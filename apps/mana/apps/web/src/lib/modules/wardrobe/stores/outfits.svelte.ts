@@ -73,10 +73,7 @@ export const wardrobeOutfitsStore = {
 	): Promise<void> {
 		const wrapped = { ...patch } as Record<string, unknown>;
 		await encryptRecord('wardrobeOutfits', wrapped);
-		await wardrobeOutfitsTable.update(id, {
-			...wrapped,
-			updatedAt: new Date().toISOString(),
-		});
+		await wardrobeOutfitsTable.update(id, wrapped as never);
 	},
 
 	async toggleFavorite(id: string): Promise<void> {
@@ -84,7 +81,6 @@ export const wardrobeOutfitsStore = {
 		if (!existing) return;
 		await wardrobeOutfitsTable.update(id, {
 			isFavorite: !existing.isFavorite,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -92,7 +88,6 @@ export const wardrobeOutfitsStore = {
 		const today = new Date().toISOString().slice(0, 10);
 		await wardrobeOutfitsTable.update(id, {
 			lastWornAt: today,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -105,7 +100,6 @@ export const wardrobeOutfitsStore = {
 	async setLastTryOn(id: string, tryOn: OutfitTryOn): Promise<void> {
 		await wardrobeOutfitsTable.update(id, {
 			lastTryOn: tryOn,
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('WardrobeOutfitTryOn', 'wardrobe', 'wardrobeOutfits', id, {
 			outfitId: id,
@@ -116,7 +110,6 @@ export const wardrobeOutfitsStore = {
 	async archiveOutfit(id: string, archived: boolean): Promise<void> {
 		await wardrobeOutfitsTable.update(id, {
 			isArchived: archived,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -124,7 +117,6 @@ export const wardrobeOutfitsStore = {
 		const nowIso = new Date().toISOString();
 		await wardrobeOutfitsTable.update(id, {
 			deletedAt: nowIso,
-			updatedAt: nowIso,
 		});
 		emitDomainEvent('WardrobeOutfitDeleted', 'wardrobe', 'wardrobeOutfits', id, {
 			outfitId: id,
@@ -147,14 +139,13 @@ export const wardrobeOutfitsStore = {
 			visibility: next,
 			visibilityChangedAt: now,
 			visibilityChangedBy: getEffectiveUserId(),
-			updatedAt: now,
 		};
 		if (next === 'unlisted' && !existing.unlistedToken) {
 			patch.unlistedToken = generateUnlistedToken();
 		} else if (next !== 'unlisted' && existing.unlistedToken) {
 			patch.unlistedToken = undefined;
 		}
-		await wardrobeOutfitsTable.update(id, patch);
+		await wardrobeOutfitsTable.update(id, patch as never);
 
 		emitDomainEvent('VisibilityChanged', 'wardrobe', 'wardrobeOutfits', id, {
 			recordId: id,

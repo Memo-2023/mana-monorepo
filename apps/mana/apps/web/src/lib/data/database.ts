@@ -1157,10 +1157,10 @@ db.version(48).upgrade(async (tx) => {
 		}
 		const survivorAppCount = Array.isArray(survivor.openApps) ? survivor.openApps.length : 0;
 		if (merged.length !== survivorAppCount) {
-			await tx.table('workbenchScenes').update(survivor.id, { openApps: merged, updatedAt: now });
+			await tx.table('workbenchScenes').update(survivor.id, { openApps: merged });
 		}
 		for (const loser of losers) {
-			await tx.table('workbenchScenes').update(loser.id, { deletedAt: now, updatedAt: now });
+			await tx.table('workbenchScenes').update(loser.id, { deletedAt: now });
 			removed += 1;
 		}
 	}
@@ -1259,6 +1259,97 @@ db.version(51).stores({
 db.version(52).stores({
 	lastsCooldown: 'id, refTable, dismissedAt, [refTable+refId]',
 });
+
+// v53 — Sync Field-Meta Overhaul F3 (docs/plans/sync-field-meta-overhaul.md).
+// `updatedAt` is no longer a synced data field; replaced by a non-synced
+// shadow column `_updatedAtIndex` that the Dexie creating/updating hook
+// stamps on every write. All 22 tables that previously indexed `updatedAt`
+// now index `_updatedAtIndex` so module queries can keep using
+// `.orderBy(...)` for sort. The upgrade step copies the existing
+// updatedAt value into _updatedAtIndex so existing local rows stay
+// orderable across the version bump.
+db.version(53)
+	.stores({
+		conversations: 'id, isArchived, isPinned, spaceId, templateId, _updatedAtIndex',
+		images:
+			'id, isFavorite, isPublic, isArchived, prompt, _updatedAtIndex, wardrobeOutfitId, wardrobeGarmentId',
+		songs: 'id, artist, album, genre, favorite, title, _updatedAtIndex',
+		mukkePlaylists: 'id, name, _updatedAtIndex',
+		presiDecks: 'id, isPublic, _updatedAtIndex',
+		documents: 'id, contextSpaceId, type, pinned, title, [contextSpaceId+type], _updatedAtIndex',
+		playgroundConversations: 'id, model, isPinned, _updatedAtIndex',
+		journalEntries: 'id, entryDate, mood, isPinned, isArchived, isFavorite, _updatedAtIndex',
+		dreams: 'id, dreamDate, mood, isLucid, isPinned, isArchived, _updatedAtIndex',
+		dreamSymbols: 'id, name, count, _updatedAtIndex',
+		periods: 'id, startDate, endDate, isPredicted, isArchived, _updatedAtIndex',
+		periodSymptoms: 'id, name, category, count, _updatedAtIndex',
+		notes: 'id, isPinned, isArchived, color, title, _updatedAtIndex',
+		quizzes: 'id, isPinned, isArchived, _updatedAtIndex',
+		userTagPresets: 'id, userId, isDefault, _updatedAtIndex',
+		websites: 'id, slug, publishedVersion, _updatedAtIndex, deletedAt',
+		websitePages: 'id, siteId, [siteId+order], [siteId+path], _updatedAtIndex, deletedAt',
+		websiteBlocks:
+			'id, pageId, parentBlockId, [pageId+order], [pageId+parentBlockId+order], type, _updatedAtIndex, deletedAt',
+		writingDrafts: 'id, kind, status, _updatedAtIndex, isFavorite',
+		writingStyles: 'id, source, isSpaceDefault, isFavorite, _updatedAtIndex',
+	})
+	.upgrade(async (tx) => {
+		// Copy the existing `updatedAt` value into `_updatedAtIndex` for every
+		// row in the affected tables so post-upgrade sorts continue to land
+		// in the right order. Rows without an updatedAt fall back to
+		// `__fieldMeta` argmax, then to createdAt, then to empty string.
+		const tables = [
+			'conversations',
+			'images',
+			'songs',
+			'mukkePlaylists',
+			'presiDecks',
+			'documents',
+			'playgroundConversations',
+			'journalEntries',
+			'dreams',
+			'dreamSymbols',
+			'periods',
+			'periodSymptoms',
+			'notes',
+			'quizzes',
+			'userTagPresets',
+			'websites',
+			'websitePages',
+			'websiteBlocks',
+			'writingDrafts',
+			'writingStyles',
+		];
+		for (const tableName of tables) {
+			await tx
+				.table(tableName)
+				.toCollection()
+				.modify((row: Record<string, unknown>) => {
+					const updatedAt =
+						(typeof row.updatedAt === 'string' ? row.updatedAt : undefined) ??
+						deriveFromFieldMeta(row) ??
+						(typeof row.createdAt === 'string' ? row.createdAt : undefined) ??
+						'';
+					row._updatedAtIndex = updatedAt;
+					// Keep `updatedAt` on the row for now — the F3 store/type
+					// sweep below renames every read. The next-version
+					// upgrade (or a follow-up cleanup) can drop it once all
+					// modules read via the type-converter helper.
+				});
+		}
+	});
+
+/** Local helper for the v53 upgrade — read `__fieldMeta` argmax `at`
+ *  without importing the sync layer (which would create a cycle here). */
+function deriveFromFieldMeta(row: Record<string, unknown>): string | undefined {
+	const meta = row[FIELD_META_KEY];
+	if (!meta || typeof meta !== 'object') return undefined;
+	let max = '';
+	for (const fm of Object.values(meta as Record<string, { at?: string }>)) {
+		if (fm && typeof fm.at === 'string' && fm.at > max) max = fm.at;
+	}
+	return max || undefined;
+}
 
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
@@ -1403,8 +1494,17 @@ function trackActivity(
  */
 export const FIELD_META_KEY = '__fieldMeta';
 
+/**
+ * Local-only shadow column the Dexie hook stamps on every create + update
+ * write. Holds the latest `now` ISO so module queries can `.orderBy(...)`
+ * by it instead of the (now derived) `updatedAt`. Stripped from
+ * pending-change payloads so it never travels to mana-sync — it is rebuilt
+ * locally on each write, including server-replays via applyServerChanges.
+ */
+export const UPDATED_AT_INDEX_KEY = '_updatedAtIndex';
+
 function isInternalKey(key: string): boolean {
-	return key === 'id' || key === FIELD_META_KEY;
+	return key === 'id' || key === FIELD_META_KEY || key === UPDATED_AT_INDEX_KEY;
 }
 
 /**
@@ -1513,9 +1613,16 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 				fieldMeta[key] = makeFieldMeta(now, actor, origin);
 			}
 			objRecord[FIELD_META_KEY] = fieldMeta;
+			// Stamp the local-only shadow column for indexed sorts. Stripped
+			// from `dataForSync` below so it never lands in pending-changes.
+			objRecord[UPDATED_AT_INDEX_KEY] = now;
 
-			// Build payload for pending-change WITHOUT the internal bookkeeping field.
-			const { [FIELD_META_KEY]: _fm, ...dataForSync } = obj as Record<string, unknown>;
+			// Build payload for pending-change WITHOUT the internal bookkeeping fields.
+			const {
+				[FIELD_META_KEY]: _fm,
+				[UPDATED_AT_INDEX_KEY]: _uai,
+				...dataForSync
+			} = obj as Record<string, unknown>;
 
 			trackPendingChange(tableName, {
 				appId,
@@ -1604,9 +1711,12 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 
 			// Returning an object from a Dexie 'updating' hook merges it into the
 			// modifications applied to the record — use this to persist the merged
-			// __fieldMeta alongside the user's data update.
+			// __fieldMeta alongside the user's data update, plus refresh the
+			// local-only `_updatedAtIndex` shadow so indexed sorts see the
+			// latest write.
 			return {
 				[FIELD_META_KEY]: newMeta,
+				[UPDATED_AT_INDEX_KEY]: now,
 			};
 		});
 	}

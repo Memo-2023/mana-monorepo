@@ -49,7 +49,6 @@ export const locationsStore = {
 	async update(id: string, data: Partial<Pick<LocalLocation, 'name' | 'description' | 'icon'>>) {
 		await invLocationTable.update(id, {
 			...data,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -64,7 +63,7 @@ export const locationsStore = {
 		collectIds(id);
 		const now = new Date().toISOString();
 		for (const deleteId of idsToDelete) {
-			await invLocationTable.update(deleteId, { deletedAt: now, updatedAt: now });
+			await invLocationTable.update(deleteId, { deletedAt: now });
 		}
 		InventoryEvents.locationDeleted();
 	},

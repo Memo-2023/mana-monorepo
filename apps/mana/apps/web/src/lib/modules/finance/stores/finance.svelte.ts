@@ -52,7 +52,6 @@ export const financeStore = {
 	) {
 		const diff: Partial<LocalTransaction> = {
 			...data,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('transactions', diff);
 		await transactionTable.update(id, diff);
@@ -61,7 +60,6 @@ export const financeStore = {
 	async deleteTransaction(id: string) {
 		await transactionTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('TransactionDeleted', 'finance', 'transactions', id, { transactionId: id });
 	},

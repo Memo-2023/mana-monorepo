@@ -48,23 +48,21 @@ export const quizzesStore = {
 			Pick<LocalQuiz, 'title' | 'description' | 'category' | 'tags' | 'isPinned' | 'isArchived'>
 		>
 	) {
-		const diff: Partial<LocalQuiz> = { ...data, updatedAt: now() };
+		const diff: Partial<LocalQuiz> = { ...data };
 		await encryptRecord('quizzes', diff);
 		await quizTable.update(id, diff);
 	},
 
 	async deleteQuiz(id: string) {
-		await quizTable.update(id, { deletedAt: now(), updatedAt: now() });
+		await quizTable.update(id, { deletedAt: now() });
 		const questions = await quizQuestionTable.where('quizId').equals(id).toArray();
-		await Promise.all(
-			questions.map((q) => quizQuestionTable.update(q.id, { deletedAt: now(), updatedAt: now() }))
-		);
+		await Promise.all(questions.map((q) => quizQuestionTable.update(q.id, { deletedAt: now() })));
 	},
 
 	async togglePin(id: string) {
 		const quiz = await quizTable.get(id);
 		if (!quiz) return;
-		await quizTable.update(id, { isPinned: !quiz.isPinned, updatedAt: now() });
+		await quizTable.update(id, { isPinned: !quiz.isPinned });
 	},
 
 	/**
@@ -126,7 +124,7 @@ export const quizzesStore = {
 			Pick<LocalQuizQuestion, 'type' | 'questionText' | 'options' | 'explanation' | 'order'>
 		>
 	) {
-		const diff: Partial<LocalQuizQuestion> = { ...data, updatedAt: now() };
+		const diff: Partial<LocalQuizQuestion> = { ...data };
 		await encryptRecord('quizQuestions', diff);
 		await quizQuestionTable.update(id, diff);
 	},
@@ -134,7 +132,7 @@ export const quizzesStore = {
 	async deleteQuestion(id: string) {
 		const q = await quizQuestionTable.get(id);
 		if (!q) return;
-		await quizQuestionTable.update(id, { deletedAt: now(), updatedAt: now() });
+		await quizQuestionTable.update(id, { deletedAt: now() });
 		await this.recountQuestions(q.quizId);
 	},
 
@@ -142,6 +140,6 @@ export const quizzesStore = {
 		const live = (await quizQuestionTable.where('quizId').equals(quizId).toArray()).filter(
 			(q) => !q.deletedAt
 		);
-		await quizTable.update(quizId, { questionCount: live.length, updatedAt: now() });
+		await quizTable.update(quizId, { questionCount: live.length });
 	},
 };

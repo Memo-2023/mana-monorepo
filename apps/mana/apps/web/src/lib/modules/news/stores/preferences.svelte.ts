@@ -41,7 +41,6 @@ export const preferencesStore = {
 			preferredLanguages: [...input.languages],
 			blockedSources: [...(input.blockedSources ?? [])],
 			onboardingCompleted: true,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('newsPreferences', diff);
 		await preferencesTable.update(PREFERENCES_ID, diff);
@@ -51,7 +50,6 @@ export const preferencesStore = {
 		await ensureRow();
 		const diff: Partial<LocalPreferences> = {
 			selectedTopics: [...topics],
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('newsPreferences', diff);
 		await preferencesTable.update(PREFERENCES_ID, diff);
@@ -61,7 +59,6 @@ export const preferencesStore = {
 		await ensureRow();
 		const diff: Partial<LocalPreferences> = {
 			preferredLanguages: [...languages],
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('newsPreferences', diff);
 		await preferencesTable.update(PREFERENCES_ID, diff);
@@ -73,7 +70,6 @@ export const preferencesStore = {
 		const next = blocked.includes(slug) ? blocked.filter((s) => s !== slug) : [...blocked, slug];
 		const diff: Partial<LocalPreferences> = {
 			blockedSources: next,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('newsPreferences', diff);
 		await preferencesTable.update(PREFERENCES_ID, diff);
@@ -91,7 +87,6 @@ export const preferencesStore = {
 		await ensureRow();
 		const update: Partial<LocalPreferences> = {
 			...diff,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('newsPreferences', update);
 		await preferencesTable.update(PREFERENCES_ID, update);
@@ -113,7 +108,6 @@ export const preferencesStore = {
 		];
 		const diff: Partial<LocalPreferences> = {
 			customFeeds: next,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('newsPreferences', diff);
 		await preferencesTable.update(PREFERENCES_ID, diff);
@@ -126,7 +120,6 @@ export const preferencesStore = {
 		if (next.length === existing.length) return;
 		const diff: Partial<LocalPreferences> = {
 			customFeeds: next,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('newsPreferences', diff);
 		await preferencesTable.update(PREFERENCES_ID, diff);
@@ -137,7 +130,6 @@ export const preferencesStore = {
 		const diff: Partial<LocalPreferences> = {
 			topicWeights: {},
 			sourceWeights: {},
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('newsPreferences', diff);
 		await preferencesTable.update(PREFERENCES_ID, diff);

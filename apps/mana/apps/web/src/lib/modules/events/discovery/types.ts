@@ -35,7 +35,6 @@ export interface DiscoverySource {
 	lastError: string | null;
 	isActive: boolean;
 	createdAt: string;
-	updatedAt: string;
 }
 
 export interface DiscoveredEvent {

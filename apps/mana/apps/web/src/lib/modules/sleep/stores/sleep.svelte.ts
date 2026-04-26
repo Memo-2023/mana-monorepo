@@ -62,7 +62,6 @@ export const sleepStore = {
 			const wrapped = await encryptRecord('sleepEntries', { ...patch });
 			await sleepEntryTable.update(existing.id, {
 				...wrapped,
-				updatedAt: new Date().toISOString(),
 			});
 			return toSleepEntry({ ...existing, ...patch });
 		}
@@ -123,10 +122,7 @@ export const sleepStore = {
 			}
 		}
 		const wrapped = await encryptRecord('sleepEntries', update);
-		await sleepEntryTable.update(id, {
-			...wrapped,
-			updatedAt: new Date().toISOString(),
-		});
+		await sleepEntryTable.update(id, wrapped as never);
 	},
 
 	async deleteEntry(id: string) {
@@ -154,7 +150,6 @@ export const sleepStore = {
 			await sleepHygieneLogTable.update(existing.id, {
 				completedCheckIds: input.completedCheckIds,
 				score,
-				updatedAt: new Date().toISOString(),
 			});
 			return toSleepHygieneLog({ ...existing, completedCheckIds: input.completedCheckIds, score });
 		}
@@ -198,7 +193,6 @@ export const sleepStore = {
 		const wrapped = await encryptRecord('sleepHygieneChecks', { ...patch });
 		await sleepHygieneCheckTable.update(id, {
 			...wrapped,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -207,7 +201,6 @@ export const sleepStore = {
 		if (!check) return;
 		await sleepHygieneCheckTable.update(id, {
 			isActive: !check.isActive,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -237,7 +230,6 @@ export const sleepStore = {
 		if (existing) {
 			await sleepSettingsTable.update(existing.id, {
 				...patch,
-				updatedAt: new Date().toISOString(),
 			});
 			return;
 		}

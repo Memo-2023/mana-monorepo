@@ -61,7 +61,6 @@ export const articlesStore = {
 	async markRead(id: string, isRead = true): Promise<void> {
 		await articleTable.update(id, {
 			isRead,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -70,28 +69,24 @@ export const articlesStore = {
 		if (!a) return;
 		await articleTable.update(id, {
 			isFavorite: !a.isFavorite,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async archive(id: string): Promise<void> {
 		await articleTable.update(id, {
 			isArchived: true,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async setCategory(id: string, categoryId: string | null): Promise<void> {
 		await articleTable.update(id, {
 			categoryId,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async delete(id: string): Promise<void> {
 		await articleTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 };

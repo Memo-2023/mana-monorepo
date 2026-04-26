@@ -137,10 +137,7 @@ export const invoicesStore = {
 		}
 		const wrapped = { ...patch } as Record<string, unknown>;
 		await encryptRecord('invoices', wrapped);
-		await invoiceTable.update(id, {
-			...wrapped,
-			updatedAt: new Date().toISOString(),
-		});
+		await invoiceTable.update(id, wrapped as never);
 	},
 
 	/**
@@ -159,10 +156,7 @@ export const invoicesStore = {
 		// `lines` is in the encryption allowlist; `totals` is not. encryptRecord
 		// only touches allowlisted keys, so a single call is correct for both.
 		await encryptRecord('invoices', patch);
-		await invoiceTable.update(id, {
-			...patch,
-			updatedAt: new Date().toISOString(),
-		});
+		await invoiceTable.update(id, patch as never);
 	},
 
 	/**
@@ -178,7 +172,6 @@ export const invoicesStore = {
 		await invoiceTable.update(id, {
 			status: 'sent',
 			sentAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('InvoiceSent', 'invoices', 'invoices', id, {
 			invoiceId: id,
@@ -198,7 +191,6 @@ export const invoicesStore = {
 		await invoiceTable.update(id, {
 			status: 'paid',
 			paidAt: stamp,
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('InvoicePaid', 'invoices', 'invoices', id, {
 			invoiceId: id,
@@ -243,7 +235,6 @@ export const invoicesStore = {
 		}
 		await invoiceTable.update(id, {
 			status: 'void',
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('InvoiceVoided', 'invoices', 'invoices', id, {
 			invoiceId: id,
@@ -294,7 +285,6 @@ export const invoicesStore = {
 		}
 		await invoiceTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('InvoiceDeleted', 'invoices', 'invoices', id, { invoiceId: id });
 	},

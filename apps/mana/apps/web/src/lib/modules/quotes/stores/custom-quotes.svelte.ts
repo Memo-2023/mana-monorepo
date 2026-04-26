@@ -26,7 +26,6 @@ export const customQuotesStore = {
 			source: input.source ?? null,
 			year: input.year ?? null,
 			createdAt: now,
-			updatedAt: now,
 		});
 		return id;
 	},
@@ -34,14 +33,12 @@ export const customQuotesStore = {
 	async update(id: string, updates: Partial<CustomQuoteInput>): Promise<void> {
 		await db.table('customQuotes').update(id, {
 			...updates,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async remove(id: string): Promise<void> {
 		await db.table('customQuotes').update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 };

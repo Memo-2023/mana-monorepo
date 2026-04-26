@@ -198,7 +198,6 @@ export const dreamsStore = {
 
 		const diff: Partial<LocalDream> = {
 			...data,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('dreams', diff);
 		await dreamTable.update(id, diff);
@@ -256,7 +255,6 @@ export const dreamsStore = {
 		await dreamTable.update(id, {
 			processingStatus: status,
 			processingError: error,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -285,7 +283,6 @@ export const dreamsStore = {
 				content: decryptedExisting.content?.trim() ? decryptedExisting.content : transcript,
 				processingStatus: 'idle',
 				processingError: null,
-				updatedAt: new Date().toISOString(),
 			};
 			await encryptRecord('dreams', diff);
 			await dreamTable.update(dreamId, diff);
@@ -294,7 +291,6 @@ export const dreamsStore = {
 			await dreamTable.update(dreamId, {
 				processingStatus: 'failed',
 				processingError: msg,
-				updatedAt: new Date().toISOString(),
 			});
 		}
 	},
@@ -309,7 +305,6 @@ export const dreamsStore = {
 		}
 		await dreamTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('DreamDeleted', 'dreams', 'dreams', id, { dreamId: id });
 	},
@@ -319,7 +314,6 @@ export const dreamsStore = {
 		if (!dream) return;
 		await dreamTable.update(id, {
 			isPinned: !dream.isPinned,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -328,21 +322,18 @@ export const dreamsStore = {
 		if (!dream) return;
 		await dreamTable.update(id, {
 			isLucid: !dream.isLucid,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async setMood(id: string, mood: DreamMood | null) {
 		await dreamTable.update(id, {
 			mood,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async setSleepQuality(id: string, quality: SleepQuality | null) {
 		await dreamTable.update(id, {
 			sleepQuality: quality,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -372,7 +363,6 @@ export const dreamsStore = {
 				const updated = dream.symbols.map((s) => (s === existing.name ? newName : s));
 				await dreamTable.update(dream.id, {
 					symbols: updated,
-					updatedAt: new Date().toISOString(),
 				});
 			}
 		}
@@ -380,7 +370,6 @@ export const dreamsStore = {
 		const symbolDiff: Record<string, unknown> = {
 			...data,
 			...(data.name ? { name: data.name.trim() } : {}),
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('dreamSymbols', symbolDiff);
 		await dreamSymbolTable.update(id, symbolDiff);
@@ -396,13 +385,11 @@ export const dreamsStore = {
 			if (dream.deletedAt || !dream.symbols?.includes(symbol.name)) continue;
 			await dreamTable.update(dream.id, {
 				symbols: dream.symbols.filter((s) => s !== symbol.name),
-				updatedAt: new Date().toISOString(),
 			});
 		}
 
 		await dreamSymbolTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -421,17 +408,14 @@ export const dreamsStore = {
 			set.add(target.name);
 			await dreamTable.update(dream.id, {
 				symbols: Array.from(set),
-				updatedAt: new Date().toISOString(),
 			});
 		}
 
 		await dreamSymbolTable.update(targetId, {
 			count: (target.count ?? 0) + (source.count ?? 0),
-			updatedAt: new Date().toISOString(),
 		});
 		await dreamSymbolTable.update(sourceId, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -445,7 +429,6 @@ export const dreamsStore = {
 				const next = Math.max(0, (existing.count ?? 0) + delta);
 				await dreamSymbolTable.update(existing.id, {
 					count: next,
-					updatedAt: new Date().toISOString(),
 				});
 			} else if (delta > 0) {
 				await dreamSymbolTable.add({

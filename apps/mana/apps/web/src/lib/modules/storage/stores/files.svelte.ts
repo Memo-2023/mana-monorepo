@@ -123,7 +123,6 @@ export const filesStore = {
 	async renameFile(id: string, name: string) {
 		const diff: Record<string, unknown> = {
 			name,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('files', diff);
 		await fileTable.update(id, diff);
@@ -132,7 +131,6 @@ export const filesStore = {
 	async renameFolder(id: string, name: string) {
 		await storageFolderTable.update(id, {
 			name,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -142,7 +140,6 @@ export const filesStore = {
 			const newFav = !file.isFavorite;
 			await fileTable.update(id, {
 				isFavorite: newFav,
-				updatedAt: new Date().toISOString(),
 			});
 			StorageEvents.fileFavorited(newFav);
 			return newFav;
@@ -156,7 +153,6 @@ export const filesStore = {
 			const newFav = !folder.isFavorite;
 			await storageFolderTable.update(id, {
 				isFavorite: newFav,
-				updatedAt: new Date().toISOString(),
 			});
 			StorageEvents.folderFavorited(newFav);
 			return newFav;
@@ -167,7 +163,6 @@ export const filesStore = {
 	async deleteFile(id: string) {
 		await fileTable.update(id, {
 			isDeleted: true,
-			updatedAt: new Date().toISOString(),
 		});
 		StorageEvents.fileDeleted();
 	},
@@ -175,7 +170,6 @@ export const filesStore = {
 	async deleteFolder(id: string) {
 		await storageFolderTable.update(id, {
 			isDeleted: true,
-			updatedAt: new Date().toISOString(),
 		});
 		StorageEvents.folderDeleted();
 	},
@@ -183,52 +177,46 @@ export const filesStore = {
 	async restoreFile(id: string) {
 		await fileTable.update(id, {
 			isDeleted: false,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async restoreFolder(id: string) {
 		await storageFolderTable.update(id, {
 			isDeleted: false,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async permanentDeleteFile(id: string) {
 		await fileTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async permanentDeleteFolder(id: string) {
 		await storageFolderTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async moveFile(id: string, targetFolderId: string) {
 		await fileTable.update(id, {
 			parentFolderId: targetFolderId,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async moveFolder(id: string, targetFolderId: string) {
 		await storageFolderTable.update(id, {
 			parentFolderId: targetFolderId,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async deleteSelected() {
 		const now = new Date().toISOString();
 		for (const id of selectedFileIds) {
-			await fileTable.update(id, { isDeleted: true, updatedAt: now });
+			await fileTable.update(id, { isDeleted: true });
 		}
 		for (const id of selectedFolderIds) {
-			await storageFolderTable.update(id, { isDeleted: true, updatedAt: now });
+			await storageFolderTable.update(id, { isDeleted: true });
 		}
 		const count = selectedFileIds.size + selectedFolderIds.size;
 		selectedFileIds = new Set();

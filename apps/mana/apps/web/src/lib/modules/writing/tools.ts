@@ -19,6 +19,7 @@
  */
 
 import type { ModuleTool } from '$lib/data/tools/types';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { draftsStore } from './stores/drafts.svelte';
 import { generationsStore } from './stores/generations.svelte';
 import { draftTable, draftVersionTable } from './collections';
@@ -135,7 +136,7 @@ export const writingTools: ModuleTool[] = [
 							title: d.title,
 							status: d.status,
 							wordCount: v?.wordCount ?? 0,
-							updatedAt: d.updatedAt,
+							updatedAt: deriveUpdatedAt(d),
 						};
 					});
 
@@ -198,7 +199,7 @@ export const writingTools: ModuleTool[] = [
 							visibility: draft.visibility,
 							publishedTo: draft.publishedTo,
 							createdAt: draft.createdAt,
-							updatedAt: draft.updatedAt,
+							updatedAt: deriveUpdatedAt(draft),
 						},
 						version: version
 							? {

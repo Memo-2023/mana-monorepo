@@ -7,6 +7,7 @@
  */
 
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { decryptRecords } from '$lib/data/crypto';
 import { scopedForModule } from '$lib/data/scope';
 import { campaignTable, templateTable, settingsTable } from './collections';
@@ -42,7 +43,7 @@ export function toCampaign(local: LocalCampaign): Campaign {
 		serverJobId: local.serverJobId ?? null,
 		stats: local.stats ?? null,
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

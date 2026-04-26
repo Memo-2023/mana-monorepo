@@ -1,4 +1,5 @@
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import type { Last, LastStatus, LocalLast } from './types';
@@ -34,7 +35,7 @@ export function toLast(local: LocalLast): Last {
 		unlistedToken: local.unlistedToken ?? '',
 		unlistedExpiresAt: local.unlistedExpiresAt ?? null,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

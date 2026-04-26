@@ -20,7 +20,6 @@ export const articlesStore = {
 	async setStatus(id: string, status: ArticleStatus): Promise<void> {
 		const diff: Partial<LocalArticle> = {
 			status,
-			updatedAt: new Date().toISOString(),
 		};
 		if (status === 'finished') {
 			const existing = await articleTable.get(id);
@@ -34,7 +33,6 @@ export const articlesStore = {
 		if (!existing) return;
 		await articleTable.update(id, {
 			isFavorite: !existing.isFavorite,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -42,14 +40,12 @@ export const articlesStore = {
 		const clamped = Math.max(0, Math.min(1, progress));
 		await articleTable.update(id, {
 			readingProgress: clamped,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async updateNote(id: string, note: string | null): Promise<void> {
 		const diff: Partial<LocalArticle> = {
 			userNote: note,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('articles', diff as LocalArticle);
 		await articleTable.update(id, diff);
@@ -58,7 +54,6 @@ export const articlesStore = {
 	async deleteArticle(id: string): Promise<void> {
 		await articleTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 

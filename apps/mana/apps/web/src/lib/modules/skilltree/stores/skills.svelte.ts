@@ -32,7 +32,6 @@ async function addSkill(data: Partial<Skill>): Promise<Skill> {
 	await db.table<LocalSkill>('skills').add({
 		...localSkill,
 		createdAt: new Date().toISOString(),
-		updatedAt: new Date().toISOString(),
 	});
 	emitDomainEvent('SkillCreated', 'skilltree', 'skills', skill.id, {
 		skillId: skill.id,
@@ -43,9 +42,7 @@ async function addSkill(data: Partial<Skill>): Promise<Skill> {
 }
 
 async function updateSkill(id: string, updates: Partial<Skill>): Promise<void> {
-	const localUpdates: Partial<LocalSkill> & { updatedAt: string } = {
-		updatedAt: new Date().toISOString(),
-	};
+	const localUpdates: Partial<LocalSkill> = {};
 	if (updates.name !== undefined) localUpdates.name = updates.name;
 	if (updates.description !== undefined) localUpdates.description = updates.description;
 	if (updates.branch !== undefined) localUpdates.branch = updates.branch;
@@ -65,9 +62,9 @@ async function deleteSkill(id: string): Promise<void> {
 		.equals(id)
 		.toArray();
 	for (const a of skillActivities) {
-		await db.table('activities').update(a.id, { deletedAt: now, updatedAt: now });
+		await db.table('activities').update(a.id, { deletedAt: now });
 	}
-	await db.table('skills').update(id, { deletedAt: now, updatedAt: now });
+	await db.table('skills').update(id, { deletedAt: now });
 	SkillTreeEvents.skillDeleted();
 }
 
@@ -89,7 +86,6 @@ async function addXp(
 		totalXp: newTotalXp,
 		currentXp: newCurrentXp,
 		level: newLevel,
-		updatedAt: new Date().toISOString(),
 	});
 
 	const activity = createActivity(skillId, xp, description, duration);
@@ -102,7 +98,6 @@ async function addXp(
 		duration: activity.duration,
 		timestamp: activity.timestamp,
 		createdAt: now,
-		updatedAt: now,
 	});
 
 	// Create a TimeBlock for practice sessions with duration

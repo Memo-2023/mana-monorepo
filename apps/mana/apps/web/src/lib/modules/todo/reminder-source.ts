@@ -47,7 +47,6 @@ export const todoReminderSource: ReminderSource = {
 	async markSent(reminderId: string): Promise<void> {
 		await db.table('reminders').update(reminderId, {
 			status: 'sent',
-			updatedAt: new Date().toISOString(),
 		});
 	},
 };

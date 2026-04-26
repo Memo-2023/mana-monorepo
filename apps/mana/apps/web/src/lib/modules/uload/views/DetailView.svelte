@@ -44,7 +44,6 @@
 			description: editDescription.trim() || undefined,
 			isActive: editIsActive,
 			expiresAt: editExpiresAt ? new Date(editExpiresAt).toISOString() : null,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('links', diff);
 		await db.table('links').update(linkId, diff);
@@ -53,14 +52,12 @@
 	async function handleActiveToggle() {
 		await db.table('links').update(linkId, {
 			isActive: editIsActive,
-			updatedAt: new Date().toISOString(),
 		});
 	}
 
 	async function deleteLink() {
 		await db.table('links').update(linkId, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	}
 </script>

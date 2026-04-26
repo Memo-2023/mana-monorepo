@@ -7,6 +7,7 @@
  */
 
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import type { LocalSkill, LocalActivity, LocalAchievement } from './types';
@@ -28,7 +29,7 @@ export function toSkill(local: LocalSkill): Skill {
 		totalXp: local.totalXp,
 		level: local.level,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

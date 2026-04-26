@@ -39,11 +39,10 @@ export const attemptsStore = {
 			answers,
 			score,
 			finishedAt: now(),
-			updatedAt: now(),
 		});
 	},
 
 	async deleteAttempt(id: string) {
-		await quizAttemptTable.update(id, { deletedAt: now(), updatedAt: now() });
+		await quizAttemptTable.update(id, { deletedAt: now() });
 	},
 };

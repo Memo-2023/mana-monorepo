@@ -8,6 +8,7 @@
  */
 
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -36,7 +37,7 @@ export function toQuiz(local: LocalQuiz): Quiz {
 		isArchived: local.isArchived ?? false,
 		visibility: local.visibility ?? 'space',
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -50,7 +51,7 @@ export function toQuestion(local: LocalQuizQuestion): QuizQuestion {
 		options: local.options ?? [],
 		explanation: local.explanation,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -63,7 +64,7 @@ export function toAttempt(local: LocalQuizAttempt): QuizAttempt {
 		score: local.score ?? 0,
 		answers: local.answers ?? [],
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

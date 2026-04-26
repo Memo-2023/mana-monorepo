@@ -87,7 +87,6 @@ export const contactsStore = {
 
 		const diff: Partial<LocalContact> = {
 			...updateData,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('contacts', diff);
 		await contactTable.update(id, diff);
@@ -99,7 +98,6 @@ export const contactsStore = {
 		const decrypted = local ? await decryptRecord('contacts', { ...local }) : null;
 		await contactTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('ContactDeleted', 'contacts', 'contacts', id, {
 			contactId: id,
@@ -114,7 +112,6 @@ export const contactsStore = {
 
 		await contactTable.update(id, {
 			isFavorite: !local.isFavorite,
-			updatedAt: new Date().toISOString(),
 		});
 		ContactsEvents.contactFavorited();
 	},
@@ -122,7 +119,6 @@ export const contactsStore = {
 	async updateTagIds(id: string, tagIds: string[]) {
 		await contactTable.update(id, {
 			tagIds,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -153,7 +149,6 @@ export const contactsStore = {
 				isFavorite: true,
 				isArchived: false,
 				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			};
 			await encryptRecord('contacts', self);
 			await contactTable.add(self);
@@ -178,7 +173,6 @@ export const contactsStore = {
 				lastName,
 				email: profile.email || undefined,
 				photoUrl: profile.image || undefined,
-				updatedAt: new Date().toISOString(),
 			};
 			await encryptRecord('contacts', diff);
 			await contactTable.update(SELF_CONTACT_ID, diff);

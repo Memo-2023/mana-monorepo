@@ -3,6 +3,7 @@
  */
 
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
@@ -29,7 +30,7 @@ export function toRecipe(local: LocalRecipe): Recipe {
 		photoThumbnailUrl: local.photoThumbnailUrl ?? null,
 		visibility: local.visibility ?? 'space',
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

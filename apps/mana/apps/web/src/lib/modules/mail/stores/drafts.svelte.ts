@@ -25,7 +25,6 @@ export const draftsStore = {
 			await encryptRecord('mailDrafts', wrapped);
 			await mailDraftTable.update(input.existingDraftId, {
 				...wrapped,
-				updatedAt: new Date().toISOString(),
 			});
 			return input.existingDraftId;
 		}
@@ -49,7 +48,6 @@ export const draftsStore = {
 	async deleteDraft(id: string) {
 		await mailDraftTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 };

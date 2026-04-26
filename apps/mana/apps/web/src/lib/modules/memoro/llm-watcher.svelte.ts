@@ -169,7 +169,6 @@ async function applyRow(row: QueuedTask): Promise<void> {
 
 	const diff: Partial<LocalMemo> = {
 		title: titleToWrite,
-		updatedAt: new Date().toISOString(),
 		metadata: {
 			...existingMetadata,
 			titleSource: row.source,

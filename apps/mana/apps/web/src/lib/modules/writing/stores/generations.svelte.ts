@@ -177,11 +177,9 @@ export const generationsStore = {
 		await generationTable.update(generationId, {
 			status: 'running',
 			startedAt: now,
-			updatedAt: new Date().toISOString(),
 		});
 		await draftTable.update(draftId, {
 			status: 'refining',
-			updatedAt: new Date().toISOString(),
 		});
 
 		try {
@@ -372,7 +370,6 @@ export const generationsStore = {
 
 		await generationTable.update(generationId, {
 			status: 'running',
-			updatedAt: new Date().toISOString(),
 		});
 
 		try {
@@ -436,8 +433,8 @@ export const generationsStore = {
 		};
 		await encryptRecord('writingDraftVersions', wrapped);
 		const now = new Date().toISOString();
-		await draftVersionTable.update(versionId, { ...wrapped, updatedAt: now });
-		await draftTable.update(existing.draftId, { updatedAt: now });
+		await draftVersionTable.update(versionId, { ...wrapped });
+		await draftTable.update(existing.draftId, {});
 
 		// Mark the generation as "applied" by pointing it at the version
 		// whose content it modified. The version isn't a new row — it's
@@ -445,7 +442,6 @@ export const generationsStore = {
 		// reference makes the generation record useful for audits.
 		await generationTable.update(generationId, {
 			outputVersionId: versionId,
-			updatedAt: now,
 		});
 
 		emitDomainEvent('WritingSelectionRefineApplied', 'writing', 'writingDraftVersions', versionId, {
@@ -470,7 +466,6 @@ export const generationsStore = {
 		await generationTable.update(generationId, {
 			status: 'cancelled',
 			completedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 };

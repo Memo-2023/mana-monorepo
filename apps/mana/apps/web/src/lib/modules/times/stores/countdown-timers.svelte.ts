@@ -35,7 +35,6 @@ export const countdownTimersStore = {
 				pausedAt: null,
 				sound: input.sound ?? null,
 				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			};
 
 			await db.table<LocalCountdownTimer>('timeCountdownTimers').add(newLocal);
@@ -53,9 +52,7 @@ export const countdownTimersStore = {
 	async updateTimer(id: string, input: UpdateTimerInput) {
 		error = null;
 		try {
-			const updateData: Partial<LocalCountdownTimer> = {
-				updatedAt: new Date().toISOString(),
-			};
+			const updateData: Partial<LocalCountdownTimer> = {};
 			if (input.label !== undefined) updateData.label = input.label ?? null;
 			if (input.durationSeconds !== undefined) updateData.durationSeconds = input.durationSeconds;
 			if (input.sound !== undefined) updateData.sound = input.sound ?? null;
@@ -86,7 +83,6 @@ export const countdownTimersStore = {
 				status: 'running',
 				startedAt: new Date().toISOString(),
 				pausedAt: null,
-				updatedAt: new Date().toISOString(),
 			};
 
 			// If resuming from pause, keep remaining seconds
@@ -132,7 +128,6 @@ export const countdownTimersStore = {
 				pausedAt: new Date().toISOString(),
 				remainingSeconds: Math.round(remaining),
 				startedAt: null,
-				updatedAt: new Date().toISOString(),
 			};
 
 			await db.table('timeCountdownTimers').update(id, updateData);
@@ -159,7 +154,6 @@ export const countdownTimersStore = {
 				remainingSeconds: null,
 				startedAt: null,
 				pausedAt: null,
-				updatedAt: new Date().toISOString(),
 			};
 
 			await db.table('timeCountdownTimers').update(id, updateData);
@@ -183,7 +177,6 @@ export const countdownTimersStore = {
 		try {
 			await db.table('timeCountdownTimers').update(id, {
 				deletedAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			});
 			return { success: true };
 		} catch (e) {

@@ -82,7 +82,6 @@ export const bodyStore = {
 		const wrapped = await encryptRecord('bodyExercises', { ...patch });
 		await bodyExerciseTable.update(id, {
 			...wrapped,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -95,7 +94,6 @@ export const bodyStore = {
 		if (!exercise || exercise.isPreset) return;
 		await bodyExerciseTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -128,14 +126,12 @@ export const bodyStore = {
 		const wrapped = await encryptRecord('bodyRoutines', { ...patch });
 		await bodyRoutineTable.update(id, {
 			...wrapped,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async deleteRoutine(id: string) {
 		await bodyRoutineTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -202,7 +198,6 @@ export const bodyStore = {
 		const wrapped = await encryptRecord('bodyWorkouts', { ...update });
 		await bodyWorkoutTable.update(id, {
 			...wrapped,
-			updatedAt: now,
 		});
 
 		// Stamp the TimeBlock's endDate so the calendar shows duration.
@@ -229,7 +224,6 @@ export const bodyStore = {
 		const wrapped = await encryptRecord('bodyWorkouts', { ...patch });
 		await bodyWorkoutTable.update(id, {
 			...wrapped,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -238,7 +232,7 @@ export const bodyStore = {
 		// stop counting them. Also remove the linked TimeBlock.
 		const workout = await bodyWorkoutTable.get(id);
 		const now = new Date().toISOString();
-		await bodyWorkoutTable.update(id, { deletedAt: now, updatedAt: now });
+		await bodyWorkoutTable.update(id, { deletedAt: now });
 		const sets = await bodySetTable.where('workoutId').equals(id).toArray();
 		for (const s of sets) {
 			await bodySetTable.update(s.id, { deletedAt: now });
@@ -373,7 +367,6 @@ export const bodyStore = {
 			const wrapped = await encryptRecord('bodyChecks', { ...patch });
 			await bodyCheckTable.update(existing.id, {
 				...wrapped,
-				updatedAt: new Date().toISOString(),
 			});
 			return toBodyCheck({ ...existing, ...patch });
 		}
@@ -437,7 +430,6 @@ export const bodyStore = {
 	async endPhase(id: string) {
 		await bodyPhaseTable.update(id, {
 			endDate: new Date().toISOString().split('T')[0],
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -453,14 +445,12 @@ export const bodyStore = {
 		const wrapped = await encryptRecord('bodyPhases', { ...patch });
 		await bodyPhaseTable.update(id, {
 			...wrapped,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async deletePhase(id: string) {
 		await bodyPhaseTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 };

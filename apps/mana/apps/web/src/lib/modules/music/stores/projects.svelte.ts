@@ -28,14 +28,13 @@ export const projectsStore = {
 	async update(id: string, data: Partial<Pick<LocalProject, 'title' | 'description' | 'songId'>>) {
 		await musicProjectTable.update(id, {
 			...data,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	/** Soft-delete a project. */
 	async delete(id: string) {
 		const now = new Date().toISOString();
-		await musicProjectTable.update(id, { deletedAt: now, updatedAt: now });
+		await musicProjectTable.update(id, { deletedAt: now });
 		MusicEvents.projectDeleted();
 	},
 };

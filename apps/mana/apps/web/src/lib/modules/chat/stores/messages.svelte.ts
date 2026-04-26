@@ -33,9 +33,7 @@ export const messagesStore = {
 		await encryptRecord('messages', newLocal);
 		await messageTable.add(newLocal);
 		// Touch the conversation's updatedAt
-		await conversationTable.update(conversationId, {
-			updatedAt: new Date().toISOString(),
-		});
+		await conversationTable.update(conversationId, {});
 		emitDomainEvent('ChatMessageSent', 'chat', 'messages', newLocal.id, {
 			messageId: newLocal.id,
 			conversationId,
@@ -55,9 +53,7 @@ export const messagesStore = {
 		const plaintextSnapshot = toMessage(newLocal);
 		await encryptRecord('messages', newLocal);
 		await messageTable.add(newLocal);
-		await conversationTable.update(conversationId, {
-			updatedAt: new Date().toISOString(),
-		});
+		await conversationTable.update(conversationId, {});
 		return plaintextSnapshot;
 	},
 
@@ -65,7 +61,6 @@ export const messagesStore = {
 	async updateText(id: string, text: string) {
 		const diff: Partial<LocalMessage> = {
 			messageText: text,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('messages', diff);
 		await messageTable.update(id, diff);
@@ -74,6 +69,6 @@ export const messagesStore = {
 	/** Soft-delete a message. */
 	async delete(id: string) {
 		const now = new Date().toISOString();
-		await messageTable.update(id, { deletedAt: now, updatedAt: now });
+		await messageTable.update(id, { deletedAt: now });
 	},
 };

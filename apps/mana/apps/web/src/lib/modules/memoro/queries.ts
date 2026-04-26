@@ -3,6 +3,7 @@
  */
 
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -38,7 +39,7 @@ export function toMemo(local: LocalMemo): Memo {
 		visibility: local.visibility ?? 'space',
 		language: local.language,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -49,7 +50,7 @@ export function toMemory(local: LocalMemory): Memory {
 		title: local.title,
 		content: local.content,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -60,7 +61,7 @@ export function toSpace(local: LocalSpace): Space {
 		description: local.description,
 		ownerId: local.ownerId,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

@@ -31,7 +31,6 @@ export const memoriesStore = {
 	async update(id: string, data: Partial<Pick<LocalMemory, 'title' | 'content'>>) {
 		const diff: Partial<LocalMemory> = {
 			...data,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('memories', diff);
 		await memoryTable.update(id, diff);
@@ -40,7 +39,7 @@ export const memoriesStore = {
 	/** Soft-delete a memory. */
 	async delete(id: string) {
 		const now = new Date().toISOString();
-		await memoryTable.update(id, { deletedAt: now, updatedAt: now });
+		await memoryTable.update(id, { deletedAt: now });
 		MemoroEvents.memoDeleted();
 	},
 };

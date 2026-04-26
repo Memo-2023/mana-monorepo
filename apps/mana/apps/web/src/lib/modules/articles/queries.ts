@@ -7,6 +7,7 @@
  */
 
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { decryptRecords } from '$lib/data/crypto';
 import { scopedForModule, scopedGet } from '$lib/data/scope';
 import { articleTagOps } from './stores/tags.svelte';
@@ -37,7 +38,7 @@ export function toArticle(local: LocalArticle): Article {
 		userNote: local.userNote ?? null,
 		extractedVersion: local.extractedVersion ?? 1,
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -54,7 +55,7 @@ export function toHighlight(local: LocalHighlight): Highlight {
 		contextBefore: local.contextBefore ?? null,
 		contextAfter: local.contextAfter ?? null,
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

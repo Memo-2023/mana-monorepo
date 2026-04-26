@@ -72,14 +72,12 @@ export const meditateStore = {
 		await encryptRecord('meditatePresets', wrapped);
 		await meditatePresetTable.update(id, {
 			...wrapped,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async deletePreset(id: string) {
 		await meditatePresetTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -126,14 +124,12 @@ export const meditateStore = {
 		await encryptRecord('meditateSessions', wrapped);
 		await meditateSessionTable.update(id, {
 			...wrapped,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async deleteSession(id: string) {
 		await meditateSessionTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -151,7 +147,6 @@ export const meditateStore = {
 		if (existing) {
 			await meditateSettingsTable.update('settings', {
 				...patch,
-				updatedAt: new Date().toISOString(),
 			});
 		} else {
 			const newSettings: LocalMeditateSettings = {

@@ -29,7 +29,6 @@ export const favoritesStore = {
 			if (existing) {
 				await db.table('ccFavorites').update(existing.id, {
 					deletedAt: new Date().toISOString(),
-					updatedAt: new Date().toISOString(),
 				});
 				CityCornersEvents.favoriteToggled(false);
 			} else {
@@ -37,7 +36,6 @@ export const favoritesStore = {
 					id: crypto.randomUUID(),
 					locationId,
 					createdAt: new Date().toISOString(),
-					updatedAt: new Date().toISOString(),
 				};
 				await db.table('ccFavorites').add(newFav);
 				CityCornersEvents.favoriteToggled(true);

@@ -1,4 +1,5 @@
 import { formatDate } from '$lib/i18n/format';
+import { deriveUpdatedAt } from '$lib/data/sync';
 /**
  * Reactive Queries & Pure Helpers for Journal module.
  *
@@ -29,7 +30,7 @@ export function toJournalEntry(local: LocalJournalEntry): JournalEntry {
 		wordCount: local.wordCount ?? 0,
 		transcriptModel: local.transcriptModel ?? null,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

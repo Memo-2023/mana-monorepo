@@ -54,7 +54,6 @@ export const userContextStore = {
 		const merged = { ...current[section], ...value };
 		const diff: Partial<LocalUserContext> = {
 			[section]: merged,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('userContext', diff);
 		await userContextTable.update(USER_CONTEXT_SINGLETON_ID, diff);
@@ -89,12 +88,11 @@ export const userContextStore = {
 			// Nested field: e.g. 'about.occupation'
 			const sectionObj = { ...(current[section] as Record<string, unknown>) };
 			sectionObj[field] = finalValue;
-			diff = { [section]: sectionObj, updatedAt: new Date().toISOString() };
+			diff = { [section]: sectionObj };
 		} else {
 			// Top-level field: e.g. 'interests', 'goals'
 			diff = {
 				[section]: finalValue,
-				updatedAt: new Date().toISOString(),
 			} as Partial<LocalUserContext>;
 		}
 
@@ -107,7 +105,6 @@ export const userContextStore = {
 		await ensureDoc();
 		const diff: Partial<LocalUserContext> = {
 			interests,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('userContext', diff);
 		await userContextTable.update(USER_CONTEXT_SINGLETON_ID, diff);
@@ -118,7 +115,6 @@ export const userContextStore = {
 		await ensureDoc();
 		const diff: Partial<LocalUserContext> = {
 			goals,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('userContext', diff);
 		await userContextTable.update(USER_CONTEXT_SINGLETON_ID, diff);
@@ -129,7 +125,6 @@ export const userContextStore = {
 		await ensureDoc();
 		const diff: Partial<LocalUserContext> = {
 			freeform: content,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('userContext', diff);
 		await userContextTable.update(USER_CONTEXT_SINGLETON_ID, diff);
@@ -156,7 +151,6 @@ export const userContextStore = {
 		// interview is not encrypted — update directly
 		await userContextTable.update(USER_CONTEXT_SINGLETON_ID, {
 			interview,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -171,7 +165,6 @@ export const userContextStore = {
 		interview.lastSessionAt = new Date().toISOString();
 		await userContextTable.update(USER_CONTEXT_SINGLETON_ID, {
 			interview,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 };

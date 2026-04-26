@@ -70,7 +70,7 @@ async function clearDefaultFlag(userId: string, exceptId?: string): Promise<void
 		.and((p) => p.isDefault && p.id !== exceptId)
 		.toArray();
 	for (const row of rows) {
-		await table.update(row.id, { isDefault: false, updatedAt: now() });
+		await table.update(row.id, { isDefault: false });
 	}
 }
 
@@ -85,7 +85,6 @@ export const tagPresetsStore = {
 			isDefault: input.isDefault ?? false,
 			tags: input.tags ?? [],
 			createdAt: timestamp,
-			updatedAt: timestamp,
 		};
 
 		if (newLocal.isDefault) await clearDefaultFlag(userId, newLocal.id);
@@ -108,21 +107,20 @@ export const tagPresetsStore = {
 			...(input.name !== undefined && { name: input.name }),
 			...(input.tags !== undefined && { tags: input.tags }),
 			...(input.isDefault !== undefined && { isDefault: input.isDefault }),
-			updatedAt: now(),
 		};
 		await encryptRecord('userTagPresets', diff);
 		await table.update(id, diff);
 	},
 
 	async deletePreset(id: string): Promise<void> {
-		await table.update(id, { deletedAt: now(), updatedAt: now() });
+		await table.update(id, { deletedAt: now() });
 	},
 
 	async setDefault(id: string): Promise<void> {
 		const existing = await table.get(id);
 		if (!existing) throw new Error(`Preset ${id} not found`);
 		await clearDefaultFlag(existing.userId, id);
-		await table.update(id, { isDefault: true, updatedAt: now() });
+		await table.update(id, { isDefault: true });
 	},
 
 	/**

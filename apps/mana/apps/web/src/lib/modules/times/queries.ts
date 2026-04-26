@@ -5,6 +5,7 @@
  */
 
 import { liveQuery } from 'dexie';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
@@ -44,7 +45,7 @@ export function toClient(local: LocalClient): Client {
 		notes: local.notes ?? undefined,
 		order: local.order,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -63,7 +64,7 @@ export function toProject(local: LocalProject): Project {
 		guildId: local.guildId ?? undefined,
 		order: local.order,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -89,7 +90,7 @@ export function toTimeEntry(local: LocalTimeEntry, block?: LocalTimeBlock | null
 		guildId: local.guildId ?? undefined,
 		source: local.source ?? undefined,
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -105,7 +106,7 @@ export function toTemplate(local: LocalTemplate): EntryTemplate {
 		usageCount: local.usageCount,
 		lastUsedAt: local.lastUsedAt ?? undefined,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -122,7 +123,7 @@ export function toSettings(local: LocalSettings): TimesSettings {
 		timerReminderMinutes: local.timerReminderMinutes,
 		autoStopTimerHours: local.autoStopTimerHours,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -139,7 +140,7 @@ export function toAlarm(local: LocalAlarm): Alarm {
 		sound: local.sound,
 		vibrate: local.vibrate ?? null,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -154,7 +155,7 @@ export function toCountdownTimer(local: LocalCountdownTimer): Timer {
 		pausedAt: local.pausedAt,
 		sound: local.sound,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

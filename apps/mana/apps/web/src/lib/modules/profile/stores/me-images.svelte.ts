@@ -120,10 +120,10 @@ async function setPrimaryInTx(id: string | null, slot: MeImagePrimarySlot): Prom
 			.toArray();
 		for (const row of current) {
 			if (row.id === id) continue;
-			await meImagesTable.update(row.id, { primaryFor: null, updatedAt: nowIso });
+			await meImagesTable.update(row.id, { primaryFor: null });
 		}
 		if (id !== null) {
-			await meImagesTable.update(id, { primaryFor: slot, updatedAt: nowIso });
+			await meImagesTable.update(id, { primaryFor: slot });
 		}
 	});
 }
@@ -167,10 +167,7 @@ export const meImagesStore = {
 	): Promise<void> {
 		const wrapped = { ...patch } as Record<string, unknown>;
 		await encryptRecord('meImages', wrapped);
-		await meImagesTable.update(id, {
-			...wrapped,
-			updatedAt: new Date().toISOString(),
-		});
+		await meImagesTable.update(id, wrapped as never);
 	},
 
 	/**
@@ -187,7 +184,6 @@ export const meImagesStore = {
 		};
 		await meImagesTable.update(id, {
 			usage: nextUsage,
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('MeImageAiReferenceToggled', 'profile', 'meImages', id, {
 			meImageId: id,
@@ -221,7 +217,7 @@ export const meImagesStore = {
 			const wasAvatarRelevant =
 				existing?.primaryFor === 'face-ref' || existing?.primaryFor === 'avatar';
 			const nowIso = new Date().toISOString();
-			await meImagesTable.update(id, { primaryFor: null, updatedAt: nowIso });
+			await meImagesTable.update(id, { primaryFor: null });
 			emitDomainEvent('MeImagePrimaryChanged', 'profile', 'meImages', id, {
 				meImageId: id,
 				slot: null,
@@ -247,7 +243,6 @@ export const meImagesStore = {
 		const nowIso = new Date().toISOString();
 		await meImagesTable.update(id, {
 			deletedAt: nowIso,
-			updatedAt: nowIso,
 			// Dropping a primary-holder silently leaves the slot empty;
 			// the UI's primary-picker will prompt the user to pick a new
 			// one next time it renders.

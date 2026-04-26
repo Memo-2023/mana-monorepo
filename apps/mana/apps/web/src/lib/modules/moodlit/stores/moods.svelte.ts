@@ -135,7 +135,6 @@ function createMoodsStore() {
 				animation: data.animation,
 				isDefault: false,
 				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			});
 			MoodlitEvents.moodCreated();
 		},
@@ -143,7 +142,6 @@ function createMoodsStore() {
 		async deleteMood(id: string) {
 			await db.table('moods').update(id, {
 				deletedAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			});
 			MoodlitEvents.moodDeleted();
 		},

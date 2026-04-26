@@ -55,7 +55,6 @@ export const conversationsStore = {
 	async update(id: string, updates: Partial<LocalConversation>) {
 		const diff: Partial<LocalConversation> = {
 			...updates,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('conversations', diff);
 		await conversationTable.update(id, diff);
@@ -65,7 +64,6 @@ export const conversationsStore = {
 	async updateTitle(id: string, title: string) {
 		const diff: Partial<LocalConversation> = {
 			title,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('conversations', diff);
 		await conversationTable.update(id, diff);
@@ -79,7 +77,6 @@ export const conversationsStore = {
 	async pin(id: string) {
 		await conversationTable.update(id, {
 			isPinned: true,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -87,7 +84,6 @@ export const conversationsStore = {
 	async unpin(id: string) {
 		await conversationTable.update(id, {
 			isPinned: false,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -97,10 +93,10 @@ export const conversationsStore = {
 		// Atomic cascade: conversation + all messages in one Dexie transaction.
 		// Aborts as a unit on failure to avoid orphaned messages.
 		await db.transaction('rw', conversationTable, messageTable, async () => {
-			await conversationTable.update(id, { deletedAt: now, updatedAt: now });
+			await conversationTable.update(id, { deletedAt: now });
 			const msgs = await messageTable.where('conversationId').equals(id).toArray();
 			for (const msg of msgs) {
-				await messageTable.update(msg.id, { deletedAt: now, updatedAt: now });
+				await messageTable.update(msg.id, { deletedAt: now });
 			}
 		});
 		ChatEvents.conversationDeleted();

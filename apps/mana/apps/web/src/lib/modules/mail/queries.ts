@@ -3,6 +3,7 @@
  */
 
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
@@ -22,7 +23,7 @@ export function toMailDraft(local: LocalMailDraft): MailDraft {
 		htmlBody: local.htmlBody ?? '',
 		replyToMessageId: local.replyToMessageId ?? null,
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

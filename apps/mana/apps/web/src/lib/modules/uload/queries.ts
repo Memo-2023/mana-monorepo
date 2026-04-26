@@ -6,6 +6,7 @@
  */
 
 import { liveQuery } from 'dexie';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
@@ -93,7 +94,7 @@ export function toLink(local: LocalLink): Link {
 		folderId: local.folderId ?? undefined,
 		order: local.order,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -107,7 +108,7 @@ export function toTag(local: LocalTag): Tag {
 		visibility: local.visibility ?? 'space',
 		usageCount: local.usageCount,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -118,7 +119,7 @@ export function toFolder(local: LocalFolder): Folder {
 		color: local.color ?? undefined,
 		order: local.order,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

@@ -17,6 +17,7 @@
  */
 
 import type { ModuleTool } from '$lib/data/tools/types';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { quizzesStore } from './stores/quizzes.svelte';
 import { toQuiz, toQuestion } from './queries';
 import { db } from '$lib/data/database';
@@ -423,7 +424,7 @@ export const quizTools: ModuleTool[] = [
 						category: q.category,
 						questionCount: q.questionCount,
 						isPinned: q.isPinned,
-						updatedAt: q.updatedAt,
+						updatedAt: deriveUpdatedAt(q),
 					}));
 
 				return {

@@ -13,6 +13,7 @@
  */
 
 import type { BaseRecord } from '@mana/local-store';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import type { VisibilityLevel } from '@mana/shared-privacy';
 
 // ─── Style ────────────────────────────────────────────────────────
@@ -148,7 +149,7 @@ export function toStory(local: LocalComicStory): ComicStory {
 		isArchived: local.isArchived,
 		visibility: local.visibility ?? 'space',
 		createdAt: local.createdAt ?? '',
-		updatedAt: local.updatedAt ?? '',
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -235,7 +236,7 @@ export function toCharacter(local: LocalComicCharacter): ComicCharacter {
 		isFavorite: local.isFavorite,
 		isArchived: local.isArchived,
 		createdAt: local.createdAt ?? '',
-		updatedAt: local.updatedAt ?? '',
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

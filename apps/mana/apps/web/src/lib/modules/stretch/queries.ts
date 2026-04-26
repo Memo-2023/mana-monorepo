@@ -5,6 +5,7 @@
  */
 
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
@@ -39,7 +40,7 @@ export function toStretchExercise(local: LocalStretchExercise): StretchExercise 
 		isArchived: local.isArchived,
 		order: local.order,
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -58,7 +59,7 @@ export function toStretchRoutine(local: LocalStretchRoutine): StretchRoutine {
 		isPinned: local.isPinned,
 		order: local.order,
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -102,7 +103,7 @@ export function toStretchReminder(local: LocalStretchReminder): StretchReminder 
 		isActive: local.isActive,
 		lastTriggeredAt: local.lastTriggeredAt ?? null,
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

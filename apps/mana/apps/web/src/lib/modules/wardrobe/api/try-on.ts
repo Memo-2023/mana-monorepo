@@ -219,7 +219,6 @@ export async function runOutfitTryOn(params: RunOutfitTryOnParams): Promise<RunT
 		referenceImageIds: referenceMediaIds,
 		wardrobeOutfitId: outfit.id,
 		createdAt: now,
-		updatedAt: now,
 	});
 
 	// Pin the snapshot on the outfit so OutfitCard + DetailOutfitView
@@ -333,7 +332,6 @@ export async function runGarmentTryOn(params: RunGarmentTryOnParams): Promise<Ru
 		wardrobeOutfitId: null,
 		wardrobeGarmentId: garment.id,
 		createdAt: now,
-		updatedAt: now,
 	});
 
 	return {

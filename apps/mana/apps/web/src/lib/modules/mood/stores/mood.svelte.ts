@@ -49,7 +49,6 @@ export const moodStore = {
 		const wrapped = await encryptRecord('moodEntries', { ...patch });
 		await moodEntryTable.update(id, {
 			...wrapped,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -57,10 +56,12 @@ export const moodStore = {
 		await moodEntryTable.update(id, { deletedAt: new Date().toISOString() });
 	},
 
-	async updateSettings(patch: Partial<Pick<LocalMoodSettings, 'dailyTarget' | 'reminderTimes' | 'remindersEnabled'>>) {
+	async updateSettings(
+		patch: Partial<Pick<LocalMoodSettings, 'dailyTarget' | 'reminderTimes' | 'remindersEnabled'>>
+	) {
 		const existing = (await moodSettingsTable.toArray()).find((s) => !s.deletedAt);
 		if (existing) {
-			await moodSettingsTable.update(existing.id, { ...patch, updatedAt: new Date().toISOString() });
+			await moodSettingsTable.update(existing.id, { ...patch });
 			return;
 		}
 		const newLocal: LocalMoodSettings = {

@@ -55,7 +55,6 @@ export const memosStore = {
 			// stores have to set their own createdAt/updatedAt explicitly
 			// (consistent with the rest of the Mana modules).
 			createdAt: now,
-			updatedAt: now,
 		} as LocalMemo;
 		const plaintextSnapshot = toMemo(newLocal);
 		await encryptRecord('memos', newLocal);
@@ -101,7 +100,6 @@ export const memosStore = {
 				transcriptModel: result.model,
 				language: existing.language ?? result.language ?? null,
 				processingStatus: 'completed',
-				updatedAt: new Date().toISOString(),
 			};
 			await encryptRecord('memos', diff);
 			await memoTable.update(memoId, diff);
@@ -132,7 +130,6 @@ export const memosStore = {
 			await memoTable.update(memoId, {
 				processingStatus: 'failed',
 				metadata: { ...(((await memoTable.get(memoId))?.metadata as object) ?? {}), error: msg },
-				updatedAt: new Date().toISOString(),
 			});
 		}
 	},
@@ -144,7 +141,6 @@ export const memosStore = {
 	) {
 		const diff: Partial<LocalMemo> = {
 			...data,
-			updatedAt: new Date().toISOString(),
 		};
 
 		// If the user is overwriting the title manually, clear the
@@ -201,7 +197,6 @@ export const memosStore = {
 	async pin(id: string) {
 		await memoTable.update(id, {
 			isPinned: true,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -209,7 +204,6 @@ export const memosStore = {
 	async unpin(id: string) {
 		await memoTable.update(id, {
 			isPinned: false,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 

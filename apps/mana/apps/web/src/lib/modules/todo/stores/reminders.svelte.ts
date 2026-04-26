@@ -28,7 +28,6 @@ export const remindersStore = {
 	async deleteReminder(id: string) {
 		await reminderTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -38,7 +37,6 @@ export const remindersStore = {
 			if (!r.deletedAt) {
 				await reminderTable.update(r.id, {
 					deletedAt: new Date().toISOString(),
-					updatedAt: new Date().toISOString(),
 				});
 			}
 		}

@@ -70,6 +70,10 @@ export const sessionAlarmsStore = {
 			sound: input.sound || null,
 			vibrate: input.vibrate ?? null,
 			createdAt: now,
+			// Session-only store: not synced, no Dexie hook to derive
+			// updatedAt from __fieldMeta. Stamp it directly here so the
+			// public Alarm shape stays consistent with the synced
+			// counterpart (LocalAlarm via the type-converter).
 			updatedAt: now,
 		};
 
@@ -89,7 +93,6 @@ export const sessionAlarmsStore = {
 		const updated: Alarm = {
 			...alarms[index],
 			...input,
-			updatedAt: new Date().toISOString(),
 		};
 
 		alarms = alarms.map((a) => (a.id === id ? updated : a));

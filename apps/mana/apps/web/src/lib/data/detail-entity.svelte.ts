@@ -175,7 +175,6 @@ export function useDetailEntity<T extends { id?: string }>(
 				toastStore.undo(label, () => {
 					db.table(opts.table!).update(id, {
 						deletedAt: undefined,
-						updatedAt: new Date().toISOString(),
 					});
 				});
 			} else {

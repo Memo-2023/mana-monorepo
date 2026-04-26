@@ -141,10 +141,7 @@ export const draftsStore = {
 	async updateDraft(id: string, patch: UpdateDraftPatch) {
 		const wrapped = { ...patch } as Record<string, unknown>;
 		await encryptRecord('writingDrafts', wrapped);
-		await draftTable.update(id, {
-			...wrapped,
-			updatedAt: new Date().toISOString(),
-		});
+		await draftTable.update(id, wrapped as never);
 	},
 
 	async updateBriefing(id: string, briefingPatch: Partial<DraftBriefing>) {
@@ -166,7 +163,6 @@ export const draftsStore = {
 		if (!existing || existing.status === status) return;
 		await draftTable.update(id, {
 			status,
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('WritingDraftStatusChanged', 'writing', 'writingDrafts', id, {
 			draftId: id,
@@ -180,20 +176,17 @@ export const draftsStore = {
 		if (!existing) return;
 		await draftTable.update(id, {
 			isFavorite: !existing.isFavorite,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async deleteDraft(id: string) {
 		const now = new Date().toISOString();
-		await draftTable.update(id, { deletedAt: now, updatedAt: now });
+		await draftTable.update(id, { deletedAt: now });
 		// Soft-delete every version belonging to the draft so they stop
 		// showing up in version-history queries. Generations we leave —
 		// they're audit records and shouldn't disappear silently.
 		const versions = await draftVersionTable.where('draftId').equals(id).toArray();
-		await Promise.all(
-			versions.map((v) => draftVersionTable.update(v.id, { deletedAt: now, updatedAt: now }))
-		);
+		await Promise.all(versions.map((v) => draftVersionTable.update(v.id, { deletedAt: now })));
 		emitDomainEvent('WritingDraftDeleted', 'writing', 'writingDrafts', id, { draftId: id });
 	},
 
@@ -212,10 +205,10 @@ export const draftsStore = {
 		};
 		await encryptRecord('writingDraftVersions', wrapped);
 		const now = new Date().toISOString();
-		await draftVersionTable.update(versionId, { ...wrapped, updatedAt: now });
+		await draftVersionTable.update(versionId, { ...wrapped });
 		// Bump the owning draft's updatedAt so ListView sorting reflects
 		// the edit even though nothing on the draft itself changed.
-		await draftTable.update(existing.draftId, { updatedAt: now });
+		await draftTable.update(existing.draftId, {});
 	},
 
 	/**
@@ -252,7 +245,6 @@ export const draftsStore = {
 		await draftVersionTable.add(newVersion);
 		await draftTable.update(draftId, {
 			currentVersionId: newVersion.id,
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent(
 			'WritingDraftVersionCreated',
@@ -282,7 +274,6 @@ export const draftsStore = {
 		}
 		await draftTable.update(draftId, {
 			currentVersionId: versionId,
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('WritingDraftVersionReverted', 'writing', 'writingDrafts', draftId, {
 			draftId,
@@ -309,7 +300,6 @@ export const draftsStore = {
 		];
 		await draftTable.update(draftId, {
 			publishedTo: next,
-			updatedAt: now,
 		});
 		emitDomainEvent('WritingDraftPublished', 'writing', 'writingDrafts', draftId, {
 			draftId,
@@ -329,14 +319,13 @@ export const draftsStore = {
 			visibility: next,
 			visibilityChangedAt: now,
 			visibilityChangedBy: getEffectiveUserId(),
-			updatedAt: now,
 		};
 		if (next === 'unlisted' && !existing.unlistedToken) {
 			patch.unlistedToken = generateUnlistedToken();
 		} else if (next !== 'unlisted' && existing.unlistedToken) {
 			patch.unlistedToken = undefined;
 		}
-		await draftTable.update(id, patch);
+		await draftTable.update(id, patch as never);
 		emitDomainEvent('VisibilityChanged', 'writing', 'writingDrafts', id, {
 			recordId: id,
 			collection: 'writingDrafts',

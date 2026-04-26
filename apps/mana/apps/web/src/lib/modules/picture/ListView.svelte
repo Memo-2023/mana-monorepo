@@ -199,7 +199,6 @@
 					isFavorite: false,
 					downloadCount: 0,
 					createdAt: nowIso,
-					updatedAt: nowIso,
 				};
 				await imagesStore.insert(local);
 				uploadFiles[i].status = 'success';

@@ -54,7 +54,6 @@
 		// Color is not in UpdateDeckInput, update directly
 		await db.table('decks').update(deckId, {
 			color: editColor,
-			updatedAt: new Date().toISOString(),
 		});
 	}
 </script>

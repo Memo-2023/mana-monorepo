@@ -3,6 +3,7 @@
  */
 
 import { liveQuery } from 'dexie';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import type { LocalFavorite, LocalQuoteList, LocalCustomQuote } from './types';
@@ -65,7 +66,7 @@ export function toQuoteList(local: LocalQuoteList): QuoteList {
 		description: local.description ?? undefined,
 		quoteIds: local.quoteIds,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

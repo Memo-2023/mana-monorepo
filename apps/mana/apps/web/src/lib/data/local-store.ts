@@ -74,21 +74,18 @@ function createCollectionWrapper<T extends BaseRecord>(tableName: string) {
 			await table.put({
 				...record,
 				createdAt: record.createdAt ?? now,
-				updatedAt: now,
 			});
 		},
 
 		async update(id: string, changes: Partial<T>): Promise<void> {
 			await table.update(id, {
 				...changes,
-				updatedAt: new Date().toISOString(),
 			} as any);
 		},
 
 		async delete(id: string): Promise<void> {
 			await table.update(id, {
 				deletedAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			} as any);
 		},
 

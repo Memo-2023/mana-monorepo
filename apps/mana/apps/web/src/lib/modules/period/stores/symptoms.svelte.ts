@@ -24,14 +24,12 @@ export const symptomsStore = {
 	) {
 		await periodSymptomTable.update(id, {
 			...data,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async deleteSymptom(id: string) {
 		await periodSymptomTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -43,7 +41,6 @@ export const symptomsStore = {
 			const next = Math.max(0, (existing.count ?? 0) + delta);
 			await periodSymptomTable.update(id, {
 				count: next,
-				updatedAt: new Date().toISOString(),
 			});
 		}
 	},

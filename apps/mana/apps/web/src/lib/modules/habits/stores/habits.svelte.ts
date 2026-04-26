@@ -126,7 +126,6 @@ export const habitsStore = {
 	) {
 		await habitTable.update(id, {
 			...data,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -148,7 +147,6 @@ export const habitsStore = {
 			visibility: next,
 			visibilityChangedAt: now,
 			visibilityChangedBy: getEffectiveUserId(),
-			updatedAt: now,
 		});
 
 		emitDomainEvent('VisibilityChanged', 'habits', 'habits', id, {
@@ -163,7 +161,6 @@ export const habitsStore = {
 		const habit = await habitTable.get(id);
 		await habitTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('HabitDeleted', 'habits', 'habits', id, {
 			habitId: id,
@@ -318,7 +315,6 @@ export const habitsStore = {
 		for (let i = 0; i < habitIds.length; i++) {
 			await habitTable.update(habitIds[i], {
 				order: i,
-				updatedAt: now,
 			});
 		}
 	},
@@ -334,7 +330,6 @@ export const habitsStore = {
 		// Update the habit record
 		await habitTable.update(habitId, {
 			schedule,
-			updatedAt: new Date().toISOString(),
 		});
 
 		// Find existing template block for this habit

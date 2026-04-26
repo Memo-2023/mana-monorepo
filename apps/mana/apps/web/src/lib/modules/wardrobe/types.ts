@@ -16,6 +16,7 @@
  */
 
 import type { BaseRecord } from '@mana/local-store';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import type { VisibilityLevel } from '@mana/shared-privacy';
 
 // ─── Garment ──────────────────────────────────────────────────────
@@ -115,7 +116,7 @@ export function toGarment(local: LocalWardrobeGarment): Garment {
 		wearCount: local.wearCount ?? undefined,
 		lastWornAt: local.lastWornAt ?? undefined,
 		createdAt: local.createdAt ?? '',
-		updatedAt: local.updatedAt ?? '',
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -212,6 +213,6 @@ export function toOutfit(local: LocalWardrobeOutfit): Outfit {
 		lastWornAt: local.lastWornAt ?? undefined,
 		visibility: local.visibility ?? 'space',
 		createdAt: local.createdAt ?? '',
-		updatedAt: local.updatedAt ?? '',
+		updatedAt: deriveUpdatedAt(local),
 	};
 }

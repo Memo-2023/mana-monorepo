@@ -54,7 +54,6 @@ export async function saveAgentKontext(agentId: string, content: string): Promis
 	if (existing) {
 		const diff: Partial<LocalAgentKontextDoc> = {
 			content,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord(TABLE, diff);
 		await db.table<LocalAgentKontextDoc>(TABLE).update(existing.id, diff);

@@ -66,10 +66,7 @@ export const stylesStore = {
 	async updateStyle(id: string, patch: UpdateStylePatch) {
 		const wrapped = { ...patch } as Record<string, unknown>;
 		await encryptRecord('writingStyles', wrapped);
-		await writingStyleTable.update(id, {
-			...wrapped,
-			updatedAt: new Date().toISOString(),
-		});
+		await writingStyleTable.update(id, wrapped as never);
 	},
 
 	async upsertExtractedPrinciples(id: string, principles: StyleExtractedPrinciples) {
@@ -85,7 +82,6 @@ export const stylesStore = {
 		if (!existing) return;
 		await writingStyleTable.update(id, {
 			isFavorite: !existing.isFavorite,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -99,19 +95,17 @@ export const stylesStore = {
 				existing.map((s) =>
 					writingStyleTable.update(s.id, {
 						isSpaceDefault: false,
-						updatedAt: new Date().toISOString(),
 					})
 				)
 			);
 		}
 		await writingStyleTable.update(id, {
 			isSpaceDefault: isDefault,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async deleteStyle(id: string) {
 		const now = new Date().toISOString();
-		await writingStyleTable.update(id, { deletedAt: now, updatedAt: now });
+		await writingStyleTable.update(id, { deletedAt: now });
 	},
 };

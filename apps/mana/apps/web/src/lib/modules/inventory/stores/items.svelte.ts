@@ -78,7 +78,6 @@ export const itemsStore = {
 	) {
 		const diff: Partial<LocalItem> = {
 			...data,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('invItems', diff);
 		await invItemTable.update(id, diff);
@@ -88,7 +87,6 @@ export const itemsStore = {
 	async delete(id: string) {
 		await invItemTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 		InventoryEvents.itemDeleted();
 	},
@@ -98,7 +96,7 @@ export const itemsStore = {
 		const toDelete = all.filter((i) => !i.deletedAt && i.collectionId === collectionId);
 		const now = new Date().toISOString();
 		for (const item of toDelete) {
-			await invItemTable.update(item.id, { deletedAt: now, updatedAt: now });
+			await invItemTable.update(item.id, { deletedAt: now });
 		}
 	},
 
@@ -109,7 +107,6 @@ export const itemsStore = {
 		const note = { id: crypto.randomUUID(), content, createdAt: now };
 		await invItemTable.update(itemId, {
 			notes: [...item.notes, note],
-			updatedAt: now,
 		});
 	},
 
@@ -118,7 +115,6 @@ export const itemsStore = {
 		if (!item) return;
 		await invItemTable.update(itemId, {
 			notes: item.notes.filter((n) => n.id !== noteId),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 };

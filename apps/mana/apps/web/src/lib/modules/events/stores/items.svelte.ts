@@ -45,7 +45,6 @@ export const eventItemsStore = {
 				claimedByName: null,
 				claimedAt: null,
 				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			};
 			await db.table<LocalEventItem>('eventItems').add(newItem);
 			void eventsStore.syncItems(input.eventId);
@@ -71,7 +70,6 @@ export const eventItemsStore = {
 		try {
 			await db.table('eventItems').update(id, {
 				...input,
-				updatedAt: new Date().toISOString(),
 			});
 			// Push the updated bring list to the server. We need the
 			// parent eventId, so re-read the row first.
@@ -103,7 +101,6 @@ export const eventItemsStore = {
 			const item = await db.table<LocalEventItem>('eventItems').get(id);
 			await db.table('eventItems').update(id, {
 				deletedAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			});
 			if (item) void eventsStore.syncItems(item.eventId);
 			return { success: true as const };

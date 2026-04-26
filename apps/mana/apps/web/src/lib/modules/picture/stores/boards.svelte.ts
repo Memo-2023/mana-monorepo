@@ -49,7 +49,6 @@ export const boardsStore = {
 				backgroundColor: input.backgroundColor || '#ffffff',
 				visibility: defaultVisibilityFor(getActiveSpace()?.type),
 				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			};
 
 			// Snapshot plaintext for the return value before encryptRecord
@@ -72,7 +71,6 @@ export const boardsStore = {
 		try {
 			const diff: Partial<LocalBoard> = {
 				...input,
-				updatedAt: new Date().toISOString(),
 			};
 			await encryptRecord('boards', diff);
 			await db.table('boards').update(id, diff);
@@ -104,10 +102,10 @@ export const boardsStore = {
 				.equals(id)
 				.toArray();
 			for (const item of items) {
-				await db.table('boardItems').update(item.id, { deletedAt: now, updatedAt: now });
+				await db.table('boardItems').update(item.id, { deletedAt: now });
 			}
 			// Soft-delete the board
-			await db.table('boards').update(id, { deletedAt: now, updatedAt: now });
+			await db.table('boards').update(id, { deletedAt: now });
 			return { success: true };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to delete board';
@@ -145,7 +143,6 @@ export const boardsStore = {
 				backgroundColor: original.backgroundColor,
 				visibility: defaultVisibilityFor(getActiveSpace()?.type),
 				createdAt: now,
-				updatedAt: now,
 			};
 			const plaintextSnapshot = toBoard({ ...duplicated });
 			await encryptRecord('boards', duplicated);
@@ -167,7 +164,6 @@ export const boardsStore = {
 					id: crypto.randomUUID(),
 					boardId: newId,
 					createdAt: now,
-					updatedAt: now,
 				};
 				await encryptRecord('boardItems', newItem);
 				await db.table<LocalBoardItem>('boardItems').add(newItem);
@@ -198,7 +194,6 @@ export const boardsStore = {
 				visibility: next,
 				visibilityChangedAt: now,
 				visibilityChangedBy: getEffectiveUserId(),
-				updatedAt: now,
 			};
 			if (next === 'unlisted' && !existing.unlistedToken) {
 				patch.unlistedToken = generateUnlistedToken();

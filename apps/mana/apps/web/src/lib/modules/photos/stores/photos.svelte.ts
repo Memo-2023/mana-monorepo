@@ -145,14 +145,12 @@ export const photoStore = {
 			if (fav) {
 				await db.table('photoFavorites').update(fav.id, {
 					deletedAt: new Date().toISOString(),
-					updatedAt: new Date().toISOString(),
 				});
 			} else {
 				await db.table('photoFavorites').add({
 					id: crypto.randomUUID(),
 					mediaId,
 					createdAt: new Date().toISOString(),
-					updatedAt: new Date().toISOString(),
 				});
 			}
 

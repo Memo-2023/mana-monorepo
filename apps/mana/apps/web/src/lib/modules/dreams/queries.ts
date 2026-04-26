@@ -1,4 +1,5 @@
 import { formatDate } from '$lib/i18n/format';
+import { deriveUpdatedAt } from '$lib/data/sync';
 /**
  * Reactive Queries & Pure Helpers for Dreams module.
  *
@@ -44,7 +45,7 @@ export function toDream(local: LocalDream): Dream {
 		isPinned: local.isPinned,
 		isArchived: local.isArchived,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -56,7 +57,7 @@ export function toDreamSymbol(local: LocalDreamSymbol): DreamSymbol {
 		color: local.color,
 		count: local.count ?? 0,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

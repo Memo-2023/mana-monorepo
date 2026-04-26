@@ -220,7 +220,6 @@ export async function runPanelGenerate(
 		comicStoryId: story.id,
 		comicPanelIndex: panelIndex,
 		createdAt: now,
-		updatedAt: now,
 	});
 
 	await comicStoriesStore.appendPanel(story.id, localImageId, {

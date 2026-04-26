@@ -12,6 +12,7 @@
  */
 
 import { db } from '$lib/data/database';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { wrapValue, unwrapValue } from '$lib/data/crypto/aes';
 import { getActiveKey } from '$lib/data/crypto/key-provider';
 import type { ByokProviderId } from '@mana/shared-llm';
@@ -48,7 +49,7 @@ async function recordToPlain(rec: ByokKeyRecord): Promise<ByokKeyPlain> {
 		model: rec.model,
 		isDefault: rec.isDefault,
 		createdAt: rec.createdAt,
-		updatedAt: rec.updatedAt,
+		updatedAt: deriveUpdatedAt(rec),
 		lastUsedAt: rec.lastUsedAt,
 		usageCount: rec.usageCount,
 		totalTokens: rec.totalTokens,
@@ -75,7 +76,7 @@ export const byokVault = {
 			model: r.model,
 			isDefault: r.isDefault,
 			createdAt: r.createdAt,
-			updatedAt: r.updatedAt,
+			updatedAt: deriveUpdatedAt(r),
 			lastUsedAt: r.lastUsedAt,
 			usageCount: r.usageCount,
 			totalTokens: r.totalTokens,

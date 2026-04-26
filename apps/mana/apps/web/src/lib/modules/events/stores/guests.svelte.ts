@@ -38,7 +38,6 @@ export const eventGuestsStore = {
 				plusOnes: input.plusOnes ?? 0,
 				note: input.note ?? null,
 				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			};
 			// name / email / phone / note are encrypted at rest. Guest
 			// records stay local-only — they're never pushed to the
@@ -68,7 +67,6 @@ export const eventGuestsStore = {
 		try {
 			const data: Partial<LocalEventGuest> = {
 				...input,
-				updatedAt: new Date().toISOString(),
 			};
 			if (input.rsvpStatus !== undefined) {
 				data.rsvpAt = new Date().toISOString();
@@ -91,7 +89,6 @@ export const eventGuestsStore = {
 		try {
 			await db.table('eventGuests').update(id, {
 				deletedAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			});
 			return { success: true as const };
 		} catch (e) {

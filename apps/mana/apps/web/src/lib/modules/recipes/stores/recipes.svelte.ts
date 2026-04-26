@@ -78,16 +78,12 @@ export const recipesStore = {
 	) {
 		const wrapped = { ...patch } as Record<string, unknown>;
 		await encryptRecord('recipes', wrapped);
-		await recipeTable.update(id, {
-			...wrapped,
-			updatedAt: new Date().toISOString(),
-		});
+		await recipeTable.update(id, wrapped as never);
 	},
 
 	async deleteRecipe(id: string) {
 		await recipeTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('RecipeDeleted', 'recipes', 'recipes', id, { recipeId: id });
 	},
@@ -97,7 +93,6 @@ export const recipesStore = {
 		if (!existing) return;
 		await recipeTable.update(id, {
 			isFavorite: !existing.isFavorite,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -117,14 +112,13 @@ export const recipesStore = {
 			visibility: next,
 			visibilityChangedAt: now,
 			visibilityChangedBy: getEffectiveUserId(),
-			updatedAt: now,
 		};
 		if (next === 'unlisted' && !existing.unlistedToken) {
 			patch.unlistedToken = generateUnlistedToken();
 		} else if (next !== 'unlisted' && existing.unlistedToken) {
 			patch.unlistedToken = undefined;
 		}
-		await recipeTable.update(id, patch);
+		await recipeTable.update(id, patch as never);
 
 		emitDomainEvent('VisibilityChanged', 'recipes', 'recipes', id, {
 			recordId: id,

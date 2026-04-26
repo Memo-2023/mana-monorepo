@@ -3,6 +3,7 @@
  */
 
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
@@ -38,7 +39,7 @@ export function toDraft(local: LocalDraft): Draft {
 		visibility: local.visibility ?? 'space',
 		unlistedToken: local.unlistedToken ?? null,
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -95,7 +96,7 @@ export function toWritingStyle(local: LocalWritingStyle): WritingStyle {
 		isSpaceDefault: local.isSpaceDefault ?? false,
 		isFavorite: local.isFavorite ?? false,
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

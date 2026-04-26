@@ -56,7 +56,6 @@ export const reactionsStore = {
 		// suppression.
 		await reactionTable.update(reactionId, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 };

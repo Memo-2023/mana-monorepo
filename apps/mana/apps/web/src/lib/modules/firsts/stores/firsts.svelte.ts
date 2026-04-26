@@ -126,7 +126,6 @@ export const firstsStore = {
 			reality: data.reality ?? null,
 			rating: data.rating ?? null,
 			wouldRepeat: data.wouldRepeat ?? null,
-			updatedAt: new Date().toISOString(),
 		};
 		if (data.personIds) diff.personIds = data.personIds;
 		if (data.sharedWith !== undefined) diff.sharedWith = data.sharedWith;
@@ -164,7 +163,6 @@ export const firstsStore = {
 	) {
 		const diff: Partial<LocalFirst> = {
 			...data,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('firsts', diff);
 		await firstTable.update(id, diff);
@@ -173,7 +171,6 @@ export const firstsStore = {
 	async deleteFirst(id: string) {
 		await firstTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -182,14 +179,12 @@ export const firstsStore = {
 		if (!first) return;
 		await firstTable.update(id, {
 			isPinned: !first.isPinned,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async archiveFirst(id: string) {
 		await firstTable.update(id, {
 			isArchived: true,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 };

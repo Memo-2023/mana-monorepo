@@ -58,7 +58,6 @@ export const TIME_BLOCK_GUEST_SEED = {
 				icon: null,
 				projectId: null,
 				createdAt: nowISO,
-				updatedAt: nowISO,
 			},
 			{
 				id: 'sample-tb-event-2',
@@ -79,7 +78,6 @@ export const TIME_BLOCK_GUEST_SEED = {
 				icon: null,
 				projectId: null,
 				createdAt: nowISO,
-				updatedAt: nowISO,
 			},
 		] satisfies LocalTimeBlock[];
 	})(),

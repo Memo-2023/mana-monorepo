@@ -28,7 +28,6 @@ export const conversationsStore = {
 			isPinned: false,
 			comparisonModels: data.comparisonModels ?? null,
 			createdAt: now,
-			updatedAt: now,
 		};
 		const snapshot = toConversation(newLocal);
 		await encryptRecord('playgroundConversations', newLocal);
@@ -39,21 +38,18 @@ export const conversationsStore = {
 	async updateTitle(id: string, title: string) {
 		const diff: Partial<LocalPlaygroundConversation> = {
 			title,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('playgroundConversations', diff);
 		await playgroundConversationTable.update(id, diff);
 	},
 
 	async touch(id: string) {
-		await playgroundConversationTable.update(id, {
-			updatedAt: new Date().toISOString(),
-		});
+		await playgroundConversationTable.update(id, {});
 	},
 
 	async remove(id: string) {
 		const now = new Date().toISOString();
-		await playgroundConversationTable.update(id, { deletedAt: now, updatedAt: now });
+		await playgroundConversationTable.update(id, { deletedAt: now });
 	},
 
 	async addMessage(

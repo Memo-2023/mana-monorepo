@@ -119,7 +119,6 @@ export async function updateMission(id: string, patch: MissionPatch): Promise<vo
 	// Same Proxy-stripping reason as createMission.
 	const mods: Partial<Mission> = {
 		...deepClone(patch),
-		updatedAt: new Date().toISOString(),
 	};
 	if (patch.cadence) {
 		mods.nextRunAt = nextRunForCadence(patch.cadence, new Date());
@@ -130,7 +129,7 @@ export async function updateMission(id: string, patch: MissionPatch): Promise<vo
 // ── Lifecycle ──────────────────────────────────────────────
 
 export async function pauseMission(id: string): Promise<void> {
-	await table().update(id, { state: 'paused', updatedAt: new Date().toISOString() });
+	await table().update(id, { state: 'paused' });
 }
 
 export async function resumeMission(id: string): Promise<void> {
@@ -139,7 +138,6 @@ export async function resumeMission(id: string): Promise<void> {
 	await table().update(id, {
 		state: 'active',
 		nextRunAt: nextRunForCadence(mission.cadence, new Date()),
-		updatedAt: new Date().toISOString(),
 	});
 }
 
@@ -147,12 +145,11 @@ export async function completeMission(id: string): Promise<void> {
 	await table().update(id, {
 		state: 'done',
 		nextRunAt: undefined,
-		updatedAt: new Date().toISOString(),
 	});
 }
 
 export async function archiveMission(id: string): Promise<void> {
-	await table().update(id, { state: 'archived', updatedAt: new Date().toISOString() });
+	await table().update(id, { state: 'archived' });
 }
 
 export async function deleteMission(id: string): Promise<void> {
@@ -173,7 +170,6 @@ export async function setMissionGrant(
 	// attached — matches the pattern used in createMission / updateMission.
 	await table().update(id, {
 		grant: deepClone(grant),
-		updatedAt: new Date().toISOString(),
 	});
 }
 
@@ -183,7 +179,6 @@ export async function setMissionGrant(
 export async function revokeMissionGrant(id: string): Promise<void> {
 	await table().update(id, {
 		grant: undefined,
-		updatedAt: new Date().toISOString(),
 	});
 }
 
@@ -213,7 +208,6 @@ export async function startIteration(
 	};
 	await table().update(missionId, {
 		iterations: [...mission.iterations, iteration],
-		updatedAt: now,
 	});
 	return iteration;
 }
@@ -242,7 +236,7 @@ export async function setIterationPhase(
 					}
 				: it
 		);
-		await table().update(missionId, { iterations: updated, updatedAt: now });
+		await table().update(missionId, { iterations: updated });
 	} catch (err) {
 		console.warn('[mission-store] setIterationPhase failed:', err);
 	}
@@ -263,7 +257,6 @@ export async function requestIterationCancel(
 	);
 	await table().update(missionId, {
 		iterations: updated,
-		updatedAt: new Date().toISOString(),
 	});
 }
 
@@ -317,7 +310,6 @@ export async function finishIteration(
 		iterations: updatedIterations,
 		// Advance nextRunAt now that this iteration is done
 		nextRunAt: nextRunForCadence(mission.cadence, new Date()),
-		updatedAt: new Date().toISOString(),
 	});
 }
 
@@ -334,6 +326,5 @@ export async function addIterationFeedback(
 	);
 	await table().update(missionId, {
 		iterations: updatedIterations,
-		updatedAt: new Date().toISOString(),
 	});
 }

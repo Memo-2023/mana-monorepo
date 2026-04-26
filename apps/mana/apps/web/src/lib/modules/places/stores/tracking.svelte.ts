@@ -138,7 +138,6 @@ async function logPosition(pos: GeolocationPosition) {
 		timestamp: new Date(pos.timestamp).toISOString(),
 		placeId: nearest?.id,
 		createdAt: new Date().toISOString(),
-		updatedAt: new Date().toISOString(),
 	};
 
 	await encryptRecord('locationLogs', log);
@@ -158,7 +157,6 @@ async function logPosition(pos: GeolocationPosition) {
 			const updates: Partial<LocalPlace> = {
 				visitCount: (local.visitCount ?? 0) + 1,
 				lastVisitedAt: log.timestamp,
-				updatedAt: new Date().toISOString(),
 			};
 
 			// Auto-fill address via reverse geocoding if the place has none
@@ -171,7 +169,6 @@ async function logPosition(pos: GeolocationPosition) {
 							await encryptRecord('places', rec);
 							await placeTable.update(nearest.id, {
 								address: rec.address,
-								updatedAt: new Date().toISOString(),
 							});
 						}
 					}

@@ -10,6 +10,7 @@
  */
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { decryptRecords } from '$lib/data/crypto';
 import { scopedTable } from '$lib/data/scope/scoped-db';
 import type { KontextDoc, LocalKontextDoc } from './types';
@@ -19,7 +20,7 @@ export function toKontextDoc(local: LocalKontextDoc): KontextDoc {
 		id: local.id,
 		content: local.content ?? '',
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

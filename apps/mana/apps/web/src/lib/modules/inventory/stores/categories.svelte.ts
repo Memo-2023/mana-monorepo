@@ -32,7 +32,6 @@ export const categoriesStore = {
 	async update(id: string, data: Partial<Pick<LocalCategory, 'name' | 'icon' | 'color'>>) {
 		await invCategoryTable.update(id, {
 			...data,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -47,7 +46,7 @@ export const categoriesStore = {
 		collectIds(id);
 		const now = new Date().toISOString();
 		for (const deleteId of idsToDelete) {
-			await invCategoryTable.update(deleteId, { deletedAt: now, updatedAt: now });
+			await invCategoryTable.update(deleteId, { deletedAt: now });
 		}
 		InventoryEvents.categoryDeleted();
 	},

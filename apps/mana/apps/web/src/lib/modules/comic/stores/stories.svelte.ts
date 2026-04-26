@@ -76,18 +76,15 @@ export const comicStoriesStore = {
 	): Promise<void> {
 		// Same proxy-breaking copy as createStory: any array on the patch
 		// might be a $state proxy if the caller is a Svelte 5 component.
-		const wrapped: Record<string, unknown> = { ...patch };
+		const wrapped: Partial<LocalComicStory> = { ...patch };
 		if (Array.isArray(wrapped.characterMediaIds)) {
-			wrapped.characterMediaIds = [...(wrapped.characterMediaIds as string[])];
+			wrapped.characterMediaIds = [...wrapped.characterMediaIds];
 		}
 		if (Array.isArray(wrapped.tags)) {
-			wrapped.tags = [...(wrapped.tags as string[])];
+			wrapped.tags = [...wrapped.tags];
 		}
-		await encryptRecord('comicStories', wrapped);
-		await comicStoriesTable.update(id, {
-			...wrapped,
-			updatedAt: new Date().toISOString(),
-		});
+		await encryptRecord('comicStories', wrapped as Record<string, unknown>);
+		await comicStoriesTable.update(id, wrapped as never);
 	},
 
 	async toggleFavorite(id: string): Promise<void> {
@@ -95,14 +92,12 @@ export const comicStoriesStore = {
 		if (!existing) return;
 		await comicStoriesTable.update(id, {
 			isFavorite: !existing.isFavorite,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async archiveStory(id: string, archived: boolean): Promise<void> {
 		await comicStoriesTable.update(id, {
 			isArchived: archived,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -110,7 +105,6 @@ export const comicStoriesStore = {
 		const nowIso = new Date().toISOString();
 		await comicStoriesTable.update(id, {
 			deletedAt: nowIso,
-			updatedAt: nowIso,
 		});
 		emitDomainEvent('ComicStoryDeleted', 'comic', 'comicStories', id, {
 			storyId: id,
@@ -133,14 +127,13 @@ export const comicStoriesStore = {
 			visibility: next,
 			visibilityChangedAt: now,
 			visibilityChangedBy: getEffectiveUserId(),
-			updatedAt: now,
 		};
 		if (next === 'unlisted' && !existing.unlistedToken) {
 			patch.unlistedToken = generateUnlistedToken();
 		} else if (next !== 'unlisted' && existing.unlistedToken) {
 			patch.unlistedToken = undefined;
 		}
-		await comicStoriesTable.update(id, patch);
+		await comicStoriesTable.update(id, patch as never);
 
 		emitDomainEvent('VisibilityChanged', 'comic', 'comicStories', id, {
 			recordId: id,
@@ -170,10 +163,7 @@ export const comicStoriesStore = {
 			panelMeta: nextMeta,
 		} as Record<string, unknown>;
 		await encryptRecord('comicStories', patch);
-		await comicStoriesTable.update(storyId, {
-			...patch,
-			updatedAt: new Date().toISOString(),
-		});
+		await comicStoriesTable.update(storyId, patch as never);
 		emitDomainEvent('ComicPanelAppended', 'comic', 'comicStories', storyId, {
 			storyId,
 			panelImageId,

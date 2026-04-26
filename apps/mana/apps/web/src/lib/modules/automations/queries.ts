@@ -5,6 +5,7 @@
  */
 
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { automationTable } from './collections';
 import type { LocalAutomation } from './types';
 
@@ -42,7 +43,7 @@ export function toAutomation(local: LocalAutomation): Automation {
 		targetAction: local.targetAction,
 		targetParams: local.targetParams,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

@@ -16,7 +16,6 @@ export const calculationsStore = {
 			result: input.result,
 			skin: input.skin,
 			createdAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 		CalcEvents.calculationAdded();
 	},
@@ -24,7 +23,6 @@ export const calculationsStore = {
 	async deleteCalculation(id: string) {
 		await db.table('calculations').update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -32,9 +30,7 @@ export const calculationsStore = {
 		const now = new Date().toISOString();
 		const all = await db.table<LocalCalculation>('calculations').toArray();
 		const active = all.filter((c) => !c.deletedAt);
-		await Promise.all(
-			active.map((c) => db.table('calculations').update(c.id, { deletedAt: now, updatedAt: now }))
-		);
+		await Promise.all(active.map((c) => db.table('calculations').update(c.id, { deletedAt: now })));
 		CalcEvents.historyCleared();
 	},
 };

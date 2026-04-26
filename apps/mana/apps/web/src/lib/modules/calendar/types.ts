@@ -6,6 +6,7 @@
  */
 
 import type { BaseRecord } from '@mana/local-store';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import type { VisibilityLevel } from '@mana/shared-privacy';
 import type { TimeBlock, TimeBlockType } from '$lib/data/time-blocks/types';
 
@@ -120,7 +121,7 @@ export function timeBlockToCalendarEvent(
 		unlistedToken: eventData?.unlistedToken ?? '',
 		unlistedExpiresAt: eventData?.unlistedExpiresAt ?? null,
 		createdAt: block.createdAt,
-		updatedAt: block.updatedAt,
+		updatedAt: deriveUpdatedAt(block),
 		blockType: block.type,
 		sourceModule: block.sourceModule,
 		sourceId: block.sourceId,

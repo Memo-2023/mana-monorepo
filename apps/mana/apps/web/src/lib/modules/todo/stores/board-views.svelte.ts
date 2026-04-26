@@ -25,14 +25,12 @@ export const boardViewsStore = {
 	async updateView(id: string, data: Partial<LocalBoardView>) {
 		await boardViewTable.update(id, {
 			...data,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async deleteView(id: string) {
 		await boardViewTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -40,7 +38,6 @@ export const boardViewsStore = {
 		for (let i = 0; i < viewIds.length; i++) {
 			await boardViewTable.update(viewIds[i], {
 				order: i,
-				updatedAt: new Date().toISOString(),
 			});
 		}
 	},
@@ -54,7 +51,6 @@ export const boardViewsStore = {
 		);
 		await boardViewTable.update(viewId, {
 			columns: updatedColumns,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 };

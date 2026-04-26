@@ -123,7 +123,6 @@ export function useTaskForm() {
 				if (!r.deletedAt) {
 					await reminderTable.update(r.id, {
 						deletedAt: new Date().toISOString(),
-						updatedAt: new Date().toISOString(),
 					});
 				}
 			}

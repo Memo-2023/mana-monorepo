@@ -3,6 +3,7 @@
  */
 
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
@@ -22,7 +23,7 @@ export function toDrinkEntry(local: LocalDrinkEntry): DrinkEntry {
 		note: local.note ?? null,
 		presetId: local.presetId ?? null,
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -38,7 +39,7 @@ export function toDrinkPreset(local: LocalDrinkPreset): DrinkPreset {
 		order: local.order,
 		isArchived: local.isArchived,
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

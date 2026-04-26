@@ -33,7 +33,7 @@ async function touchSiteForPage(pageId: string): Promise<void> {
 	const page = await websitePagesTable.get(pageId);
 	if (!page) return;
 	const now = new Date().toISOString();
-	await websitesTable.update(page.siteId, { draftUpdatedAt: now, updatedAt: now });
+	await websitesTable.update(page.siteId, { draftUpdatedAt: now });
 }
 
 async function nextOrder(pageId: string, parentBlockId: string | null): Promise<number> {
@@ -74,7 +74,6 @@ export const blocksStore = {
 			schemaVersion: spec.schemaVersion,
 			order,
 			createdAt: now,
-			updatedAt: now,
 		};
 
 		await websiteBlocksTable.add(newBlock);
@@ -106,7 +105,6 @@ export const blocksStore = {
 		const now = new Date().toISOString();
 		await websiteBlocksTable.update(id, {
 			props: validated.data,
-			updatedAt: now,
 		});
 		await touchSiteForPage(existing.pageId);
 
@@ -124,7 +122,6 @@ export const blocksStore = {
 		const now = new Date().toISOString();
 		await websiteBlocksTable.update(id, {
 			deletedAt: now,
-			updatedAt: now,
 		});
 		await touchSiteForPage(existing.pageId);
 
@@ -156,7 +153,6 @@ export const blocksStore = {
 		const now = new Date().toISOString();
 		await websiteBlocksTable.update(id, {
 			order: newOrder,
-			updatedAt: now,
 		});
 		await touchSiteForPage(existing.pageId);
 
@@ -179,7 +175,6 @@ export const blocksStore = {
 		const restored: LocalWebsiteBlock = {
 			...snapshot,
 			deletedAt: undefined,
-			updatedAt: now,
 		};
 		await websiteBlocksTable.put(restored);
 		await touchSiteForPage(snapshot.pageId);
@@ -210,7 +205,6 @@ export const blocksStore = {
 		const now = new Date().toISOString();
 		await websiteBlocksTable.update(id, {
 			props: validated.data,
-			updatedAt: now,
 		});
 		await touchSiteForPage(existing.pageId);
 
@@ -233,7 +227,6 @@ export const blocksStore = {
 		const now = new Date().toISOString();
 		await websiteBlocksTable.update(id, {
 			order,
-			updatedAt: now,
 		});
 		await touchSiteForPage(existing.pageId);
 

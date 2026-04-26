@@ -65,7 +65,6 @@ export async function seedWorkbenchHomeOn(
 		openApps: DEFAULT_HOME_APPS,
 		order: 0,
 		createdAt: now,
-		updatedAt: now,
 		spaceId,
 	};
 	await table.add(row);

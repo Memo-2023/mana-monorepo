@@ -5,6 +5,7 @@
  */
 
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
@@ -39,7 +40,7 @@ export function toSleepEntry(local: LocalSleepEntry): SleepEntry {
 		tags: local.tags ?? [],
 		dreamIds: local.dreamIds ?? [],
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -64,7 +65,7 @@ export function toSleepHygieneCheck(local: LocalSleepHygieneCheck): SleepHygiene
 		isPreset: local.isPreset,
 		order: local.order,
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

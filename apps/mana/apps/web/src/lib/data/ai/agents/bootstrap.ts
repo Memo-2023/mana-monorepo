@@ -141,7 +141,7 @@ export async function backfillMissionsAgentId(targetAgentId: string): Promise<nu
 	const now = new Date().toISOString();
 	await db.transaction('rw', table, async () => {
 		for (const m of pending) {
-			await table.update(m.id, { agentId: targetAgentId, updatedAt: now });
+			await table.update(m.id, { agentId: targetAgentId });
 		}
 	});
 

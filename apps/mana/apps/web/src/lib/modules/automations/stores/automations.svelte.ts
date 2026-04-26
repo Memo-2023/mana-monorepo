@@ -37,7 +37,6 @@ export const automationsStore = {
 			targetAction: data.targetAction,
 			targetParams: data.targetParams,
 			createdAt: now,
-			updatedAt: now,
 		};
 		await automationTable.add(auto);
 		await loadAutomations();
@@ -47,7 +46,6 @@ export const automationsStore = {
 	async update(id: string, data: Partial<LocalAutomation>) {
 		await automationTable.update(id, {
 			...data,
-			updatedAt: new Date().toISOString(),
 		});
 		await loadAutomations();
 	},
@@ -57,7 +55,6 @@ export const automationsStore = {
 		if (!auto) return;
 		await automationTable.update(id, {
 			enabled: !auto.enabled,
-			updatedAt: new Date().toISOString(),
 		});
 		await loadAutomations();
 	},
@@ -65,7 +62,6 @@ export const automationsStore = {
 	async remove(id: string) {
 		await automationTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 		await loadAutomations();
 	},

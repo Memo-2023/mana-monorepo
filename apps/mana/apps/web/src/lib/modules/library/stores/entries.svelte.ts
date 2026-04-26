@@ -132,10 +132,7 @@ export const libraryEntriesStore = {
 	) {
 		const wrapped = { ...patch } as Record<string, unknown>;
 		await encryptRecord('libraryEntries', wrapped);
-		await libraryEntryTable.update(id, {
-			...wrapped,
-			updatedAt: new Date().toISOString(),
-		});
+		await libraryEntryTable.update(id, wrapped as never);
 		// Keep the share-link snapshot in sync if this entry is unlisted.
 		void this.refreshUnlistedSnapshot(id);
 	},
@@ -152,7 +149,6 @@ export const libraryEntriesStore = {
 		}
 		await libraryEntryTable.update(id, {
 			...patch,
-			updatedAt: new Date().toISOString(),
 		});
 		if (status === 'completed') {
 			emitDomainEvent('LibraryEntryCompleted', 'library', 'libraryEntries', id, {
@@ -178,14 +174,12 @@ export const libraryEntriesStore = {
 			status: 'active',
 			startedAt: nowDate,
 			completedAt: null,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async rate(id: string, rating: number | null) {
 		await libraryEntryTable.update(id, {
 			rating,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -194,7 +188,6 @@ export const libraryEntriesStore = {
 		if (!existing) return;
 		await libraryEntryTable.update(id, {
 			isFavorite: !existing.isFavorite,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -220,7 +213,6 @@ export const libraryEntriesStore = {
 
 		await libraryEntryTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('LibraryEntryDeleted', 'library', 'libraryEntries', id, { entryId: id });
 	},
@@ -241,7 +233,6 @@ export const libraryEntriesStore = {
 			visibility: next,
 			visibilityChangedAt: now,
 			visibilityChangedBy: getEffectiveUserId(),
-			updatedAt: now,
 		};
 
 		if (next === 'unlisted') {
@@ -274,7 +265,7 @@ export const libraryEntriesStore = {
 			patch.unlistedExpiresAt = undefined;
 		}
 
-		await libraryEntryTable.update(id, patch);
+		await libraryEntryTable.update(id, patch as never);
 
 		emitDomainEvent('VisibilityChanged', 'library', 'libraryEntries', id, {
 			recordId: id,
@@ -317,7 +308,6 @@ export const libraryEntriesStore = {
 			});
 			await libraryEntryTable.update(id, {
 				unlistedToken: token,
-				updatedAt: new Date().toISOString(),
 			});
 			return token;
 		} catch (e) {
@@ -351,7 +341,6 @@ export const libraryEntriesStore = {
 			});
 			await libraryEntryTable.update(id, {
 				unlistedExpiresAt: expiresAt ? expiresAt.toISOString() : undefined,
-				updatedAt: new Date().toISOString(),
 			});
 		} catch (e) {
 			console.error('[library] setUnlistedExpiry failed', e);

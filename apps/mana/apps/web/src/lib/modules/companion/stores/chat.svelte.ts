@@ -22,7 +22,6 @@ export const chatStore = {
 			id: crypto.randomUUID(),
 			title: title ?? 'Neues Gespraech',
 			createdAt: now,
-			updatedAt: now,
 		};
 		await db.table<LocalConversation>(CONV_TABLE).add(conv);
 		emitDomainEvent('CompanionConversationStarted', 'companion', CONV_TABLE, conv.id, {
@@ -35,14 +34,12 @@ export const chatStore = {
 	async renameConversation(id: string, title: string): Promise<void> {
 		await db.table<LocalConversation>(CONV_TABLE).update(id, {
 			title,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async deleteConversation(id: string): Promise<void> {
 		await db.table<LocalConversation>(CONV_TABLE).update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -68,9 +65,10 @@ export const chatStore = {
 		};
 		await db.table<LocalMessage>(MSG_TABLE).add(msg);
 
-		// Touch conversation updatedAt
+		// Touch conversation so the chat list re-sorts with the most
+		// recently active conversation at the top.
 		await db.table<LocalConversation>(CONV_TABLE).update(conversationId, {
-			updatedAt: msg.createdAt,
+			lastMessageAt: msg.createdAt,
 		});
 
 		// Emit event only for actual user/assistant messages, not tool plumbing

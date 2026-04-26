@@ -3,6 +3,7 @@
  */
 
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -41,7 +42,7 @@ export function toSong(local: LocalSong): Song {
 		playCount: local.playCount,
 		lastPlayedAt: local.lastPlayedAt ?? null,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -52,7 +53,7 @@ export function toPlaylist(local: LocalPlaylist): Playlist {
 		description: local.description ?? null,
 		coverArtPath: local.coverArtPath ?? null,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -63,7 +64,7 @@ export function toProject(local: LocalProject): Project {
 		description: local.description ?? null,
 		songId: local.songId ?? null,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

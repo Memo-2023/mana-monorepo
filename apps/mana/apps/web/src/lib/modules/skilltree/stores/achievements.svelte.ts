@@ -103,7 +103,6 @@ async function seedIfEmpty() {
 				icon: def.icon,
 				unlockedAt: '',
 				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			});
 		}
 	}
@@ -198,7 +197,6 @@ async function checkLocal(context: {
 			const now = new Date().toISOString();
 			await db.table('achievements').update(a.id, {
 				unlockedAt: now,
-				updatedAt: now,
 			});
 			newlyUnlocked.push({ achievement: a, xpReward: a.xpReward });
 		}

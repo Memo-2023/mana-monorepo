@@ -6,7 +6,11 @@ export interface LocalConversation {
 	id: string;
 	title: string;
 	createdAt: string;
-	updatedAt: string;
+	/** Real data field touched on every new message. Used as the sort key
+	 *  in the conversation list so the most recently active chat floats
+	 *  to the top. Replaces the older `updatedAt` reliance — F3 of the
+	 *  sync-field-meta overhaul moved updatedAt off Local records. */
+	lastMessageAt?: string;
 	deletedAt?: string;
 }
 

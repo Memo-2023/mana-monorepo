@@ -51,14 +51,12 @@
 			category: editCategory,
 			description: editDescription.trim() || undefined,
 			address: editAddress.trim() || undefined,
-			updatedAt: new Date().toISOString(),
 		});
 	}
 
 	async function handleCategoryChange() {
 		await db.table('ccLocations').update(locationId, {
 			category: editCategory,
-			updatedAt: new Date().toISOString(),
 		});
 	}
 
@@ -69,7 +67,6 @@
 	async function deleteLocation() {
 		await db.table('ccLocations').update(locationId, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	}
 

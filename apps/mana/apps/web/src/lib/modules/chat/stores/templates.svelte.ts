@@ -58,7 +58,6 @@ export const templatesStore = {
 	) {
 		const diff: Partial<LocalTemplate> = {
 			...data,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('chatTemplates', diff);
 		await chatTemplateTable.update(id, diff);
@@ -67,7 +66,7 @@ export const templatesStore = {
 	/** Soft-delete a template. */
 	async delete(id: string) {
 		const now = new Date().toISOString();
-		await chatTemplateTable.update(id, { deletedAt: now, updatedAt: now });
+		await chatTemplateTable.update(id, { deletedAt: now });
 	},
 
 	/** Set a template as default (unset all others). */
@@ -77,13 +76,11 @@ export const templatesStore = {
 			if (t.isDefault && t.id !== templateId) {
 				await chatTemplateTable.update(t.id, {
 					isDefault: false,
-					updatedAt: new Date().toISOString(),
 				});
 			}
 		}
 		await chatTemplateTable.update(templateId, {
 			isDefault: true,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 };

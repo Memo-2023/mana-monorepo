@@ -86,7 +86,6 @@ export const sitesStore = {
 			publishedVersion: null,
 			draftUpdatedAt: now,
 			createdAt: now,
-			updatedAt: now,
 		};
 
 		const homePage: LocalWebsitePage = {
@@ -97,7 +96,6 @@ export const sitesStore = {
 			seo: {},
 			order: 1024,
 			createdAt: now,
-			updatedAt: now,
 		};
 
 		await websitesTable.add(newSite);
@@ -119,7 +117,6 @@ export const sitesStore = {
 		const now = new Date().toISOString();
 		await websitesTable.update(id, {
 			...patch,
-			updatedAt: now,
 			draftUpdatedAt: now,
 		});
 		emitDomainEvent('WebsiteUpdated', 'website', 'websites', id, {
@@ -132,7 +129,6 @@ export const sitesStore = {
 		const now = new Date().toISOString();
 		await websitesTable.update(id, {
 			deletedAt: now,
-			updatedAt: now,
 		});
 		// Best-effort: unpublish so the public URL stops serving. Failures
 		// here don't block the soft-delete — the GC job in M7 will clean
@@ -161,7 +157,6 @@ export const sitesStore = {
 		const now = new Date().toISOString();
 		await websitesTable.update(id, {
 			publishedVersion: result.snapshotId,
-			updatedAt: now,
 		});
 
 		emitDomainEvent('WebsitePublished', 'website', 'websites', id, {
@@ -186,7 +181,6 @@ export const sitesStore = {
 		const now = new Date().toISOString();
 		await websitesTable.update(id, {
 			publishedVersion: null,
-			updatedAt: now,
 		});
 
 		emitDomainEvent('WebsiteUnpublished', 'website', 'websites', id, { siteId: id });
@@ -229,7 +223,6 @@ export const sitesStore = {
 			publishedVersion: null,
 			draftUpdatedAt: now,
 			createdAt: now,
-			updatedAt: now,
 		};
 
 		const pageRows: LocalWebsitePage[] = [];
@@ -247,7 +240,6 @@ export const sitesStore = {
 				seo: {},
 				order: page.order,
 				createdAt: now,
-				updatedAt: now,
 			});
 
 			// Resolve template-local parent refs → real UUIDs in a second pass.
@@ -270,7 +262,6 @@ export const sitesStore = {
 					schemaVersion: 1,
 					order,
 					createdAt: now,
-					updatedAt: now,
 				});
 				order += 1024;
 			}
@@ -288,7 +279,6 @@ export const sitesStore = {
 				seo: {},
 				order: 1024,
 				createdAt: now,
-				updatedAt: now,
 			});
 		}
 
@@ -320,7 +310,6 @@ export const sitesStore = {
 		const now = new Date().toISOString();
 		await websitesTable.update(siteId, {
 			publishedVersion: snapshotId,
-			updatedAt: now,
 		});
 
 		emitDomainEvent('WebsiteRolledBack', 'website', 'websites', siteId, {

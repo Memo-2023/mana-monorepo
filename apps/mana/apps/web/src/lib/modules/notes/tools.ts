@@ -10,6 +10,7 @@
  */
 
 import type { ModuleTool } from '$lib/data/tools/types';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { notesStore } from './stores/notes.svelte';
 import { noteTagOps } from './stores/tags.svelte';
 import { db } from '$lib/data/database';
@@ -122,7 +123,7 @@ export const notesTools: ModuleTool[] = [
 					excerpt: excerptOf(n.content ?? ''),
 					isPinned: n.isPinned,
 					isArchived: n.isArchived,
-					updatedAt: n.updatedAt,
+					updatedAt: deriveUpdatedAt(n),
 				}));
 
 			return {

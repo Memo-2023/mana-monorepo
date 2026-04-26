@@ -75,7 +75,6 @@ export const wishesStore = {
 	) {
 		const diff: Partial<LocalWish> = {
 			...data,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('wishesItems', diff);
 		await wishTable.update(id, diff);
@@ -84,7 +83,6 @@ export const wishesStore = {
 	async fulfill(id: string) {
 		await wishTable.update(id, {
 			status: 'fulfilled',
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('WishFulfilled', 'wishes', 'wishesItems', id, { wishId: id });
 	},
@@ -92,14 +90,12 @@ export const wishesStore = {
 	async archive(id: string) {
 		await wishTable.update(id, {
 			status: 'archived',
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async delete(id: string) {
 		await wishTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -110,7 +106,6 @@ export const wishesStore = {
 		const note = { id: crypto.randomUUID(), content, createdAt: now };
 		await wishTable.update(wishId, {
 			notes: [...wish.notes, note],
-			updatedAt: now,
 		});
 	},
 
@@ -120,7 +115,6 @@ export const wishesStore = {
 		if (wish.productUrls.includes(url)) return;
 		await wishTable.update(wishId, {
 			productUrls: [...wish.productUrls, url],
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -129,14 +123,13 @@ export const wishesStore = {
 		if (!wish) return;
 		await wishTable.update(wishId, {
 			productUrls: wish.productUrls.filter((u) => u !== url),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async reorder(orderedIds: string[]) {
 		const now = new Date().toISOString();
 		for (let i = 0; i < orderedIds.length; i++) {
-			await wishTable.update(orderedIds[i], { order: i, updatedAt: now });
+			await wishTable.update(orderedIds[i], { order: i });
 		}
 	},
 };

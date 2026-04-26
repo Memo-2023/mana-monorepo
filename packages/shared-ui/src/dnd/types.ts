@@ -27,6 +27,7 @@ export type DragType =
 	| 'dream'
 	| 'journal-entry'
 	| 'first'
+	| 'last'
 	| 'wish'
 	| 'draft';
 

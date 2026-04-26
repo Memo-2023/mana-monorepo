@@ -71,6 +71,7 @@ export const sessionCountdownTimersStore = {
 			pausedAt: null,
 			sound: input.sound || null,
 			createdAt: now,
+			// Session-only store (no Dexie sync) — stamp updatedAt directly.
 			updatedAt: now,
 		};
 
@@ -90,7 +91,6 @@ export const sessionCountdownTimersStore = {
 		const updated: Timer = {
 			...timers[index],
 			...input,
-			updatedAt: new Date().toISOString(),
 		};
 
 		timers = timers.map((t) => (t.id === id ? updated : t));
@@ -112,7 +112,6 @@ export const sessionCountdownTimersStore = {
 			status: 'running',
 			startedAt: now,
 			pausedAt: null,
-			updatedAt: now,
 		};
 
 		timers = timers.map((t) => (t.id === id ? updated : t));
@@ -133,7 +132,6 @@ export const sessionCountdownTimersStore = {
 			...timer,
 			status: 'paused',
 			pausedAt: now,
-			updatedAt: now,
 		};
 
 		timers = timers.map((t) => (t.id === id ? updated : t));
@@ -156,7 +154,6 @@ export const sessionCountdownTimersStore = {
 			remainingSeconds: timer.durationSeconds,
 			startedAt: null,
 			pausedAt: null,
-			updatedAt: now,
 		};
 
 		timers = timers.map((t) => (t.id === id ? updated : t));

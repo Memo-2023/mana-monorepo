@@ -34,7 +34,6 @@ export const playlistsStore = {
 	async update(id: string, data: Partial<Pick<LocalPlaylist, 'name' | 'description'>>) {
 		const diff: Record<string, unknown> = {
 			...data,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('mukkePlaylists', diff);
 		await musicPlaylistTable.update(id, diff);
@@ -45,10 +44,10 @@ export const playlistsStore = {
 		const now = new Date().toISOString();
 		// Atomic cascade: playlist + playlistSongs in one Dexie transaction.
 		await db.transaction('rw', musicPlaylistTable, playlistSongTable, async () => {
-			await musicPlaylistTable.update(id, { deletedAt: now, updatedAt: now });
+			await musicPlaylistTable.update(id, { deletedAt: now });
 			const allPS = await playlistSongTable.where('playlistId').equals(id).toArray();
 			for (const ps of allPS) {
-				await playlistSongTable.update(ps.id, { deletedAt: now, updatedAt: now });
+				await playlistSongTable.update(ps.id, { deletedAt: now });
 			}
 		});
 		MusicEvents.playlistDeleted();
@@ -76,7 +75,7 @@ export const playlistsStore = {
 		const toRemove = allPS.find((ps) => ps.songId === songId && !ps.deletedAt);
 		if (toRemove) {
 			const now = new Date().toISOString();
-			await playlistSongTable.update(toRemove.id, { deletedAt: now, updatedAt: now });
+			await playlistSongTable.update(toRemove.id, { deletedAt: now });
 		}
 	},
 
@@ -87,7 +86,7 @@ export const playlistsStore = {
 		for (let i = 0; i < songIds.length; i++) {
 			const ps = allPS.find((p) => p.songId === songIds[i] && !p.deletedAt);
 			if (ps) {
-				await playlistSongTable.update(ps.id, { sortOrder: i, updatedAt: now });
+				await playlistSongTable.update(ps.id, { sortOrder: i });
 			}
 		}
 	},

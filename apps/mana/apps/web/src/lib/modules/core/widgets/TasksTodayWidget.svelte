@@ -76,7 +76,6 @@
 		await db.table('tasks').update(task.id, {
 			isCompleted: true,
 			completedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	}
 </script>

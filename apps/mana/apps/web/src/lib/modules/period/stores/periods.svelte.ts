@@ -37,7 +37,6 @@ export const periodsStore = {
 			await periodTable.update(prev.id, {
 				endDate,
 				length,
-				updatedAt: new Date().toISOString(),
 			});
 		}
 
@@ -88,7 +87,6 @@ export const periodsStore = {
 	) {
 		const diff: Partial<LocalPeriod> = {
 			...data,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('periods', diff);
 		await periodTable.update(id, diff);
@@ -99,7 +97,6 @@ export const periodsStore = {
 		const period = await periodTable.get(id);
 		await periodTable.update(id, {
 			periodEndDate,
-			updatedAt: new Date().toISOString(),
 		});
 		// Update the TimeBlock's endDate to reflect the period duration
 		if (period?.timeBlockId && periodEndDate) {
@@ -116,14 +113,12 @@ export const periodsStore = {
 		}
 		await periodTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async archivePeriod(id: string) {
 		await periodTable.update(id, {
 			isArchived: true,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 };

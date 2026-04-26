@@ -58,7 +58,6 @@ export const deckStore = {
 
 			const diff: Partial<LocalDeck> = {
 				...localUpdates,
-				updatedAt: new Date().toISOString(),
 			};
 			await encryptRecord('cardDecks', diff);
 			await cardDeckTable.update(id, diff);
@@ -105,9 +104,9 @@ export const deckStore = {
 			await db.transaction('rw', cardDeckTable, cardTable, async () => {
 				const cards = await cardTable.where('deckId').equals(id).toArray();
 				for (const card of cards) {
-					await cardTable.update(card.id, { deletedAt: now, updatedAt: now });
+					await cardTable.update(card.id, { deletedAt: now });
 				}
-				await cardDeckTable.update(id, { deletedAt: now, updatedAt: now });
+				await cardDeckTable.update(id, { deletedAt: now });
 			});
 			CardsEvents.deckDeleted();
 		} catch (err: any) {
@@ -142,7 +141,6 @@ export const deckStore = {
 		await cardDeckTable.update(deckId, {
 			activeStudyBlockId: timeBlockId,
 			lastStudied: now,
-			updatedAt: now,
 		});
 
 		return timeBlockId;
@@ -160,7 +158,6 @@ export const deckStore = {
 
 		await cardDeckTable.update(deckId, {
 			activeStudyBlockId: null,
-			updatedAt: now,
 		});
 	},
 

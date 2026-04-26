@@ -6,6 +6,7 @@
 -->
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { deriveUpdatedAt } from '$lib/data/sync';
 	import { CheckCircle, PencilSimple, Archive, Sparkle, Trash } from '@mana/shared-icons';
 	import { useGarment, useGarmentSoloTryOns, useOutfitsContainingGarment } from '../queries';
 	import { wardrobeGarmentsStore } from '../stores/garments.svelte';
@@ -64,7 +65,7 @@
 			isFavorite: false,
 			downloadCount: 0,
 			createdAt: garment.createdAt,
-			updatedAt: garment.updatedAt,
+			updatedAt: deriveUpdatedAt(garment),
 		};
 	}
 

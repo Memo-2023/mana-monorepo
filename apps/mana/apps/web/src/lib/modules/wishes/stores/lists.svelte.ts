@@ -30,28 +30,25 @@ export const listsStore = {
 	) {
 		await listTable.update(id, {
 			...data,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async archive(id: string) {
 		await listTable.update(id, {
 			isArchived: true,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async delete(id: string) {
 		await listTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async reorder(orderedIds: string[]) {
 		const now = new Date().toISOString();
 		for (let i = 0; i < orderedIds.length; i++) {
-			await listTable.update(orderedIds[i], { order: i, updatedAt: now });
+			await listTable.update(orderedIds[i], { order: i });
 		}
 	},
 };

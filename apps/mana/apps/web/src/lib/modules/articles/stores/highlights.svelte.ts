@@ -44,14 +44,12 @@ export const highlightsStore = {
 	async setColor(id: string, color: HighlightColor): Promise<void> {
 		await articleHighlightTable.update(id, {
 			color,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async setNote(id: string, note: string | null): Promise<void> {
 		const diff: Partial<LocalHighlight> = {
 			note,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('articleHighlights', diff as LocalHighlight);
 		await articleHighlightTable.update(id, diff);
@@ -60,7 +58,6 @@ export const highlightsStore = {
 	async deleteHighlight(id: string): Promise<void> {
 		await articleHighlightTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 };

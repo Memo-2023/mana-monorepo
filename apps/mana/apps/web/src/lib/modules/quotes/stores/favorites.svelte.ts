@@ -15,7 +15,6 @@ export const favoritesStore = {
 			id: crypto.randomUUID(),
 			quoteId,
 			createdAt: now,
-			updatedAt: now,
 		});
 	},
 
@@ -24,7 +23,6 @@ export const favoritesStore = {
 		if (fav) {
 			await db.table('quotesFavorites').update(fav.id, {
 				deletedAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			});
 		}
 	},
@@ -41,7 +39,6 @@ export const favoritesStore = {
 	async setNotes(favoriteId: string, notes: string) {
 		await db.table('quotesFavorites').update(favoriteId, {
 			notes: notes || null,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 };

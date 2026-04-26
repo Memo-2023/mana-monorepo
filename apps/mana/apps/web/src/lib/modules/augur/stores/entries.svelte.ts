@@ -95,7 +95,6 @@ export const augurStore = {
 	) {
 		const diff: Partial<LocalAugurEntry> = {
 			...data,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('augurEntries', diff);
 		await augurEntriesTable.update(id, diff);
@@ -106,7 +105,6 @@ export const augurStore = {
 			outcome,
 			outcomeNote: note ?? null,
 			resolvedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('augurEntries', diff);
 		await augurEntriesTable.update(id, diff);
@@ -115,7 +113,6 @@ export const augurStore = {
 	async archiveEntry(id: string) {
 		await augurEntriesTable.update(id, {
 			isArchived: true,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -141,7 +138,6 @@ export const augurStore = {
 
 		await augurEntriesTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -161,7 +157,6 @@ export const augurStore = {
 			visibility: next,
 			visibilityChangedAt: now,
 			visibilityChangedBy: getEffectiveUserId() ?? undefined,
-			updatedAt: now,
 		};
 
 		if (next === 'unlisted') {
@@ -230,7 +225,6 @@ export const augurStore = {
 			});
 			await augurEntriesTable.update(id, {
 				unlistedToken: token,
-				updatedAt: new Date().toISOString(),
 			});
 			return token;
 		} catch (e) {
@@ -264,7 +258,6 @@ export const augurStore = {
 			});
 			await augurEntriesTable.update(id, {
 				unlistedExpiresAt: expiresAt ? expiresAt.toISOString() : null,
-				updatedAt: new Date().toISOString(),
 			});
 		} catch (e) {
 			console.error('[augur] setUnlistedExpiry failed', e);

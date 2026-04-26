@@ -50,7 +50,6 @@ export const broadcastSettingsStore = {
 		await encryptRecord('broadcastSettings', wrapped);
 		await settingsTable.update(BROADCAST_SETTINGS_ID, {
 			...wrapped,
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent(
 			'BroadcastSettingsUpdated',

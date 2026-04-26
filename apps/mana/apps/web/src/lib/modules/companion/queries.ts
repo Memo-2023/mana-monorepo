@@ -14,7 +14,11 @@ export function useConversations() {
 				'companion',
 				'companionConversations'
 			).toArray();
-			return all.filter((c) => !c.deletedAt).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+			return all
+				.filter((c) => !c.deletedAt)
+				.sort((a, b) =>
+					(b.lastMessageAt ?? b.createdAt).localeCompare(a.lastMessageAt ?? a.createdAt)
+				);
 		} catch {
 			return [];
 		}

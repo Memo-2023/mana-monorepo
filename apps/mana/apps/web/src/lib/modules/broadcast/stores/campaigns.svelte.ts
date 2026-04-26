@@ -66,7 +66,6 @@ export const broadcastCampaignsStore = {
 			serverJobId: null,
 			stats: null,
 			createdAt: now,
-			updatedAt: now,
 		};
 
 		await encryptRecord('broadcastCampaigns', newLocal);
@@ -99,10 +98,7 @@ export const broadcastCampaignsStore = {
 		}
 		const wrapped = { ...patch } as Record<string, unknown>;
 		await encryptRecord('broadcastCampaigns', wrapped);
-		await campaignTable.update(id, {
-			...wrapped,
-			updatedAt: new Date().toISOString(),
-		});
+		await campaignTable.update(id, wrapped as never);
 	},
 
 	/**
@@ -119,10 +115,7 @@ export const broadcastCampaignsStore = {
 		}
 		const patch = { content } as Record<string, unknown>;
 		await encryptRecord('broadcastCampaigns', patch);
-		await campaignTable.update(id, {
-			...patch,
-			updatedAt: new Date().toISOString(),
-		});
+		await campaignTable.update(id, patch as never);
 	},
 
 	async updateAudience(id: string, audience: AudienceDefinition) {
@@ -133,10 +126,7 @@ export const broadcastCampaignsStore = {
 		}
 		const patch = { audience } as Record<string, unknown>;
 		await encryptRecord('broadcastCampaigns', patch);
-		await campaignTable.update(id, {
-			...patch,
-			updatedAt: new Date().toISOString(),
-		});
+		await campaignTable.update(id, patch as never);
 	},
 
 	/**
@@ -151,7 +141,6 @@ export const broadcastCampaignsStore = {
 		await campaignTable.update(id, {
 			status: 'scheduled' as CampaignStatus,
 			scheduledAt,
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('BroadcastCampaignScheduled', 'broadcast', 'broadcastCampaigns', id, {
 			campaignId: id,
@@ -169,7 +158,6 @@ export const broadcastCampaignsStore = {
 		await campaignTable.update(id, {
 			status: 'cancelled' as CampaignStatus,
 			scheduledAt: null,
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('BroadcastCampaignCancelled', 'broadcast', 'broadcastCampaigns', id, {
 			campaignId: id,
@@ -209,7 +197,6 @@ export const broadcastCampaignsStore = {
 		}
 		await campaignTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('BroadcastCampaignDeleted', 'broadcast', 'broadcastCampaigns', id, {
 			campaignId: id,
@@ -232,7 +219,6 @@ export const broadcastCampaignsStore = {
 	) {
 		await campaignTable.update(id, {
 			...patch,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 };

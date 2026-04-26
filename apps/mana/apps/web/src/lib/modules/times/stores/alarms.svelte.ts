@@ -34,7 +34,6 @@ export const alarmsStore = {
 				sound: input.sound ?? null,
 				vibrate: input.vibrate ?? null,
 				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			};
 
 			await db.table<LocalAlarm>('timeAlarms').add(newLocal);
@@ -52,9 +51,7 @@ export const alarmsStore = {
 	async updateAlarm(id: string, input: UpdateAlarmInput) {
 		error = null;
 		try {
-			const updateData: Partial<LocalAlarm> = {
-				updatedAt: new Date().toISOString(),
-			};
+			const updateData: Partial<LocalAlarm> = {};
 			if (input.label !== undefined) updateData.label = input.label ?? null;
 			if (input.time !== undefined) updateData.time = input.time;
 			if (input.enabled !== undefined) updateData.enabled = input.enabled;
@@ -94,7 +91,6 @@ export const alarmsStore = {
 		try {
 			await db.table('timeAlarms').update(id, {
 				deletedAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			});
 			return { success: true };
 		} catch (e) {

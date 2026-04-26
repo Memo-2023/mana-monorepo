@@ -76,7 +76,6 @@ export const notesStore = {
 				title,
 				content: transcript,
 				transcriptModel: result.model,
-				updatedAt: new Date().toISOString(),
 			};
 			await encryptRecord('notes', diff);
 			await noteTable.update(noteId, diff);
@@ -97,7 +96,6 @@ export const notesStore = {
 		// allowlist (color, isPinned, isArchived) pass through untouched.
 		const diff: Partial<LocalNote> = {
 			...data,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('notes', diff);
 		await noteTable.update(id, diff);
@@ -106,7 +104,6 @@ export const notesStore = {
 	async deleteNote(id: string) {
 		await noteTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('NoteDeleted', 'notes', 'notes', id, { noteId: id });
 	},
@@ -116,14 +113,12 @@ export const notesStore = {
 		if (!note) return;
 		await noteTable.update(id, {
 			isPinned: !note.isPinned,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async archiveNote(id: string) {
 		await noteTable.update(id, {
 			isArchived: true,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 };

@@ -77,14 +77,13 @@ export const comicCharactersStore = {
 		const nextIds = [...(existing.variantMediaIds ?? []), variantMediaId];
 		const patch: Partial<LocalComicCharacter> = {
 			variantMediaIds: nextIds,
-			updatedAt: new Date().toISOString(),
 		};
 		// Auto-pin the first variant so the cover isn't blank during
 		// build. User can re-pin afterwards.
 		if (!existing.pinnedVariantId) {
 			patch.pinnedVariantId = variantMediaId;
 		}
-		await comicCharactersTable.update(characterId, patch);
+		await comicCharactersTable.update(characterId, patch as never);
 		emitDomainEvent('ComicCharacterVariantAdded', 'comic', 'comicCharacters', characterId, {
 			characterId,
 			variantMediaId,
@@ -103,7 +102,6 @@ export const comicCharactersStore = {
 		}
 		await comicCharactersTable.update(characterId, {
 			pinnedVariantId: variantMediaId,
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('ComicCharacterVariantPinned', 'comic', 'comicCharacters', characterId, {
 			characterId,
@@ -121,27 +119,23 @@ export const comicCharactersStore = {
 		const nextIds = (existing.variantMediaIds ?? []).filter((id) => id !== variantMediaId);
 		const patch: Partial<LocalComicCharacter> = {
 			variantMediaIds: nextIds,
-			updatedAt: new Date().toISOString(),
 		};
 		if (existing.pinnedVariantId === variantMediaId) {
 			patch.pinnedVariantId = nextIds[0] ?? null;
 		}
-		await comicCharactersTable.update(characterId, patch);
+		await comicCharactersTable.update(characterId, patch as never);
 	},
 
 	async updateCharacter(
 		id: string,
 		patch: Partial<Pick<LocalComicCharacter, 'name' | 'description' | 'addPrompt' | 'tags'>>
 	): Promise<void> {
-		const wrapped: Record<string, unknown> = { ...patch };
+		const wrapped: Partial<LocalComicCharacter> = { ...patch };
 		if (Array.isArray(wrapped.tags)) {
-			wrapped.tags = [...(wrapped.tags as string[])];
+			wrapped.tags = [...wrapped.tags];
 		}
-		await encryptRecord('comicCharacters', wrapped);
-		await comicCharactersTable.update(id, {
-			...wrapped,
-			updatedAt: new Date().toISOString(),
-		});
+		await encryptRecord('comicCharacters', wrapped as Record<string, unknown>);
+		await comicCharactersTable.update(id, wrapped as never);
 	},
 
 	async toggleFavorite(id: string): Promise<void> {
@@ -149,14 +143,12 @@ export const comicCharactersStore = {
 		if (!existing) return;
 		await comicCharactersTable.update(id, {
 			isFavorite: !existing.isFavorite,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async archiveCharacter(id: string, archived: boolean): Promise<void> {
 		await comicCharactersTable.update(id, {
 			isArchived: archived,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -164,7 +156,6 @@ export const comicCharactersStore = {
 		const nowIso = new Date().toISOString();
 		await comicCharactersTable.update(id, {
 			deletedAt: nowIso,
-			updatedAt: nowIso,
 		});
 		emitDomainEvent('ComicCharacterDeleted', 'comic', 'comicCharacters', id, {
 			characterId: id,

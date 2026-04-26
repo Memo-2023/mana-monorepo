@@ -91,7 +91,6 @@
 		if (!current.includes(tagData.id)) {
 			await db.table('quotesFavorites').update(fav.id, {
 				tagIds: [...current, tagData.id],
-				updatedAt: new Date().toISOString(),
 			});
 		}
 	}

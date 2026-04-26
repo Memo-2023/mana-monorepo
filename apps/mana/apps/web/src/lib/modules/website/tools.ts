@@ -20,6 +20,7 @@
  */
 
 import type { ModuleTool } from '$lib/data/tools/types';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import {
 	sitesStore,
 	InvalidSlugError,
@@ -256,7 +257,7 @@ export const websiteTools: ModuleTool[] = [
 				slug: s.slug,
 				name: s.name,
 				published: Boolean(s.publishedVersion),
-				updatedAt: s.updatedAt ?? null,
+				updatedAt: deriveUpdatedAt(s),
 			}));
 			return {
 				success: true,

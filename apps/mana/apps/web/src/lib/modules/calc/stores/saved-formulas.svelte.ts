@@ -16,7 +16,6 @@ export const savedFormulasStore = {
 			description: input.description ?? null,
 			mode: input.mode,
 			createdAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 		CalcEvents.formulaSaved();
 	},
@@ -24,14 +23,12 @@ export const savedFormulasStore = {
 	async updateFormula(id: string, input: UpdateFormulaInput) {
 		await db.table('savedFormulas').update(id, {
 			...input,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async deleteFormula(id: string) {
 		await db.table('savedFormulas').update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 		CalcEvents.formulaDeleted();
 	},

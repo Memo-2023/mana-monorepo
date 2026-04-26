@@ -1,4 +1,5 @@
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
 import { isDue } from './lib/reminders';
@@ -32,7 +33,7 @@ export function toAugurEntry(local: LocalAugurEntry): AugurEntry {
 		unlistedToken: local.unlistedToken ?? '',
 		unlistedExpiresAt: local.unlistedExpiresAt ?? null,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

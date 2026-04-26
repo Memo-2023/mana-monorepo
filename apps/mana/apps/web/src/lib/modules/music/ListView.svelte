@@ -169,7 +169,6 @@
 					playCount: 0,
 					fileSize: uploadFiles[i]!.file.size,
 					createdAt: now,
-					updatedAt: now,
 				} as LocalSong);
 
 				uploadFiles[i]!.status = 'success';

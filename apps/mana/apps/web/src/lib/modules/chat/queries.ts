@@ -8,6 +8,7 @@
  */
 
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -34,7 +35,7 @@ export function toConversation(local: LocalConversation): Conversation {
 		isArchived: local.isArchived,
 		isPinned: local.isPinned,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -50,7 +51,7 @@ export function toTemplate(local: LocalTemplate): Template {
 		isDefault: local.isDefault,
 		documentMode: local.documentMode,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -61,7 +62,7 @@ export function toMessage(local: LocalMessage): Message {
 		sender: local.sender,
 		messageText: local.messageText,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? undefined,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

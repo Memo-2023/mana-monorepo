@@ -71,7 +71,6 @@ export const eventsStore = {
 				status: input.status ?? 'draft',
 				visibility: defaultVisibilityFor(getActiveSpace()?.type),
 				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			};
 
 			// title / description / location are encrypted at rest. The
@@ -125,9 +124,7 @@ export const eventsStore = {
 				await updateBlock(event.timeBlockId, blockUpdates);
 			}
 
-			const localData: Partial<LocalSocialEvent> = {
-				updatedAt: new Date().toISOString(),
-			};
+			const localData: Partial<LocalSocialEvent> = {};
 			if (input.title !== undefined) localData.title = input.title;
 			if (input.description !== undefined) localData.description = input.description;
 			if (input.location !== undefined) localData.location = input.location;
@@ -170,7 +167,6 @@ export const eventsStore = {
 			}
 			await db.table('socialEvents').update(id, {
 				deletedAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			});
 			emitDomainEvent('SocialEventDeleted', 'events', 'socialEvents', id, { eventId: id });
 			return { success: true as const };
@@ -199,7 +195,6 @@ export const eventsStore = {
 			visibility: next,
 			visibilityChangedAt: now,
 			visibilityChangedBy: getEffectiveUserId(),
-			updatedAt: now,
 		});
 
 		emitDomainEvent('VisibilityChanged', 'events', 'socialEvents', id, {
@@ -246,7 +241,6 @@ export const eventsStore = {
 				isPublished: true,
 				publicToken: token,
 				status: 'published' satisfies EventStatus,
-				updatedAt: new Date().toISOString(),
 			});
 			// Push any pre-existing bring-list items right away so the
 			// public page shows them on first open.
@@ -276,7 +270,6 @@ export const eventsStore = {
 				isPublished: false,
 				publicToken: null,
 				status: 'draft' satisfies EventStatus,
-				updatedAt: new Date().toISOString(),
 			});
 			return { success: true as const };
 		} catch (e) {

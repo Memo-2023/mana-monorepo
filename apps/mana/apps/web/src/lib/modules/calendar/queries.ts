@@ -11,6 +11,7 @@
  */
 
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { db } from '$lib/data/database';
 import { scopedForModule, applyVisibility } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -33,7 +34,7 @@ export function toCalendar(local: LocalCalendar): Calendar {
 		isVisible: local.isVisible,
 		timezone: local.timezone,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

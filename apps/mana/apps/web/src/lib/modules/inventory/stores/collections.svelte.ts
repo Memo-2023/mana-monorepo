@@ -43,14 +43,12 @@ export const collectionsStore = {
 	) {
 		await invCollectionTable.update(id, {
 			...data,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async delete(id: string) {
 		await invCollectionTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 		InventoryEvents.collectionDeleted();
 	},
@@ -58,14 +56,13 @@ export const collectionsStore = {
 	async reorder(orderedIds: string[]) {
 		const now = new Date().toISOString();
 		for (let i = 0; i < orderedIds.length; i++) {
-			await invCollectionTable.update(orderedIds[i], { order: i, updatedAt: now });
+			await invCollectionTable.update(orderedIds[i], { order: i });
 		}
 	},
 
 	async updateItemCount(collectionId: string, count: number) {
 		await invCollectionTable.update(collectionId, {
 			itemCount: count,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 };

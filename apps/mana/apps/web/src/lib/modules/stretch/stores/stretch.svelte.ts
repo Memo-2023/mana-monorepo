@@ -87,7 +87,6 @@ export const stretchStore = {
 		const wrapped = await encryptRecord('stretchExercises', { ...patch });
 		await stretchExerciseTable.update(id, {
 			...wrapped,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -96,7 +95,6 @@ export const stretchStore = {
 		if (!exercise || exercise.isPreset) return;
 		await stretchExerciseTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -155,7 +153,6 @@ export const stretchStore = {
 		const wrapped = await encryptRecord('stretchRoutines', { ...patch });
 		await stretchRoutineTable.update(id, {
 			...wrapped,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -164,7 +161,6 @@ export const stretchStore = {
 		if (!routine || routine.isPreset) return;
 		await stretchRoutineTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -173,7 +169,6 @@ export const stretchStore = {
 		if (!routine) return;
 		await stretchRoutineTable.update(id, {
 			isPinned: !routine.isPinned,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -225,7 +220,6 @@ export const stretchStore = {
 		const wrapped = await encryptRecord('stretchSessions', { ...patch });
 		await stretchSessionTable.update(id, {
 			...wrapped,
-			updatedAt: now,
 		});
 	},
 
@@ -297,7 +291,6 @@ export const stretchStore = {
 		const wrapped = await encryptRecord('stretchReminders', { ...patch });
 		await stretchReminderTable.update(id, {
 			...wrapped,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -306,7 +299,6 @@ export const stretchStore = {
 		if (!reminder) return;
 		await stretchReminderTable.update(id, {
 			isActive: !reminder.isActive,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 

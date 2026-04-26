@@ -153,7 +153,7 @@ async function restore(id: string): Promise<void> {
 	await new Promise<void>((resolve) => setTimeout(resolve, 0));
 
 	const now = new Date().toISOString();
-	const updates: Record<string, unknown> = { updatedAt: now };
+	const updates: Record<string, unknown> = {};
 
 	for (const [field, info] of Object.entries(conflict.fields)) {
 		updates[field] = info.wasLocal;

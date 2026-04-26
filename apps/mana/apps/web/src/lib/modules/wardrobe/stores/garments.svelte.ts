@@ -82,10 +82,7 @@ export const wardrobeGarmentsStore = {
 	): Promise<void> {
 		const wrapped = { ...patch } as Record<string, unknown>;
 		await encryptRecord('wardrobeGarments', wrapped);
-		await wardrobeGarmentsTable.update(id, {
-			...wrapped,
-			updatedAt: new Date().toISOString(),
-		});
+		await wardrobeGarmentsTable.update(id, wrapped as never);
 	},
 
 	/**
@@ -100,7 +97,6 @@ export const wardrobeGarmentsStore = {
 		await wardrobeGarmentsTable.update(id, {
 			wearCount: (existing.wearCount ?? 0) + 1,
 			lastWornAt: today,
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('WardrobeGarmentWorn', 'wardrobe', 'wardrobeGarments', id, {
 			garmentId: id,
@@ -111,7 +107,6 @@ export const wardrobeGarmentsStore = {
 	async archiveGarment(id: string, archived: boolean): Promise<void> {
 		await wardrobeGarmentsTable.update(id, {
 			isArchived: archived,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -119,7 +114,6 @@ export const wardrobeGarmentsStore = {
 		const nowIso = new Date().toISOString();
 		await wardrobeGarmentsTable.update(id, {
 			deletedAt: nowIso,
-			updatedAt: nowIso,
 		});
 		emitDomainEvent('WardrobeGarmentDeleted', 'wardrobe', 'wardrobeGarments', id, {
 			garmentId: id,

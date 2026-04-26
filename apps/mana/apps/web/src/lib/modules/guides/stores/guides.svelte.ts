@@ -57,7 +57,7 @@ export const guidesStore = {
 	},
 
 	async updateGuide(id: string, dto: UpdateGuideDto): Promise<void> {
-		const updates: Record<string, unknown> = { updatedAt: new Date().toISOString() };
+		const updates: Record<string, unknown> = {};
 		if (dto.title !== undefined) updates.title = dto.title;
 		if (dto.description !== undefined) updates.description = dto.description;
 		if (dto.category !== undefined) updates.category = dto.category;
@@ -74,17 +74,17 @@ export const guidesStore = {
 		// Cascade: soft-delete sections, steps, and runs
 		const sections = await sectionTable.where('guideId').equals(id).toArray();
 		for (const s of sections) {
-			await sectionTable.update(s.id, { deletedAt: now, updatedAt: now });
+			await sectionTable.update(s.id, { deletedAt: now });
 		}
 		const steps = await stepTable.where('guideId').equals(id).toArray();
 		for (const s of steps) {
-			await stepTable.update(s.id, { deletedAt: now, updatedAt: now });
+			await stepTable.update(s.id, { deletedAt: now });
 		}
 		const runs = await runTable.where('guideId').equals(id).toArray();
 		for (const r of runs) {
-			await runTable.update(r.id, { deletedAt: now, updatedAt: now });
+			await runTable.update(r.id, { deletedAt: now });
 		}
-		await guideTable.update(id, { deletedAt: now, updatedAt: now });
+		await guideTable.update(id, { deletedAt: now });
 	},
 
 	// ─── Sections ────────────────────────────────────────
@@ -107,7 +107,7 @@ export const guidesStore = {
 	},
 
 	async updateSection(id: string, dto: UpdateSectionDto): Promise<void> {
-		const updates: Record<string, unknown> = { updatedAt: new Date().toISOString() };
+		const updates: Record<string, unknown> = {};
 		if (dto.title !== undefined) updates.title = dto.title;
 		if (dto.content !== undefined) updates.content = dto.content;
 		await encryptRecord('sections', updates);
@@ -116,7 +116,7 @@ export const guidesStore = {
 
 	async deleteSection(id: string): Promise<void> {
 		const now = new Date().toISOString();
-		await sectionTable.update(id, { deletedAt: now, updatedAt: now });
+		await sectionTable.update(id, { deletedAt: now });
 	},
 
 	// ─── Steps ───────────────────────────────────────────
@@ -140,7 +140,7 @@ export const guidesStore = {
 	},
 
 	async updateStep(id: string, dto: UpdateStepDto): Promise<void> {
-		const updates: Record<string, unknown> = { updatedAt: new Date().toISOString() };
+		const updates: Record<string, unknown> = {};
 		if (dto.title !== undefined) updates.title = dto.title;
 		if (dto.content !== undefined) updates.content = dto.content;
 		if (dto.sectionId !== undefined) updates.sectionId = dto.sectionId;
@@ -150,7 +150,7 @@ export const guidesStore = {
 
 	async deleteStep(id: string): Promise<void> {
 		const now = new Date().toISOString();
-		await stepTable.update(id, { deletedAt: now, updatedAt: now });
+		await stepTable.update(id, { deletedAt: now });
 	},
 
 	// ─── Runs (Progress Tracking) ────────────────────────
@@ -194,7 +194,6 @@ export const guidesStore = {
 		if (run.completedStepIds.includes(stepId)) return;
 		await runTable.update(runId, {
 			completedStepIds: [...run.completedStepIds, stepId],
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -203,7 +202,6 @@ export const guidesStore = {
 		if (!run) return;
 		await runTable.update(runId, {
 			completedStepIds: run.completedStepIds.filter((id) => id !== stepId),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -212,7 +210,6 @@ export const guidesStore = {
 		const run = await runTable.get(runId);
 		await runTable.update(runId, {
 			completedAt: now,
-			updatedAt: now,
 		});
 		if (run?.timeBlockId) {
 			await updateBlock(run.timeBlockId, { endDate: now });
@@ -225,6 +222,6 @@ export const guidesStore = {
 		if (run?.timeBlockId) {
 			await deleteBlock(run.timeBlockId);
 		}
-		await runTable.update(id, { deletedAt: now, updatedAt: now });
+		await runTable.update(id, { deletedAt: now });
 	},
 };

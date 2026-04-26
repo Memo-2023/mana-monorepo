@@ -136,7 +136,6 @@ function createSequencesStore() {
 				moodIds: data.moodIds,
 				duration: data.duration,
 				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			});
 			MoodlitEvents.sequenceCreated();
 		},
@@ -144,7 +143,6 @@ function createSequencesStore() {
 		async deleteSequence(id: string) {
 			await db.table('sequences').update(id, {
 				deletedAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			});
 			MoodlitEvents.sequenceDeleted();
 		},

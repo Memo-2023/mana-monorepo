@@ -69,7 +69,6 @@ export const drinkStore = {
 		await encryptRecord('drinkEntries', wrapped);
 		await drinkEntryTable.update(id, {
 			...wrapped,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -77,7 +76,6 @@ export const drinkStore = {
 		const entry = await drinkEntryTable.get(id);
 		await drinkEntryTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 		if (entry) {
 			emitDomainEvent('DrinkEntryDeleted', 'drink', 'drinkEntries', id, {
@@ -97,7 +95,6 @@ export const drinkStore = {
 			const entry = active[0];
 			await drinkEntryTable.update(entry.id, {
 				deletedAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			});
 			emitDomainEvent('DrinkEntryUndone', 'drink', 'drinkEntries', entry.id, {
 				entryId: entry.id,
@@ -146,14 +143,12 @@ export const drinkStore = {
 		await encryptRecord('drinkPresets', wrapped);
 		await drinkPresetTable.update(id, {
 			...wrapped,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async deletePreset(id: string) {
 		await drinkPresetTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -162,7 +157,6 @@ export const drinkStore = {
 		for (let i = 0; i < presetIds.length; i++) {
 			await drinkPresetTable.update(presetIds[i], {
 				order: i,
-				updatedAt: now,
 			});
 		}
 	},

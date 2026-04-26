@@ -33,9 +33,7 @@ export function isValidPath(path: string): boolean {
 
 function touchSite(siteId: string): Promise<void> {
 	const now = new Date().toISOString();
-	return websitesTable
-		.update(siteId, { draftUpdatedAt: now, updatedAt: now })
-		.then(() => undefined);
+	return websitesTable.update(siteId, { draftUpdatedAt: now }).then(() => undefined);
 }
 
 export const pagesStore = {
@@ -62,7 +60,6 @@ export const pagesStore = {
 			seo: input.seo ?? {},
 			order: maxOrder + 1024,
 			createdAt: now,
-			updatedAt: now,
 		};
 
 		await websitePagesTable.add(newPage);
@@ -88,7 +85,6 @@ export const pagesStore = {
 
 		await websitePagesTable.update(id, {
 			...patch,
-			updatedAt: now,
 		});
 		await touchSite(existing.siteId);
 
@@ -106,7 +102,6 @@ export const pagesStore = {
 		const now = new Date().toISOString();
 		await websitePagesTable.update(id, {
 			deletedAt: now,
-			updatedAt: now,
 		});
 		await touchSite(existing.siteId);
 
@@ -142,7 +137,6 @@ export const pagesStore = {
 
 		await websitePagesTable.update(id, {
 			order: newOrder,
-			updatedAt: now,
 		});
 		await touchSite(existing.siteId);
 	},

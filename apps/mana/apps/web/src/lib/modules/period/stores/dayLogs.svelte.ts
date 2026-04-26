@@ -67,7 +67,6 @@ export const dayLogsStore = {
 			const updateDiff: Partial<LocalPeriodDayLog> = {
 				...data,
 				logDate,
-				updatedAt: new Date().toISOString(),
 			};
 			await encryptRecord('periodDayLogs', updateDiff);
 			await periodDayLogTable.update(existing.id, updateDiff);
@@ -125,7 +124,6 @@ export const dayLogsStore = {
 		}
 		await periodDayLogTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -138,7 +136,6 @@ export const dayLogsStore = {
 			if (periodId) {
 				await periodDayLogTable.update(log.id, {
 					periodId,
-					updatedAt: new Date().toISOString(),
 				});
 			}
 		}

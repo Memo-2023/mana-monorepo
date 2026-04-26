@@ -5,6 +5,7 @@
  */
 
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { decryptRecords } from '$lib/data/crypto';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
@@ -39,7 +40,7 @@ export function toBodyExercise(local: LocalBodyExercise): BodyExercise {
 		isArchived: local.isArchived,
 		isPreset: local.isPreset,
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -53,7 +54,7 @@ export function toBodyRoutine(local: LocalBodyRoutine): BodyRoutine {
 		order: local.order,
 		isArchived: local.isArchived,
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -68,7 +69,7 @@ export function toBodyWorkout(local: LocalBodyWorkout): BodyWorkout {
 		notes: local.notes ?? null,
 		rpe: local.rpe ?? null,
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -124,7 +125,7 @@ export function toBodyPhase(local: LocalBodyPhase): BodyPhase {
 		targetWeight: local.targetWeight ?? null,
 		notes: local.notes ?? null,
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

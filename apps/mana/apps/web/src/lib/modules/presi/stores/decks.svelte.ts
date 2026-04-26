@@ -58,9 +58,7 @@ function createDecksStore() {
 	async function updateDeck(id: string, dto: UpdateDeckDto): Promise<boolean> {
 		error = null;
 		try {
-			const localUpdates: Partial<LocalDeck> & { updatedAt: string } = {
-				updatedAt: new Date().toISOString(),
-			};
+			const localUpdates: Partial<LocalDeck> = {};
 			if (dto.title !== undefined) localUpdates.title = dto.title;
 			if (dto.description !== undefined) localUpdates.description = dto.description;
 			if (dto.themeId !== undefined) localUpdates.themeId = dto.themeId;
@@ -109,9 +107,9 @@ function createDecksStore() {
 			await db.transaction('rw', presiDeckTable, slideTable, async () => {
 				const slides = await slideTable.where('deckId').equals(id).toArray();
 				for (const slide of slides) {
-					await slideTable.update(slide.id, { deletedAt: now, updatedAt: now });
+					await slideTable.update(slide.id, { deletedAt: now });
 				}
-				await presiDeckTable.update(id, { deletedAt: now, updatedAt: now });
+				await presiDeckTable.update(id, { deletedAt: now });
 			});
 			PresiEvents.deckDeleted();
 			return true;
@@ -149,9 +147,7 @@ function createDecksStore() {
 	async function updateSlide(id: string, dto: UpdateSlideDto): Promise<boolean> {
 		error = null;
 		try {
-			const localUpdates: Partial<LocalSlide> & { updatedAt: string } = {
-				updatedAt: new Date().toISOString(),
-			};
+			const localUpdates: Partial<LocalSlide> = {};
 			if (dto.content !== undefined) localUpdates.content = dto.content;
 			if (dto.order !== undefined) localUpdates.order = dto.order;
 
@@ -169,7 +165,7 @@ function createDecksStore() {
 		error = null;
 		try {
 			const now = new Date().toISOString();
-			await slideTable.update(id, { deletedAt: now, updatedAt: now });
+			await slideTable.update(id, { deletedAt: now });
 			PresiEvents.slideDeleted();
 			return true;
 		} catch (e) {
@@ -184,7 +180,7 @@ function createDecksStore() {
 		try {
 			const now = new Date().toISOString();
 			for (const { id, order } of slides) {
-				await slideTable.update(id, { order, updatedAt: now });
+				await slideTable.update(id, { order });
 			}
 			return true;
 		} catch (e) {
@@ -217,7 +213,6 @@ function createDecksStore() {
 
 		await presiDeckTable.update(deckId, {
 			activeRehearsalBlockId: timeBlockId,
-			updatedAt: now,
 		});
 
 		return timeBlockId;
@@ -235,7 +230,6 @@ function createDecksStore() {
 
 		await presiDeckTable.update(deckId, {
 			activeRehearsalBlockId: null,
-			updatedAt: now,
 		});
 	}
 

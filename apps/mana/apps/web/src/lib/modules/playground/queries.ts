@@ -7,6 +7,7 @@
  */
 
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -29,7 +30,7 @@ export function toSnippet(local: LocalPlaygroundSnippet): PlaygroundSnippet {
 		isPinned: local.isPinned ?? false,
 		order: local.order ?? 0,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -65,7 +66,7 @@ export function toConversation(local: LocalPlaygroundConversation): PlaygroundCo
 		isPinned: local.isPinned ?? false,
 		comparisonModels: local.comparisonModels ?? null,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

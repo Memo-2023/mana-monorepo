@@ -81,12 +81,8 @@
 			panelImageIds: nextIds,
 			panelMeta: nextMeta,
 		} as Partial<LocalComicStory>;
-		const wrapped = { ...patch } as Record<string, unknown>;
-		await encryptRecord('comicStories', wrapped);
-		await comicStoriesTable.update(story.id, {
-			...wrapped,
-			updatedAt: new Date().toISOString(),
-		});
+		await encryptRecord('comicStories', patch as Record<string, unknown>);
+		await comicStoriesTable.update(story.id, patch as never);
 	}
 </script>
 

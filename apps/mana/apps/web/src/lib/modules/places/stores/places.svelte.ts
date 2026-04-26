@@ -46,7 +46,6 @@ export const placesStore = {
 			visitCount: 0,
 			visibility: defaultVisibilityFor(getActiveSpace()?.type),
 			createdAt: now,
-			updatedAt: now,
 		};
 
 		// Snapshot the plaintext DTO before encryption mutates the record
@@ -77,7 +76,6 @@ export const placesStore = {
 
 		const diff = {
 			...updateData,
-			updatedAt: new Date().toISOString(),
 		};
 		// encryptRecord mutates the diff in place. Fields not in the
 		// places allowlist (lat/lng, isFavorite, isArchived, …) pass
@@ -111,7 +109,6 @@ export const placesStore = {
 
 		await placeTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('PlaceDeleted', 'places', 'places', id, {
 			placeId: id,
@@ -125,14 +122,12 @@ export const placesStore = {
 
 		await placeTable.update(id, {
 			isFavorite: !local.isFavorite,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async updateTagIds(id: string, tagIds: string[]) {
 		await placeTable.update(id, {
 			tagIds,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -147,7 +142,6 @@ export const placesStore = {
 		await placeTable.update(id, {
 			visitCount: (local.visitCount ?? 0) + 1,
 			lastVisitedAt: now,
-			updatedAt: now,
 		});
 
 		await createBlock({
@@ -183,7 +177,6 @@ export const placesStore = {
 			visibility: next,
 			visibilityChangedAt: now,
 			visibilityChangedBy: getEffectiveUserId(),
-			updatedAt: now,
 		};
 
 		if (next === 'unlisted') {
@@ -252,7 +245,6 @@ export const placesStore = {
 			});
 			await placeTable.update(id, {
 				unlistedToken: token,
-				updatedAt: new Date().toISOString(),
 			});
 			return token;
 		} catch (e) {
@@ -281,7 +273,6 @@ export const placesStore = {
 			});
 			await placeTable.update(id, {
 				unlistedExpiresAt: expiresAt ? expiresAt.toISOString() : undefined,
-				updatedAt: new Date().toISOString(),
 			});
 		} catch (e) {
 			console.error('[places] setUnlistedExpiry failed', e);

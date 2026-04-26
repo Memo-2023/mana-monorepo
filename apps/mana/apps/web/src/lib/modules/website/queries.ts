@@ -8,6 +8,7 @@
  */
 
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import type {
@@ -35,7 +36,7 @@ export function toWebsite(local: LocalWebsite): Website {
 		publishedVersion: local.publishedVersion ?? null,
 		draftUpdatedAt: local.draftUpdatedAt ?? null,
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -49,7 +50,7 @@ export function toWebsitePage(local: LocalWebsitePage): WebsitePage {
 		seo: local.seo ?? {},
 		order: local.order,
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -65,7 +66,7 @@ export function toWebsiteBlock(local: LocalWebsiteBlock): WebsiteBlock {
 		schemaVersion: local.schemaVersion,
 		order: local.order,
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

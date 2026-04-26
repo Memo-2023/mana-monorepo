@@ -140,7 +140,7 @@
 		await tasksStore.deleteTask(id);
 		goBack();
 		toastStore.undo('Aufgabe gelöscht', () => {
-			db.table('tasks').update(id, { deletedAt: undefined, updatedAt: new Date().toISOString() });
+			db.table('tasks').update(id, { deletedAt: undefined });
 		});
 	}
 

@@ -9,6 +9,7 @@
  */
 
 import { liveQuery } from 'dexie';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 import { db } from '$lib/data/database';
 import { decryptRecords } from '$lib/data/crypto';
@@ -46,7 +47,7 @@ export function toTimeBlock(local: LocalTimeBlock): TimeBlock {
 		icon: local.icon ?? null,
 		projectId: local.projectId ?? null,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

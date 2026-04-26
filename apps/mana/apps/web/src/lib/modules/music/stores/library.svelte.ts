@@ -20,7 +20,6 @@ export const libraryStore = {
 			const newState = !local.favorite;
 			await songTable.update(id, {
 				favorite: newState,
-				updatedAt: new Date().toISOString(),
 			});
 			MusicEvents.songFavorited(newState);
 		}
@@ -34,7 +33,6 @@ export const libraryStore = {
 			await songTable.update(id, {
 				playCount: (local.playCount || 0) + 1,
 				lastPlayedAt: now,
-				updatedAt: now,
 			});
 
 			const decrypted = await decryptRecord('songs', { ...local });
@@ -71,7 +69,6 @@ export const libraryStore = {
 	) {
 		const diff: Record<string, unknown> = {
 			...data,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('songs', diff);
 		await songTable.update(id, diff);
@@ -80,7 +77,7 @@ export const libraryStore = {
 	/** Soft-delete a song. */
 	async delete(id: string) {
 		const now = new Date().toISOString();
-		await songTable.update(id, { deletedAt: now, updatedAt: now });
+		await songTable.update(id, { deletedAt: now });
 		MusicEvents.songDeleted();
 	},
 

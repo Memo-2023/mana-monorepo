@@ -29,7 +29,6 @@ export const worldClocksStore = {
 				cityName: input.cityName,
 				sortOrder: currentCount,
 				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			};
 
 			await db.table<LocalWorldClock>('timeWorldClocks').add(newLocal);
@@ -49,7 +48,6 @@ export const worldClocksStore = {
 		try {
 			await db.table('timeWorldClocks').update(id, {
 				deletedAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			});
 			return { success: true };
 		} catch (e) {
@@ -69,7 +67,6 @@ export const worldClocksStore = {
 			for (let i = 0; i < ids.length; i++) {
 				await db.table('timeWorldClocks').update(ids[i], {
 					sortOrder: i,
-					updatedAt: now,
 				});
 			}
 			return { success: true };

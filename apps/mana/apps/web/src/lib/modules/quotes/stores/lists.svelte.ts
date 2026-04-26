@@ -26,7 +26,6 @@ export const listsStore = {
 				description: description ?? null,
 				quoteIds: [],
 				createdAt: now,
-				updatedAt: now,
 			};
 			await db.table<LocalQuoteList>('quotesLists').add(newLocal);
 			QuotesEvents.listCreated();
@@ -43,7 +42,6 @@ export const listsStore = {
 		try {
 			await db.table('quotesLists').update(id, {
 				...updates,
-				updatedAt: new Date().toISOString(),
 			});
 			const updated = await db.table<LocalQuoteList>('quotesLists').get(id);
 			return updated ? toQuoteList(updated) : null;
@@ -56,7 +54,6 @@ export const listsStore = {
 		try {
 			await db.table('quotesLists').update(id, {
 				deletedAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			});
 			QuotesEvents.listDeleted();
 			return true;
@@ -77,7 +74,6 @@ export const listsStore = {
 
 			await db.table('quotesLists').update(listId, {
 				quoteIds,
-				updatedAt: new Date().toISOString(),
 			});
 			return true;
 		} catch {
@@ -94,7 +90,6 @@ export const listsStore = {
 
 			await db.table('quotesLists').update(listId, {
 				quoteIds,
-				updatedAt: new Date().toISOString(),
 			});
 			return true;
 		} catch {

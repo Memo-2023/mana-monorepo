@@ -134,7 +134,6 @@ export const invoiceSettingsStore = {
 			out = formatNumber(prefix, nextN, padding);
 			await invoiceSettingsTable.update(INVOICE_SETTINGS_ID, {
 				nextNumber: nextN + 1,
-				updatedAt: new Date().toISOString(),
 			});
 		});
 		return out;
@@ -146,7 +145,6 @@ export const invoiceSettingsStore = {
 		await encryptRecord('invoiceSettings', wrapped);
 		await invoiceSettingsTable.update(INVOICE_SETTINGS_ID, {
 			...wrapped,
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('InvoiceSettingsUpdated', 'invoices', 'invoiceSettings', INVOICE_SETTINGS_ID, {
 			fields: Object.keys(patch),

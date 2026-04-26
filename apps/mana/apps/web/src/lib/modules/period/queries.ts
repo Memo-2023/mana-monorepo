@@ -3,6 +3,7 @@
  */
 
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecord, decryptRecords } from '$lib/data/crypto';
@@ -28,7 +29,7 @@ export function toPeriod(local: LocalPeriod): Period {
 		isArchived: local.isArchived,
 		notes: local.notes,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -46,7 +47,7 @@ export function toPeriodDayLog(local: LocalPeriodDayLog): PeriodDayLog {
 		sexualActivity: local.sexualActivity,
 		notes: local.notes,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -58,7 +59,7 @@ export function toPeriodSymptom(local: LocalPeriodSymptom): PeriodSymptom {
 		color: local.color,
 		count: local.count ?? 0,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

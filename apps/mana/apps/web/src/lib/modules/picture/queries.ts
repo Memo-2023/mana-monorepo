@@ -7,6 +7,7 @@
  */
 
 import { liveQuery } from 'dexie';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
@@ -53,7 +54,7 @@ export function toImage(local: LocalImage): Image {
 		comicPanelIndex: local.comicPanelIndex ?? undefined,
 		comicCharacterId: local.comicCharacterId ?? undefined,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -68,7 +69,7 @@ export function toBoard(local: LocalBoard): Board {
 		backgroundColor: local.backgroundColor,
 		visibility: local.visibility ?? 'private',
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

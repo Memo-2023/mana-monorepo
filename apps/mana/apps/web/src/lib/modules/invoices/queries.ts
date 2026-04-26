@@ -3,6 +3,7 @@
  */
 
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { decryptRecords } from '$lib/data/crypto';
 import { scopedForModule } from '$lib/data/scope';
 import type {
@@ -48,7 +49,7 @@ export function toInvoice(local: LocalInvoice): Invoice {
 		pdfBlobKey: local.pdfBlobKey ?? null,
 		totals: local.totals,
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

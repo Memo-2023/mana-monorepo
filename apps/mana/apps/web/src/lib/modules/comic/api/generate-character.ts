@@ -187,7 +187,6 @@ export async function runCharacterGenerate(
 			referenceImageIds: referenceMediaIds,
 			comicCharacterId: character.id,
 			createdAt: nowIso,
-			updatedAt: nowIso,
 		});
 
 		await comicCharactersStore.appendVariant(character.id, localImageId);

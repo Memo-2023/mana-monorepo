@@ -41,7 +41,6 @@
 			status: editStatus,
 			priority: editPriority,
 			researchDepth: editResearchDepth,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('questions', diff);
 		await db.table('questions').update(questionId, diff);
@@ -52,14 +51,12 @@
 			status: editStatus,
 			priority: editPriority,
 			researchDepth: editResearchDepth,
-			updatedAt: new Date().toISOString(),
 		});
 	}
 
 	async function deleteQuestion() {
 		await db.table('questions').update(questionId, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	}
 

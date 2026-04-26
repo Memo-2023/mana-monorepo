@@ -129,7 +129,6 @@
 				species: editSpecies.trim() || null,
 				healthStatus: editHealthStatus,
 				acquiredAt: editAcquiredAt ? new Date(editAcquiredAt).toISOString() : null,
-				updatedAt: new Date().toISOString(),
 			});
 		} catch (err) {
 			console.error('plant save failed:', err);
@@ -142,7 +141,6 @@
 			await db.table('plants').update(plantId, {
 				healthStatus: editHealthStatus,
 				lightRequirements: editLightRequirements || null,
-				updatedAt: new Date().toISOString(),
 			});
 		} catch (err) {
 			console.error('plant select save failed:', err);

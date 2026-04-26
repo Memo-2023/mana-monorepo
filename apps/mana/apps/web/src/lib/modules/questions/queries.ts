@@ -5,6 +5,7 @@
  */
 
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -66,7 +67,7 @@ export function toCollection(local: LocalCollection): Collection {
 		isDefault: local.isDefault,
 		sortOrder: local.sortOrder,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -81,7 +82,7 @@ export function toQuestion(local: LocalQuestion): Question {
 		tags: local.tags ?? [],
 		researchDepth: local.researchDepth,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -95,7 +96,7 @@ export function toAnswer(local: LocalAnswer): Answer {
 		rating: local.rating ?? undefined,
 		isAccepted: local.isAccepted,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

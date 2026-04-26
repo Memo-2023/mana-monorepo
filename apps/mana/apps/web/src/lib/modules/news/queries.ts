@@ -1,4 +1,5 @@
 import { formatDate } from '$lib/i18n/format';
+import { deriveUpdatedAt } from '$lib/data/sync';
 /**
  * Reactive queries + type converters for News.
  *
@@ -53,7 +54,7 @@ export function toArticle(local: LocalArticle): Article {
 		isRead: local.isRead,
 		isFavorite: local.isFavorite,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -65,7 +66,7 @@ export function toCategory(local: LocalCategory): Category {
 		icon: local.icon,
 		sortOrder: local.sortOrder,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

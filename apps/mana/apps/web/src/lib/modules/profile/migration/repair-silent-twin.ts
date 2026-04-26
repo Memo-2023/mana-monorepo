@@ -73,7 +73,6 @@ export async function repairSilentTwinAvatarRows(): Promise<void> {
 				const row = victims[i];
 				await meImagesTable.update(row.id, {
 					primaryFor: i === 0 ? 'face-ref' : null,
-					updatedAt: nowIso,
 				});
 			}
 		});

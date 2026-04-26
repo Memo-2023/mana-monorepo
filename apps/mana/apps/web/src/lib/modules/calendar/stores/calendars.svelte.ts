@@ -38,7 +38,6 @@ export const calendarsStore = {
 				isVisible: input.isVisible ?? true,
 				timezone: input.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
 				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			};
 
 			await db.table<LocalCalendar>('calendars').add(newLocal);
@@ -57,7 +56,6 @@ export const calendarsStore = {
 		try {
 			await db.table('calendars').update(id, {
 				...input,
-				updatedAt: new Date().toISOString(),
 			});
 			const updated = await db.table<LocalCalendar>('calendars').get(id);
 			if (updated) {
@@ -78,7 +76,6 @@ export const calendarsStore = {
 		try {
 			await db.table('calendars').update(id, {
 				deletedAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			});
 			return { success: true };
 		} catch (e) {
@@ -106,13 +103,11 @@ export const calendarsStore = {
 				if (cal.isDefault && cal.id !== id) {
 					await db.table('calendars').update(cal.id, {
 						isDefault: false,
-						updatedAt: new Date().toISOString(),
 					});
 				}
 			}
 			await db.table('calendars').update(id, {
 				isDefault: true,
-				updatedAt: new Date().toISOString(),
 			});
 			const updated = await db.table<LocalCalendar>('calendars').get(id);
 			return { success: true, data: updated ? toCalendar(updated) : null };

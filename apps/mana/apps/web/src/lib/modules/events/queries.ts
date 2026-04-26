@@ -5,6 +5,7 @@
  */
 
 import { useScopedLiveQuery } from '$lib/data/scope/use-scoped-live-query.svelte';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecords } from '$lib/data/crypto';
@@ -47,7 +48,7 @@ export function toSocialEvent(local: LocalSocialEvent, block: LocalTimeBlock | n
 		endTime: block?.endDate ?? block?.startDate ?? now,
 		isAllDay: block?.allDay ?? false,
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -64,7 +65,7 @@ export function toEventItem(local: LocalEventItem): EventItem {
 		claimedByName: local.claimedByName ?? null,
 		claimedAt: local.claimedAt ?? null,
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -82,7 +83,7 @@ export function toEventGuest(local: LocalEventGuest): EventGuest {
 		plusOnes: local.plusOnes ?? 0,
 		note: local.note ?? null,
 		createdAt: local.createdAt ?? now,
-		updatedAt: local.updatedAt ?? now,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

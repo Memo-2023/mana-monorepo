@@ -147,7 +147,6 @@ export async function updateAgent(id: string, patch: AgentPatch): Promise<void> 
 	}
 	const mods: Partial<Agent> = {
 		...deepClone(patch),
-		updatedAt: new Date().toISOString(),
 	};
 	await encryptRecord(AGENTS_TABLE, mods);
 	await table().update(id, mods);
@@ -156,15 +155,15 @@ export async function updateAgent(id: string, patch: AgentPatch): Promise<void> 
 // ── Lifecycle ──────────────────────────────────────────────
 
 export async function archiveAgent(id: string): Promise<void> {
-	await table().update(id, { state: 'archived', updatedAt: new Date().toISOString() });
+	await table().update(id, { state: 'archived' });
 }
 
 export async function pauseAgent(id: string): Promise<void> {
-	await table().update(id, { state: 'paused', updatedAt: new Date().toISOString() });
+	await table().update(id, { state: 'paused' });
 }
 
 export async function resumeAgent(id: string): Promise<void> {
-	await table().update(id, { state: 'active', updatedAt: new Date().toISOString() });
+	await table().update(id, { state: 'active' });
 }
 
 /** Soft-delete. Missions owned by the agent keep running; the Workbench

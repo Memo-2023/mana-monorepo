@@ -370,7 +370,6 @@ export const tasksStore = {
 
 		const diff: Record<string, unknown> = {
 			...data,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('tasks', diff);
 		await taskTable.update(id, diff);
@@ -386,7 +385,6 @@ export const tasksStore = {
 
 		await taskTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('TaskDeleted', 'todo', 'tasks', id, {
 			taskId: id,
@@ -403,7 +401,6 @@ export const tasksStore = {
 		await taskTable.update(id, {
 			isCompleted: true,
 			completedAt: now,
-			updatedAt: now,
 		});
 		emitDomainEvent('TaskCompleted', 'todo', 'tasks', id, {
 			taskId: id,
@@ -420,7 +417,6 @@ export const tasksStore = {
 		await taskTable.update(id, {
 			isCompleted: false,
 			completedAt: null,
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('TaskUncompleted', 'todo', 'tasks', id, {
 			taskId: id,
@@ -442,7 +438,6 @@ export const tasksStore = {
 	async updateSubtasks(id: string, subtasks: Subtask[]) {
 		const diff: Record<string, unknown> = {
 			subtasks,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('tasks', diff);
 		await taskTable.update(id, diff);
@@ -462,7 +457,6 @@ export const tasksStore = {
 		const existingMeta = (existing?.metadata as Record<string, unknown>) ?? {};
 		const diff: Record<string, unknown> = {
 			metadata: { ...existingMeta, labelIds },
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('tasks', diff);
 		await taskTable.update(id, diff);
@@ -472,7 +466,6 @@ export const tasksStore = {
 		for (let i = 0; i < taskIds.length; i++) {
 			await taskTable.update(taskIds[i], {
 				order: i,
-				updatedAt: new Date().toISOString(),
 			});
 		}
 	},
@@ -494,7 +487,6 @@ export const tasksStore = {
 			visibility: next,
 			visibilityChangedAt: now,
 			visibilityChangedBy: getEffectiveUserId(),
-			updatedAt: now,
 		};
 		if (next === 'unlisted' && !existing.unlistedToken) {
 			patch.unlistedToken = generateUnlistedToken();

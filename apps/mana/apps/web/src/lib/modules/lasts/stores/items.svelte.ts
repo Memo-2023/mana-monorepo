@@ -150,7 +150,6 @@ export const lastsStore = {
 			whatIKnowNow: data.whatIKnowNow ?? null,
 			tenderness: data.tenderness ?? null,
 			wouldReclaim: data.wouldReclaim ?? null,
-			updatedAt: nowIso(),
 		};
 		await encryptRecord('lasts', diff);
 		await lastTable.update(id, diff);
@@ -165,7 +164,6 @@ export const lastsStore = {
 			status: 'reclaimed',
 			reclaimedAt: nowIso(),
 			reclaimedNote,
-			updatedAt: nowIso(),
 		};
 		await encryptRecord('lasts', diff);
 		await lastTable.update(id, diff);
@@ -198,7 +196,6 @@ export const lastsStore = {
 	) {
 		const diff: Partial<LocalLast> = {
 			...data,
-			updatedAt: nowIso(),
 		};
 		await encryptRecord('lasts', diff);
 		await lastTable.update(id, diff);
@@ -207,7 +204,6 @@ export const lastsStore = {
 	async deleteLast(id: string) {
 		await lastTable.update(id, {
 			deletedAt: nowIso(),
-			updatedAt: nowIso(),
 		});
 	},
 
@@ -216,14 +212,12 @@ export const lastsStore = {
 		if (!last) return;
 		await lastTable.update(id, {
 			isPinned: !last.isPinned,
-			updatedAt: nowIso(),
 		});
 	},
 
 	async archiveLast(id: string) {
 		await lastTable.update(id, {
 			isArchived: true,
-			updatedAt: nowIso(),
 		});
 	},
 
@@ -289,7 +283,6 @@ export const lastsStore = {
 	async acceptCandidate(id: string) {
 		await lastTable.update(id, {
 			inferredFrom: null,
-			updatedAt: nowIso(),
 		});
 	},
 
@@ -329,7 +322,6 @@ export const lastsStore = {
 			visibility: next,
 			visibilityChangedAt: now,
 			visibilityChangedBy: getEffectiveUserId() ?? undefined,
-			updatedAt: now,
 		};
 
 		if (next === 'unlisted') {
@@ -407,7 +399,6 @@ export const lastsStore = {
 		});
 		await lastTable.update(id, {
 			unlistedToken: token,
-			updatedAt: nowIso(),
 		});
 		return token;
 	},
@@ -438,7 +429,6 @@ export const lastsStore = {
 		await lastTable.update(id, {
 			unlistedToken: token,
 			unlistedExpiresAt: expiresAt ? expiresAt.toISOString() : null,
-			updatedAt: nowIso(),
 		});
 	},
 };

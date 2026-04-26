@@ -45,7 +45,6 @@ export const kontextStore = {
 		const row = await this.ensureDoc();
 		const diff: Partial<LocalKontextDoc> = {
 			content,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('kontextDoc', diff);
 		await kontextDocTable.update(row.id, diff);

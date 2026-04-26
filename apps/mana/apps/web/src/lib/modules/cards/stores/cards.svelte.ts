@@ -41,7 +41,6 @@ export const cardStore = {
 			if (deck) {
 				await cardDeckTable.update(input.deckId, {
 					cardCount: (deck.cardCount || 0) + 1,
-					updatedAt: new Date().toISOString(),
 				});
 			}
 
@@ -69,7 +68,6 @@ export const cardStore = {
 
 			const diff: Partial<LocalCard> = {
 				...localUpdates,
-				updatedAt: new Date().toISOString(),
 			};
 			await encryptRecord('cards', diff);
 			await cardTable.update(id, diff);
@@ -83,7 +81,7 @@ export const cardStore = {
 		error = null;
 		try {
 			const now = new Date().toISOString();
-			await cardTable.update(id, { deletedAt: now, updatedAt: now });
+			await cardTable.update(id, { deletedAt: now });
 			CardsEvents.cardDeleted();
 
 			// Update deck card count
@@ -92,7 +90,6 @@ export const cardStore = {
 				if (deck) {
 					await cardDeckTable.update(deckId, {
 						cardCount: Math.max(0, (deck.cardCount || 0) - 1),
-						updatedAt: now,
 					});
 				}
 			}
@@ -107,7 +104,7 @@ export const cardStore = {
 		try {
 			const now = new Date().toISOString();
 			for (let i = 0; i < cardIds.length; i++) {
-				await cardTable.update(cardIds[i], { order: i, updatedAt: now });
+				await cardTable.update(cardIds[i], { order: i });
 			}
 		} catch (err: any) {
 			error = err.message || 'Failed to reorder cards';

@@ -50,7 +50,6 @@ export const categoriesStore = {
 		if (!trimmed) return;
 		const diff: Partial<LocalCategory> = {
 			name: trimmed,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('newsCategories', diff);
 		await categoryTable.update(id, diff);
@@ -59,14 +58,12 @@ export const categoriesStore = {
 	async setColor(id: string, color: string): Promise<void> {
 		await categoryTable.update(id, {
 			color,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async setIcon(id: string, icon: string): Promise<void> {
 		await categoryTable.update(id, {
 			icon,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -76,7 +73,7 @@ export const categoriesStore = {
 		// counts (typically <20).
 		const now = new Date().toISOString();
 		for (let i = 0; i < ids.length; i++) {
-			await categoryTable.update(ids[i], { sortOrder: i, updatedAt: now });
+			await categoryTable.update(ids[i], { sortOrder: i });
 		}
 	},
 
@@ -87,7 +84,6 @@ export const categoriesStore = {
 		// don't disappear. A subsequent re-categorize cleans them up.
 		await categoryTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 	},
 };

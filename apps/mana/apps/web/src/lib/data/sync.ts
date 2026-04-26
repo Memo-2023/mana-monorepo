@@ -21,6 +21,7 @@ import {
 	fromSyncName,
 	beginApplyingTables,
 	FIELD_META_KEY,
+	UPDATED_AT_INDEX_KEY,
 	setPendingChangeListener,
 } from './database';
 import { isQuotaError, cleanupTombstones, notifyQuotaExceeded } from './quota';
@@ -42,6 +43,30 @@ export function readFieldMeta(record: unknown): Record<string, FieldMeta> {
 	if (!record || typeof record !== 'object') return {};
 	const fm = (record as Record<string, unknown>)[FIELD_META_KEY];
 	return fm && typeof fm === 'object' ? (fm as Record<string, FieldMeta>) : {};
+}
+
+/**
+ * Derive a record's "last modified" timestamp from its `__fieldMeta`
+ * map. Returns the max `at` across all per-field entries — empty
+ * string when the record has no field-meta yet (only seen on records
+ * mid-write or pre-hook).
+ *
+ * Replaces the older synced `updatedAt` data field. F3 of the
+ * sync-field-meta overhaul moved updatedAt from a wire-protocol
+ * property to a read-side computed property — type converters call
+ * this to populate the public-facing `updatedAt` from the merged
+ * field-meta map.
+ *
+ * For Dexie indexed sorting, prefer the non-synced `_updatedAtIndex`
+ * shadow column the creating/updating hook stamps on every write.
+ */
+export function deriveUpdatedAt(record: unknown): string {
+	const meta = readFieldMeta(record);
+	let max = '';
+	for (const fm of Object.values(meta)) {
+		if (fm.at > max) max = fm.at;
+	}
+	return max;
 }
 
 // ─── Types ────────────────────────────────────────────────────
@@ -370,12 +395,11 @@ export async function applyServerChanges(
 										const tombActor: Actor = change.actor ?? USER_ACTOR;
 										await table.update(recordId, {
 											deletedAt: serverTime,
-											updatedAt: serverTime,
 											[FIELD_META_KEY]: {
 												...localMeta,
 												deletedAt: makeFieldMeta(serverTime, tombActor, replayOrigin),
-												updatedAt: makeFieldMeta(serverTime, tombActor, replayOrigin),
 											},
+											[UPDATED_AT_INDEX_KEY]: serverTime,
 										});
 									}
 								} else {
@@ -405,17 +429,16 @@ export async function applyServerChanges(
 										...changeData,
 										id: recordId,
 										[FIELD_META_KEY]: fieldMeta,
+										[UPDATED_AT_INDEX_KEY]: recordTime,
 									});
 								} else {
 									const localMeta = readFieldMeta(existing);
-									const localUpdatedAt =
-										((existing as Record<string, unknown>).updatedAt as string | undefined) ?? '';
 									const updates: Record<string, unknown> = {};
 									const newMeta: Record<string, FieldMeta> = { ...localMeta };
 
 									for (const [key, val] of Object.entries(changeData)) {
 										if (key === 'id' || key === FIELD_META_KEY) continue;
-										const localFieldTime = localMeta[key]?.at ?? localUpdatedAt;
+										const localFieldTime = localMeta[key]?.at ?? '';
 										if (recordTime >= localFieldTime) {
 											// Conflict signal: server STRICTLY wins (>), the local
 											// field had a non-empty value that differs from the new
@@ -448,6 +471,7 @@ export async function applyServerChanges(
 									}
 									if (Object.keys(updates).length > 0) {
 										updates[FIELD_META_KEY] = newMeta;
+										updates[UPDATED_AT_INDEX_KEY] = recordTime;
 										await table.update(recordId, updates);
 									}
 								}
@@ -464,23 +488,26 @@ export async function applyServerChanges(
 									const record: Record<string, unknown> = { id: recordId };
 									const fieldMeta: Record<string, FieldMeta> = {};
 									const fallback = new Date().toISOString();
+									let maxAt = '';
 									for (const [key, fc] of Object.entries(serverFields)) {
 										record[key] = fc.value;
-										fieldMeta[key] = makeFieldMeta(fc.at ?? fallback, changeActor, replayOrigin);
+										const at = fc.at ?? fallback;
+										fieldMeta[key] = makeFieldMeta(at, changeActor, replayOrigin);
+										if (at > maxAt) maxAt = at;
 									}
 									record[FIELD_META_KEY] = fieldMeta;
+									record[UPDATED_AT_INDEX_KEY] = maxAt || fallback;
 									await table.put(record);
 								} else {
 									// Per-field comparison.
 									const localMeta = readFieldMeta(existing);
-									const localUpdatedAt =
-										((existing as Record<string, unknown>).updatedAt as string | undefined) ?? '';
 									const updates: Record<string, unknown> = {};
 									const newMeta: Record<string, FieldMeta> = { ...localMeta };
+									let maxApplied = '';
 
 									for (const [key, fc] of Object.entries(serverFields)) {
 										const serverTime = fc.at ?? '';
-										const localFieldTime = localMeta[key]?.at ?? localUpdatedAt;
+										const localFieldTime = localMeta[key]?.at ?? '';
 										if (serverTime >= localFieldTime) {
 											// Same conflict criteria as the insert-as-update path:
 											// strictly newer + non-empty local + actually different
@@ -506,10 +533,12 @@ export async function applyServerChanges(
 											}
 											updates[key] = fc.value;
 											newMeta[key] = makeFieldMeta(serverTime, changeActor, replayOrigin);
+											if (serverTime > maxApplied) maxApplied = serverTime;
 										}
 									}
 									if (Object.keys(updates).length > 0) {
 										updates[FIELD_META_KEY] = newMeta;
+										if (maxApplied) updates[UPDATED_AT_INDEX_KEY] = maxApplied;
 										await table.update(recordId, updates);
 									}
 								}

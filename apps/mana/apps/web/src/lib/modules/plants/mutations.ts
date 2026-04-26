@@ -41,7 +41,6 @@ export const plantMutations = {
 			healthStatus: null,
 			acquiredAt: dto.acquiredAt ?? null,
 			createdAt: now,
-			updatedAt: now,
 		};
 		const plaintextSnapshot = toPlant(newLocal);
 		await encryptRecord('plants', newLocal);
@@ -56,9 +55,7 @@ export const plantMutations = {
 	},
 
 	async update(id: string, dto: UpdatePlantDto): Promise<Plant> {
-		const updateData: Record<string, unknown> = {
-			updatedAt: new Date().toISOString(),
-		};
+		const updateData: Record<string, unknown> = {};
 		if (dto.name !== undefined) updateData.name = dto.name;
 		if (dto.scientificName !== undefined) updateData.scientificName = dto.scientificName ?? null;
 		if (dto.commonName !== undefined) updateData.commonName = dto.commonName ?? null;
@@ -81,7 +78,6 @@ export const plantMutations = {
 	async delete(id: string): Promise<void> {
 		await db.table('plants').update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('PlantDeleted', 'plants', 'plants', id, { plantId: id });
 		PlantsEvents.plantDeleted();
@@ -136,7 +132,6 @@ export const wateringMutations = {
 			wateredAt: now,
 			notes: notes ?? null,
 			createdAt: now,
-			updatedAt: now,
 		};
 		await db.table('wateringLogs').add(logEntry);
 
@@ -162,7 +157,6 @@ export const wateringMutations = {
 			await db.table('wateringSchedules').update(schedule.id, {
 				lastWateredAt: now,
 				nextWateringAt: nextDate.toISOString(),
-				updatedAt: now,
 			});
 		}
 
@@ -182,7 +176,6 @@ export const wateringMutations = {
 			await db.table('wateringSchedules').update(schedule.id, {
 				frequencyDays,
 				nextWateringAt: nextDate.toISOString(),
-				updatedAt: now,
 			});
 		} else {
 			const nextDate = new Date(Date.now() + frequencyDays * 86400000);
@@ -195,7 +188,6 @@ export const wateringMutations = {
 				reminderEnabled: false,
 				reminderHoursBefore: 0,
 				createdAt: now,
-				updatedAt: now,
 			});
 		}
 	},
@@ -228,7 +220,6 @@ export const photoMutations = {
 			isAnalyzed: false,
 			takenAt: now,
 			createdAt: now,
-			updatedAt: now,
 		};
 		await db.table('plantPhotos').add(photo);
 		return photo;
@@ -240,7 +231,6 @@ export const photoMutations = {
 		const result = await identifyPlant(photo.publicUrl);
 		await db.table('plantPhotos').update(photoId, {
 			isAnalyzed: true,
-			updatedAt: new Date().toISOString(),
 		});
 		return result;
 	},
@@ -252,13 +242,13 @@ export const photoMutations = {
 			if (p.plantId !== plantId || p.deletedAt) continue;
 			const shouldBe = p.id === photoId;
 			if (p.isPrimary !== shouldBe) {
-				await db.table('plantPhotos').update(p.id, { isPrimary: shouldBe, updatedAt: now });
+				await db.table('plantPhotos').update(p.id, { isPrimary: shouldBe });
 			}
 		}
 	},
 
 	async remove(photoId: string): Promise<void> {
 		const now = new Date().toISOString();
-		await db.table('plantPhotos').update(photoId, { deletedAt: now, updatedAt: now });
+		await db.table('plantPhotos').update(photoId, { deletedAt: now });
 	},
 };

@@ -6,6 +6,7 @@
  */
 
 import type { BaseRecord } from '@mana/local-store';
+import { deriveUpdatedAt } from '$lib/data/sync';
 
 export const USER_CONTEXT_SINGLETON_ID = 'singleton' as const;
 
@@ -100,7 +101,7 @@ export function toUserContext(local: LocalUserContext): UserContext {
 		freeform: local.freeform ?? '',
 		interview: local.interview ?? { answeredIds: [], skippedIds: [] },
 		createdAt: local.createdAt ?? '',
-		updatedAt: local.updatedAt ?? '',
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -214,6 +215,6 @@ export function toMeImage(local: LocalMeImage): MeImage {
 		primaryFor: local.primaryFor ?? null,
 		spaceId: local.spaceId,
 		createdAt: local.createdAt ?? '',
-		updatedAt: local.updatedAt ?? '',
+		updatedAt: deriveUpdatedAt(local),
 	};
 }

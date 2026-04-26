@@ -90,16 +90,18 @@ export async function appendServerIteration(sql: Sql, input: AppendIterationInpu
 	const { userId, missionId, allIterations, nowIso } = input;
 	const fieldMeta = {
 		iterations: nowIso,
-		updatedAt: nowIso,
 	};
 	// The mana-sync Go handler stores `data` on inserts and `fields` on
 	// updates — for our update we populate the `data` JSONB with the
 	// winning values and `field_meta` with the per-field stamps. Per-row
 	// origin is `'agent'` — every server-side iteration write is an agent
 	// write from the point of view of the originating "client".
+	//
+	// `updatedAt` is no longer a synced field after F3 of the
+	// sync-field-meta overhaul; the receiving client derives it from
+	// `__fieldMeta` on read.
 	const data = {
 		iterations: allIterations,
-		updatedAt: nowIso,
 	};
 
 	// postgres.js's `tx.json()` types are strict about JSONValue; our

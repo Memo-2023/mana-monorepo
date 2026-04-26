@@ -5,6 +5,7 @@
  */
 
 import { liveQuery } from 'dexie';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { db } from '$lib/data/database';
 import { scopedForModule } from '$lib/data/scope';
 import { decryptRecord, decryptRecords } from '$lib/data/crypto';
@@ -22,7 +23,7 @@ export function toDeck(local: LocalDeck): Deck {
 		tags: [],
 		cardCount: local.cardCount,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 
@@ -37,7 +38,7 @@ export function toCard(local: LocalCard): Card {
 		reviewCount: local.reviewCount,
 		order: local.order,
 		createdAt: local.createdAt ?? new Date().toISOString(),
-		updatedAt: local.updatedAt ?? new Date().toISOString(),
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

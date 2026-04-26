@@ -1,3 +1,4 @@
+import { deriveUpdatedAt } from '$lib/data/sync';
 /**
  * User-level tag presets.
  *
@@ -33,11 +34,15 @@ export interface LocalUserTagPreset {
 	isDefault: boolean;
 	tags: TagPresetEntry[];
 	createdAt: string;
-	updatedAt: string;
 	deletedAt?: string;
 }
 
-export type UserTagPreset = Omit<LocalUserTagPreset, 'deletedAt'>;
+export type UserTagPreset = Omit<LocalUserTagPreset, 'deletedAt'> & {
+	/** Computed read-side property: max(__fieldMeta[*].at). The Local
+	 *  record stamps `_updatedAtIndex` for sort indexes; consumers see
+	 *  `updatedAt` here via {@link toUserTagPreset}. */
+	updatedAt: string;
+};
 
 export function toUserTagPreset(local: LocalUserTagPreset): UserTagPreset {
 	return {
@@ -47,7 +52,7 @@ export function toUserTagPreset(local: LocalUserTagPreset): UserTagPreset {
 		isDefault: local.isDefault,
 		tags: local.tags ?? [],
 		createdAt: local.createdAt,
-		updatedAt: local.updatedAt,
+		updatedAt: deriveUpdatedAt(local),
 	};
 }
 

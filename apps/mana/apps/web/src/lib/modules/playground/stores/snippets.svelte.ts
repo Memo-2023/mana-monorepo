@@ -28,7 +28,6 @@ export const playgroundSnippetsStore = {
 			isPinned: false,
 			order: Date.now(),
 			createdAt: now,
-			updatedAt: now,
 		};
 
 		// Snapshot the plaintext DTO before encryption mutates the record
@@ -45,7 +44,6 @@ export const playgroundSnippetsStore = {
 	): Promise<void> {
 		const diff: Partial<LocalPlaygroundSnippet> & Record<string, unknown> = {
 			...patch,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('playgroundSnippets', diff);
 		await playgroundSnippetTable.update(id, diff);
@@ -56,7 +54,6 @@ export const playgroundSnippetsStore = {
 		if (!local) return;
 		await playgroundSnippetTable.update(id, {
 			isPinned: !local.isPinned,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -64,7 +61,6 @@ export const playgroundSnippetsStore = {
 		const now = new Date().toISOString();
 		await playgroundSnippetTable.update(id, {
 			deletedAt: now,
-			updatedAt: now,
 		});
 	},
 };

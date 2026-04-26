@@ -10,6 +10,7 @@
  */
 
 import { RRule } from 'rrule';
+import { deriveUpdatedAt } from '$lib/data/sync';
 import { db } from '$lib/data/database';
 import { timeBlockTable } from './collections';
 import { createBlock, deleteBlock } from './service';
@@ -311,7 +312,7 @@ export function expandTemplatesVirtually(
 				linkedBlockId: null,
 				isVirtual: true,
 				createdAt: template.createdAt ?? new Date().toISOString(),
-				updatedAt: template.updatedAt ?? new Date().toISOString(),
+				updatedAt: deriveUpdatedAt(template),
 			});
 		}
 	}

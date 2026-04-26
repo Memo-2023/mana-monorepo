@@ -23,7 +23,6 @@ export const albumMutations = {
 				autoGenerateType: null,
 				autoGenerateValue: null,
 				createdAt: now,
-				updatedAt: now,
 			};
 			await db.table('albums').add(newLocal);
 			PhotosEvents.albumCreated();
@@ -39,7 +38,7 @@ export const albumMutations = {
 		data: { name?: string; description?: string }
 	): Promise<Album | null> {
 		try {
-			const updateData: Record<string, unknown> = { updatedAt: new Date().toISOString() };
+			const updateData: Record<string, unknown> = {};
 			if (data.name !== undefined) updateData.name = data.name;
 			if (data.description !== undefined) updateData.description = data.description ?? null;
 
@@ -58,9 +57,9 @@ export const albumMutations = {
 			// Soft-delete album items first
 			const items = await db.table<LocalAlbumItem>('albumItems').toArray();
 			for (const item of items.filter((i) => i.albumId === id)) {
-				await db.table('albumItems').update(item.id, { deletedAt: now, updatedAt: now });
+				await db.table('albumItems').update(item.id, { deletedAt: now });
 			}
-			await db.table('albums').update(id, { deletedAt: now, updatedAt: now });
+			await db.table('albums').update(id, { deletedAt: now });
 			PhotosEvents.albumDeleted();
 			return true;
 		} catch (e) {
@@ -85,7 +84,6 @@ export const albumMutations = {
 					mediaId,
 					sortOrder: nextOrder++,
 					createdAt: now,
-					updatedAt: now,
 				});
 			}
 			return true;
@@ -103,7 +101,7 @@ export const albumMutations = {
 			);
 			if (item) {
 				const now = new Date().toISOString();
-				await db.table('albumItems').update(item.id, { deletedAt: now, updatedAt: now });
+				await db.table('albumItems').update(item.id, { deletedAt: now });
 			}
 			return true;
 		} catch (e) {
@@ -116,7 +114,6 @@ export const albumMutations = {
 		try {
 			await db.table('albums').update(albumId, {
 				coverMediaId: mediaId,
-				updatedAt: new Date().toISOString(),
 			});
 			return true;
 		} catch (e) {

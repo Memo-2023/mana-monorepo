@@ -138,7 +138,7 @@ export async function runArticlesFromNewsMigration(): Promise<number> {
 				// the server + other devices. Keep it in the local table so
 				// if someone later rolls back the migration they can still
 				// see what was there.
-				await newsTable.update(row.id, { deletedAt: now, updatedAt: now });
+				await newsTable.update(row.id, { deletedAt: now });
 				moved++;
 			} catch (rowErr) {
 				console.warn(`[articles/from-news] skipping row ${row.id} — ${(rowErr as Error).message}`);

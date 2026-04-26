@@ -76,7 +76,6 @@ export const journalStore = {
 	) {
 		const diff: Partial<LocalJournalEntry> = {
 			...data,
-			updatedAt: new Date().toISOString(),
 		};
 
 		// Recompute word count when content changes
@@ -117,7 +116,6 @@ export const journalStore = {
 				content: transcript,
 				transcriptModel: result.model,
 				wordCount: countWords(transcript),
-				updatedAt: new Date().toISOString(),
 			};
 			await encryptRecord('journalEntries', diff);
 			await journalEntryTable.update(entryId, diff);
@@ -133,7 +131,6 @@ export const journalStore = {
 	async deleteEntry(id: string) {
 		await journalEntryTable.update(id, {
 			deletedAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
 		});
 		emitDomainEvent('JournalEntryDeleted', 'journal', 'journalEntries', id, { entryId: id });
 	},
@@ -143,7 +140,6 @@ export const journalStore = {
 		if (!entry) return;
 		await journalEntryTable.update(id, {
 			isPinned: !entry.isPinned,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -152,14 +148,12 @@ export const journalStore = {
 		if (!entry) return;
 		await journalEntryTable.update(id, {
 			isFavorite: !entry.isFavorite,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
 	async setMood(id: string, mood: JournalMood | null) {
 		await journalEntryTable.update(id, {
 			mood,
-			updatedAt: new Date().toISOString(),
 		});
 		if (mood)
 			emitDomainEvent('JournalMoodSet', 'journal', 'journalEntries', id, { entryId: id, mood });
@@ -168,7 +162,6 @@ export const journalStore = {
 	async archiveEntry(id: string) {
 		await journalEntryTable.update(id, {
 			isArchived: true,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 };

@@ -89,7 +89,6 @@ export const eventsStore = {
 				reminders: null,
 				visibility: defaultVisibilityFor(getActiveSpace()?.type),
 				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			};
 
 			// title/description/location are encrypted at rest. createBlock
@@ -154,9 +153,7 @@ export const eventsStore = {
 			}
 
 			// Update LocalEvent for domain fields
-			const localData: Partial<LocalEvent> = {
-				updatedAt: new Date().toISOString(),
-			};
+			const localData: Partial<LocalEvent> = {};
 			if (input.title !== undefined) localData.title = input.title;
 			if (input.description !== undefined) localData.description = input.description;
 			if (input.location !== undefined) localData.location = input.location;
@@ -213,7 +210,7 @@ export const eventsStore = {
 			await updateBlock(event.timeBlockId, blockUpdates);
 
 			// Update LocalEvent
-			const localData: Partial<LocalEvent> = { updatedAt: new Date().toISOString() };
+			const localData: Partial<LocalEvent> = {};
 			if (input.title !== undefined) localData.title = input.title;
 			if (input.description !== undefined) localData.description = input.description;
 			if (input.location !== undefined) localData.location = input.location;
@@ -277,7 +274,7 @@ export const eventsStore = {
 				.equals(templateBlockId)
 				.first();
 			if (templateEvent) {
-				const localData: Partial<LocalEvent> = { updatedAt: new Date().toISOString() };
+				const localData: Partial<LocalEvent> = {};
 				if (input.title !== undefined) localData.title = input.title;
 				if (input.description !== undefined) localData.description = input.description;
 				if (input.location !== undefined) localData.location = input.location;
@@ -308,7 +305,6 @@ export const eventsStore = {
 			}
 			await db.table('events').update(id, {
 				deletedAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			});
 			CalendarEvents.eventDeleted();
 			return { success: true };
@@ -343,7 +339,7 @@ export const eventsStore = {
 			const now = new Date().toISOString();
 			for (const ev of allEvents) {
 				if (blockIds.has(ev.timeBlockId) && !ev.deletedAt) {
-					await db.table('events').update(ev.id, { deletedAt: now, updatedAt: now });
+					await db.table('events').update(ev.id, { deletedAt: now });
 				}
 			}
 
@@ -391,7 +387,6 @@ export const eventsStore = {
 
 			await db.table('events').update(id, {
 				deletedAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			});
 			emitDomainEvent('CalendarEventDeleted', 'calendar', 'events', id, {
 				eventId: id,
@@ -412,7 +407,6 @@ export const eventsStore = {
 	async updateTagIds(id: string, tagIds: string[]) {
 		await db.table('events').update(id, {
 			tagIds,
-			updatedAt: new Date().toISOString(),
 		});
 	},
 
@@ -503,7 +497,6 @@ export const eventsStore = {
 				visibility: next,
 				visibilityChangedAt: now,
 				visibilityChangedBy: getEffectiveUserId(),
-				updatedAt: now,
 			};
 
 			// Server-authoritative token. Publish first; local update only
@@ -590,7 +583,6 @@ export const eventsStore = {
 			});
 			await db.table('events').update(id, {
 				unlistedToken: token,
-				updatedAt: new Date().toISOString(),
 			});
 			return { success: true, token };
 		} catch (e) {
@@ -625,7 +617,6 @@ export const eventsStore = {
 			});
 			await db.table('events').update(id, {
 				unlistedExpiresAt: expiresAt ? expiresAt.toISOString() : undefined,
-				updatedAt: new Date().toISOString(),
 			});
 		} catch (e) {
 			console.error('[calendar/events] setUnlistedExpiry failed', e);

@@ -70,7 +70,6 @@ export const mealMutations = {
 			photoThumbnailUrl: null,
 			foods: null,
 			createdAt: now,
-			updatedAt: now,
 		};
 		const encrypted: Record<string, unknown> = { ...row };
 		await encryptRecord('meals', encrypted);
@@ -104,7 +103,6 @@ export const mealMutations = {
 			photoThumbnailUrl: dto.photoThumbnailUrl ?? null,
 			foods: dto.foods ?? null,
 			createdAt: now,
-			updatedAt: now,
 		};
 		const encrypted: Record<string, unknown> = { ...row };
 		await encryptRecord('meals', encrypted);
@@ -130,9 +128,7 @@ export const mealMutations = {
 	 * and decrypts it for the caller.
 	 */
 	async update(id: string, dto: UpdateMealDto): Promise<LocalMeal> {
-		const updateData: Record<string, unknown> = {
-			updatedAt: new Date().toISOString(),
-		};
+		const updateData: Record<string, unknown> = {};
 		if (dto.mealType !== undefined) updateData.mealType = dto.mealType;
 		if (dto.description !== undefined) updateData.description = dto.description.trim();
 		if (dto.nutrition !== undefined) updateData.nutrition = dto.nutrition;
@@ -150,7 +146,7 @@ export const mealMutations = {
 	async delete(id: string): Promise<void> {
 		const existing = await db.table<LocalMeal>('meals').get(id);
 		const now = new Date().toISOString();
-		await db.table('meals').update(id, { deletedAt: now, updatedAt: now });
+		await db.table('meals').update(id, { deletedAt: now });
 		emitDomainEvent('MealDeleted', 'food', 'meals', id, {
 			mealId: id,
 			mealType: existing?.mealType ?? '',

@@ -45,7 +45,6 @@ export async function createBlock(input: CreateTimeBlockInput): Promise<string> 
 		icon: input.icon ?? null,
 		projectId: input.projectId ?? null,
 		createdAt: now,
-		updatedAt: now,
 	};
 
 	// Encrypt configured fields (title + description) before write.
@@ -60,7 +59,6 @@ export async function updateBlock(id: string, input: UpdateTimeBlockInput): Prom
 	const now = new Date().toISOString();
 	const diff: Partial<LocalTimeBlock> = {
 		...input,
-		updatedAt: now,
 	};
 	await encryptRecord('timeBlocks', diff);
 	await timeBlockTable.update(id, diff);
@@ -71,7 +69,6 @@ export async function deleteBlock(id: string): Promise<void> {
 	const now = new Date().toISOString();
 	await timeBlockTable.update(id, {
 		deletedAt: now,
-		updatedAt: now,
 	});
 }
 
@@ -85,8 +82,8 @@ export async function linkBlocks(scheduledId: string, loggedId: string): Promise
 		if (scheduled.kind !== 'scheduled') throw new Error('First block must be scheduled');
 		if (logged.kind !== 'logged') throw new Error('Second block must be logged');
 
-		await timeBlockTable.update(scheduledId, { linkedBlockId: loggedId, updatedAt: now });
-		await timeBlockTable.update(loggedId, { linkedBlockId: scheduledId, updatedAt: now });
+		await timeBlockTable.update(scheduledId, { linkedBlockId: loggedId });
+		await timeBlockTable.update(loggedId, { linkedBlockId: scheduledId });
 	});
 }
 
@@ -125,7 +122,7 @@ export async function startFromScheduled(
 	});
 
 	// Link back from scheduled → logged
-	await timeBlockTable.update(scheduledId, { linkedBlockId: loggedId, updatedAt: now });
+	await timeBlockTable.update(scheduledId, { linkedBlockId: loggedId });
 
 	return loggedId;
 }

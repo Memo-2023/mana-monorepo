@@ -44,7 +44,6 @@ async function createManual(input: CreateManualAnswerInput): Promise<string> {
 		rating: null,
 		isAccepted: false,
 		createdAt: now,
-		updatedAt: now,
 	};
 	await encryptRecord('answers', row);
 	await db.table('answers').add(row);
@@ -86,7 +85,6 @@ async function startResearch(opts: StartResearchOptions): Promise<ResearchHandle
 	// 1. Mark the question as researching so the UI flips immediately.
 	await db.table('questions').update(question.id, {
 		status: 'researching',
-		updatedAt: new Date().toISOString(),
 	});
 
 	// 2. Kick off the server-side pipeline.
@@ -108,7 +106,6 @@ async function startResearch(opts: StartResearchOptions): Promise<ResearchHandle
 		citations: [],
 		rating: null,
 		createdAt: now,
-		updatedAt: now,
 	};
 	await encryptRecord('answers', draft);
 	await db.table('answers').add(draft);
@@ -132,7 +129,6 @@ async function startResearch(opts: StartResearchOptions): Promise<ResearchHandle
 		const decrypted = (await decryptRecord('answers', { ...existing })) as LocalAnswer;
 		const updated: Record<string, unknown> = {
 			content: (decrypted.content ?? '') + delta,
-			updatedAt: new Date().toISOString(),
 		};
 		await encryptRecord('answers', updated);
 		await db.table('answers').update(answerId, updated);
@@ -167,7 +163,6 @@ async function startResearch(opts: StartResearchOptions): Promise<ResearchHandle
 				await flush();
 				await db.table('questions').update(question.id, {
 					status: 'open',
-					updatedAt: new Date().toISOString(),
 				});
 				cancel();
 				break;
@@ -223,14 +218,12 @@ async function finaliseAnswer(
 	const update: Record<string, unknown> = {
 		content,
 		citations,
-		updatedAt: new Date().toISOString(),
 	};
 	await encryptRecord('answers', update);
 	await db.table('answers').update(answerId, update);
 
 	await db.table('questions').update(questionId, {
 		status: 'answered',
-		updatedAt: new Date().toISOString(),
 	});
 }
 
@@ -244,20 +237,17 @@ async function accept(answerId: string, questionId: string): Promise<void> {
 		if (a.isAccepted) {
 			await db.table('answers').update(a.id, {
 				isAccepted: false,
-				updatedAt: new Date().toISOString(),
 			});
 		}
 	}
 	await db.table('answers').update(answerId, {
 		isAccepted: true,
-		updatedAt: new Date().toISOString(),
 	});
 }
 
 async function softDelete(answerId: string): Promise<void> {
 	await db.table('answers').update(answerId, {
 		deletedAt: new Date().toISOString(),
-		updatedAt: new Date().toISOString(),
 	});
 }
 
