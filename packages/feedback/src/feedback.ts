@@ -1,8 +1,20 @@
 /**
- * Core feedback types
+ * Core feedback types — Single source of truth for the @mana/feedback hub.
+ *
+ * Mana-analytics' Postgres enums (`feedback.feedback_category`,
+ * `feedback.feedback_status`) MUST mirror these literal unions exactly.
+ * If you add or rename a value here, also write a SQL migration under
+ * services/mana-analytics/drizzle/.
  */
 
-export type FeedbackCategory = 'bug' | 'feature' | 'improvement' | 'question' | 'other';
+export type FeedbackCategory =
+	| 'bug'
+	| 'feature'
+	| 'improvement'
+	| 'question'
+	| 'praise'
+	| 'onboarding-wish'
+	| 'other';
 
 export type FeedbackStatus =
 	| 'submitted'
@@ -43,6 +55,8 @@ export const FEEDBACK_CATEGORY_LABELS: Record<FeedbackCategory, string> = {
 	feature: 'Feature',
 	improvement: 'Verbesserung',
 	question: 'Frage',
+	praise: 'Lob',
+	'onboarding-wish': 'Was ich mir wünsche',
 	other: 'Sonstiges',
 };
 

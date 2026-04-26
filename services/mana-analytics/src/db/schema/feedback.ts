@@ -13,22 +13,27 @@ import {
 
 export const feedbackSchema = pgSchema('feedback');
 
+// Enum values must mirror @mana/feedback's FeedbackCategory / FeedbackStatus
+// unions exactly. Renames or additions need a hand-authored SQL migration
+// under services/mana-analytics/drizzle/ (drizzle-kit push can't safely
+// rename enum values).
 export const feedbackCategoryEnum = pgEnum('feedback_category', [
 	'bug',
 	'feature',
 	'improvement',
 	'question',
 	'praise',
+	'onboarding-wish',
 	'other',
 ]);
 
 export const feedbackStatusEnum = pgEnum('feedback_status', [
-	'new',
-	'reviewed',
+	'submitted',
+	'under_review',
 	'planned',
 	'in_progress',
-	'done',
-	'rejected',
+	'completed',
+	'declined',
 ]);
 
 export const userFeedback = feedbackSchema.table(
@@ -40,7 +45,7 @@ export const userFeedback = feedbackSchema.table(
 		title: text('title'),
 		feedbackText: text('feedback_text').notNull(),
 		category: feedbackCategoryEnum('category').default('other').notNull(),
-		status: feedbackStatusEnum('status').default('new').notNull(),
+		status: feedbackStatusEnum('status').default('submitted').notNull(),
 		isPublic: boolean('is_public').default(true).notNull(),
 		adminResponse: text('admin_response'),
 		voteCount: integer('vote_count').default(0).notNull(),

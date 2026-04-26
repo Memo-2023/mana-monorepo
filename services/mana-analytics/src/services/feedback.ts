@@ -20,6 +20,7 @@ export class FeedbackService {
 			feedbackText: string;
 			category?: string;
 			title?: string;
+			isPublic?: boolean;
 			deviceInfo?: Record<string, unknown>;
 		}
 	) {
@@ -42,6 +43,10 @@ export class FeedbackService {
 				title: title || data.feedbackText.slice(0, 80),
 				feedbackText: data.feedbackText,
 				category: (data.category as any) || 'other',
+				// Honor explicit isPublic from caller; otherwise let the column
+				// default (true) apply. Private intake categories like
+				// 'onboarding-wish' should pass `false`.
+				...(typeof data.isPublic === 'boolean' ? { isPublic: data.isPublic } : {}),
 				deviceInfo: data.deviceInfo,
 			})
 			.returning();

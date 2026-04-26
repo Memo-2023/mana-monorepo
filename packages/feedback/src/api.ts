@@ -8,6 +8,12 @@ export interface CreateFeedbackInput {
 	title?: string;
 	feedbackText: string;
 	category?: FeedbackCategory;
+	/**
+	 * Whether the submission shows up in the public community list.
+	 * Defaults to `true` server-side. Set `false` for private intake
+	 * categories like `onboarding-wish` or `churn-feedback`.
+	 */
+	isPublic?: boolean;
 	deviceInfo?: Record<string, unknown>;
 }
 
