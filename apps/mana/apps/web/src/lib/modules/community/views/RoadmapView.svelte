@@ -9,7 +9,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import type { FeedbackStatus, PublicFeedbackItem } from '@mana/feedback';
-	import { useCommunityFeed, toggleReactionOnItem } from '../queries';
+	import { useCommunityFeed, toggleReactionOnItem } from '../queries.svelte';
 	import ItemCard from '../components/ItemCard.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 

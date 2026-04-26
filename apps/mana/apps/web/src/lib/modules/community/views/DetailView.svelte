@@ -5,7 +5,7 @@
 -->
 <script lang="ts">
 	import type { PublicFeedbackItem, ReactionEmoji } from '@mana/feedback';
-	import { useCommunityItem } from '../queries';
+	import { useCommunityItem } from '../queries.svelte';
 	import ItemCard from '../components/ItemCard.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { feedbackService } from '$lib/api/feedback';
@@ -53,7 +53,7 @@
 			if (view.item && view.item.id === _id) {
 				const myReactions = res.userHasReacted
 					? Array.from(new Set([...(view.item.myReactions ?? []), emoji]))
-					: (view.item.myReactions ?? []).filter((e) => e !== emoji);
+					: (view.item.myReactions ?? []).filter((e: string) => e !== emoji);
 				view.item.reactions = res.reactions;
 				view.item.score = res.score;
 				view.item.myReactions = myReactions;
@@ -64,7 +64,7 @@
 					const old = view.replies[idx];
 					const myReactions = res.userHasReacted
 						? Array.from(new Set([...(old.myReactions ?? []), emoji]))
-						: (old.myReactions ?? []).filter((e) => e !== emoji);
+						: (old.myReactions ?? []).filter((e: string) => e !== emoji);
 					view.replies[idx] = {
 						...old,
 						reactions: res.reactions,

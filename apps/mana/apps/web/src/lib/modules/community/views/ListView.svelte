@@ -7,7 +7,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { FEEDBACK_CATEGORY_LABELS, type FeedbackCategory } from '@mana/feedback';
-	import { useCommunityFeed, toggleReactionOnItem } from '../queries';
+	import { useCommunityFeed, toggleReactionOnItem } from '../queries.svelte';
 	import ItemCard from '../components/ItemCard.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 
