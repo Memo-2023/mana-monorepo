@@ -185,13 +185,34 @@ Logout / Tab-Close → MemoryKeyProvider.setKey(null) → Cyphertext bleibt
 ### Eckdaten
 
 - **120+ Collections** in einer einzigen IndexedDB
-- **Schema-Versionen** 1–10 (V9 fügte updatedAt-Indexes hinzu, V10 die `_activity` Tabelle)
+- **Schema-Versionen** 1–54 (v53 ersetzte `updatedAt`-Indizes durch `_updatedAtIndex`, v54 fügte `_clientIdentity` für stabile Client-IDs hinzu)
 - **Eager Apps**: mana, todo, calendar, contacts, tags, links — syncen beim Start
 - **Lazy Apps**: starten Sync erst beim ersten Modul-Besuch via `ensureAppSynced()`
-- **Conflict Resolution**: ✅ echter Field-Level LWW via `__fieldTimestamps`
+- **Conflict Resolution**: ✅ Origin-gated Field-Level LWW via `__fieldMeta` (siehe Sync Field-Meta Overhaul unten)
 - **Soft Delete** ist Standard via `deletedAt`
 - **At-Rest-Encryption**: AES-GCM-256, server-wrapped Master Key, 27 Tabellen aktiv (Rollout abgeschlossen)
 - **Zero-Knowledge-Modus** (Phase 9 Opt-In): Recovery-Code-basiertes Wrapping ohne Server-seitige Entschlüsselbarkeit, mit Rotate-im-Active-State-Support
+
+### Sync Field-Meta Overhaul (2026-04-26, F1–F7 SHIPPED)
+
+Sieben Phasen, die vier strukturelle Bugs in der Conflict-Detection abgeräumt haben:
+
+- **F1** (`7766ea502`) `__fieldMeta` ersetzt `__fieldTimestamps` + `__fieldActors` + `__lastActor`. Ein Hidden-Field statt drei. Wire-Format `FieldChange = { value, at }` (vorher `{ value, updatedAt }`). mana-sync DB-Spalte `field_timestamps` → `field_meta`, neue Spalte `origin TEXT`.
+- **F2** (`ad5e04a55`) Conflict-Trigger gated auf `localFieldMeta.origin === 'user' && !options.isInitialHydration`. `originFromActor()` in shared-ai mappt actor.kind → `'user' | 'agent' | 'system' | 'migration'`. applyServerChanges stempelt alle Replays als `'server-replay'`. Initial-Pull-Hydration suppress alle Conflicts (Belt-and-Suspenders).
+- **F3** (`6bb9d77be`) `updatedAt` raus aus dem Wire. Read-side computed via `deriveUpdatedAt(record) = max(__fieldMeta[*].at)`. Lokale `_updatedAtIndex`-Schatten-Spalte für Dexie-`orderBy`-Sortierung. v53 Dexie-Migration kopiert `updatedAt` → `_updatedAtIndex` für existing rows. ~382 stamping-sites über 121 Files entfernt.
+- **F4** (`c07db300b`) Server-side Singleton-Bootstrap in mana-auth's `/register`. `bootstrapUserSingletons(userId)` schreibt `userContext` direkt in `mana_sync.sync_changes` mit `client_id='system:bootstrap'` + `origin='system'`. Default-Inhalt mirror't `emptyUserContext()`.
+- **F5** (`d78f57c04`) `userContextStore.ensureDoc()` Public-API entfernt. Internal `getOrCreateLocalDoc()` bleibt als Fallback für brand-new clients deren First-Pull noch nicht durch ist. UI mountet ohne ensureDoc-Race.
+- **F6** (`a031493fe`) Stable `client_id` in Dexie-Tabelle `_clientIdentity`. `restoreClientIdFromDexie()` läuft im (app)-Layout vor `createUnifiedSync` und reconciliated Dexie ↔ localStorage. Dexie ist canonical, localStorage ist fast-read-cache. Survives clear-site-data und incognito flush.
+- **F7** (`2a8e8ff98`) `repair-silent-twin.ts` + `legacy-avatar.ts` Migrationen ersatzlos gelöscht — pre-live, keine Live-Daten brauchen sie. Orphan-localStorage-Flags-Sweep im Boot (`migrations-cleanup.ts`, `119cd2cf8`) räumt die zugehörigen Flags auf.
+
+Die vier Bug-Wurzeln (siehe ursprüngliche Diagnose 2026-04-26):
+
+1. ❌ `updatedAt` als syncbares Feld → entfernt in F3
+2. ❌ Conflict-Detection unterscheidet User-Edit nicht von Replay → Origin-Gate in F2
+3. ❌ Singleton race-anfällig → Server-Bootstrap (F4) + Public-API-Drop (F5)
+4. ❌ `client_id` an localStorage gebunden → Dexie-canonical (F6)
+
+Plan + Implementation-Notes: [`docs/plans/sync-field-meta-overhaul.md`](../../../../../../docs/plans/sync-field-meta-overhaul.md).
 
 ---
 
@@ -220,15 +241,15 @@ Logout / Tab-Close → MemoryKeyProvider.setKey(null) → Cyphertext bleibt
 
 ### 🟢 Mittel — alle erledigt oder in Backlog
 
-| #   | Problem                                  | Status                                                   |
-| --- | ---------------------------------------- | -------------------------------------------------------- |
-| 12  | `changes: any[]` in `applyServerChanges` | ✅ Sprint 3.1 — `SyncChange` Interface                   |
-| 13  | SSE-Buffer akkumuliert ganze Events      | ✅ Backlog 2 — pipelined Reader/Apply mit indexOf-Parser |
-| 14  | Tombstone-Cleanup-Routine fehlt          | ✅ Sprint 4+ — `data-layer-listeners.ts` boot+24h Loop   |
-| 15  | Conflict-Visualisierung im UI            | 🟢 Backlog — UX-Entscheidung                             |
-| 16  | Keine Unit-Tests für `sync.ts`           | ✅ Sprint 3.3 — 20 Tests gegen fake-indexeddb            |
-| 17  | Composite Keys / Multi-Account Indizes   | 🟢 Backlog — wenn Multi-Account aktiv wird               |
-| 18  | Audit-Log / Activity Feed                | ✅ Backlog 3 — `_activity` Table + read API + prune      |
+| #   | Problem                                  | Status                                                                                                                                                               |
+| --- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 12  | `changes: any[]` in `applyServerChanges` | ✅ Sprint 3.1 — `SyncChange` Interface                                                                                                                               |
+| 13  | SSE-Buffer akkumuliert ganze Events      | ✅ Backlog 2 — pipelined Reader/Apply mit indexOf-Parser                                                                                                             |
+| 14  | Tombstone-Cleanup-Routine fehlt          | ✅ Sprint 4+ — `data-layer-listeners.ts` boot+24h Loop                                                                                                               |
+| 15  | Conflict-Visualisierung im UI            | ✅ Sprint 4+ Backlog C — Toast + Restore (`SyncConflictToast`) shipped, F2 (2026-04-26) gated den Trigger auf `origin === 'user'` damit nur echte User-Edits surface |
+| 16  | Keine Unit-Tests für `sync.ts`           | ✅ Sprint 3.3 — 20 Tests gegen fake-indexeddb                                                                                                                        |
+| 17  | Composite Keys / Multi-Account Indizes   | 🟢 Backlog — wenn Multi-Account aktiv wird                                                                                                                           |
+| 18  | Audit-Log / Activity Feed                | ✅ Backlog 3 — `_activity` Table + read API + prune                                                                                                                  |
 
 ---
 

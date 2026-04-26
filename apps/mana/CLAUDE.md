@@ -72,10 +72,10 @@ table.add(encryptedRecord)            ← Dexie write
         │
         ▼
 Dexie hooks (database.ts):
-  - stamp userId
-  - stamp __fieldTimestamps per field
-  - stamp __lastActor + __fieldActors (user / ai / system — see AI Workbench)
-  - record into _pendingChanges  (tagged with appId + actor)
+  - stamp userId (user-level tables only)
+  - stamp __fieldMeta[k] = { at, actor, origin } per field
+  - stamp _updatedAtIndex (local-only shadow for indexed sorts)
+  - record into _pendingChanges  (tagged with appId + actor + origin)
   - record into _activity
         │
         ▼
@@ -94,6 +94,28 @@ applyServerChanges → Dexie hooks (suppressed) → liveQuery → decryptRecord 
 ```
 
 **Deep dive**: [`apps/web/src/lib/data/DATA_LAYER_AUDIT.md`](apps/web/src/lib/data/DATA_LAYER_AUDIT.md) — sync engine, retry/backoff, quota recovery, telemetry, RLS, encryption rollout, threat model. **Single most important file for understanding how the app works under the hood.**
+
+### Conflict-Detection (post 2026-04-26 sync-field-meta-overhaul)
+
+The four bug-roots that made the conflict-toast fire spuriously have all been closed. Architecture today:
+
+- **`__fieldMeta`** (single hidden field per record, replaces the older `__fieldTimestamps` / `__fieldActors` / `__lastActor` triple). Shape: `{ [field]: { at, actor, origin } }`. The Dexie creating/updating hook stamps it on every write; consumers read it via `readFieldMeta()` and `deriveUpdatedAt()` from `$lib/data/sync`.
+- **Origin-tracking**: `originFromActor(actor)` in `@mana/shared-ai` maps `actor.kind` onto `'user' | 'agent' | 'system' | 'migration' | 'server-replay'`. The conflict surface fires only when `localFieldMeta.origin === 'user'` — replay-deltas from server pulls, agent writes, migration helpers, and bootstrap inserts never surface as toasts.
+- **`updatedAt` is no longer a synced data field.** Type-converters compute `updatedAt` on read as `max(__fieldMeta[*].at)` via `deriveUpdatedAt(local)`. For Dexie-indexed sort, every record carries a non-synced `_updatedAtIndex` shadow column that the hook stamps automatically — `orderBy('_updatedAtIndex')` instead of `orderBy('updatedAt')`.
+- **Server-side singleton bootstrap**: mana-auth's `/register` flow writes the `userContext` singleton straight into `mana_sync.sync_changes` with `origin: 'system'`. The webapp's `getOrCreateLocalDoc()` survives only as a fallback for the rare race where the first pull hasn't landed yet.
+- **Stable `client_id`**: Dexie table `_clientIdentity` (single row keyed by `id='self'`) is the canonical source of the per-device sync identity. `restoreClientIdFromDexie()` runs once at boot and reconciles localStorage ↔ Dexie — a localStorage wipe gets restored from Dexie, the server keeps seeing the same client.
+
+When writing new code:
+
+| Pattern | Use this |
+| --- | --- |
+| Read "last modified" for UI | `deriveUpdatedAt(local)` (returns ISO string) |
+| Sort a Dexie query by recency | `.orderBy('_updatedAtIndex')` |
+| Stamp a system/migration write | wrap in `runAsAsync(makeSystemActor(SYSTEM_MIGRATION, '<label>'), async () => { … })` |
+| Schreib Local-Type | omit `updatedAt: string` field — it's derived, not stored |
+| Add a new singleton | Bootstrap server-side in mana-auth (see `services/mana-auth/src/services/bootstrap-singletons.ts`) instead of `ensureDoc()` on the client |
+
+Plan with full per-phase rationale: [`docs/plans/sync-field-meta-overhaul.md`](../../docs/plans/sync-field-meta-overhaul.md).
 
 ## At-Rest Encryption
 
