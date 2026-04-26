@@ -3,6 +3,7 @@
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { _ } from 'svelte-i18n';
 	import { useUserContext } from './queries';
 	import { userContextStore } from './stores/user-context.svelte';
 	import { getProgress } from './questions';
@@ -56,15 +57,15 @@
 		if (Array.isArray(editValue)) editValue = editValue.filter((t) => t !== tag);
 	}
 
-	const WEEKDAY_NAMES: Record<number, string> = {
-		0: 'So',
-		1: 'Mo',
-		2: 'Di',
-		3: 'Mi',
-		4: 'Do',
-		5: 'Fr',
-		6: 'Sa',
-	};
+	const WEEKDAY_NAMES = $derived<Record<number, string>>({
+		0: $_('profile.context.weekday_0'),
+		1: $_('profile.context.weekday_1'),
+		2: $_('profile.context.weekday_2'),
+		3: $_('profile.context.weekday_3'),
+		4: $_('profile.context.weekday_4'),
+		5: $_('profile.context.weekday_5'),
+		6: $_('profile.context.weekday_6'),
+	});
 
 	// Enter / Space on a non-button click-target counts as activation, same
 	// as a button would. Used to make the "tap a section to edit" surfaces
@@ -82,13 +83,17 @@
 <div class="overview">
 	<div class="identity-card">
 		<div class="avatar-area">
-			{#if user?.image}<img src={user.image} alt="Avatar" class="avatar" />
+			{#if user?.image}<img
+					src={user.image}
+					alt={$_('profile.context.avatar_alt')}
+					class="avatar"
+				/>
 			{:else}<div class="avatar-placeholder">
-					{(user?.name ?? 'U').slice(0, 2).toUpperCase()}
+					{(user?.name ?? '?').slice(0, 2).toUpperCase()}
 				</div>{/if}
 		</div>
 		<div class="identity-info">
-			<h2 class="user-name">{user?.name ?? 'Unbekannt'}</h2>
+			<h2 class="user-name">{user?.name ?? $_('profile.context.unknown_user')}</h2>
 			<p class="user-email">{user?.email ?? ''}</p>
 			{#if ctx?.about?.occupation}<p class="user-meta">{ctx.about.occupation}</p>{/if}
 			{#if ctx?.about?.location}<p class="user-meta">{ctx.about.location}</p>{/if}
@@ -99,7 +104,9 @@
 		<button class="nudge-card" onclick={onStartInterview}>
 			<div class="nudge-bar"><div class="nudge-fill" style:width="{progress.percent}%"></div></div>
 			<p class="nudge-text">
-				Profil zu {progress.percent}% ausgefüllt — <strong>Interview starten</strong>
+				{$_('profile.context.nudge_pre', { values: { percent: progress.percent } })}<strong
+					>{$_('profile.context.nudge_action')}</strong
+				>
 			</p>
 		</button>
 	{/if}
@@ -107,7 +114,7 @@
 	<div class="sections">
 		{#if ctx?.about?.bio || editingField === 'about.bio'}
 			<section class="section-card">
-				<h3 class="section-title">Über mich</h3>
+				<h3 class="section-title">{$_('profile.context.section_about')}</h3>
 				{#if editingField === 'about.bio'}
 					<textarea
 						class="edit-textarea"
@@ -116,8 +123,9 @@
 						rows="3"
 					></textarea>
 					<div class="edit-actions">
-						<button class="edit-btn" onclick={cancelEdit}>Abbrechen</button>
-						<button class="edit-btn primary" onclick={() => saveEdit('about.bio')}>Speichern</button
+						<button class="edit-btn" onclick={cancelEdit}>{$_('profile.cancel')}</button>
+						<button class="edit-btn primary" onclick={() => saveEdit('about.bio')}
+							>{$_('profile.save')}</button
 						>
 					</div>
 				{:else}<div
@@ -133,7 +141,7 @@
 		{/if}
 
 		<section class="section-card">
-			<h3 class="section-title">Interessen</h3>
+			<h3 class="section-title">{$_('profile.context.section_interests')}</h3>
 			{#if editingField === 'interests'}
 				<div class="tags-edit">
 					<div class="tags-list">
@@ -146,7 +154,7 @@
 						type="text"
 						class="edit-input"
 						bind:value={tagInput}
-						placeholder="Neues Interesse + Enter"
+						placeholder={$_('profile.context.ph_interest')}
 						onkeydown={(e) => {
 							if (e.key === 'Enter' || e.key === ',') {
 								e.preventDefault();
@@ -156,8 +164,9 @@
 						onblur={addEditTag}
 					/>
 					<div class="edit-actions">
-						<button class="edit-btn" onclick={cancelEdit}>Abbrechen</button>
-						<button class="edit-btn primary" onclick={() => saveEdit('interests')}>Speichern</button
+						<button class="edit-btn" onclick={cancelEdit}>{$_('profile.cancel')}</button>
+						<button class="edit-btn primary" onclick={() => saveEdit('interests')}
+							>{$_('profile.save')}</button
 						>
 					</div>
 				</div>
@@ -177,14 +186,14 @@
 					onclick={() => {
 						editValue = [];
 						editingField = 'interests';
-					}}>Interessen hinzufügen</button
+					}}>{$_('profile.context.add_interests')}</button
 				>
 			{/if}
 		</section>
 
 		<!-- Routine -->
 		<section class="section-card">
-			<h3 class="section-title">Tagesablauf</h3>
+			<h3 class="section-title">{$_('profile.context.section_routine')}</h3>
 			{#if ctx?.routine && (ctx.routine.wakeUp || ctx.routine.workStart || ctx.routine.bedtime)}
 				<div
 					class="routine-grid"
@@ -194,36 +203,37 @@
 					onkeydown={onActivate(() => onStartInterview())}
 				>
 					{#if ctx.routine.wakeUp}<div class="routine-item">
-							<span class="routine-label">Aufstehen</span><span class="routine-value"
-								>{ctx.routine.wakeUp}</span
+							<span class="routine-label">{$_('profile.context.routine_wake')}</span><span
+								class="routine-value">{ctx.routine.wakeUp}</span
 							>
 						</div>{/if}
 					{#if ctx.routine.workStart && ctx.routine.workEnd}<div class="routine-item">
-							<span class="routine-label">Arbeit</span><span class="routine-value"
-								>{ctx.routine.workStart} – {ctx.routine.workEnd}</span
+							<span class="routine-label">{$_('profile.context.routine_work')}</span><span
+								class="routine-value">{ctx.routine.workStart} – {ctx.routine.workEnd}</span
 							>
 						</div>{/if}
 					{#if ctx.routine.bedtime}<div class="routine-item">
-							<span class="routine-label">Schlafenszeit</span><span class="routine-value"
-								>{ctx.routine.bedtime}</span
+							<span class="routine-label">{$_('profile.context.routine_bedtime')}</span><span
+								class="routine-value">{ctx.routine.bedtime}</span
 							>
 						</div>{/if}
 					{#if ctx.routine.workDays?.length}<div class="routine-item">
-							<span class="routine-label">Arbeitstage</span><span class="routine-value"
+							<span class="routine-label">{$_('profile.context.routine_workdays')}</span><span
+								class="routine-value"
 								>{ctx.routine.workDays.map((d: number) => WEEKDAY_NAMES[d]).join(', ')}</span
 							>
 						</div>{/if}
 				</div>
 			{:else}
 				<button class="empty-hint" onclick={onStartInterview}
-					>Tagesablauf im Interview ausfüllen</button
+					>{$_('profile.context.empty_routine')}</button
 				>
 			{/if}
 		</section>
 
 		<!-- Nutrition -->
 		<section class="section-card">
-			<h3 class="section-title">Ernährung</h3>
+			<h3 class="section-title">{$_('profile.context.section_nutrition')}</h3>
 			{#if ctx?.nutrition && (ctx.nutrition.diet || ctx.nutrition.allergies?.length)}
 				<div>
 					{#if ctx.nutrition.diet}<div
@@ -249,7 +259,7 @@
 									type="text"
 									class="edit-input"
 									bind:value={tagInput}
-									placeholder="Allergie + Enter"
+									placeholder={$_('profile.context.ph_allergy')}
 									onkeydown={(e) => {
 										if (e.key === 'Enter' || e.key === ',') {
 											e.preventDefault();
@@ -259,9 +269,9 @@
 									onblur={addEditTag}
 								/>
 								<div class="edit-actions">
-									<button class="edit-btn" onclick={cancelEdit}>Abbrechen</button>
+									<button class="edit-btn" onclick={cancelEdit}>{$_('profile.cancel')}</button>
 									<button class="edit-btn primary" onclick={() => saveEdit('nutrition.allergies')}
-										>Speichern</button
+										>{$_('profile.save')}</button
 									>
 								</div>
 							</div>
@@ -285,7 +295,7 @@
 				</div>
 			{:else}
 				<button class="empty-hint" onclick={onStartInterview}
-					>Ernährung im Interview ausfüllen</button
+					>{$_('profile.context.empty_nutrition')}</button
 				>
 			{/if}
 		</section>
@@ -293,10 +303,10 @@
 		<!-- Leisure -->
 		{#if ctx?.leisure && (ctx.leisure.media?.length || ctx.leisure.sports?.length || ctx.leisure.pets)}
 			<section class="section-card">
-				<h3 class="section-title">Freizeit</h3>
+				<h3 class="section-title">{$_('profile.context.section_leisure')}</h3>
 				{#if ctx.leisure.sports?.length}
 					<div class="sub-section">
-						<span class="routine-label">Sport</span>
+						<span class="routine-label">{$_('profile.context.leisure_sports')}</span>
 						<div
 							class="tags-list"
 							role="button"
@@ -310,7 +320,7 @@
 				{/if}
 				{#if ctx.leisure.media?.length}
 					<div class="sub-section">
-						<span class="routine-label">Medien</span>
+						<span class="routine-label">{$_('profile.context.leisure_media')}</span>
 						<div
 							class="tags-list"
 							role="button"
@@ -324,7 +334,7 @@
 				{/if}
 				{#if ctx.leisure.pets}
 					<div class="sub-section">
-						<span class="routine-label">Haustiere</span>
+						<span class="routine-label">{$_('profile.context.leisure_pets')}</span>
 						<span
 							class="section-text"
 							role="button"
@@ -340,7 +350,7 @@
 
 		<!-- Goals -->
 		<section class="section-card">
-			<h3 class="section-title">Ziele</h3>
+			<h3 class="section-title">{$_('profile.context.section_goals')}</h3>
 			{#if editingField === 'goals'}
 				<div class="tags-edit">
 					<div class="tags-list">
@@ -353,7 +363,7 @@
 						type="text"
 						class="edit-input"
 						bind:value={tagInput}
-						placeholder="Neues Ziel + Enter"
+						placeholder={$_('profile.context.ph_goal')}
 						onkeydown={(e) => {
 							if (e.key === 'Enter' || e.key === ',') {
 								e.preventDefault();
@@ -363,8 +373,10 @@
 						onblur={addEditTag}
 					/>
 					<div class="edit-actions">
-						<button class="edit-btn" onclick={cancelEdit}>Abbrechen</button>
-						<button class="edit-btn primary" onclick={() => saveEdit('goals')}>Speichern</button>
+						<button class="edit-btn" onclick={cancelEdit}>{$_('profile.cancel')}</button>
+						<button class="edit-btn primary" onclick={() => saveEdit('goals')}
+							>{$_('profile.save')}</button
+						>
 					</div>
 				</div>
 			{:else if ctx?.goals?.length}
@@ -383,14 +395,14 @@
 					onclick={() => {
 						editValue = [];
 						editingField = 'goals';
-					}}>Ziele hinzufügen</button
+					}}>{$_('profile.context.add_goals')}</button
 				>
 			{/if}
 		</section>
 
 		<!-- Social / Work style -->
 		<section class="section-card">
-			<h3 class="section-title">Arbeitsstil</h3>
+			<h3 class="section-title">{$_('profile.context.section_work')}</h3>
 			{#if ctx?.social && (ctx.social.workStyle || ctx.social.communication || ctx.social.livingSetup)}
 				<div
 					class="routine-grid"
@@ -400,31 +412,31 @@
 					onkeydown={onActivate(() => onStartInterview())}
 				>
 					{#if ctx.social.workStyle}<div class="routine-item">
-							<span class="routine-label">Arbeitsweise</span><span class="routine-value"
-								>{ctx.social.workStyle}</span
+							<span class="routine-label">{$_('profile.context.social_workstyle')}</span><span
+								class="routine-value">{ctx.social.workStyle}</span
 							>
 						</div>{/if}
 					{#if ctx.social.communication}<div class="routine-item">
-							<span class="routine-label">Kommunikation</span><span class="routine-value"
-								>{ctx.social.communication}</span
+							<span class="routine-label">{$_('profile.context.social_communication')}</span><span
+								class="routine-value">{ctx.social.communication}</span
 							>
 						</div>{/if}
 					{#if ctx.social.livingSetup}<div class="routine-item">
-							<span class="routine-label">Wohnsituation</span><span class="routine-value"
-								>{ctx.social.livingSetup}</span
+							<span class="routine-label">{$_('profile.context.social_living')}</span><span
+								class="routine-value">{ctx.social.livingSetup}</span
 							>
 						</div>{/if}
 				</div>
 			{:else}
 				<button class="empty-hint" onclick={onStartInterview}
-					>Arbeitsstil im Interview ausfüllen</button
+					>{$_('profile.context.empty_work')}</button
 				>
 			{/if}
 		</section>
 
 		<!-- Languages -->
 		<section class="section-card">
-			<h3 class="section-title">Sprachen</h3>
+			<h3 class="section-title">{$_('profile.context.section_languages')}</h3>
 			{#if editingField === 'about.languages'}
 				<div class="tags-edit">
 					<div class="tags-list">
@@ -437,7 +449,7 @@
 						type="text"
 						class="edit-input"
 						bind:value={tagInput}
-						placeholder="Sprache + Enter"
+						placeholder={$_('profile.context.ph_language')}
 						onkeydown={(e) => {
 							if (e.key === 'Enter' || e.key === ',') {
 								e.preventDefault();
@@ -447,9 +459,9 @@
 						onblur={addEditTag}
 					/>
 					<div class="edit-actions">
-						<button class="edit-btn" onclick={cancelEdit}>Abbrechen</button>
+						<button class="edit-btn" onclick={cancelEdit}>{$_('profile.cancel')}</button>
 						<button class="edit-btn primary" onclick={() => saveEdit('about.languages')}
-							>Speichern</button
+							>{$_('profile.save')}</button
 						>
 					</div>
 				</div>
@@ -469,7 +481,7 @@
 					onclick={() => {
 						editValue = [];
 						editingField = 'about.languages';
-					}}>Sprachen hinzufügen</button
+					}}>{$_('profile.context.add_languages')}</button
 				>
 			{/if}
 		</section>
