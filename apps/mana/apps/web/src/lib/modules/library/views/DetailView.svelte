@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { _ } from 'svelte-i18n';
 	import {
 		VisibilityPicker,
 		SharedLinkControls,
@@ -10,7 +11,7 @@
 	import RatingStars from '../components/RatingStars.svelte';
 	import EntryForm from '../components/EntryForm.svelte';
 	import ProgressControls from '../components/ProgressControls.svelte';
-	import { KIND_LABELS, STATUS_LABELS, BOOK_FORMAT_LABELS } from '../constants';
+	import { KIND_LABELS } from '../constants';
 	import { libraryEntriesStore } from '../stores/entries.svelte';
 	import type { LibraryEntry, LibraryStatus } from '../types';
 
@@ -55,7 +56,8 @@
 	}
 
 	async function onDelete() {
-		if (!confirm(`Eintrag "${entry.title}" wirklich löschen?`)) return;
+		if (!confirm($_('library.detail_view.confirm_delete', { values: { title: entry.title } })))
+			return;
 		await libraryEntriesStore.deleteEntry(entry.id);
 		goto('/library');
 	}
@@ -64,19 +66,15 @@
 		await libraryEntriesStore.restartEntry(entry.id);
 	}
 
-	const restartLabel = $derived.by(() => {
-		switch (entry.kind) {
-			case 'book':
-			case 'comic':
-				return 'Nochmal lesen';
-			default:
-				return 'Nochmal sehen';
-		}
-	});
+	const restartLabel = $derived(
+		entry.kind === 'book' || entry.kind === 'comic'
+			? $_('library.detail_view.restart_read')
+			: $_('library.detail_view.restart_watch')
+	);
 </script>
 
 <div class="detail">
-	<a href="/library" class="back">← Zurück zur Bibliothek</a>
+	<a href="/library" class="back">{$_('library.detail_view.action_back')}</a>
 
 	{#if editing}
 		<EntryForm mode="edit" initial={entry} onclose={() => (editing = false)} />
@@ -86,17 +84,24 @@
 				<CoverImage url={entry.coverUrl} kind={entry.kind} alt={entry.title} size="lg" />
 				<div class="cover-actions">
 					<button type="button" onclick={() => (editing = true)} class="primary">
-						Bearbeiten
+						{$_('library.detail_view.action_edit')}
 					</button>
 					<button
 						type="button"
 						onclick={onToggleFavorite}
 						class="icon-btn"
-						aria-label={entry.isFavorite ? 'Favorit entfernen' : 'Favorisieren'}
+						aria-label={entry.isFavorite
+							? $_('library.detail_view.action_unfavorite')
+							: $_('library.detail_view.action_favorite')}
 					>
 						{entry.isFavorite ? '★' : '☆'}
 					</button>
-					<button type="button" onclick={onDelete} class="icon-btn danger" aria-label="Löschen">
+					<button
+						type="button"
+						onclick={onDelete}
+						class="icon-btn danger"
+						aria-label={$_('library.detail_view.action_delete')}
+					>
 						🗑
 					</button>
 				</div>
@@ -105,7 +110,7 @@
 			<div class="meta-col">
 				<div class="kind-pill">
 					{KIND_LABELS[entry.kind].emoji}
-					{KIND_LABELS[entry.kind].de}
+					{$_('library.kinds.' + entry.kind)}
 				</div>
 				<h1>{entry.title}</h1>
 				{#if entry.originalTitle && entry.originalTitle !== entry.title}
@@ -128,7 +133,7 @@
 							class:active={entry.status === s}
 							onclick={() => onStatusChange(s)}
 						>
-							{STATUS_LABELS[s].de}
+							{$_('library.statuses.' + s)}
 						</button>
 					{/each}
 				</div>
@@ -137,8 +142,15 @@
 					<div class="times-row">
 						{#if entry.times > 0}
 							<span class="times">
-								{entry.kind === 'book' || entry.kind === 'comic' ? 'Gelesen' : 'Gesehen'}:
-								{entry.times}×
+								{$_('library.detail_view.times_value', {
+									values: {
+										label:
+											entry.kind === 'book' || entry.kind === 'comic'
+												? $_('library.detail_view.times_read')
+												: $_('library.detail_view.times_seen'),
+										count: entry.times,
+									},
+								})}
 							</span>
 						{/if}
 						{#if entry.status === 'completed'}
@@ -161,12 +173,12 @@
 				{/if}
 
 				<dl class="details">
-					<dt>Sichtbarkeit</dt>
+					<dt>{$_('library.detail_view.label_visibility')}</dt>
 					<dd>
 						<VisibilityPicker level={entry.visibility} onChange={onVisibilityChange} />
 					</dd>
 					{#if entry.visibility === 'unlisted' && entry.unlistedToken && shareUrl}
-						<dt>Link</dt>
+						<dt>{$_('library.detail_view.label_link')}</dt>
 						<dd>
 							<SharedLinkControls
 								token={entry.unlistedToken}
@@ -180,59 +192,73 @@
 					{/if}
 					{#if entry.details.kind === 'book'}
 						{#if entry.details.pages}
-							<dt>Seiten</dt>
+							<dt>{$_('library.detail_view.label_pages')}</dt>
 							<dd>
 								{entry.details.currentPage
-									? `${entry.details.currentPage} / ${entry.details.pages}`
+									? $_('library.detail_view.pages_value', {
+											values: {
+												current: entry.details.currentPage,
+												total: entry.details.pages,
+											},
+										})
 									: entry.details.pages}
 							</dd>
 						{/if}
 						{#if entry.details.format}
-							<dt>Format</dt>
-							<dd>{BOOK_FORMAT_LABELS[entry.details.format].de}</dd>
+							<dt>{$_('library.detail_view.label_format')}</dt>
+							<dd>{$_('library.book_formats.' + entry.details.format)}</dd>
 						{/if}
 					{:else if entry.details.kind === 'movie'}
 						{#if entry.details.runtimeMin}
-							<dt>Laufzeit</dt>
-							<dd>{entry.details.runtimeMin} min</dd>
+							<dt>{$_('library.detail_view.label_runtime')}</dt>
+							<dd>
+								{$_('library.detail_view.runtime_value', {
+									values: { minutes: entry.details.runtimeMin },
+								})}
+							</dd>
 						{/if}
 						{#if entry.details.director}
-							<dt>Regie</dt>
+							<dt>{$_('library.detail_view.label_director')}</dt>
 							<dd>{entry.details.director}</dd>
 						{/if}
 					{:else if entry.details.kind === 'series'}
 						{#if entry.details.totalSeasons}
-							<dt>Staffeln</dt>
+							<dt>{$_('library.detail_view.label_seasons')}</dt>
 							<dd>{entry.details.totalSeasons}</dd>
 						{/if}
 						{#if entry.details.totalEpisodes}
-							<dt>Episoden</dt>
+							<dt>{$_('library.detail_view.label_episodes')}</dt>
 							<dd>{entry.details.totalEpisodes}</dd>
 						{/if}
 					{:else if entry.details.kind === 'comic'}
 						{#if entry.details.publisher}
-							<dt>Verlag</dt>
+							<dt>{$_('library.detail_view.label_publisher')}</dt>
 							<dd>{entry.details.publisher}</dd>
 						{/if}
 						{#if entry.details.issueCount}
-							<dt>Ausgaben</dt>
+							<dt>{$_('library.detail_view.label_issues')}</dt>
 							<dd>
 								{entry.details.currentIssue
-									? `${entry.details.currentIssue} / ${entry.details.issueCount}`
+									? $_('library.detail_view.pages_value', {
+											values: {
+												current: entry.details.currentIssue,
+												total: entry.details.issueCount,
+											},
+										})
 									: entry.details.issueCount}
 							</dd>
 						{/if}
 						{#if entry.details.isOngoing}
-							<dt>Status</dt>
-							<dd>laufend</dd>
+							<dt>{$_('library.detail_view.label_status')}</dt>
+							<dd>{$_('library.detail_view.status_ongoing')}</dd>
 						{/if}
 					{/if}
 					{#if entry.startedAt}
-						<dt>Gestartet</dt>
+						<dt>{$_('library.detail_view.label_started')}</dt>
 						<dd>{entry.startedAt}</dd>
 					{/if}
 					{#if entry.completedAt}
-						<dt>Fertig</dt>
+						<dt>{$_('library.detail_view.label_completed')}</dt>
 						<dd>{entry.completedAt}</dd>
 					{/if}
 				</dl>
@@ -241,7 +267,7 @@
 
 				{#if entry.review}
 					<section class="review">
-						<h2>Review</h2>
+						<h2>{$_('library.detail_view.section_review')}</h2>
 						<p>{entry.review}</p>
 					</section>
 				{/if}

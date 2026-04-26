@@ -10,6 +10,7 @@
 	"apps/mana/apps/web/src/lib/modules/invoices/constants.ts": 1,
 	"apps/mana/apps/web/src/lib/modules/invoices/ListView.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/invoices/views/DetailView.svelte": 1,
+	"apps/mana/apps/web/src/lib/modules/library/views/DetailView.svelte": 3,
 	"apps/mana/apps/web/src/lib/modules/period/ListView.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/plants/ListView.svelte": 5,
 	"apps/mana/apps/web/src/lib/modules/quotes/components/QuoteCard.svelte": 4,
