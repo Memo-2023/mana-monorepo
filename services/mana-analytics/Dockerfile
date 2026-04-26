@@ -10,6 +10,7 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY services/mana-analytics/package.json ./services/mana-analytics/
 COPY packages/shared-hono ./packages/shared-hono
+COPY packages/shared-logger ./packages/shared-logger
 
 # Install only mana-analytics and its workspace deps
 RUN pnpm install --filter @mana/analytics... --no-frozen-lockfile --ignore-scripts
