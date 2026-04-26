@@ -1,13 +1,11 @@
 <!--
-  Comic list view — grid of stories in the active space, with a "+"
-  CTA at the top to jump into the create flow. Empty-state nudges
-  first-time users to check their face-ref first (comics can't
-  render without a Protagonist).
+  Comic stories list view — grid of stories in the active space.
+  The face-ref upload banner lives one level up in the module-root
+  ListView (above the tabs), so we don't repeat it here per tab.
 -->
 <script lang="ts">
-	import { Plus, UserCircle } from '@mana/shared-icons';
+	import { Plus } from '@mana/shared-icons';
 	import { getActiveSpace } from '$lib/data/scope';
-	import { useImageByPrimary } from '$lib/modules/profile/queries';
 	import { useAllStories } from '../queries';
 	import StoryCard from '../components/StoryCard.svelte';
 
@@ -15,8 +13,6 @@
 	const stories = $derived(stories$.value ?? []);
 
 	const activeSpace = $derived(getActiveSpace());
-	const face$ = useImageByPrimary('face-ref');
-	const hasFace = $derived(Boolean(face$.value?.mediaId));
 </script>
 
 <div class="space-y-4">
@@ -37,21 +33,6 @@
 			Neue Story
 		</a>
 	</header>
-
-	{#if !hasFace && !face$.loading}
-		<div class="rounded-xl border border-dashed border-border bg-background/50 p-4">
-			<div class="flex items-start gap-3 text-sm">
-				<UserCircle size={18} class="mt-0.5 flex-shrink-0 text-primary" />
-				<div class="space-y-1">
-					<p class="font-medium text-foreground">Lade erst dein Gesichtsbild hoch</p>
-					<p class="text-xs text-muted-foreground">
-						Ohne Face-Ref im aktiven Space kann kein Comic-Panel generiert werden. Hochladen in
-						<a href="/profile/me-images" class="text-primary hover:underline">Profil → Bilder</a>.
-					</p>
-				</div>
-			</div>
-		</div>
-	{/if}
 
 	{#if stories.length > 0}
 		<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
