@@ -71,6 +71,7 @@
 	} from '$lib/modules/memoro/llm-watcher.svelte';
 	import { createUnifiedSync, restoreClientIdFromDexie } from '$lib/data/sync';
 	import { cleanupOrphanMigrationFlags } from '$lib/data/migrations-cleanup';
+	import { bootstrapSingletons } from '$lib/data/bootstrap-singletons';
 	import { syncBilling } from '$lib/stores/sync-billing.svelte';
 	import { networkStore } from '$lib/stores/network.svelte';
 	import { db } from '$lib/data/database';
@@ -636,6 +637,12 @@
 			// Sweep stale localStorage flags from migration helpers that
 			// have since been deleted (F7 + future cleanups).
 			cleanupOrphanMigrationFlags();
+			// Reconcile per-user + per-Space singletons via mana-auth's
+			// idempotent bootstrap endpoint before the sync engine starts
+			// pulling. Best-effort — failures fall back to the in-store
+			// `getOrCreateLocalDoc()` path that handles the rare race
+			// where a write happens before the bootstrap row arrives.
+			void bootstrapSingletons();
 			const getToken = () => authStore.getValidToken();
 			unifiedSync = createUnifiedSync(SYNC_SERVER_URL, getToken, syncBilling.active);
 			// Expose on window for SYNC_DEBUG.md (Schritt C). Not a security

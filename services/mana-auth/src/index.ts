@@ -31,6 +31,7 @@ import { createPasskeyRoutes } from './routes/passkeys';
 import { createGuildRoutes } from './routes/guilds';
 import { createApiKeyRoutes, createApiKeyValidationRoute } from './routes/api-keys';
 import { createMeRoutes } from './routes/me';
+import { createMeBootstrapRoutes } from './routes/me-bootstrap';
 import { createOnboardingRoutes } from './routes/onboarding';
 import { createEncryptionVaultRoutes } from './routes/encryption-vault';
 import { createAiMissionGrantRoutes } from './routes/ai-mission-grant';
@@ -137,6 +138,13 @@ app.route('/api/v1/me/ai-mission-grant', createAiMissionGrantRoutes(missionGrant
 // Per-user "did you finish the 3-screen onboarding flow yet" state.
 // See docs/plans/onboarding-flow.md.
 app.route('/api/v1/me/onboarding', createOnboardingRoutes(db));
+
+// ─── Singleton Bootstrap ────────────────────────────────────
+// Idempotent reconciliation endpoint for per-user + per-Space sync
+// singletons (userContext, kontextDoc). Webapp boot calls this once;
+// signup-time hooks remain the happy path. See
+// docs/plans/sync-field-meta-overhaul.md and routes/me-bootstrap.ts.
+app.route('/api/v1/me/bootstrap-singletons', createMeBootstrapRoutes(db, config.syncDatabaseUrl));
 
 // ─── Settings ──────────────────────────────────────────────
 

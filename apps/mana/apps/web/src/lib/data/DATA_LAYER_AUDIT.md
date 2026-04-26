@@ -206,6 +206,7 @@ Sieben Phasen, die vier strukturelle Bugs in der Conflict-Detection abgeräumt h
 - **F6** (`a031493fe`) Stable `client_id` in Dexie-Tabelle `_clientIdentity`. `restoreClientIdFromDexie()` läuft im (app)-Layout vor `createUnifiedSync` und reconciliated Dexie ↔ localStorage. Dexie ist canonical, localStorage ist fast-read-cache. Survives clear-site-data und incognito flush.
 - **F7** (`2a8e8ff98`) `repair-silent-twin.ts` + `legacy-avatar.ts` Migrationen ersatzlos gelöscht — pre-live, keine Live-Daten brauchen sie. Orphan-localStorage-Flags-Sweep im Boot (`migrations-cleanup.ts`, `119cd2cf8`) räumt die zugehörigen Flags auf.
 - **F3-fu (v55 cleanup)** (_pending_) Dexie v55 row-rewrite: löscht den Orphan-`updatedAt`-Wert aus jedem Row in `Object.keys(TABLE_TO_APP)`. v53 hatte ihn bewusst stehengelassen (Comment "next-version upgrade can drop it"); nach F3+F5 liest niemand mehr `row.updatedAt`, also pure waste. Idempotent — rows ohne das Feld sind ein no-op.
+- **F4-robust (Endpoint)** (_pending_) Bootstrap-Funktionen idempotent (existence-check) + expliziter Endpoint `POST /api/v1/me/bootstrap-singletons`. Webapp callt ihn auf Boot vor `createUnifiedSync`. Signup-Hooks bleiben als happy-path; Endpoint ist Reconciliation belt-and-suspenders, sodass eine transient mana_sync-Outage beim Signup nicht den User mit `getOrCreateLocalDoc()`-Race auf erstem Write strandet.
 
 Die vier Bug-Wurzeln (siehe ursprüngliche Diagnose 2026-04-26):
 

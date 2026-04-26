@@ -16,15 +16,20 @@
  *     empty default in plaintext, the client's `decryptRecord` skips
  *     non-envelope strings so this is safe).
  *
- * Idempotency: `ON CONFLICT (...) DO NOTHING` on the sync_changes primary
- * key would only catch re-inserts of the same row id, which never happens
- * (UUIDs are fresh per call). Instead the caller MUST gate on the first
- * real creation event — the user-create hook fires once per real signup,
- * and the personal-space + organization hooks fire once per real Space
- * creation. Calling either bootstrap twice for the same target produces
- * two insert rows; field-LWW replay collapses them on the client (latest
- * `at` wins). Harmless but wasteful, hence the `created: true` gate in
- * `createPersonalSpaceFor`'s caller.
+ * Idempotency: each function performs an existence-check on
+ * `sync_changes` before inserting — if a row matching the singleton's
+ * scope already exists, the call is a no-op. This makes the bootstrap
+ * safe to run from multiple sources without producing duplicate rows:
+ *   - signup-time hooks (databaseHooks.user.create.after,
+ *     organizationHooks.afterCreateOrganization) — fire on the happy
+ *     path
+ *   - boot-time endpoint (POST /api/v1/me/bootstrap-singletons) — fires
+ *     on every webapp boot as a reconciliation belt-and-suspenders
+ *
+ * The TOCTOU race between two concurrent callers can theoretically
+ * still produce a duplicate insert, but field-LWW collapses duplicates
+ * harmlessly on the client (latest `at` wins). The check is a
+ * waste-reduction, not a correctness mechanism.
  */
 
 import postgres from 'postgres';
@@ -97,17 +102,32 @@ function emptyKontextDocData(): Record<string, unknown> {
 }
 
 /**
- * Insert the per-user singletons into mana_sync.sync_changes. Called
- * fire-and-forget from the post-signUp hook in routes/auth.ts; failures
- * are logged but do not abort registration (the webapp's
- * `getOrCreateLocalDoc()` is still in place as a fallback for the rare
- * race where the first pull hasn't landed yet).
+ * Insert the per-user singletons into mana_sync.sync_changes. Idempotent
+ * — skips the insert if a row for `(userContext, 'singleton', userId)`
+ * already exists. Called from the post-signUp hook in routes/auth.ts and
+ * from the boot-time `/me/bootstrap-singletons` endpoint; both are
+ * fire-and-forget at the caller, but the caller can also `await` it
+ * (the boot endpoint does) and report failure to the client without
+ * causing a write conflict.
+ *
+ * Returns true if an insert was actually written, false if the
+ * idempotency check skipped it.
  */
 export async function bootstrapUserSingletons(
 	userId: string,
 	syncSql: ReturnType<typeof postgres>
-): Promise<void> {
+): Promise<boolean> {
 	if (!userId) throw new Error('bootstrapUserSingletons: empty userId');
+
+	const existing = await syncSql<Array<{ exists: number }>>`
+		SELECT 1 AS exists
+		FROM sync_changes
+		WHERE table_name = 'userContext'
+			AND record_id = 'singleton'
+			AND user_id = ${userId}
+		LIMIT 1
+	`;
+	if (existing.length > 0) return false;
 
 	const now = new Date().toISOString();
 	const data = emptyUserContextData(userId);
@@ -127,27 +147,46 @@ export async function bootstrapUserSingletons(
 			${BOOTSTRAP_ORIGIN}
 		)
 	`;
+	return true;
 }
 
 /**
- * Insert the per-Space singletons into mana_sync.sync_changes. Called
- * after every real Space creation:
- *   - Personal Space — from `databaseHooks.user.create.after` once
- *     `createPersonalSpaceFor` returns `created: true`.
- *   - Brand / club / family / team / practice — from
- *     `organizationHooks.afterCreateOrganization` on the org plugin.
+ * Insert the per-Space singletons into mana_sync.sync_changes. Idempotent
+ * — skips the insert if any `kontextDoc` row already exists for the
+ * given `spaceId` (regardless of writer). Called from:
+ *   - `databaseHooks.user.create.after` once `createPersonalSpaceFor`
+ *     returns `created: true` (personal-space happy path)
+ *   - `organizationHooks.afterCreateOrganization` (brand / club /
+ *     family / team / practice happy path)
+ *   - `POST /api/v1/me/bootstrap-singletons` for every space the
+ *     caller is a member of (boot-time reconciliation)
  *
  * `ownerUserId` is the writer (RLS guard); `spaceId` is the data scope.
  * For non-personal Spaces the inviting user remains the writer — joining
- * members will receive the row via the membership-aware pull.
+ * members will receive the row via the membership-aware pull. If the
+ * inviter's bootstrap somehow failed and a member triggers it later via
+ * the endpoint, the member becomes the writer; the row is still
+ * delivered to all members via the membership-aware pull.
+ *
+ * Returns true if an insert was actually written, false if the
+ * idempotency check skipped it.
  */
 export async function bootstrapSpaceSingletons(
 	spaceId: string,
 	ownerUserId: string,
 	syncSql: ReturnType<typeof postgres>
-): Promise<void> {
+): Promise<boolean> {
 	if (!spaceId) throw new Error('bootstrapSpaceSingletons: empty spaceId');
 	if (!ownerUserId) throw new Error('bootstrapSpaceSingletons: empty ownerUserId');
+
+	const existing = await syncSql<Array<{ exists: number }>>`
+		SELECT 1 AS exists
+		FROM sync_changes
+		WHERE table_name = 'kontextDoc'
+			AND space_id = ${spaceId}
+		LIMIT 1
+	`;
+	if (existing.length > 0) return false;
 
 	const now = new Date().toISOString();
 	const data = emptyKontextDocData();
@@ -167,4 +206,5 @@ export async function bootstrapSpaceSingletons(
 			${BOOTSTRAP_ORIGIN}
 		)
 	`;
+	return true;
 }
