@@ -1278,13 +1278,96 @@ export function createUnifiedSync(
 
 // ─── Client ID ────────────────────────────────────────────────
 
+const CLIENT_ID_LOCALSTORAGE_KEY = 'mana-sync-client-id';
+const CLIENT_IDENTITY_TABLE = '_clientIdentity';
+const CLIENT_IDENTITY_ROW = 'self';
+
+interface ClientIdentityRow {
+	id: typeof CLIENT_IDENTITY_ROW;
+	clientId: string;
+	createdAt: string;
+}
+
+/**
+ * Sync-readable client id. Tries localStorage first (fast path); if
+ * empty, generates a fresh UUID. The fresh UUID is NOT yet persisted
+ * to Dexie at this point — that happens via the async
+ * {@link restoreClientIdFromDexie} reconciliation step the layout
+ * runs once at boot, before sync starts. The reconciliation is what
+ * makes a localStorage wipe survivable: Dexie keeps the canonical id
+ * and copies it back into localStorage every time the cache is empty.
+ */
 function getOrCreateClientId(): string {
-	const key = 'mana-sync-client-id';
 	if (typeof localStorage === 'undefined') return crypto.randomUUID();
-	let id = localStorage.getItem(key);
+	let id = localStorage.getItem(CLIENT_ID_LOCALSTORAGE_KEY);
 	if (!id) {
 		id = crypto.randomUUID();
-		localStorage.setItem(key, id);
+		localStorage.setItem(CLIENT_ID_LOCALSTORAGE_KEY, id);
 	}
 	return id;
+}
+
+/**
+ * Reconcile the client id between Dexie (`_clientIdentity` table) and
+ * localStorage. Call ONCE at app boot, BEFORE `createUnifiedSync`. The
+ * helper is async because Dexie is async; the rest of the sync code
+ * keeps reading the id synchronously from localStorage.
+ *
+ * Three states the helper handles:
+ *
+ *   1. Dexie has a row, localStorage is empty (typical after a
+ *      "clear site data" / incognito flush) — copy Dexie → localStorage
+ *      so the sync engine sees the same id this device used last time.
+ *   2. localStorage has a value, Dexie is empty (typical first run on
+ *      this device after F6 ships) — copy localStorage → Dexie so the
+ *      identity is canonicalised.
+ *   3. Both empty — generate a fresh UUID and write it to both.
+ *
+ * If both have values and they differ (race during a crash, two tabs,
+ * a stale localStorage from a different browser profile), Dexie wins
+ * and overwrites localStorage. That keeps the sync server's view of
+ * the client identity stable across localStorage wipes.
+ *
+ * The function silently no-ops in non-browser contexts (SSR / tests
+ * without a Dexie instance ready) by catching the Dexie error.
+ */
+export async function restoreClientIdFromDexie(): Promise<void> {
+	if (typeof localStorage === 'undefined') return;
+	let dexieId: string | undefined;
+	try {
+		const row = (await db
+			.table<ClientIdentityRow>(CLIENT_IDENTITY_TABLE)
+			.get(CLIENT_IDENTITY_ROW)) as ClientIdentityRow | undefined;
+		dexieId = row?.clientId;
+	} catch {
+		// Dexie not ready / table missing on a pre-v54 boot. Defer —
+		// next reload after the upgrade lands will reconcile.
+		return;
+	}
+
+	const localStorageId = localStorage.getItem(CLIENT_ID_LOCALSTORAGE_KEY);
+
+	if (dexieId) {
+		// Canonical source. Restore to localStorage every time so a
+		// later wipe is fixed at boot.
+		if (localStorageId !== dexieId) {
+			localStorage.setItem(CLIENT_ID_LOCALSTORAGE_KEY, dexieId);
+		}
+		return;
+	}
+
+	// Dexie is empty — adopt localStorage's value or mint a fresh UUID.
+	const adopt = localStorageId ?? crypto.randomUUID();
+	if (!localStorageId) {
+		localStorage.setItem(CLIENT_ID_LOCALSTORAGE_KEY, adopt);
+	}
+	try {
+		await db.table<ClientIdentityRow>(CLIENT_IDENTITY_TABLE).put({
+			id: CLIENT_IDENTITY_ROW,
+			clientId: adopt,
+			createdAt: new Date().toISOString(),
+		});
+	} catch {
+		// Best-effort. Next boot will retry.
+	}
 }

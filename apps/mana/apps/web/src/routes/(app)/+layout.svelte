@@ -9,6 +9,7 @@
 	import { page } from '$app/stores';
 	import type { Component, Snippet } from 'svelte';
 	import ToastContainer from '$lib/components/ToastContainer.svelte';
+	import GlobalFeedbackPill from '$lib/components/feedback/GlobalFeedbackPill.svelte';
 	import { onDestroy, setContext, tick } from 'svelte';
 	import { createReminderScheduler } from '@mana/shared-stores';
 	import { todoReminderSource } from '$lib/modules/todo/reminder-source';
@@ -68,7 +69,7 @@
 		startMemoroLlmWatcher,
 		stopMemoroLlmWatcher,
 	} from '$lib/modules/memoro/llm-watcher.svelte';
-	import { createUnifiedSync } from '$lib/data/sync';
+	import { createUnifiedSync, restoreClientIdFromDexie } from '$lib/data/sync';
 	import { syncBilling } from '$lib/stores/sync-billing.svelte';
 	import { networkStore } from '$lib/stores/network.svelte';
 	import { db } from '$lib/data/database';
@@ -625,6 +626,12 @@
 			}
 
 			await syncBilling.load();
+			// F6: reconcile the per-device sync client_id between Dexie
+			// (canonical) and localStorage (cache) before the sync engine
+			// reads it. A localStorage wipe gets restored from Dexie here,
+			// so the next push/pull keeps the same identity the server
+			// already knows.
+			await restoreClientIdFromDexie();
 			const getToken = () => authStore.getValidToken();
 			unifiedSync = createUnifiedSync(SYNC_SERVER_URL, getToken, syncBilling.active);
 			// Expose on window for SYNC_DEBUG.md (Schritt C). Not a security
@@ -1114,6 +1121,10 @@
 			locale={($locale || 'de') === 'de' ? 'de' : 'en'}
 		/>
 	{/if}
+
+	<!-- Global "Idee?" feedback pill — self-hides on /onboarding,
+	     /feedback, /community, and for unauthenticated users. -->
+	<GlobalFeedbackPill />
 </AuthGate>
 
 <ToastContainer />

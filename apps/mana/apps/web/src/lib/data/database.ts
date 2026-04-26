@@ -1351,6 +1351,24 @@ function deriveFromFieldMeta(row: Record<string, unknown>): string | undefined {
 	return max || undefined;
 }
 
+// v54 — Sync Field-Meta Overhaul F6 (docs/plans/sync-field-meta-overhaul.md).
+// Persistent `_clientIdentity` table so the per-browser-session sync
+// client id survives a localStorage wipe. Without this, every browser-
+// state clearing (devtools "Clear site data", incognito flush, …)
+// produced a fresh client_id from the sync server's perspective —
+// which made the local replay of one's own historical writes look
+// like "another session overwrote me", driving the false-positive
+// conflict toasts F1+F2 already addressed in code.
+//
+// Single-row table keyed by `id='self'`. Generated on the first run
+// where no value exists in either Dexie or localStorage. Migration:
+// the bootstrap code in sync.ts reconciles Dexie ↔ localStorage on
+// every load — Dexie is the canonical source, localStorage is the
+// fast-read cache that gets restored from Dexie when wiped.
+db.version(54).stores({
+	_clientIdentity: 'id',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module
