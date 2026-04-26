@@ -2,6 +2,7 @@
   GoalEditor — Modal for creating custom goals with metric + target.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { X } from '@mana/shared-icons';
 	import { goalStore } from '$lib/companion/goals';
 
@@ -24,21 +25,37 @@
 	let moduleId = $state('todo');
 	let pending = $state(false);
 
-	const EVENT_OPTIONS = [
-		{ value: 'TaskCompleted', label: 'Tasks erledigt', module: 'todo' },
-		{ value: 'TaskCreated', label: 'Tasks erstellt', module: 'todo' },
-		{ value: 'DrinkLogged', label: 'Getraenk geloggt', module: 'drink' },
-		{ value: 'MealLogged', label: 'Mahlzeit geloggt', module: 'food' },
-		{ value: 'HabitLogged', label: 'Habit geloggt', module: 'habits' },
-		{ value: 'JournalEntryCreated', label: 'Journal-Eintrag', module: 'journal' },
-		{ value: 'NoteCreated', label: 'Notiz erstellt', module: 'notes' },
-		{ value: 'PlaceVisited', label: 'Ort besucht', module: 'places' },
-		{ value: 'WorkoutFinished', label: 'Workout beendet', module: 'body' },
-		{ value: 'MeditationCompleted', label: 'Meditation', module: 'meditate' },
-		{ value: 'SleepLogged', label: 'Schlaf geloggt', module: 'sleep' },
-		{ value: 'CalendarEventCreated', label: 'Termin erstellt', module: 'calendar' },
-		{ value: 'TransactionCreated', label: 'Transaktion', module: 'finance' },
-	];
+	const EVENT_OPTIONS = $derived([
+		{ value: 'TaskCompleted', label: $_('goals.editor.event_task_completed'), module: 'todo' },
+		{ value: 'TaskCreated', label: $_('goals.editor.event_task_created'), module: 'todo' },
+		{ value: 'DrinkLogged', label: $_('goals.editor.event_drink_logged'), module: 'drink' },
+		{ value: 'MealLogged', label: $_('goals.editor.event_meal_logged'), module: 'food' },
+		{ value: 'HabitLogged', label: $_('goals.editor.event_habit_logged'), module: 'habits' },
+		{
+			value: 'JournalEntryCreated',
+			label: $_('goals.editor.event_journal_entry_created'),
+			module: 'journal',
+		},
+		{ value: 'NoteCreated', label: $_('goals.editor.event_note_created'), module: 'notes' },
+		{ value: 'PlaceVisited', label: $_('goals.editor.event_place_visited'), module: 'places' },
+		{ value: 'WorkoutFinished', label: $_('goals.editor.event_workout_finished'), module: 'body' },
+		{
+			value: 'MeditationCompleted',
+			label: $_('goals.editor.event_meditation_completed'),
+			module: 'meditate',
+		},
+		{ value: 'SleepLogged', label: $_('goals.editor.event_sleep_logged'), module: 'sleep' },
+		{
+			value: 'CalendarEventCreated',
+			label: $_('goals.editor.event_calendar_event_created'),
+			module: 'calendar',
+		},
+		{
+			value: 'TransactionCreated',
+			label: $_('goals.editor.event_transaction_created'),
+			module: 'finance',
+		},
+	]);
 
 	function onEventTypeChange() {
 		const opt = EVENT_OPTIONS.find((o) => o.value === eventType);
@@ -88,7 +105,7 @@
 			onclick={(e) => e.stopPropagation()}
 		>
 			<div class="editor-header">
-				<h3>Eigenes Ziel erstellen</h3>
+				<h3>{$_('goals.editor.title')}</h3>
 				<button class="close-btn" onclick={onClose}><X size={16} /></button>
 			</div>
 
@@ -99,18 +116,18 @@
 				}}
 			>
 				<label class="field">
-					<span class="label">Titel</span>
+					<span class="label">{$_('goals.editor.label_title')}</span>
 					<input
 						type="text"
 						bind:value={title}
-						placeholder="z.B. 4x Sport pro Woche"
+						placeholder={$_('goals.editor.placeholder_title')}
 						required
 						maxlength="60"
 					/>
 				</label>
 
 				<label class="field">
-					<span class="label">Was zaehlen?</span>
+					<span class="label">{$_('goals.editor.label_what_to_count')}</span>
 					<select bind:value={eventType} onchange={onEventTypeChange}>
 						{#each EVENT_OPTIONS as opt}
 							<option value={opt.value}>{opt.label}</option>
@@ -119,56 +136,70 @@
 				</label>
 
 				<label class="field">
-					<span class="label">Wie zaehlen?</span>
+					<span class="label">{$_('goals.editor.label_how_to_count')}</span>
 					<select bind:value={source}>
-						<option value="event_count">Anzahl zaehlen</option>
-						<option value="event_sum">Wert summieren</option>
+						<option value="event_count">{$_('goals.editor.source_count')}</option>
+						<option value="event_sum">{$_('goals.editor.source_sum')}</option>
 					</select>
 				</label>
 
 				{#if source === 'event_sum'}
 					<label class="field">
-						<span class="label">Summen-Feld</span>
-						<input type="text" bind:value={sumField} placeholder="z.B. quantityMl, calories" />
+						<span class="label">{$_('goals.editor.label_sum_field')}</span>
+						<input
+							type="text"
+							bind:value={sumField}
+							placeholder={$_('goals.editor.placeholder_sum_field')}
+						/>
 					</label>
 				{/if}
 
 				<div class="field-row">
 					<label class="field">
-						<span class="label">Filter (optional)</span>
-						<input type="text" bind:value={filterField} placeholder="Feld z.B. drinkType" />
+						<span class="label">{$_('goals.editor.label_filter')}</span>
+						<input
+							type="text"
+							bind:value={filterField}
+							placeholder={$_('goals.editor.placeholder_filter_field')}
+						/>
 					</label>
 					<label class="field">
-						<span class="label">Wert</span>
-						<input type="text" bind:value={filterValue} placeholder="z.B. water" />
+						<span class="label">{$_('goals.editor.label_filter_value')}</span>
+						<input
+							type="text"
+							bind:value={filterValue}
+							placeholder={$_('goals.editor.placeholder_filter_value')}
+						/>
 					</label>
 				</div>
 
 				<div class="field-row">
 					<label class="field">
-						<span class="label">Ziel</span>
+						<span class="label">{$_('goals.editor.label_target')}</span>
 						<div class="target-row">
 							<select bind:value={comparison}>
-								<option value="gte">Mindestens</option>
-								<option value="lte">Hoechstens</option>
+								<option value="gte">{$_('goals.editor.comparison_gte')}</option>
+								<option value="lte">{$_('goals.editor.comparison_lte')}</option>
 							</select>
 							<input type="number" bind:value={targetValue} min={1} max={10000} />
 						</div>
 					</label>
 					<label class="field">
-						<span class="label">Zeitraum</span>
+						<span class="label">{$_('goals.editor.label_period')}</span>
 						<select bind:value={period}>
-							<option value="day">Pro Tag</option>
-							<option value="week">Pro Woche</option>
-							<option value="month">Pro Monat</option>
+							<option value="day">{$_('goals.editor.period_day')}</option>
+							<option value="week">{$_('goals.editor.period_week')}</option>
+							<option value="month">{$_('goals.editor.period_month')}</option>
 						</select>
 					</label>
 				</div>
 
 				<div class="actions">
-					<button type="button" class="btn-cancel" onclick={onClose}>Abbrechen</button>
+					<button type="button" class="btn-cancel" onclick={onClose}
+						>{$_('goals.editor.action_cancel')}</button
+					>
 					<button type="submit" class="btn-create" disabled={!title.trim() || pending}>
-						{pending ? '...' : 'Erstellen'}
+						{pending ? '...' : $_('goals.editor.action_create')}
 					</button>
 				</div>
 			</form>
