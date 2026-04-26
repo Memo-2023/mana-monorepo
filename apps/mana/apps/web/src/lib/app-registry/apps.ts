@@ -83,6 +83,7 @@ import {
 	NotePencil,
 	FilmStrip,
 	Hourglass,
+	Megaphone,
 } from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
@@ -1329,6 +1330,16 @@ registerApp({
 	icon: ChatCircleDots,
 	views: {
 		list: { load: () => import('$lib/modules/feedback/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'community',
+	name: 'Community',
+	color: '#F59E0B',
+	icon: Megaphone,
+	views: {
+		list: { load: () => import('$lib/modules/community/ListView.svelte') },
 	},
 });
 

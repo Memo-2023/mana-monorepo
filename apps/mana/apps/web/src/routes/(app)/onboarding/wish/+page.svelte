@@ -1,14 +1,19 @@
 <!--
   Onboarding — Screen 4: Wish.
   Free-text "what do you want from Mana?" capture. Posts to the central
-  @mana/feedback hub as category='onboarding-wish', isPublic=false.
+  @mana/feedback hub as category='onboarding-wish'.
+
+  Public by default — appears in the /community feed under a Tier-
+  pseudonym ("Wachsame Eule #4528"). Users can opt out via the visibility
+  toggle, in which case the wish stays private (admin-only).
+
   Submit is fail-soft: a network/server failure logs a warning and
   still completes the flow — onboarding must never block on backend
   latency.
 -->
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { ArrowLeft, Check } from '@mana/shared-icons';
+	import { ArrowLeft, Check, Globe, Lock } from '@mana/shared-icons';
 	import { onboardingFlow } from '$lib/stores/onboarding-flow.svelte';
 	import { onboardingStatus } from '$lib/stores/onboarding-status.svelte';
 	import { feedbackService } from '$lib/api/feedback';
@@ -16,7 +21,9 @@
 	const MAX_LEN = 2000;
 
 	let wish = $state(onboardingFlow.pendingWish ?? '');
+	let isPublic = $state(true);
 	let saving = $state(false);
+	let submittedDisplayName = $state<string | null>(null);
 
 	let trimmed = $derived(wish.trim());
 	let charsLeft = $derived(MAX_LEN - wish.length);
@@ -29,11 +36,15 @@
 		if (trimmed.length > 0) {
 			onboardingFlow.setPendingWish(trimmed);
 			try {
-				await feedbackService.createFeedback({
+				const res = await feedbackService.createFeedback({
 					feedbackText: trimmed,
 					category: 'onboarding-wish',
-					isPublic: false,
+					isPublic,
 				});
+				submittedDisplayName =
+					(res as { displayName?: string }).displayName ??
+					(res as { feedback?: { displayName?: string } }).feedback?.displayName ??
+					null;
 			} catch (err) {
 				console.warn('[onboarding/wish] feedback submit failed:', err);
 			}
@@ -81,6 +92,33 @@
 		</div>
 	</div>
 
+	<!-- Public-Disclosure mit Toggle -->
+	<div class="visibility">
+		<button
+			type="button"
+			class="vis-toggle"
+			class:active={isPublic}
+			onclick={() => (isPublic = !isPublic)}
+			aria-pressed={isPublic}
+		>
+			<span class="vis-icon">
+				{#if isPublic}<Globe size={16} weight="bold" />{:else}<Lock size={16} weight="bold" />{/if}
+			</span>
+			<span class="vis-label">
+				{isPublic ? 'Öffentlich teilen' : 'Nur für Admins'}
+			</span>
+		</button>
+		<p class="vis-hint">
+			{#if isPublic}
+				Erscheint in unserer Community-Page als <strong>Tier-Pseudonym</strong> (z.B. "Wachsame Eule
+				#4528"). Dein Name wird <em>nicht</em> gezeigt.
+			{:else}
+				Bleibt privat — nur du und das Mana-Team können das lesen. Du kannst es später öffentlich
+				stellen.
+			{/if}
+		</p>
+	</div>
+
 	<div class="actions">
 		<button type="button" class="btn-ghost" onclick={handleBack} disabled={saving}>
 			<ArrowLeft size={16} weight="bold" />
@@ -97,6 +135,12 @@
 			<Check size={16} weight="bold" />
 		</button>
 	</div>
+
+	{#if submittedDisplayName}
+		<aside class="preview" aria-live="polite">
+			Gesendet — sichtbar als <strong>{submittedDisplayName}</strong>
+		</aside>
+	{/if}
 </div>
 
 <style>
@@ -166,6 +210,53 @@
 		color: hsl(var(--color-error, 0 84% 60%));
 	}
 
+	.visibility {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		padding: 0.75rem 0.875rem;
+		border: 1px solid hsl(var(--color-border));
+		border-radius: 0.75rem;
+		background: hsl(var(--color-muted) / 0.2);
+	}
+
+	.vis-toggle {
+		align-self: flex-start;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.375rem 0.75rem;
+		border: 1px solid hsl(var(--color-border));
+		background: hsl(var(--color-card));
+		color: hsl(var(--color-foreground));
+		border-radius: 999px;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.15s;
+	}
+
+	.vis-toggle.active {
+		border-color: hsl(var(--color-primary));
+		background: hsl(var(--color-primary) / 0.1);
+		color: hsl(var(--color-primary));
+	}
+
+	.vis-toggle:hover {
+		transform: translateY(-1px);
+	}
+
+	.vis-icon {
+		display: inline-flex;
+	}
+
+	.vis-hint {
+		margin: 0;
+		font-size: 0.8125rem;
+		line-height: 1.4;
+		color: hsl(var(--color-muted-foreground));
+	}
+
 	.actions {
 		display: flex;
 		justify-content: space-between;
@@ -225,5 +316,14 @@
 	.btn-primary:disabled {
 		opacity: 0.6;
 		cursor: not-allowed;
+	}
+
+	.preview {
+		padding: 0.625rem 0.875rem;
+		border-radius: 0.625rem;
+		background: hsl(var(--color-primary) / 0.1);
+		color: hsl(var(--color-primary));
+		font-size: 0.8125rem;
+		text-align: center;
 	}
 </style>

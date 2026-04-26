@@ -34,6 +34,7 @@
 	} from '@mana/shared-icons';
 	import type { Snippet, Component } from 'svelte';
 	import { PAGE_WIDTH_PRESETS, nearestPresetIndex } from '../page-carousel/width-presets';
+	import FeedbackHook from '$lib/components/feedback/FeedbackHook.svelte';
 
 	interface Props {
 		// Layout mode
@@ -66,6 +67,15 @@
 		helpOpen?: boolean;
 		onContextMenu?: (e: MouseEvent) => void;
 
+		// Inline feedback hook — renders a small Lightbulb button in the
+		// window-actions row. Submitted feedback is tagged with `moduleId`
+		// so the public community feed can group/filter by module.
+		/** Module identifier passed to the inline FeedbackHook. */
+		moduleId?: string;
+		/** Suppress the auto-injected FeedbackHook (e.g. on the
+		 *  /community-/feedback-pages where it's redundant). */
+		hideFeedback?: boolean;
+
 		// Snippets
 		header_left?: Snippet;
 		badge?: Snippet;
@@ -94,6 +104,8 @@
 		onHelp,
 		helpOpen = false,
 		onContextMenu,
+		moduleId,
+		hideFeedback = false,
 		header_left,
 		badge,
 		actions,
@@ -191,6 +203,9 @@
 		<div class="window-actions">
 			{#if actions}
 				{@render actions()}
+			{/if}
+			{#if !hideFeedback}
+				<FeedbackHook {moduleId} />
 			{/if}
 			{#if onHelp}
 				<button

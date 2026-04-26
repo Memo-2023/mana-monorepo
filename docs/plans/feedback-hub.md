@@ -158,35 +158,24 @@ Im Package:
 
 ---
 
-## Phase 2 — Hub-Charakter ausbauen *(separater Sprint)*
+## Phase 2 — Public Community-Hub *(großer Sprint, eigener Plan)*
 
-Drei kleine Erweiterungen, die `@mana/feedback` zur "echten" Zentrale
-machen. Können einzeln geshippt werden.
+Phase 2 wurde komplett neu geschnitten: nicht mehr nur Admin-Triage und
+Buttons, sondern eine **vollständige Public-Community-Surface** mit
+Pseudonym-System, Anonymisierung, omnipresenten Inline-Hooks und einem
+eigenen `community`-Modul.
 
-### 2a. Globaler Feedback-Button
+→ Detailplan mit Architektur-Optionen für jede Sub-Entscheidung:
+**[`docs/plans/feedback-hub-public.md`](feedback-hub-public.md)**.
 
-Eintrag im Account-Menü oder PillNav ("Feedback / Idee teilen") öffnet
-einen Modal mit der bestehenden `FeedbackForm`. Eliminiert das Risiko,
-dass jemand pro Modul eigene Feedback-Buttons baut.
+Kurzform der Architektur-Empfehlungen (Detail siehe Sub-Plan):
+- **Anonymisierung**: Pseudonym-Hash + Tier-Display-Name ("Wachsame Eule #4528")
+- **Voting**: Auth-required, aber Reactions statt simpler Votes (👍 ❤️ 🚀 🤔)
+- **Inline-Hook**: Auto-Inject in `ModuleShell`-Header (opt-out per Modul) + Floating-Pille als Backup
+- **Public-Surface**: Eigenes `community`-Modul + Mirror-Route außerhalb (app)/
+- **Onboarding-Wish ab jetzt PUBLIC** mit Disclosure-Step
 
-### 2b. Inline-Hook pro Modul
-
-Komponente `<ModuleFeedbackHook module="todo" />` für Module-Help-Panels,
-vorausgefüllt mit `appId`, Default-Category `'feature' | 'improvement'`.
-Kontextspezifische Wünsche.
-
-### 2c. Admin-Triage-Hub `/feedback/admin`
-
-Founder-Tier-gated. Features:
-- Filter: Kategorie, Status, Datum, App
-- Bulk-Status-Updates
-- `adminResponse` schreiben
-- Aggregations-Card für `onboarding-wish`: alle Antworten gelistet,
-  optional via LLM nach Themen geclustert (was wollen neue Nutzer
-  am häufigsten?)
-- Neue Backend-Endpoints:
-  - `PATCH /api/v1/feedback/admin/:id` (status, adminResponse, isPublic)
-  - `GET /api/v1/feedback/admin?category=...&status=...` (alle inkl. private)
+Alter Phase-2-Inhalt (Admin-Hub etc.) ist in den Sub-Plan migriert.
 
 ---
 

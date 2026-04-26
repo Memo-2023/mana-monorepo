@@ -23,6 +23,19 @@ export function getManaAuthUrl(): string {
 }
 
 /**
+ * Get the mana-analytics service URL (port 3064 in dev).
+ * Hosts the public-community feedback hub.
+ */
+export function getManaAnalyticsUrl(): string {
+	if (browser && typeof window !== 'undefined') {
+		const injected = (window as unknown as { __PUBLIC_MANA_ANALYTICS_URL__?: string })
+			.__PUBLIC_MANA_ANALYTICS_URL__;
+		return injected || 'http://localhost:3064';
+	}
+	return process.env.PUBLIC_MANA_ANALYTICS_URL || 'http://localhost:3064';
+}
+
+/**
  * Get the mana-events service URL (Phase 1b: public RSVP backend).
  */
 export function getManaEventsUrl(): string {
