@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { eventGuestsStore } from '../stores/guests.svelte';
 	import { useEventGuests } from '../queries';
 	import type { RsvpStatus } from '../types';
@@ -14,12 +15,12 @@
 	let newName = $state('');
 	let newEmail = $state('');
 
-	const RSVP_OPTIONS: { value: RsvpStatus; label: string }[] = [
-		{ value: 'pending', label: 'Offen' },
-		{ value: 'yes', label: 'Ja' },
-		{ value: 'maybe', label: 'Vielleicht' },
-		{ value: 'no', label: 'Nein' },
-	];
+	const RSVP_OPTIONS = $derived<{ value: RsvpStatus; label: string }[]>([
+		{ value: 'pending', label: $_('events.guest_list_editor.rsvp_pending') },
+		{ value: 'yes', label: $_('events.guest_list_editor.rsvp_yes') },
+		{ value: 'maybe', label: $_('events.guest_list_editor.rsvp_maybe') },
+		{ value: 'no', label: $_('events.guest_list_editor.rsvp_no') },
+	]);
 
 	async function handleAdd(e: SubmitEvent) {
 		e.preventDefault();
@@ -37,14 +38,20 @@
 
 <div class="guest-editor">
 	<form class="add-row" onsubmit={handleAdd}>
-		<input type="text" bind:value={newName} placeholder="Name" class="input name-input" required />
+		<input
+			type="text"
+			bind:value={newName}
+			placeholder={$_('events.guest_list_editor.placeholder_name')}
+			class="input name-input"
+			required
+		/>
 		<input
 			type="email"
 			bind:value={newEmail}
-			placeholder="E-Mail (optional)"
+			placeholder={$_('events.guest_list_editor.placeholder_email')}
 			class="input email-input"
 		/>
-		<button type="submit" class="add-btn">Hinzufügen</button>
+		<button type="submit" class="add-btn">{$_('events.guest_list_editor.action_add')}</button>
 	</form>
 
 	<ul class="guest-list">
@@ -86,7 +93,7 @@
 					<button
 						class="remove-btn"
 						onclick={() => eventGuestsStore.deleteGuest(guest.id)}
-						title="Entfernen"
+						title={$_('events.guest_list_editor.action_remove_title')}
 					>
 						×
 					</button>
@@ -95,7 +102,7 @@
 		{/each}
 
 		{#if (guests.value ?? []).length === 0}
-			<li class="empty">Noch keine Gäste hinzugefügt.</li>
+			<li class="empty">{$_('events.guest_list_editor.empty')}</li>
 		{/if}
 	</ul>
 </div>

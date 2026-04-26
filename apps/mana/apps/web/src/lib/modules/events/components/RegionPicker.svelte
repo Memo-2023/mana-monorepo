@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import type { DiscoveryRegion } from '../discovery/types';
 	import { discoveryStore } from '../discovery/store.svelte';
 
@@ -70,12 +71,16 @@
 		{#each regions as region (region.id)}
 			<div class="region-chip">
 				<span class="region-label">{region.label}</span>
-				<span class="region-radius">{region.radiusKm} km</span>
+				<span class="region-radius"
+					>{$_('events.region_picker.radius_unit', { values: { km: region.radiusKm } })}</span
+				>
 				<button class="remove-btn" onclick={() => removeRegion(region.id)}>x</button>
 			</div>
 		{/each}
 		{#if !showForm}
-			<button class="add-btn" onclick={() => (showForm = true)}>+ Region</button>
+			<button class="add-btn" onclick={() => (showForm = true)}
+				>{$_('events.region_picker.add_region')}</button
+			>
 		{/if}
 	</div>
 
@@ -85,10 +90,12 @@
 				class="input"
 				bind:value={searchQuery}
 				oninput={onSearchInput}
-				placeholder="Stadt oder Region suchen..."
+				placeholder={$_('events.region_picker.placeholder_search')}
 			/>
 			<div class="radius-row">
-				<label class="radius-label" for="region-radius">Radius: {radiusKm} km</label>
+				<label class="radius-label" for="region-radius"
+					>{$_('events.region_picker.radius_label', { values: { km: radiusKm } })}</label
+				>
 				<input id="region-radius" type="range" min="5" max="100" step="5" bind:value={radiusKm} />
 			</div>
 			{#if suggestions.length > 0}
@@ -103,7 +110,7 @@
 				</ul>
 			{/if}
 			{#if searching}
-				<p class="searching-hint">Suche...</p>
+				<p class="searching-hint">{$_('events.region_picker.searching')}</p>
 			{/if}
 			<button
 				class="cancel-btn"
@@ -113,7 +120,7 @@
 					suggestions = [];
 				}}
 			>
-				Abbrechen
+				{$_('events.region_picker.action_cancel')}
 			</button>
 		</div>
 	{/if}

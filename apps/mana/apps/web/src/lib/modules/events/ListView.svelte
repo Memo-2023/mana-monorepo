@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { _ } from 'svelte-i18n';
 	import { useUpcomingEvents, usePastEvents, useGuestsByEvent, summarizeRsvps } from './queries';
 	import { eventsStore } from './stores/events.svelte';
 	import { drainTombstones } from './tombstones';
@@ -59,30 +60,35 @@
 </script>
 
 <svelte:head>
-	<title>Events - Mana</title>
+	<title>{$_('events.list_view.doc_title')}</title>
 </svelte:head>
 
 <div class="events-page">
 	<div class="tab-bar">
 		<button class="tab" class:active={activeTab === 'mine'} onclick={() => (activeTab = 'mine')}>
-			Meine Events
+			{$_('events.list_view.tab_mine')}
 		</button>
 		<button
 			class="tab"
 			class:active={activeTab === 'discover'}
 			onclick={() => (activeTab = 'discover')}
 		>
-			Entdecken
+			{$_('events.list_view.tab_discover')}
 		</button>
 	</div>
 
 	{#if activeTab === 'mine'}
 		<header class="events-header">
 			<p class="page-subtitle">
-				{(upcoming.value ?? []).length} bevorstehend · {(past.value ?? []).length} vergangen
+				{$_('events.list_view.subtitle_count', {
+					values: {
+						upcoming: (upcoming.value ?? []).length,
+						past: (past.value ?? []).length,
+					},
+				})}
 			</p>
 			<button class="new-btn" onclick={() => (showCreate = !showCreate)}>
-				{showCreate ? 'Abbrechen' : '+ Neues Event'}
+				{showCreate ? $_('events.list_view.cancel_btn') : $_('events.list_view.new_event_btn')}
 			</button>
 		</header>
 
@@ -91,22 +97,28 @@
 				<input
 					class="input"
 					bind:value={newTitle}
-					placeholder="Worum geht's? (z. B. Geburtstag Anna)"
+					placeholder={$_('events.list_view.placeholder_title')}
 					required
 				/>
 				<div class="form-row">
 					<input class="input" type="date" bind:value={newDate} required />
 					<input class="input" type="time" bind:value={newTime} />
-					<input class="input" bind:value={newLocation} placeholder="Ort (optional)" />
+					<input
+						class="input"
+						bind:value={newLocation}
+						placeholder={$_('events.list_view.placeholder_location')}
+					/>
 				</div>
-				<button type="submit" class="action-btn primary">Event anlegen</button>
+				<button type="submit" class="action-btn primary">
+					{$_('events.list_view.submit_create')}
+				</button>
 			</form>
 		{/if}
 
 		<section class="event-section">
-			<h2 class="section-title">Bevorstehend</h2>
+			<h2 class="section-title">{$_('events.list_view.section_upcoming')}</h2>
 			{#if (upcoming.value ?? []).length === 0}
-				<p class="empty">Keine bevorstehenden Events. Zeit fur eine Party?</p>
+				<p class="empty">{$_('events.list_view.empty_upcoming')}</p>
 			{:else}
 				<div class="event-list">
 					{#each upcoming.value ?? [] as event (event.id)}
@@ -119,7 +131,7 @@
 
 		{#if (past.value ?? []).length > 0}
 			<section class="event-section">
-				<h2 class="section-title">Vergangen</h2>
+				<h2 class="section-title">{$_('events.list_view.section_past')}</h2>
 				<div class="event-list">
 					{#each past.value ?? [] as event (event.id)}
 						<EventCard {event} onclick={() => open(event)} />

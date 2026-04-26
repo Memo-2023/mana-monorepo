@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { _, locale } from 'svelte-i18n';
+	import { get } from 'svelte/store';
 	import type { DiscoverySource, DiscoveryRegion } from '../discovery/types';
 	import { discoveryStore } from '../discovery/store.svelte';
 
@@ -61,8 +63,8 @@
 	}
 
 	function formatDate(iso: string | null): string {
-		if (!iso) return 'nie';
-		return new Date(iso).toLocaleString('de-DE', {
+		if (!iso) return $_('events.source_manager.never_scanned');
+		return new Date(iso).toLocaleString(get(locale) ?? 'de', {
 			day: '2-digit',
 			month: '2-digit',
 			hour: '2-digit',
@@ -73,17 +75,21 @@
 
 <div class="source-manager">
 	<div class="header">
-		<h3 class="section-title">Quellen</h3>
+		<h3 class="section-title">{$_('events.source_manager.section_title')}</h3>
 		<div class="header-actions">
 			<button
 				class="discover-btn"
 				onclick={handleDiscover}
 				disabled={discovering || regions.length === 0}
 			>
-				{discovering ? 'Suche...' : 'Automatisch finden'}
+				{discovering
+					? $_('events.source_manager.action_discovering')
+					: $_('events.source_manager.action_discover')}
 			</button>
 			{#if !showForm}
-				<button class="add-btn" onclick={() => (showForm = true)}>+ iCal-Feed</button>
+				<button class="add-btn" onclick={() => (showForm = true)}
+					>{$_('events.source_manager.action_add_ical')}</button
+				>
 			{/if}
 		</div>
 	</div>
@@ -93,10 +99,16 @@
 			<input
 				class="input"
 				bind:value={newName}
-				placeholder="Name (z.B. Jazzhaus Freiburg)"
+				placeholder={$_('events.source_manager.placeholder_name')}
 				required
 			/>
-			<input class="input" bind:value={newUrl} placeholder="iCal URL (.ics)" type="url" required />
+			<input
+				class="input"
+				bind:value={newUrl}
+				placeholder={$_('events.source_manager.placeholder_url')}
+				type="url"
+				required
+			/>
 			{#if regions.length > 1}
 				<select class="input" bind:value={newRegionId}>
 					{#each regions as r (r.id)}
@@ -105,9 +117,11 @@
 				</select>
 			{/if}
 			<div class="form-actions">
-				<button type="submit" class="action-btn primary">Hinzufugen</button>
+				<button type="submit" class="action-btn primary"
+					>{$_('events.source_manager.action_submit_add')}</button
+				>
 				<button type="button" class="action-btn" onclick={() => (showForm = false)}
-					>Abbrechen</button
+					>{$_('events.source_manager.action_cancel')}</button
 				>
 			</div>
 		</form>
@@ -115,7 +129,7 @@
 
 	{#if suggestedSources.length > 0}
 		<div class="suggestions-section">
-			<h4 class="sub-title">Vorgeschlagene Quellen</h4>
+			<h4 class="sub-title">{$_('events.source_manager.section_suggested')}</h4>
 			<div class="source-list">
 				{#each suggestedSources as source (source.id)}
 					<div class="source-item suggested">
@@ -132,9 +146,11 @@
 						</div>
 						<div class="source-actions">
 							<button class="icon-btn activate" onclick={() => handleActivate(source.id)}
-								>Aktivieren</button
+								>{$_('events.source_manager.action_activate')}</button
 							>
-							<button class="icon-btn danger" onclick={() => handleReject(source.id)}>x</button>
+							<button class="icon-btn danger" onclick={() => handleReject(source.id)}
+								>{$_('events.source_manager.action_reject')}</button
+							>
 						</div>
 					</div>
 				{/each}
@@ -143,9 +159,7 @@
 	{/if}
 
 	{#if activeSources.length === 0 && suggestedSources.length === 0}
-		<p class="empty">
-			Noch keine Quellen. Nutze "Automatisch finden" oder fuge iCal-Feeds manuell hinzu.
-		</p>
+		<p class="empty">{$_('events.source_manager.empty')}</p>
 	{:else if activeSources.length > 0}
 		<div class="source-list">
 			{#each activeSources as source (source.id)}
@@ -153,9 +167,15 @@
 					<div class="source-info">
 						<div class="source-name">{source.name}</div>
 						<div class="source-meta">
-							{source.type.toUpperCase()} · Letzter Scan: {formatDate(source.lastCrawledAt)}
+							{source.type.toUpperCase()} · {$_('events.source_manager.meta_last_scan', {
+								values: { date: formatDate(source.lastCrawledAt) },
+							})}
 							{#if source.errorCount > 0}
-								<span class="error-badge">{source.errorCount} Fehler</span>
+								<span class="error-badge"
+									>{$_('events.source_manager.errors_count', {
+										values: { count: source.errorCount },
+									})}</span
+								>
 							{/if}
 						</div>
 						{#if source.lastError}
@@ -163,13 +183,17 @@
 						{/if}
 					</div>
 					<div class="source-actions">
-						<button class="icon-btn" onclick={() => handleCrawl(source.id)} title="Jetzt scannen">
-							Scannen
+						<button
+							class="icon-btn"
+							onclick={() => handleCrawl(source.id)}
+							title={$_('events.source_manager.action_scan_title')}
+						>
+							{$_('events.source_manager.action_scan')}
 						</button>
 						<button
 							class="icon-btn danger"
 							onclick={() => handleRemove(source.id)}
-							title="Entfernen"
+							title={$_('events.source_manager.action_remove_title')}
 						>
 							x
 						</button>

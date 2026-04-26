@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { formatDate, formatTime } from '$lib/i18n/format';
+	import { _ } from 'svelte-i18n';
 	import type { DiscoveredEvent } from '../discovery/types';
 
 	interface Props {
@@ -19,7 +20,9 @@
 		})
 	);
 	const timeLabel = $derived(
-		event.allDay ? 'Ganztag' : formatTime(startDate, { hour: '2-digit', minute: '2-digit' })
+		event.allDay
+			? $_('events.discovered_card.all_day')
+			: formatTime(startDate, { hour: '2-digit', minute: '2-digit' })
 	);
 
 	const isSaved = $derived(event.userAction === 'save');
@@ -54,14 +57,20 @@
 					{event.sourceName}
 				</a>
 			{:else}
-				<a class="source-link" href={event.sourceUrl} target="_blank" rel="noopener"> Quelle </a>
+				<a class="source-link" href={event.sourceUrl} target="_blank" rel="noopener">
+					{$_('events.discovered_card.source_fallback')}
+				</a>
 			{/if}
 			<div class="actions">
 				{#if isSaved}
-					<span class="saved-label">Gespeichert</span>
+					<span class="saved-label">{$_('events.discovered_card.saved_label')}</span>
 				{:else}
-					<button class="action-btn save" onclick={onSave}>Merken</button>
-					<button class="action-btn dismiss" onclick={onDismiss}>Ausblenden</button>
+					<button class="action-btn save" onclick={onSave}>
+						{$_('events.discovered_card.action_save')}
+					</button>
+					<button class="action-btn dismiss" onclick={onDismiss}>
+						{$_('events.discovered_card.action_dismiss')}
+					</button>
 				{/if}
 			</div>
 		</div>

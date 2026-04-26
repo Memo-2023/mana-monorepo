@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { formatDate, formatTime } from '$lib/i18n/format';
+	import { _ } from 'svelte-i18n';
 	import type { SocialEvent, RsvpSummary } from '../types';
 
 	interface Props {
@@ -19,7 +20,9 @@
 		})
 	);
 	const timeLabel = $derived(
-		event.isAllDay ? 'Ganztägig' : formatTime(startDate, { hour: '2-digit', minute: '2-digit' })
+		event.isAllDay
+			? $_('events.event_card.all_day')
+			: formatTime(startDate, { hour: '2-digit', minute: '2-digit' })
 	);
 </script>
 
@@ -32,11 +35,11 @@
 		<div class="title-row">
 			<h3 class="title">{event.title}</h3>
 			{#if event.status === 'draft'}
-				<span class="status-badge draft">Entwurf</span>
+				<span class="status-badge draft">{$_('events.event_card.badge_draft')}</span>
 			{:else if event.status === 'cancelled'}
-				<span class="status-badge cancelled">Abgesagt</span>
+				<span class="status-badge cancelled">{$_('events.event_card.badge_cancelled')}</span>
 			{:else if event.isPublished}
-				<span class="status-badge published">Geteilt</span>
+				<span class="status-badge published">{$_('events.event_card.badge_published')}</span>
 			{/if}
 		</div>
 		{#if event.location}
@@ -44,9 +47,17 @@
 		{/if}
 		{#if summary}
 			<div class="summary-row">
-				<span class="yes-count">{summary.totalAttending} kommen</span>
+				<span class="yes-count"
+					>{$_('events.event_card.yes_count', {
+						values: { count: summary.totalAttending },
+					})}</span
+				>
 				{#if summary.pending > 0}
-					<span class="pending-count">· {summary.pending} offen</span>
+					<span class="pending-count"
+						>{$_('events.event_card.pending_count', {
+							values: { count: summary.pending },
+						})}</span
+					>
 				{/if}
 			</div>
 		{/if}

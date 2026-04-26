@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { formatTime } from '$lib/i18n/format';
+	import { _ } from 'svelte-i18n';
 	import { eventsApi, type PublicRsvpRecord } from '../api';
 	import { eventGuestsStore } from '../stores/guests.svelte';
 
@@ -30,7 +31,7 @@
 			consecutiveFailures = 0;
 			lastFetchedAt = new Date();
 		} catch (e) {
-			lastErrorMessage = e instanceof Error ? e.message : 'Fehler beim Laden';
+			lastErrorMessage = e instanceof Error ? e.message : $_('events.public_rsvp_list.err_load');
 			consecutiveFailures++;
 		} finally {
 			loading = false;
@@ -64,16 +65,16 @@
 {#if isPublished}
 	<div class="public-rsvps">
 		<div class="header-row">
-			<h3>Antworten via Link</h3>
+			<h3>{$_('events.public_rsvp_list.title')}</h3>
 			<button class="refresh" onclick={fetchRsvps} disabled={loading}>
-				{loading ? '…' : 'Neu laden'}
+				{loading ? '…' : $_('events.public_rsvp_list.action_refresh')}
 			</button>
 		</div>
 
 		{#if showError}
 			<p class="error">{lastErrorMessage}</p>
 		{:else if rsvps.length === 0 && !loading}
-			<p class="empty">Noch keine Antworten via Share-Link.</p>
+			<p class="empty">{$_('events.public_rsvp_list.empty')}</p>
 		{:else}
 			<ul class="rsvp-list">
 				{#each rsvps as r (r.id)}
@@ -82,7 +83,11 @@
 							<div class="name-row">
 								<span class="name">{r.name}</span>
 								<span class="status status-{r.status}">
-									{r.status === 'yes' ? 'Ja' : r.status === 'no' ? 'Nein' : 'Vielleicht'}
+									{r.status === 'yes'
+										? $_('events.public_rsvp_list.status_yes')
+										: r.status === 'no'
+											? $_('events.public_rsvp_list.status_no')
+											: $_('events.public_rsvp_list.status_maybe')}
 								</span>
 								{#if r.plusOnes > 0}
 									<span class="plus">+{r.plusOnes}</span>
@@ -95,7 +100,11 @@
 								<div class="note">„{r.note}“</div>
 							{/if}
 						</div>
-						<button class="import-btn" onclick={() => importToGuestList(r)} title="Zur Gästeliste">
+						<button
+							class="import-btn"
+							onclick={() => importToGuestList(r)}
+							title={$_('events.public_rsvp_list.action_import_title')}
+						>
 							→
 						</button>
 					</li>
@@ -105,11 +114,15 @@
 
 		{#if lastFetchedAt}
 			<div class="meta">
-				Aktualisiert um {formatTime(lastFetchedAt, {
-					hour: '2-digit',
-					minute: '2-digit',
-					second: '2-digit',
-				})} · Auto-Refresh alle 30s
+				{$_('events.public_rsvp_list.meta_updated', {
+					values: {
+						time: formatTime(lastFetchedAt, {
+							hour: '2-digit',
+							minute: '2-digit',
+							second: '2-digit',
+						}),
+					},
+				})}
 			</div>
 		{/if}
 	</div>

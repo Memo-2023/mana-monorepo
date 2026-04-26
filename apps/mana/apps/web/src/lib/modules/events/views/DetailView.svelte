@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { formatDateTime } from '$lib/i18n/format';
+	import { _ } from 'svelte-i18n';
 	import { useEvent, useEventGuests, summarizeRsvps } from '../queries';
 	import { eventsStore } from '../stores/events.svelte';
 	import GuestListEditor from '../components/GuestListEditor.svelte';
@@ -136,7 +137,8 @@
 
 	async function handleDelete() {
 		if (!event) return;
-		if (!confirm(`Event "${event.title}" wirklich löschen?`)) return;
+		if (!confirm($_('events.detail_view.confirm_delete', { values: { title: event.title } })))
+			return;
 		await eventsStore.deleteEvent(event.id);
 		goBack();
 	}
@@ -154,21 +156,33 @@
 </script>
 
 {#if !event}
-	<div class="loading">Lade Event...</div>
+	<div class="loading">{$_('events.detail_view.loading')}</div>
 {:else}
 	<div class="detail">
 		<header class="detail-header">
-			<button class="back-btn" onclick={goBack}>← Zurück</button>
+			<button class="back-btn" onclick={goBack}>{$_('events.detail_view.back')}</button>
 			<div class="header-actions">
-				<button class="action-btn" onclick={startEdit}>Bearbeiten</button>
-				<button class="action-btn danger" onclick={handleDelete}>Löschen</button>
+				<button class="action-btn" onclick={startEdit}>
+					{$_('events.detail_view.action_edit')}
+				</button>
+				<button class="action-btn danger" onclick={handleDelete}>
+					{$_('events.detail_view.action_delete')}
+				</button>
 			</div>
 		</header>
 
 		{#if editing}
 			<div class="edit-form">
-				<input class="title-input" bind:value={titleDraft} placeholder="Event-Titel" />
-				<textarea class="desc-input" bind:value={descDraft} rows="3" placeholder="Beschreibung"
+				<input
+					class="title-input"
+					bind:value={titleDraft}
+					placeholder={$_('events.detail_view.placeholder_title')}
+				/>
+				<textarea
+					class="desc-input"
+					bind:value={descDraft}
+					rows="3"
+					placeholder={$_('events.detail_view.placeholder_description')}
 				></textarea>
 				<div class="loc-wrapper">
 					<input
@@ -179,10 +193,10 @@
 						onfocus={() => {
 							if (addressSuggestions.length > 0) showAddressSuggestions = true;
 						}}
-						placeholder="Ort — tippe eine Adresse..."
+						placeholder={$_('events.detail_view.placeholder_location')}
 					/>
 					{#if locationLatDraft && locationLonDraft}
-						<span class="loc-pinned" title="Koordinaten gesetzt">
+						<span class="loc-pinned" title={$_('events.detail_view.location_pinned_title')}>
 							<MapPin size={12} weight="fill" />
 						</span>
 					{/if}
@@ -206,21 +220,25 @@
 				</div>
 				<div class="time-row">
 					<label>
-						<span>Start</span>
+						<span>{$_('events.detail_view.label_start')}</span>
 						<input type="datetime-local" bind:value={startDraft} />
 					</label>
 					<label>
-						<span>Ende</span>
+						<span>{$_('events.detail_view.label_end')}</span>
 						<input type="datetime-local" bind:value={endDraft} />
 					</label>
 					<label class="all-day">
 						<input type="checkbox" bind:checked={allDayDraft} />
-						<span>Ganztägig</span>
+						<span>{$_('events.detail_view.label_all_day')}</span>
 					</label>
 				</div>
 				<div class="form-actions">
-					<button class="action-btn" onclick={() => (editing = false)}>Abbrechen</button>
-					<button class="action-btn primary" onclick={saveEdit}>Speichern</button>
+					<button class="action-btn" onclick={() => (editing = false)}>
+						{$_('events.detail_view.action_cancel')}
+					</button>
+					<button class="action-btn primary" onclick={saveEdit}>
+						{$_('events.detail_view.action_save')}
+					</button>
 				</div>
 			</div>
 		{:else}
@@ -247,7 +265,7 @@
 				{#if mapUrl}
 					<div class="event-map">
 						<iframe
-							title="Event-Ort auf Karte"
+							title={$_('events.detail_view.map_iframe_title')}
 							src={mapUrl}
 							width="100%"
 							height="180"
@@ -260,7 +278,7 @@
 							target="_blank"
 							rel="noopener noreferrer"
 						>
-							In OpenStreetMap öffnen →
+							{$_('events.detail_view.map_open')}
 						</a>
 					</div>
 				{/if}
@@ -269,7 +287,7 @@
 
 		<section class="section">
 			<div class="visibility-row">
-				<span class="visibility-label">Sichtbarkeit</span>
+				<span class="visibility-label">{$_('events.detail_view.label_visibility')}</span>
 				<VisibilityPicker
 					level={event.visibility ?? 'space'}
 					onChange={handleVisibilityChange}
@@ -279,17 +297,17 @@
 		</section>
 
 		<section class="section">
-			<h2>RSVPs</h2>
+			<h2>{$_('events.detail_view.section_rsvps')}</h2>
 			<RsvpSummaryView {summary} capacity={event.capacity} />
 		</section>
 
 		<section class="section">
-			<h2>Gäste</h2>
+			<h2>{$_('events.detail_view.section_guests')}</h2>
 			<GuestListEditor eventId={event.id} />
 		</section>
 
 		<section class="section">
-			<h2>Bring-Liste</h2>
+			<h2>{$_('events.detail_view.section_bring_list')}</h2>
 			<BringListEditor eventId={event.id} />
 		</section>
 
@@ -300,19 +318,21 @@
 		{/if}
 
 		<section class="section">
-			<h2>Teilen</h2>
+			<h2>{$_('events.detail_view.section_share')}</h2>
 			{#if event.isPublished && event.publicToken}
 				<div class="share-row">
 					<code class="share-link">{window.location.origin}/rsvp/{event.publicToken}</code>
-					<button class="action-btn" onclick={copyShareLink}>Kopieren</button>
-					<button class="action-btn" onclick={handlePublish}>Privat machen</button>
+					<button class="action-btn" onclick={copyShareLink}>
+						{$_('events.detail_view.action_copy_link')}
+					</button>
+					<button class="action-btn" onclick={handlePublish}>
+						{$_('events.detail_view.action_make_private')}
+					</button>
 				</div>
-				<p class="share-hint">
-					Antworten erscheinen automatisch unten in „Antworten via Link“ (Polling alle 30s).
-				</p>
+				<p class="share-hint">{$_('events.detail_view.share_hint')}</p>
 			{:else}
 				<button class="action-btn primary" onclick={handlePublish}>
-					Event veröffentlichen & Link generieren
+					{$_('events.detail_view.action_publish')}
 				</button>
 			{/if}
 		</section>

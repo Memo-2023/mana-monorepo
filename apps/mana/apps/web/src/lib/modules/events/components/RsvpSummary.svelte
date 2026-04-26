@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import type { RsvpSummary } from '../types';
 
 	interface Props {
@@ -12,26 +13,26 @@
 <div class="rsvp-summary">
 	<div class="badge yes">
 		<span class="count">{summary.yes}</span>
-		<span class="label">Ja</span>
+		<span class="label">{$_('events.rsvp_summary.label_yes')}</span>
 	</div>
 	<div class="badge maybe">
 		<span class="count">{summary.maybe}</span>
-		<span class="label">Vielleicht</span>
+		<span class="label">{$_('events.rsvp_summary.label_maybe')}</span>
 	</div>
 	<div class="badge no">
 		<span class="count">{summary.no}</span>
-		<span class="label">Nein</span>
+		<span class="label">{$_('events.rsvp_summary.label_no')}</span>
 	</div>
 	<div class="badge pending">
 		<span class="count">{summary.pending}</span>
-		<span class="label">Offen</span>
+		<span class="label">{$_('events.rsvp_summary.label_pending')}</span>
 	</div>
 	<div class="total">
 		<strong>{summary.totalAttending}</strong>
 		{#if capacity}
 			<span class="muted">/ {capacity}</span>
 		{/if}
-		<span class="muted">kommen</span>
+		<span class="muted">{$_('events.rsvp_summary.attending')}</span>
 	</div>
 </div>
 

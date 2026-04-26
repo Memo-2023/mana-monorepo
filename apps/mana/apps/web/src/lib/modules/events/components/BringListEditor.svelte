@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { useEventItems, useEventGuests } from '../queries';
 	import { eventItemsStore } from '../stores/items.svelte';
 	import { eventsStore } from '../stores/events.svelte';
@@ -20,10 +21,14 @@
 
 	function assigneeLabel(item: EventItem): string | null {
 		if (item.assignedGuestId) {
-			return guestNameById.get(item.assignedGuestId) ?? '?';
+			return (
+				guestNameById.get(item.assignedGuestId) ?? $_('events.bring_list_editor.unknown_assignee')
+			);
 		}
 		if (item.claimedByName) {
-			return `${item.claimedByName} (via Link)`;
+			return $_('events.bring_list_editor.claimed_via_link', {
+				values: { name: item.claimedByName },
+			});
 		}
 		return null;
 	}
@@ -50,7 +55,7 @@
 		<input
 			type="text"
 			bind:value={newLabel}
-			placeholder="z. B. Salat, Wein, Lautsprecher"
+			placeholder={$_('events.bring_list_editor.placeholder_label')}
 			class="input label-input"
 			required
 		/>
@@ -58,11 +63,11 @@
 			type="number"
 			min="1"
 			max="999"
-			placeholder="Anzahl"
+			placeholder={$_('events.bring_list_editor.placeholder_quantity')}
 			bind:value={newQuantity}
 			class="input qty-input"
 		/>
-		<button type="submit" class="add-btn">Hinzufügen</button>
+		<button type="submit" class="add-btn">{$_('events.bring_list_editor.action_add')}</button>
 	</form>
 
 	<ul class="item-list">
@@ -94,7 +99,7 @@
 					value={item.assignedGuestId ?? ''}
 					onchange={(e) => eventItemsStore.assign(item.id, e.currentTarget.value || null)}
 				>
-					<option value="">— Niemand —</option>
+					<option value="">{$_('events.bring_list_editor.option_no_one')}</option>
 					{#each guests.value ?? [] as g (g.id)}
 						<option value={g.id}>{g.name}</option>
 					{/each}
@@ -103,7 +108,7 @@
 				<button
 					class="remove-btn"
 					onclick={() => eventItemsStore.deleteItem(item.id)}
-					title="Entfernen"
+					title={$_('events.bring_list_editor.action_remove_title')}
 				>
 					×
 				</button>
@@ -111,7 +116,7 @@
 		{/each}
 
 		{#if (items.value ?? []).length === 0}
-			<li class="empty">Noch nichts auf der Liste.</li>
+			<li class="empty">{$_('events.bring_list_editor.empty')}</li>
 		{/if}
 	</ul>
 </div>

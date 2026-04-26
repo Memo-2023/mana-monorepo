@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { discoveryStore } from '../discovery/store.svelte';
 	import { EVENT_CATEGORIES } from '../discovery/types';
 	import RegionPicker from './RegionPicker.svelte';
@@ -44,17 +45,19 @@
 </script>
 
 <div class="setup">
-	<h2 class="setup-title">Event-Entdeckung einrichten</h2>
+	<h2 class="setup-title">{$_('events.discovery_setup.title')}</h2>
 
 	{#if step === 1}
 		<div class="step">
-			<p class="step-desc">Welche Regionen sollen nach Events durchsucht werden?</p>
+			<p class="step-desc">{$_('events.discovery_setup.step1_desc')}</p>
 			<RegionPicker regions={discoveryStore.regions} />
-			<button class="next-btn" disabled={!canProceed} onclick={() => (step = 2)}> Weiter </button>
+			<button class="next-btn" disabled={!canProceed} onclick={() => (step = 2)}>
+				{$_('events.discovery_setup.action_next')}
+			</button>
 		</div>
 	{:else}
 		<div class="step">
-			<p class="step-desc">Was interessiert dich?</p>
+			<p class="step-desc">{$_('events.discovery_setup.step2_desc')}</p>
 			<div class="category-grid">
 				{#each EVENT_CATEGORIES as cat}
 					<button
@@ -69,11 +72,15 @@
 			<input
 				class="input"
 				bind:value={freetext}
-				placeholder="Weitere Interessen (kommagetrennt, z.B. Impro-Theater, Rust Meetups)"
+				placeholder={$_('events.discovery_setup.placeholder_freetext')}
 			/>
 			<div class="step-actions">
-				<button class="back-btn" onclick={() => (step = 1)}>Zuruck</button>
-				<button class="next-btn" disabled={!canFinish} onclick={finishSetup}> Fertig </button>
+				<button class="back-btn" onclick={() => (step = 1)}>
+					{$_('events.discovery_setup.action_back')}
+				</button>
+				<button class="next-btn" disabled={!canFinish} onclick={finishSetup}>
+					{$_('events.discovery_setup.action_finish')}
+				</button>
 			</div>
 		</div>
 	{/if}

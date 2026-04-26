@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { _ } from 'svelte-i18n';
 	import { discoveryStore } from '../discovery/store.svelte';
 	import DiscoverySetup from './DiscoverySetup.svelte';
 	import DiscoveredEventCard from './DiscoveredEventCard.svelte';
@@ -29,7 +30,7 @@
 
 <div class="discovery-tab">
 	{#if !initialized}
-		<p class="loading">Lade...</p>
+		<p class="loading">{$_('events.discovery_tab.loading')}</p>
 	{:else if !discoveryStore.isSetUp}
 		<DiscoverySetup onComplete={handleSetupComplete} />
 	{:else}
@@ -37,14 +38,18 @@
 			<RegionPicker regions={discoveryStore.regions} />
 			<div class="control-row">
 				<button class="control-btn" onclick={() => discoveryStore.refreshFeed()}>
-					Aktualisieren
+					{$_('events.discovery_tab.action_refresh')}
 				</button>
 				<button
 					class="control-btn"
 					class:active={showSources}
 					onclick={() => (showSources = !showSources)}
 				>
-					Quellen {discoveryStore.sources.length > 0 ? `(${discoveryStore.sources.length})` : ''}
+					{discoveryStore.sources.length > 0
+						? $_('events.discovery_tab.action_sources_count', {
+								values: { count: discoveryStore.sources.length },
+							})
+						: $_('events.discovery_tab.action_sources')}
 				</button>
 			</div>
 		</div>
@@ -54,18 +59,16 @@
 		{/if}
 
 		{#if discoveryStore.loading}
-			<p class="loading">Lade Events...</p>
+			<p class="loading">{$_('events.discovery_tab.loading_events')}</p>
 		{:else if discoveryStore.error}
 			<p class="error-msg">{discoveryStore.error}</p>
 		{:else if discoveryStore.feed.length === 0}
 			<div class="empty">
-				<p class="empty-title">Noch keine Events gefunden</p>
-				<p class="empty-hint">
-					Fuge iCal-Feeds von Venues oder Vereinen hinzu, um Events zu entdecken.
-				</p>
+				<p class="empty-title">{$_('events.discovery_tab.empty_title')}</p>
+				<p class="empty-hint">{$_('events.discovery_tab.empty_hint')}</p>
 				{#if !showSources}
 					<button class="action-btn" onclick={() => (showSources = true)}>
-						Quellen verwalten
+						{$_('events.discovery_tab.action_manage_sources')}
 					</button>
 				{/if}
 			</div>
@@ -83,7 +86,7 @@
 						class="load-more"
 						onclick={() => discoveryStore.refreshFeed({ offset: discoveryStore.feed.length })}
 					>
-						Mehr laden
+						{$_('events.discovery_tab.action_load_more')}
 					</button>
 				{/if}
 			</div>
