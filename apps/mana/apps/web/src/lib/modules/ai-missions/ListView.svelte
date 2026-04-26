@@ -4,6 +4,7 @@
   Master-detail inline (list ↔ create ↔ detail) in a single panel.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { formatDateTime } from '$lib/i18n/format';
 	import { ArrowLeft, Play, Pause, Check, Trash, Plus } from '@mana/shared-icons';
 	import { useMissions } from '$lib/data/ai/missions/queries';
@@ -136,31 +137,42 @@
 	function describeCadence(c: MissionCadence): string {
 		switch (c.kind) {
 			case 'manual':
-				return 'manuell';
+				return $_('ai-missions.list_view.cadence_describe_manual');
 			case 'interval':
-				return `alle ${c.everyMinutes} min`;
+				return $_('ai-missions.list_view.cadence_describe_interval', {
+					values: { minutes: c.everyMinutes },
+				});
 			case 'daily':
-				return `täglich ${String(c.atHour).padStart(2, '0')}:${String(c.atMinute).padStart(2, '0')}`;
+				return $_('ai-missions.list_view.cadence_describe_daily', {
+					values: {
+						hh: String(c.atHour).padStart(2, '0'),
+						mm: String(c.atMinute).padStart(2, '0'),
+					},
+				});
 			case 'weekly':
-				return `wöchentlich (Tag ${c.dayOfWeek}, ${c.atHour}:00)`;
+				return $_('ai-missions.list_view.cadence_describe_weekly', {
+					values: { day: c.dayOfWeek, hour: c.atHour },
+				});
 			case 'cron':
-				return `cron: ${c.expression}`;
+				return $_('ai-missions.list_view.cadence_describe_cron', {
+					values: { expression: c.expression },
+				});
 		}
 	}
 	function describeState(s: Mission['state']): string {
-		return { active: 'aktiv', paused: 'pausiert', done: 'abgeschlossen', archived: 'archiviert' }[
-			s
-		];
+		return $_('ai-missions.list_view.state_' + s);
 	}
 	function formatRelative(iso: string | undefined): string {
-		if (!iso) return '—';
+		if (!iso) return $_('ai-missions.list_view.none_dash');
 		const d = new Date(iso);
 		const deltaMs = d.getTime() - Date.now();
 		const mins = Math.round(Math.abs(deltaMs) / 60_000);
 		const hours = Math.round(mins / 60);
 		const days = Math.round(hours / 24);
 		const value = mins < 60 ? `${mins}m` : hours < 24 ? `${hours}h` : `${days}d`;
-		return deltaMs < 0 ? `vor ${value}` : `in ${value}`;
+		return deltaMs < 0
+			? $_('ai-missions.list_view.relative_past', { values: { value } })
+			: $_('ai-missions.list_view.relative_future', { values: { value } });
 	}
 
 	function openDetail(id: string) {
@@ -186,13 +198,18 @@
 		return `${m}m ${String(s).padStart(2, '0')}s`;
 	}
 
-	const PHASE_LABELS: Record<string, string> = {
-		'resolving-inputs': 'Lade Inputs',
-		'calling-llm': 'Frage Planner',
-		'parsing-response': 'Validiere Antwort',
-		'staging-proposals': 'Stage Vorschläge',
-		finalizing: 'Schließe ab',
+	const PHASE_KEY_MAP: Record<string, string> = {
+		'resolving-inputs': 'phase_resolving_inputs',
+		'calling-llm': 'phase_calling_llm',
+		'parsing-response': 'phase_parsing_response',
+		'staging-proposals': 'phase_staging_proposals',
+		finalizing: 'phase_finalizing',
 	};
+	function phaseLabel(phase: string | undefined): string {
+		if (!phase) return $_('ai-missions.list_view.phase_initializing');
+		const key = PHASE_KEY_MAP[phase];
+		return key ? $_('ai-missions.list_view.' + key) : phase;
+	}
 
 	let cancelling = $state<string | null>(null);
 	async function handleCancel(missionId: string, iterationId: string) {
@@ -209,12 +226,12 @@
 	<div class="pane">
 		<header class="bar">
 			<button type="button" class="primary" onclick={() => (mode = 'create')}>
-				<Plus size={14} /><span>Neue Mission</span>
+				<Plus size={14} /><span>{$_('ai-missions.list_view.action_new')}</span>
 			</button>
 		</header>
 		{#if missions.value.length === 0}
 			<p class="empty">
-				Keine Missions — lege eine an um die KI dauerhaft für dich arbeiten zu lassen.
+				{$_('ai-missions.list_view.empty_text')}
 			</p>
 		{:else}
 			<ul class="m-list">
@@ -227,9 +244,17 @@
 							</span>
 							<span class="m-meta">
 								<span>{describeCadence(m.cadence)}</span>
-								<span>{m.iterations.length} Iter.</span>
+								<span
+									>{$_('ai-missions.list_view.iter_short', {
+										values: { count: m.iterations.length },
+									})}</span
+								>
 								{#if m.nextRunAt}
-									<span>next {formatRelative(m.nextRunAt)}</span>
+									<span
+										>{$_('ai-missions.list_view.next_label', {
+											values: { when: formatRelative(m.nextRunAt) },
+										})}</span
+									>
 								{/if}
 							</span>
 						</button>
@@ -241,44 +266,54 @@
 {:else if mode === 'create'}
 	<form class="create" onsubmit={(e) => (e.preventDefault(), handleCreate())}>
 		<button type="button" class="back-btn" onclick={() => (mode = 'list')}>
-			<ArrowLeft size={14} /><span>Abbrechen</span>
+			<ArrowLeft size={14} /><span>{$_('ai-missions.list_view.action_cancel')}</span>
 		</button>
 		<label>
-			<span class="lbl">Titel</span>
-			<input bind:value={formTitle} placeholder="z.B. Wöchentlicher Review" required />
+			<span class="lbl">{$_('ai-missions.list_view.label_title')}</span>
+			<input
+				bind:value={formTitle}
+				placeholder={$_('ai-missions.list_view.placeholder_title')}
+				required
+			/>
 		</label>
 		<label>
-			<span class="lbl">Konkretes Ziel</span>
-			<input bind:value={formObjective} placeholder="Was soll die KI erreichen?" required />
+			<span class="lbl">{$_('ai-missions.list_view.label_objective')}</span>
+			<input
+				bind:value={formObjective}
+				placeholder={$_('ai-missions.list_view.placeholder_objective')}
+				required
+			/>
 		</label>
 		<label>
-			<span class="lbl">Konzept (Markdown, optional)</span>
+			<span class="lbl">{$_('ai-missions.list_view.label_concept')}</span>
 			<textarea
 				bind:value={formConcept}
-				placeholder="# Rahmen&#10;Erkläre der KI Kontext, Regeln, Grenzen…"
+				placeholder={$_('ai-missions.list_view.placeholder_concept')}
 				rows="5"
 			></textarea>
 		</label>
 		<fieldset>
-			<legend>Agent</legend>
+			<legend>{$_('ai-missions.list_view.legend_agent')}</legend>
 			<AgentPicker
 				value={formAgentId}
 				onSelect={(id) => (formAgentId = id)}
-				label="Wer führt aus"
+				label={$_('ai-missions.list_view.agent_picker_label')}
 			/>
 		</fieldset>
 		<fieldset>
-			<legend>Inputs (Kontext für die KI)</legend>
+			<legend>{$_('ai-missions.list_view.legend_inputs')}</legend>
 			<MissionInputPicker bind:value={formInputs} />
 		</fieldset>
 		<fieldset>
-			<legend>Cadence</legend>
+			<legend>{$_('ai-missions.list_view.legend_cadence')}</legend>
 			<div class="cadence-row">
 				<label class="inline">
-					<input type="radio" bind:group={formCadenceKind} value="manual" /> Manuell
+					<input type="radio" bind:group={formCadenceKind} value="manual" />
+					{$_('ai-missions.list_view.cadence_manual')}
 				</label>
 				<label class="inline">
-					<input type="radio" bind:group={formCadenceKind} value="interval" /> Intervall
+					<input type="radio" bind:group={formCadenceKind} value="interval" />
+					{$_('ai-missions.list_view.cadence_interval')}
 					{#if formCadenceKind === 'interval'}
 						<input
 							class="inline-num"
@@ -287,11 +322,12 @@
 							min="5"
 							max="1440"
 						/>
-						<span>min</span>
+						<span>{$_('ai-missions.list_view.cadence_min_unit')}</span>
 					{/if}
 				</label>
 				<label class="inline">
-					<input type="radio" bind:group={formCadenceKind} value="daily" /> Täglich um
+					<input type="radio" bind:group={formCadenceKind} value="daily" />
+					{$_('ai-missions.list_view.cadence_daily')}
 					{#if formCadenceKind === 'daily'}
 						<input class="inline-num" type="number" bind:value={formDailyHour} min="0" max="23" />
 						:00
@@ -301,43 +337,49 @@
 		</fieldset>
 		<div class="form-actions">
 			<button type="submit" class="primary" disabled={creating}>
-				{creating ? 'Erstelle…' : 'Mission anlegen'}
+				{creating
+					? $_('ai-missions.list_view.action_creating')
+					: $_('ai-missions.list_view.action_create')}
 			</button>
 		</div>
 	</form>
 {:else if selected}
 	<div class="detail">
 		<button type="button" class="back-btn" onclick={() => (mode = 'list')}>
-			<ArrowLeft size={14} /><span>Liste</span>
+			<ArrowLeft size={14} /><span>{$_('ai-missions.list_view.action_back_list')}</span>
 		</button>
 		<h2 class="detail-title">{selected.title}</h2>
 		<div class="detail-actions">
 			<button type="button" onclick={() => handleRunNow(selected)} disabled={runningNow}>
-				<Play size={12} /><span>{runningNow ? 'Läuft…' : 'Jetzt ausführen'}</span>
+				<Play size={12} /><span
+					>{runningNow
+						? $_('ai-missions.list_view.action_running')
+						: $_('ai-missions.list_view.action_run_now')}</span
+				>
 			</button>
-			<label class="debug-toggle" title="Erfasst Prompts + Responses lokal pro Iteration">
+			<label class="debug-toggle" title={$_('ai-missions.list_view.debug_title')}>
 				<input type="checkbox" checked={debugEnabled} onchange={toggleDebug} />
-				<span>🔍 Debug</span>
+				<span>{$_('ai-missions.list_view.debug_label')}</span>
 			</label>
 			{#if selected.state === 'active'}
 				<button type="button" onclick={() => pauseMission(selected.id)}>
-					<Pause size={12} /><span>Pause</span>
+					<Pause size={12} /><span>{$_('ai-missions.list_view.action_pause')}</span>
 				</button>
 			{:else if selected.state === 'paused'}
 				<button type="button" onclick={() => resumeMission(selected.id)}>
-					<Play size={12} /><span>Fortsetzen</span>
+					<Play size={12} /><span>{$_('ai-missions.list_view.action_resume')}</span>
 				</button>
 			{/if}
 			{#if selected.state !== 'done'}
 				<button type="button" onclick={() => completeMission(selected.id)}>
-					<Check size={12} /><span>Abschließen</span>
+					<Check size={12} /><span>{$_('ai-missions.list_view.action_complete')}</span>
 				</button>
 			{/if}
 			<button
 				type="button"
 				class="danger"
 				onclick={() => {
-					if (confirm('Mission löschen?')) {
+					if (confirm($_('ai-missions.list_view.confirm_delete'))) {
 						deleteMission(selected.id);
 						mode = 'list';
 						selectedId = null;
@@ -349,15 +391,22 @@
 		</div>
 
 		<dl class="meta">
-			<dt>Ziel</dt>
+			<dt>{$_('ai-missions.list_view.meta_objective')}</dt>
 			<dd>{selected.objective}</dd>
-			<dt>Cadence</dt>
-			<dd>{describeCadence(selected.cadence)} · {describeState(selected.state)}</dd>
-			<dt>Next</dt>
-			<dd>{formatRelative(selected.nextRunAt)}</dd>
-			<dt>Inputs</dt>
+			<dt>{$_('ai-missions.list_view.meta_cadence')}</dt>
 			<dd>
-				{#if selected.inputs.length === 0}—{:else}
+				{$_('ai-missions.list_view.meta_cadence_value', {
+					values: {
+						cadence: describeCadence(selected.cadence),
+						state: describeState(selected.state),
+					},
+				})}
+			</dd>
+			<dt>{$_('ai-missions.list_view.meta_next')}</dt>
+			<dd>{formatRelative(selected.nextRunAt)}</dd>
+			<dt>{$_('ai-missions.list_view.meta_inputs')}</dt>
+			<dd>
+				{#if selected.inputs.length === 0}{$_('ai-missions.list_view.none_dash')}{:else}
 					{selected.inputs.map((i) => `${i.module}/${i.id}`).join(', ')}
 				{/if}
 			</dd>
@@ -365,7 +414,7 @@
 
 		{#if selected.conceptMarkdown}
 			<details>
-				<summary>Konzept</summary>
+				<summary>{$_('ai-missions.list_view.concept_summary')}</summary>
 				<pre>{selected.conceptMarkdown}</pre>
 			</details>
 		{/if}
@@ -373,41 +422,48 @@
 		{#if grantsEnabled && hasEncryptedInputs(selected)}
 			<section class="grant-box">
 				<div class="grant-head">
-					<span class="grant-title">🔑 Server-Zugriff</span>
+					<span class="grant-title">{$_('ai-missions.list_view.grant_title')}</span>
 					{#if grantStatus(selected) === 'active'}
 						<span class="grant-pill grant-pill-ok"
-							>aktiv · läuft ab {formatGrantExpiry(selected)}</span
+							>{$_('ai-missions.list_view.grant_active', {
+								values: { when: formatGrantExpiry(selected) },
+							})}</span
 						>
 					{:else if grantStatus(selected) === 'expired'}
-						<span class="grant-pill grant-pill-warn">abgelaufen</span>
+						<span class="grant-pill grant-pill-warn"
+							>{$_('ai-missions.list_view.grant_expired')}</span
+						>
 					{:else}
-						<span class="grant-pill grant-pill-muted">nicht erteilt</span>
+						<span class="grant-pill grant-pill-muted">{$_('ai-missions.list_view.grant_none')}</span
+						>
 					{/if}
 				</div>
 				<p class="grant-note">
 					{#if grantStatus(selected) === 'active'}
-						Läuft autonom; Zugriff kann jederzeit zurückgezogen werden.
+						{$_('ai-missions.list_view.grant_note_active')}
 					{:else}
-						Ohne Zugriff läuft die Mission nur bei offenem Tab.
+						{$_('ai-missions.list_view.grant_note_inactive')}
 					{/if}
 				</p>
 				<div class="grant-actions">
 					{#if selected.grant}
 						<button type="button" class="btn-ghost" onclick={() => revokeMissionGrant(selected.id)}>
-							Zugriff zurückziehen
+							{$_('ai-missions.list_view.action_revoke')}
 						</button>
 					{/if}
 					<button type="button" class="btn-primary" onclick={() => (grantDialogOpen = true)}>
-						{selected.grant ? 'Neu erteilen' : 'Zugriff erteilen'}
+						{selected.grant
+							? $_('ai-missions.list_view.action_grant_renew')
+							: $_('ai-missions.list_view.action_grant')}
 					</button>
 				</div>
 			</section>
 			<MissionGrantDialog mission={selected} bind:open={grantDialogOpen} />
 		{/if}
 
-		<h3 class="section-title">Iterationen</h3>
+		<h3 class="section-title">{$_('ai-missions.list_view.section_iterations')}</h3>
 		{#if selected.iterations.length === 0}
-			<p class="empty">Noch keine Iteration gelaufen.</p>
+			<p class="empty">{$_('ai-missions.list_view.empty_iterations')}</p>
 		{:else}
 			{#each [...selected.iterations].reverse() as it (it.id)}
 				{@const isRunning = it.overallStatus === 'running'}
@@ -422,10 +478,18 @@
 							<div class="phase-line">
 								<span class="phase-spinner" aria-hidden="true">⏳</span>
 								<span class="phase-label">
-									{PHASE_LABELS[it.currentPhase ?? ''] ?? it.currentPhase ?? 'Initialisiere'}
-									{#if it.phaseDetail}<span class="phase-detail"> · {it.phaseDetail}</span>{/if}
+									{phaseLabel(it.currentPhase ?? undefined)}
+									{#if it.phaseDetail}<span class="phase-detail"
+											>{$_('ai-missions.list_view.phase_detail_separator', {
+												values: { detail: it.phaseDetail },
+											})}</span
+										>{/if}
 								</span>
-								<span class="elapsed">⏱ {formatElapsed(elapsedSeconds(it.startedAt))}</span>
+								<span class="elapsed"
+									>{$_('ai-missions.list_view.elapsed_prefix', {
+										values: { time: formatElapsed(elapsedSeconds(it.startedAt)) },
+									})}</span
+								>
 							</div>
 							<div class="phase-actions">
 								<button
@@ -434,7 +498,9 @@
 									disabled={cancelling === it.id || it.cancelRequested}
 									onclick={() => handleCancel(selected.id, it.id)}
 								>
-									{it.cancelRequested ? 'Wird abgebrochen…' : 'Abbrechen'}
+									{it.cancelRequested
+										? $_('ai-missions.list_view.action_cancelling')
+										: $_('ai-missions.list_view.action_cancel_iter')}
 								</button>
 							</div>
 						</div>
@@ -448,7 +514,9 @@
 								<span class="err-name">{it.errorDetails.name}</span>
 								{#if it.errorDetails.phase}
 									<span class="err-phase"
-										>in {PHASE_LABELS[it.errorDetails.phase] ?? it.errorDetails.phase}</span
+										>{$_('ai-missions.list_view.err_phase_in', {
+											values: { phase: phaseLabel(it.errorDetails.phase) },
+										})}</span
 									>
 								{/if}
 							</summary>
@@ -464,7 +532,9 @@
 								disabled={runningNow}
 								onclick={() => handleRunNow(selected)}
 							>
-								{runningNow ? 'Läuft…' : '↻ Erneut versuchen'}
+								{runningNow
+									? $_('ai-missions.list_view.action_retry_running')
+									: $_('ai-missions.list_view.action_retry')}
 							</button>
 						</div>
 					{/if}
@@ -480,10 +550,12 @@
 						>
 							<textarea
 								bind:value={feedbackDraft}
-								placeholder="Feedback für die nächste Iteration…"
+								placeholder={$_('ai-missions.list_view.placeholder_feedback')}
 								rows="2"
 							></textarea>
-							<button type="submit" disabled={!feedbackDraft.trim()}>Speichern</button>
+							<button type="submit" disabled={!feedbackDraft.trim()}
+								>{$_('ai-missions.list_view.action_save_feedback')}</button
+							>
 						</form>
 					{/if}
 				</article>
