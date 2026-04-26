@@ -23,16 +23,12 @@
 		title?: string;
 	}
 
-	let {
-		open,
-		onClose,
-		moduleContext,
-		defaultCategory = 'feature',
-		title = 'Idee oder Feedback?',
-	}: Props = $props();
+	let props: Props = $props();
+	let title = $derived(props.title ?? 'Idee oder Feedback?');
+	let defaultCategory = $derived<FeedbackCategory>(props.defaultCategory ?? 'feature');
 
 	let text = $state('');
-	let category = $state<FeedbackCategory>(defaultCategory);
+	let category = $state<FeedbackCategory>(props.defaultCategory ?? 'feature');
 	let isPublic = $state(true);
 	let saving = $state(false);
 	let error = $state<string | null>(null);
@@ -54,7 +50,7 @@
 				feedbackText: trimmed,
 				category,
 				isPublic,
-				moduleContext,
+				moduleContext: props.moduleContext,
 			});
 			submittedDisplayName =
 				(res as { displayName?: string }).displayName ??
@@ -74,7 +70,7 @@
 		isPublic = true;
 		error = null;
 		submittedDisplayName = null;
-		onClose();
+		props.onClose();
 	}
 
 	function onBackdropKey(e: KeyboardEvent) {
@@ -82,9 +78,10 @@
 	}
 </script>
 
-{#if open}
+{#if props.open}
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<div
 		class="backdrop"
 		role="dialog"
@@ -116,8 +113,8 @@
 				</div>
 			{:else}
 				<div class="body">
-					{#if moduleContext}
-						<div class="context-badge">Modul: {moduleContext}</div>
+					{#if props.moduleContext}
+						<div class="context-badge">Modul: {props.moduleContext}</div>
 					{/if}
 
 					<label class="field">

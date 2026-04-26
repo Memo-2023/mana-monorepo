@@ -17,12 +17,12 @@
 		moduleContext?: string;
 	}
 
-	let { moduleContext }: Props = $props();
+	let props: Props = $props();
 
 	let categoryFilter = $state<FeedbackCategory | ''>('');
-	let modulePill = $state(moduleContext ?? '');
+	let modulePill = $state(props.moduleContext ?? '');
 
-	let feed = useCommunityFeed({ moduleContext, limit: 50 });
+	let feed = useCommunityFeed({ moduleContext: props.moduleContext, limit: 50 });
 
 	function applyFilters() {
 		feed.reload({

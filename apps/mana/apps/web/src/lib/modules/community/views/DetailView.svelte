@@ -14,9 +14,9 @@
 		id: string;
 	}
 
-	let { id }: Props = $props();
+	let props: Props = $props();
 
-	let view = useCommunityItem(id);
+	let view = useCommunityItem(props.id);
 
 	let replyText = $state('');
 	let saving = $state(false);
@@ -30,7 +30,7 @@
 		try {
 			await feedbackService.createFeedback({
 				feedbackText: trimmed,
-				parentId: id,
+				parentId: props.id,
 				isPublic: true,
 				category: 'other',
 			});
