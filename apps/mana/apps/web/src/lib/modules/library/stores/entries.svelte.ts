@@ -132,7 +132,7 @@ export const libraryEntriesStore = {
 	) {
 		const wrapped = { ...patch } as Record<string, unknown>;
 		await encryptRecord('libraryEntries', wrapped);
-		await libraryEntryTable.update(id, wrapped as never);
+		await libraryEntryTable.update(id, wrapped);
 		// Keep the share-link snapshot in sync if this entry is unlisted.
 		void this.refreshUnlistedSnapshot(id);
 	},
@@ -265,7 +265,7 @@ export const libraryEntriesStore = {
 			patch.unlistedExpiresAt = undefined;
 		}
 
-		await libraryEntryTable.update(id, patch as never);
+		await libraryEntryTable.update(id, patch);
 
 		emitDomainEvent('VisibilityChanged', 'library', 'libraryEntries', id, {
 			recordId: id,

@@ -167,7 +167,7 @@ export const meImagesStore = {
 	): Promise<void> {
 		const wrapped = { ...patch } as Record<string, unknown>;
 		await encryptRecord('meImages', wrapped);
-		await meImagesTable.update(id, wrapped as never);
+		await meImagesTable.update(id, wrapped);
 	},
 
 	/**

@@ -66,7 +66,7 @@ export const stylesStore = {
 	async updateStyle(id: string, patch: UpdateStylePatch) {
 		const wrapped = { ...patch } as Record<string, unknown>;
 		await encryptRecord('writingStyles', wrapped);
-		await writingStyleTable.update(id, wrapped as never);
+		await writingStyleTable.update(id, wrapped);
 	},
 
 	async upsertExtractedPrinciples(id: string, principles: StyleExtractedPrinciples) {

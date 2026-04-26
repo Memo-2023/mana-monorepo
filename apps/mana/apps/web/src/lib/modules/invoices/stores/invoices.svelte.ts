@@ -137,7 +137,7 @@ export const invoicesStore = {
 		}
 		const wrapped = { ...patch } as Record<string, unknown>;
 		await encryptRecord('invoices', wrapped);
-		await invoiceTable.update(id, wrapped as never);
+		await invoiceTable.update(id, wrapped);
 	},
 
 	/**
@@ -156,7 +156,7 @@ export const invoicesStore = {
 		// `lines` is in the encryption allowlist; `totals` is not. encryptRecord
 		// only touches allowlisted keys, so a single call is correct for both.
 		await encryptRecord('invoices', patch);
-		await invoiceTable.update(id, patch as never);
+		await invoiceTable.update(id, patch);
 	},
 
 	/**

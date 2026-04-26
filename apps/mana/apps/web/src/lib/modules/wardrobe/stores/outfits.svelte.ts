@@ -73,7 +73,7 @@ export const wardrobeOutfitsStore = {
 	): Promise<void> {
 		const wrapped = { ...patch } as Record<string, unknown>;
 		await encryptRecord('wardrobeOutfits', wrapped);
-		await wardrobeOutfitsTable.update(id, wrapped as never);
+		await wardrobeOutfitsTable.update(id, wrapped);
 	},
 
 	async toggleFavorite(id: string): Promise<void> {
@@ -145,7 +145,7 @@ export const wardrobeOutfitsStore = {
 		} else if (next !== 'unlisted' && existing.unlistedToken) {
 			patch.unlistedToken = undefined;
 		}
-		await wardrobeOutfitsTable.update(id, patch as never);
+		await wardrobeOutfitsTable.update(id, patch);
 
 		emitDomainEvent('VisibilityChanged', 'wardrobe', 'wardrobeOutfits', id, {
 			recordId: id,

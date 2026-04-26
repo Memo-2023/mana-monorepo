@@ -82,7 +82,7 @@ export const wardrobeGarmentsStore = {
 	): Promise<void> {
 		const wrapped = { ...patch } as Record<string, unknown>;
 		await encryptRecord('wardrobeGarments', wrapped);
-		await wardrobeGarmentsTable.update(id, wrapped as never);
+		await wardrobeGarmentsTable.update(id, wrapped);
 	},
 
 	/**

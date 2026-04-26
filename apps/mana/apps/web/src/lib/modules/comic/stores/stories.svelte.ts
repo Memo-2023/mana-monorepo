@@ -83,8 +83,8 @@ export const comicStoriesStore = {
 		if (Array.isArray(wrapped.tags)) {
 			wrapped.tags = [...wrapped.tags];
 		}
-		await encryptRecord('comicStories', wrapped as Record<string, unknown>);
-		await comicStoriesTable.update(id, wrapped as never);
+		await encryptRecord('comicStories', wrapped);
+		await comicStoriesTable.update(id, wrapped);
 	},
 
 	async toggleFavorite(id: string): Promise<void> {
@@ -133,7 +133,7 @@ export const comicStoriesStore = {
 		} else if (next !== 'unlisted' && existing.unlistedToken) {
 			patch.unlistedToken = undefined;
 		}
-		await comicStoriesTable.update(id, patch as never);
+		await comicStoriesTable.update(id, patch);
 
 		emitDomainEvent('VisibilityChanged', 'comic', 'comicStories', id, {
 			recordId: id,
@@ -163,7 +163,7 @@ export const comicStoriesStore = {
 			panelMeta: nextMeta,
 		} as Record<string, unknown>;
 		await encryptRecord('comicStories', patch);
-		await comicStoriesTable.update(storyId, patch as never);
+		await comicStoriesTable.update(storyId, patch);
 		emitDomainEvent('ComicPanelAppended', 'comic', 'comicStories', storyId, {
 			storyId,
 			panelImageId,

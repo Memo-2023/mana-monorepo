@@ -141,7 +141,7 @@ export const draftsStore = {
 	async updateDraft(id: string, patch: UpdateDraftPatch) {
 		const wrapped = { ...patch } as Record<string, unknown>;
 		await encryptRecord('writingDrafts', wrapped);
-		await draftTable.update(id, wrapped as never);
+		await draftTable.update(id, wrapped);
 	},
 
 	async updateBriefing(id: string, briefingPatch: Partial<DraftBriefing>) {
@@ -325,7 +325,7 @@ export const draftsStore = {
 		} else if (next !== 'unlisted' && existing.unlistedToken) {
 			patch.unlistedToken = undefined;
 		}
-		await draftTable.update(id, patch as never);
+		await draftTable.update(id, patch);
 		emitDomainEvent('VisibilityChanged', 'writing', 'writingDrafts', id, {
 			recordId: id,
 			collection: 'writingDrafts',

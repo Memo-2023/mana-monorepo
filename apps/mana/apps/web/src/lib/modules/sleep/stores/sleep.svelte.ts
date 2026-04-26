@@ -112,7 +112,7 @@ export const sleepStore = {
 		>
 	) {
 		// Recalculate duration if times changed
-		const update: Record<string, unknown> = { ...patch };
+		const update: Partial<LocalSleepEntry> = { ...patch };
 		if (patch.bedtime || patch.wakeTime) {
 			const entry = await sleepEntryTable.get(id);
 			if (entry) {
@@ -122,7 +122,7 @@ export const sleepStore = {
 			}
 		}
 		const wrapped = await encryptRecord('sleepEntries', update);
-		await sleepEntryTable.update(id, wrapped as never);
+		await sleepEntryTable.update(id, wrapped);
 	},
 
 	async deleteEntry(id: string) {

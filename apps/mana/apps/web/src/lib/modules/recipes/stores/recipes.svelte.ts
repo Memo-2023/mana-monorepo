@@ -78,7 +78,7 @@ export const recipesStore = {
 	) {
 		const wrapped = { ...patch } as Record<string, unknown>;
 		await encryptRecord('recipes', wrapped);
-		await recipeTable.update(id, wrapped as never);
+		await recipeTable.update(id, wrapped);
 	},
 
 	async deleteRecipe(id: string) {
@@ -118,7 +118,7 @@ export const recipesStore = {
 		} else if (next !== 'unlisted' && existing.unlistedToken) {
 			patch.unlistedToken = undefined;
 		}
-		await recipeTable.update(id, patch as never);
+		await recipeTable.update(id, patch);
 
 		emitDomainEvent('VisibilityChanged', 'recipes', 'recipes', id, {
 			recordId: id,

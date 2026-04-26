@@ -83,7 +83,7 @@ export const comicCharactersStore = {
 		if (!existing.pinnedVariantId) {
 			patch.pinnedVariantId = variantMediaId;
 		}
-		await comicCharactersTable.update(characterId, patch as never);
+		await comicCharactersTable.update(characterId, patch);
 		emitDomainEvent('ComicCharacterVariantAdded', 'comic', 'comicCharacters', characterId, {
 			characterId,
 			variantMediaId,
@@ -123,7 +123,7 @@ export const comicCharactersStore = {
 		if (existing.pinnedVariantId === variantMediaId) {
 			patch.pinnedVariantId = nextIds[0] ?? null;
 		}
-		await comicCharactersTable.update(characterId, patch as never);
+		await comicCharactersTable.update(characterId, patch);
 	},
 
 	async updateCharacter(
@@ -134,8 +134,8 @@ export const comicCharactersStore = {
 		if (Array.isArray(wrapped.tags)) {
 			wrapped.tags = [...wrapped.tags];
 		}
-		await encryptRecord('comicCharacters', wrapped as Record<string, unknown>);
-		await comicCharactersTable.update(id, wrapped as never);
+		await encryptRecord('comicCharacters', wrapped);
+		await comicCharactersTable.update(id, wrapped);
 	},
 
 	async toggleFavorite(id: string): Promise<void> {

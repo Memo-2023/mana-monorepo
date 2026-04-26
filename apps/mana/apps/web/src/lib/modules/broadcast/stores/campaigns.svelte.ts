@@ -98,7 +98,7 @@ export const broadcastCampaignsStore = {
 		}
 		const wrapped = { ...patch } as Record<string, unknown>;
 		await encryptRecord('broadcastCampaigns', wrapped);
-		await campaignTable.update(id, wrapped as never);
+		await campaignTable.update(id, wrapped);
 	},
 
 	/**
@@ -115,7 +115,7 @@ export const broadcastCampaignsStore = {
 		}
 		const patch = { content } as Record<string, unknown>;
 		await encryptRecord('broadcastCampaigns', patch);
-		await campaignTable.update(id, patch as never);
+		await campaignTable.update(id, patch);
 	},
 
 	async updateAudience(id: string, audience: AudienceDefinition) {
@@ -126,7 +126,7 @@ export const broadcastCampaignsStore = {
 		}
 		const patch = { audience } as Record<string, unknown>;
 		await encryptRecord('broadcastCampaigns', patch);
-		await campaignTable.update(id, patch as never);
+		await campaignTable.update(id, patch);
 	},
 
 	/**

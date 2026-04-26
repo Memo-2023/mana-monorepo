@@ -81,8 +81,8 @@
 			panelImageIds: nextIds,
 			panelMeta: nextMeta,
 		} as Partial<LocalComicStory>;
-		await encryptRecord('comicStories', patch as Record<string, unknown>);
-		await comicStoriesTable.update(story.id, patch as never);
+		await encryptRecord('comicStories', patch);
+		await comicStoriesTable.update(story.id, patch);
 	}
 </script>
 
