@@ -82,6 +82,7 @@ import {
 	CoatHanger,
 	NotePencil,
 	FilmStrip,
+	Hourglass,
 } from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
@@ -903,7 +904,7 @@ registerApp({
 
 registerApp({
 	id: 'firsts',
-	name: 'Firsts',
+	name: 'Erste Male',
 	color: '#F59E0B',
 	icon: NumberCircleOne,
 	views: {
@@ -933,6 +934,41 @@ registerApp({
 			title: (data.title as string) ?? 'Neues erstes Mal',
 		});
 		return first.id;
+	},
+});
+
+registerApp({
+	id: 'lasts',
+	name: 'Letzte Male',
+	color: '#6366f1',
+	icon: Hourglass,
+	views: {
+		list: { load: () => import('$lib/modules/lasts/ListView.svelte') },
+	},
+	contextMenuActions: [
+		{
+			id: 'new-last',
+			label: 'Neues letztes Mal',
+			icon: Plus,
+			action: () =>
+				window.dispatchEvent(
+					new CustomEvent('mana:quick-action', { detail: { app: 'lasts', action: 'new' } })
+				),
+		},
+	],
+	collection: 'lasts',
+	paramKey: 'lastId',
+	dragType: 'last',
+	getDisplayData: (item) => ({
+		title: (item.title as string) || 'Letztes Mal',
+		subtitle: (item.date as string) ?? (item.status === 'suspected' ? 'Vermutet' : undefined),
+	}),
+	createItem: async (data) => {
+		const { lastsStore } = await import('$lib/modules/lasts/stores/items.svelte');
+		const last = await lastsStore.createSuspected({
+			title: (data.title as string) ?? 'Neues letztes Mal',
+		});
+		return last.id;
 	},
 });
 
