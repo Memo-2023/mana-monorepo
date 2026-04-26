@@ -1,13 +1,13 @@
 <!--
   Onboarding — Screen 3: Templates.
-  Multi-select of use-case templates. On Finish, the dedup'd union of
+  Multi-select of use-case templates. On Weiter, the dedup'd union of
   picked templates' modules (capped at 8) is written to a fresh Home
-  scene via `workbenchScenesStore.createScene`, then the flow is
-  marked complete and we navigate home.
+  scene via `workbenchScenesStore.createScene`, then we advance to the
+  wish screen (Screen 4), which owns markComplete + reset + goto('/').
 
-  Skip path: no scene written (the hardcoded DEFAULT_HOME_APPS
-  fallback in workbench-scenes kicks in on first liveQuery), onboarding
-  still marked complete so the guard doesn't re-route.
+  Skip path (no selections): no scene written (the hardcoded
+  DEFAULT_HOME_APPS fallback in workbench-scenes kicks in on first
+  liveQuery), still advance to /onboarding/wish.
 -->
 <script lang="ts">
 	import { goto } from '$app/navigation';
@@ -29,7 +29,6 @@
 		type OnboardingTemplateId,
 	} from '@mana/shared-branding';
 	import { workbenchScenesStore } from '$lib/stores/workbench-scenes.svelte';
-	import { onboardingStatus } from '$lib/stores/onboarding-status.svelte';
 	import { onboardingFlow } from '$lib/stores/onboarding-flow.svelte';
 
 	// Icon lookup — templates ship a phosphor name (string), the page
@@ -54,8 +53,6 @@
 	let saving = $state(false);
 	let error = $state<string | null>(null);
 
-	let selectedCount = $derived(selected.size);
-
 	function toggle(id: OnboardingTemplateId) {
 		const next = new Set(selected);
 		if (next.has(id)) next.delete(id);
@@ -64,13 +61,13 @@
 		onboardingFlow.setSelectedTemplateIds(Array.from(next));
 	}
 
-	async function finish({ skip = false }: { skip?: boolean } = {}) {
+	async function handleNext() {
 		if (saving) return;
 		saving = true;
 		error = null;
 
 		try {
-			if (!skip && selected.size > 0) {
+			if (selected.size > 0) {
 				// Preserve selection order. `selected` is a Set, but we inserted
 				// in order toggled — that matches the user's mental priority.
 				const modules = resolveModulesForTemplates(Array.from(selected));
@@ -82,12 +79,10 @@
 					});
 				}
 			}
-			await onboardingStatus.markComplete();
-			onboardingFlow.reset();
-			await goto('/');
+			await goto('/onboarding/wish');
 		} catch (err) {
-			console.error('[onboarding/templates] finish failed:', err);
-			error = 'Konnte den Flow nicht abschließen. Versuch es noch mal.';
+			console.error('[onboarding/templates] save failed:', err);
+			error = 'Konnte die Auswahl nicht speichern. Versuch es noch mal.';
 			saving = false;
 		}
 	}
@@ -144,25 +139,15 @@
 			<ArrowLeft size={16} weight="bold" />
 			<span>Zurück</span>
 		</button>
-		<div class="actions-right">
-			<button
-				type="button"
-				class="btn-ghost"
-				onclick={() => finish({ skip: true })}
-				disabled={saving}
-			>
-				Überspringen
-			</button>
-			<button
-				type="button"
-				class="btn-primary"
-				onclick={() => finish()}
-				disabled={saving || selectedCount === 0}
-				aria-label="Onboarding abschließen"
-			>
-				{saving ? 'Speichere…' : 'Fertig'}
-			</button>
-		</div>
+		<button
+			type="button"
+			class="btn-primary"
+			onclick={handleNext}
+			disabled={saving}
+			aria-label="Weiter zur Wunsch-Frage"
+		>
+			{saving ? 'Speichere…' : 'Weiter'}
+		</button>
 	</div>
 </div>
 
@@ -291,11 +276,6 @@
 		justify-content: space-between;
 		align-items: center;
 		margin-top: 0.5rem;
-	}
-
-	.actions-right {
-		display: flex;
-		gap: 0.5rem;
 	}
 
 	.btn-ghost {

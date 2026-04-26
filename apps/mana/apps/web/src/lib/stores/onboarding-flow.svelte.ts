@@ -1,8 +1,8 @@
 /**
- * Ephemeral state for the three-screen onboarding flow — holds values
+ * Ephemeral state for the four-screen onboarding flow — holds values
  * a later screen needs from an earlier screen (the freshly-typed name
  * for Screen 2's greeting, the multi-selected template ids for the
- * Screen 3 finish handler).
+ * Screen 3 finish handler, the wish text for Screen 4's submit).
  *
  * Deliberately module-local and non-persistent:
  *   - The canonical source of truth is `authStore.user` (name) and the
@@ -18,6 +18,7 @@
 
 let pendingName = $state<string | null>(null);
 let selectedTemplateIds = $state<string[]>([]);
+let pendingWish = $state<string>('');
 
 export const onboardingFlow = {
 	get pendingName() {
@@ -26,14 +27,21 @@ export const onboardingFlow = {
 	get selectedTemplateIds() {
 		return selectedTemplateIds;
 	},
+	get pendingWish() {
+		return pendingWish;
+	},
 	setPendingName(value: string) {
 		pendingName = value.trim() || null;
 	},
 	setSelectedTemplateIds(ids: string[]) {
 		selectedTemplateIds = ids;
 	},
+	setPendingWish(value: string) {
+		pendingWish = value;
+	},
 	reset() {
 		pendingName = null;
 		selectedTemplateIds = [];
+		pendingWish = '';
 	},
 };

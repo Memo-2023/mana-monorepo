@@ -60,23 +60,6 @@
 		}
 	}
 
-	async function handleSkip() {
-		const fallback = (authStore.user?.email ?? '').split('@')[0] || 'du';
-		saving = true;
-		error = null;
-		try {
-			// Persist the fallback too so the user shows up as something
-			// other than "User 1234" in admin UIs — cheap, idempotent.
-			await saveName(fallback);
-		} catch (err) {
-			console.warn('[onboarding/name] skip-save failed:', err);
-		} finally {
-			saving = false;
-		}
-		onboardingFlow.setPendingName(fallback);
-		await goto('/onboarding/look');
-	}
-
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Enter' && canSubmit) {
 			e.preventDefault();
@@ -109,9 +92,6 @@
 	</div>
 
 	<div class="actions">
-		<button type="button" class="btn-ghost" onclick={handleSkip} disabled={saving}>
-			Überspringen
-		</button>
 		<button
 			type="button"
 			class="btn-primary"
@@ -173,26 +153,8 @@
 
 	.actions {
 		display: flex;
-		justify-content: space-between;
+		justify-content: flex-end;
 		align-items: center;
-	}
-
-	.btn-ghost {
-		padding: 0.625rem 1rem;
-		border: none;
-		background: transparent;
-		color: hsl(var(--color-muted-foreground));
-		font-size: 0.9375rem;
-		border-radius: 0.5rem;
-		cursor: pointer;
-		transition:
-			background 0.15s ease,
-			color 0.15s ease;
-	}
-
-	.btn-ghost:hover:not(:disabled) {
-		background: hsl(var(--color-muted) / 0.4);
-		color: hsl(var(--color-foreground));
 	}
 
 	.btn-primary {
