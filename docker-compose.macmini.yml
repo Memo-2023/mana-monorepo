@@ -583,6 +583,10 @@ services:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform
       MANA_AUTH_URL: http://mana-auth:3001
       MANA_LLM_URL: http://mana-llm:3025
+      # Seeds the per-user display-hash for the public-community pseudonym
+      # ("Wachsame Eule #4528"). Set in .env.macmini — rotation re-keys
+      # only future pseudonyms, existing rows keep the old hash/name.
+      FEEDBACK_PSEUDONYM_SECRET: ${FEEDBACK_PSEUDONYM_SECRET:?missing in .env.macmini}
       CORS_ORIGINS: https://mana.how
     ports:
       - "3064:3064"
