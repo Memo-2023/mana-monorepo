@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getDateFnsLocale } from '$lib/i18n/format';
+	import { _ } from 'svelte-i18n';
 	import { getContext } from 'svelte';
 	import { calendarViewStore } from '../stores/view.svelte';
 	import { getEventsForDay } from '../queries';
@@ -209,8 +210,12 @@
 		<div class="month-header">
 			<span class="month-label">
 				{#if !isTodayVisible}
-					<button onclick={goToToday} title="Zum heutigen Tag" class="today-button">
-						<span class="today-label">Heute</span>
+					<button
+						onclick={goToToday}
+						title={$_('calendar.date_strip.today_aria')}
+						class="today-button"
+					>
+						<span class="today-label">{$_('calendar.date_strip.today_label')}</span>
 						<span class="today-date"
 							>{format(new Date(), 'd. MMM', { locale: getDateFnsLocale() })}</span
 						>

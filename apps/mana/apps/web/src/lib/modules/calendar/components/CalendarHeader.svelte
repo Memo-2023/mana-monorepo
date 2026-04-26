@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getDateFnsLocale } from '$lib/i18n/format';
+	import { _ } from 'svelte-i18n';
 	import { calendarViewStore } from '../stores/view.svelte';
 	import type { CalendarViewType } from '../types';
 	import type { TimeBlockType } from '$lib/data/time-blocks/types';
@@ -39,23 +40,25 @@
 
 	let showFilters = $state(false);
 
-	const blockTypeConfig: { type: TimeBlockType; label: string; icon: typeof CalendarBlank }[] = [
-		{ type: 'event', label: 'Termine', icon: CalendarBlank },
-		{ type: 'task', label: 'Aufgaben', icon: CheckSquare },
-		{ type: 'timeEntry', label: 'Zeiten', icon: Timer },
-		{ type: 'habit', label: 'Habits', icon: Heart },
-		{ type: 'body', label: 'Training', icon: Barbell },
-		{ type: 'watering', label: 'Gießen', icon: Drop },
-		{ type: 'sleep', label: 'Schlaf', icon: Moon },
-		{ type: 'practice', label: 'Übung', icon: GraduationCap },
-		{ type: 'period', label: 'Periode', icon: FlowerLotus },
-		{ type: 'guide', label: 'Guides', icon: Compass },
-		{ type: 'visit', label: 'Besuche', icon: MapPin },
-		{ type: 'study', label: 'Lernen', icon: BookOpen },
-		{ type: 'listening', label: 'Musik', icon: MusicNote },
-		{ type: 'mood', label: 'Stimmung', icon: SunHorizon },
-		{ type: 'rehearsal', label: 'Probe', icon: Presentation },
-	];
+	const blockTypeConfig = $derived<
+		{ type: TimeBlockType; label: string; icon: typeof CalendarBlank }[]
+	>([
+		{ type: 'event', label: $_('calendar.header.block_event'), icon: CalendarBlank },
+		{ type: 'task', label: $_('calendar.header.block_task'), icon: CheckSquare },
+		{ type: 'timeEntry', label: $_('calendar.header.block_time_entry'), icon: Timer },
+		{ type: 'habit', label: $_('calendar.header.block_habit'), icon: Heart },
+		{ type: 'body', label: $_('calendar.header.block_body'), icon: Barbell },
+		{ type: 'watering', label: $_('calendar.header.block_watering'), icon: Drop },
+		{ type: 'sleep', label: $_('calendar.header.block_sleep'), icon: Moon },
+		{ type: 'practice', label: $_('calendar.header.block_practice'), icon: GraduationCap },
+		{ type: 'period', label: $_('calendar.header.block_period'), icon: FlowerLotus },
+		{ type: 'guide', label: $_('calendar.header.block_guide'), icon: Compass },
+		{ type: 'visit', label: $_('calendar.header.block_visit'), icon: MapPin },
+		{ type: 'study', label: $_('calendar.header.block_study'), icon: BookOpen },
+		{ type: 'listening', label: $_('calendar.header.block_listening'), icon: MusicNote },
+		{ type: 'mood', label: $_('calendar.header.block_mood'), icon: SunHorizon },
+		{ type: 'rehearsal', label: $_('calendar.header.block_rehearsal'), icon: Presentation },
+	]);
 
 	let allActive = $derived(
 		blockTypeConfig.every((c) => calendarViewStore.visibleBlockTypes.has(c.type))
@@ -82,22 +85,32 @@
 		});
 	});
 
-	const viewLabels: Record<CalendarViewType, string> = {
-		week: 'Woche',
-		month: 'Monat',
-		agenda: 'Agenda',
-	};
+	const viewLabels = $derived<Record<CalendarViewType, string>>({
+		week: $_('calendar.views.week'),
+		month: $_('calendar.views.month'),
+		agenda: $_('calendar.views.agenda'),
+	});
 </script>
 
 <header class="calendar-header">
 	<div class="header-left">
 		<h1 class="header-label">{headerLabel}</h1>
 		<div class="nav-buttons">
-			<button onclick={() => calendarViewStore.goToPrevious()} class="nav-btn" aria-label="Zurück">
+			<button
+				onclick={() => calendarViewStore.goToPrevious()}
+				class="nav-btn"
+				aria-label={$_('calendar.header.aria_prev')}
+			>
 				<CaretLeft size={18} />
 			</button>
-			<button onclick={() => calendarViewStore.goToToday()} class="today-btn"> Heute </button>
-			<button onclick={() => calendarViewStore.goToNext()} class="nav-btn" aria-label="Weiter">
+			<button onclick={() => calendarViewStore.goToToday()} class="today-btn">
+				{$_('calendar.header.today')}
+			</button>
+			<button
+				onclick={() => calendarViewStore.goToNext()}
+				class="nav-btn"
+				aria-label={$_('calendar.header.aria_next')}
+			>
 				<CaretRight size={18} />
 			</button>
 		</div>
@@ -120,18 +133,22 @@
 			onclick={() => (showFilters = !showFilters)}
 			class="filter-btn"
 			class:active={!allActive}
-			aria-label="Filter"
+			aria-label={$_('calendar.header.aria_filter')}
 		>
 			<Funnel size={16} />
 		</button>
 
-		<button class="filter-btn" onclick={handleExport} aria-label="Exportieren">
+		<button
+			class="filter-btn"
+			onclick={handleExport}
+			aria-label={$_('calendar.header.aria_export')}
+		>
 			<Export size={16} />
 		</button>
 
 		<button onclick={onNewEvent} class="new-event-btn">
 			<Plus size={16} />
-			Termin
+			{$_('calendar.header.new_event')}
 		</button>
 	</div>
 

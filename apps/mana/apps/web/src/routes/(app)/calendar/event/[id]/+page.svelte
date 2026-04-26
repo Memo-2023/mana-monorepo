@@ -66,7 +66,11 @@
 </script>
 
 <svelte:head>
-	<title>{event?.title ?? 'Termin'} - Kalender - Mana</title>
+	<title
+		>{$_('calendar.detail_route.event_doc_title', {
+			values: { title: event?.title ?? $_('calendar.detail_route.event_doc_title_fallback') },
+		})}</title
+	>
 </svelte:head>
 
 <RoutePage appId="calendar" backHref="/calendar" title="Event">
@@ -77,20 +81,22 @@
 			class="mb-4 flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
 		>
 			<CaretLeft size={16} />
-			Zurück zum Kalender
+			{$_('calendar.detail_route.back_to_calendar')}
 		</button>
 
 		{#if !event}
 			<div class="py-16 text-center">
-				<p class="text-lg text-muted-foreground">Termin nicht gefunden</p>
+				<p class="text-lg text-muted-foreground">{$_('calendar.detail_route.not_found')}</p>
 				<button onclick={() => goto('/calendar')} class="mt-4 text-sm text-primary hover:underline">
-					Zurück zum Kalender
+					{$_('calendar.detail_route.back_to_calendar')}
 				</button>
 			</div>
 		{:else if isEditing}
 			<!-- Edit Form -->
 			<div class="rounded-xl border border-border bg-card p-6">
-				<h2 class="mb-4 text-xl font-semibold text-foreground">Termin bearbeiten</h2>
+				<h2 class="mb-4 text-xl font-semibold text-foreground">
+					{$_('calendar.detail_route.edit_title')}
+				</h2>
 
 				<form
 					onsubmit={(e) => {
@@ -101,7 +107,7 @@
 				>
 					<div>
 						<label for="edit-title" class="mb-1 block text-sm font-medium text-foreground"
-							>Titel</label
+							>{$_('calendar.detail_route.label_title')}</label
 						>
 						<input
 							id="edit-title"
@@ -114,7 +120,7 @@
 
 					<div>
 						<label for="edit-desc" class="mb-1 block text-sm font-medium text-foreground"
-							>Beschreibung</label
+							>{$_('calendar.detail_route.label_description')}</label
 						>
 						<textarea
 							id="edit-desc"
@@ -126,7 +132,7 @@
 
 					<div>
 						<label for="edit-date" class="mb-1 block text-sm font-medium text-foreground"
-							>Datum</label
+							>{$_('calendar.detail_route.label_date')}</label
 						>
 						<input
 							id="edit-date"
@@ -139,14 +145,14 @@
 
 					<label class="flex items-center gap-2 text-sm text-foreground">
 						<input type="checkbox" bind:checked={editAllDay} class="rounded" />
-						Ganztägig
+						{$_('calendar.event.allDay')}
 					</label>
 
 					{#if !editAllDay}
 						<div class="grid grid-cols-2 gap-3">
 							<div>
 								<label for="edit-start" class="mb-1 block text-sm font-medium text-foreground"
-									>Von</label
+									>{$_('calendar.detail_route.label_from')}</label
 								>
 								<input
 									id="edit-start"
@@ -157,7 +163,7 @@
 							</div>
 							<div>
 								<label for="edit-end" class="mb-1 block text-sm font-medium text-foreground"
-									>Bis</label
+									>{$_('calendar.detail_route.label_to')}</label
 								>
 								<input
 									id="edit-end"
@@ -171,13 +177,13 @@
 
 					<div>
 						<label for="edit-location" class="mb-1 block text-sm font-medium text-foreground"
-							>Ort</label
+							>{$_('calendar.detail_route.label_location')}</label
 						>
 						<input
 							id="edit-location"
 							type="text"
 							bind:value={editLocation}
-							placeholder="Ort eingeben..."
+							placeholder={$_('calendar.detail_route.placeholder_location')}
 							class="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
 						/>
 					</div>
@@ -188,13 +194,13 @@
 							onclick={() => (isEditing = false)}
 							class="flex-1 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
 						>
-							Abbrechen
+							{$_('calendar.detail_route.submit_cancel')}
 						</button>
 						<button
 							type="submit"
 							class="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
 						>
-							Speichern
+							{$_('calendar.detail_route.submit_save')}
 						</button>
 					</div>
 				</form>
@@ -245,13 +251,14 @@
 								})}
 							</div>
 							{#if event.isAllDay}
-								<div class="text-sm text-muted-foreground">Ganztägig</div>
+								<div class="text-sm text-muted-foreground">{$_('calendar.event.allDay')}</div>
 							{:else}
 								<div class="text-sm text-muted-foreground">
 									{format(new Date(event.startTime), 'HH:mm')} – {format(
 										new Date(event.endTime),
 										'HH:mm'
-									)} Uhr
+									)}
+									{$_('calendar.detail_route.time_suffix_uhr')}
 								</div>
 							{/if}
 						</div>

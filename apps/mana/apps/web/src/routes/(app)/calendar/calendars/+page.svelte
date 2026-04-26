@@ -44,13 +44,13 @@
 	}
 
 	async function handleDelete(id: string) {
-		if (!confirm('Kalender wirklich löschen? Alle zugehörigen Termine gehen verloren.')) return;
+		if (!confirm($_('calendar.calendars_route.confirm_delete'))) return;
 		await calendarsStore.deleteCalendar(id);
 	}
 </script>
 
 <svelte:head>
-	<title>Kalender verwalten - Mana</title>
+	<title>{$_('calendar.calendars_route.doc_title')}</title>
 </svelte:head>
 
 <RoutePage appId="calendar" backHref="/calendar">
@@ -60,17 +60,19 @@
 			class="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
 		>
 			<CaretLeft size={16} />
-			Zurück zum Kalender
+			{$_('calendar.calendars_route.back_to_calendar')}
 		</a>
 
 		<div class="mb-6 flex items-center justify-between">
-			<h1 class="text-2xl font-bold text-foreground">Meine Kalender</h1>
+			<h1 class="text-2xl font-bold text-foreground">
+				{$_('calendar.calendars_route.page_title')}
+			</h1>
 			<button
 				onclick={() => (showCreateForm = !showCreateForm)}
 				class="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
 			>
 				<Plus size={16} />
-				Neuer Kalender
+				{$_('calendar.calendars_route.new_calendar')}
 			</button>
 		</div>
 
@@ -85,25 +87,28 @@
 					class="space-y-3"
 				>
 					<div>
-						<label for="cal-name" class="mb-1 block text-sm font-medium text-foreground">Name</label
+						<label for="cal-name" class="mb-1 block text-sm font-medium text-foreground"
+							>{$_('calendar.calendars_route.label_name')}</label
 						>
 						<input
 							id="cal-name"
 							type="text"
 							bind:value={newName}
-							placeholder="z.B. Arbeit, Sport, Familie..."
+							placeholder={$_('calendar.calendars_route.placeholder_name')}
 							required
 							class="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
 						/>
 					</div>
 
 					<div>
-						<span class="mb-2 block text-sm font-medium text-foreground">Farbe</span>
+						<span class="mb-2 block text-sm font-medium text-foreground"
+							>{$_('calendar.calendars_route.label_color')}</span
+						>
 						<div class="flex gap-2">
 							{#each PRESET_COLORS as color}
 								<button
 									type="button"
-									aria-label="Farbe wählen"
+									aria-label={$_('calendar.calendars_route.aria_pick_color')}
 									onclick={() => (newColor = color)}
 									class="h-8 w-8 rounded-full border-2 transition-transform hover:scale-110 {newColor ===
 									color
@@ -121,14 +126,14 @@
 							onclick={() => (showCreateForm = false)}
 							class="flex-1 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
 						>
-							Abbrechen
+							{$_('common.cancel')}
 						</button>
 						<button
 							type="submit"
 							disabled={!newName.trim()}
 							class="flex-1 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
 						>
-							Erstellen
+							{$_('calendar.calendars_route.submit_create')}
 						</button>
 					</div>
 				</form>
@@ -138,7 +143,9 @@
 		<!-- Calendar List -->
 		<div class="space-y-2">
 			{#if calendarsCtx.value.length === 0}
-				<div class="py-12 text-center text-muted-foreground">Noch keine Kalender vorhanden.</div>
+				<div class="py-12 text-center text-muted-foreground">
+					{$_('calendar.calendars_route.empty')}
+				</div>
 			{:else}
 				{#each calendarsCtx.value as cal (cal.id)}
 					<div class="flex items-center gap-3 rounded-lg border border-border bg-card p-3">
@@ -150,7 +157,9 @@
 							<div class="font-medium text-foreground">
 								{cal.name}
 								{#if cal.isDefault}
-									<span class="ml-1 text-xs text-primary">(Standard)</span>
+									<span class="ml-1 text-xs text-primary"
+										>{$_('calendar.calendars_route.badge_default')}</span
+									>
 								{/if}
 							</div>
 						</div>
@@ -158,7 +167,9 @@
 							<button
 								onclick={() => handleToggleVisibility(cal.id)}
 								class="rounded-lg p-1.5 text-muted-foreground hover:text-foreground transition-colors"
-								title={cal.isVisible ? 'Ausblenden' : 'Einblenden'}
+								title={cal.isVisible
+									? $_('calendar.calendars_route.aria_hide')
+									: $_('calendar.calendars_route.aria_show')}
 							>
 								{#if cal.isVisible}
 									<Eye size={16} />
@@ -170,7 +181,7 @@
 								<button
 									onclick={() => handleSetDefault(cal.id)}
 									class="rounded-lg p-1.5 text-muted-foreground hover:text-amber-500 transition-colors"
-									title="Als Standard setzen"
+									title={$_('calendar.calendars_route.aria_set_default')}
 								>
 									<Star size={16} />
 								</button>

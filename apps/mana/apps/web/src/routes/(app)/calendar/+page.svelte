@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { getContext, onMount } from 'svelte';
 	import { dropTarget } from '@mana/shared-ui/dnd';
 	import type { DragPayload, TagDragData } from '@mana/shared-ui/dnd';
@@ -215,7 +216,7 @@
 </script>
 
 <svelte:head>
-	<title>Kalender - Mana</title>
+	<title>{$_('calendar.detail_route.doc_title')}</title>
 </svelte:head>
 
 <RoutePage appId="calendar">
@@ -272,7 +273,7 @@
 			role="presentation"
 		>
 			<div class="modal-container" role="dialog" aria-modal="true">
-				<h2 class="modal-title">Neuer Termin</h2>
+				<h2 class="modal-title">{$_('calendar.detail_route.create_modal_title')}</h2>
 				<EventForm
 					mode="create"
 					initialStartTime={createStartTime}

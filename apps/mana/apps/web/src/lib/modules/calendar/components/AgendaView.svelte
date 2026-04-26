@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getDateFnsLocale } from '$lib/i18n/format';
+	import { _ } from 'svelte-i18n';
 	import { getContext } from 'svelte';
 	import { calendarViewStore } from '../stores/view.svelte';
 	import { eventsStore } from '../stores/events.svelte';
@@ -73,8 +74,8 @@
 	});
 
 	function formatDateHeader(date: Date) {
-		if (isToday(date)) return 'Heute';
-		if (isTomorrow(date)) return 'Morgen';
+		if (isToday(date)) return $_('calendar.calendar.today');
+		if (isTomorrow(date)) return $_('calendar.calendar.tomorrow');
 		return format(date, 'EEEE, d. MMMM', { locale: getDateFnsLocale() });
 	}
 
@@ -108,7 +109,7 @@
 	{#if groupedEvents.length === 0}
 		<div class="empty-state">
 			<CalendarBlank size={64} />
-			<p>Keine Termine in diesem Zeitraum</p>
+			<p>{$_('calendar.agenda.empty')}</p>
 		</div>
 	{:else}
 		<div class="event-list">
@@ -125,7 +126,7 @@
 								<div class="event-content">
 									<div class="event-time">
 										{#if event.isAllDay}
-											Ganztägig
+											{$_('calendar.event.allDay')}
 										{:else}
 											{format(toDate(event.startTime), 'HH:mm')} - {format(
 												toDate(event.endTime),
@@ -155,8 +156,8 @@
 								<button
 									class="expand-btn"
 									onclick={() => handleEventClick(event)}
-									title="Details öffnen"
-									aria-label="Details öffnen"
+									title={$_('calendar.agenda.open_details_aria')}
+									aria-label={$_('calendar.agenda.open_details_aria')}
 								>
 									<CaretRight size={16} />
 								</button>

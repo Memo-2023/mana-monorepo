@@ -11,6 +11,9 @@
   in light + dark (via prefers-color-scheme in the layout).
 -->
 <script lang="ts">
+	import { _, locale } from 'svelte-i18n';
+	import { get } from 'svelte/store';
+
 	interface EventBlob {
 		title: string;
 		startTime: string;
@@ -35,7 +38,7 @@
 	const end = $derived(new Date(event.endTime));
 
 	function formatDate(d: Date): string {
-		return new Intl.DateTimeFormat('de-DE', {
+		return new Intl.DateTimeFormat(get(locale) ?? 'de', {
 			weekday: 'long',
 			day: '2-digit',
 			month: 'long',
@@ -44,7 +47,7 @@
 	}
 
 	function formatTime(d: Date): string {
-		return new Intl.DateTimeFormat('de-DE', {
+		return new Intl.DateTimeFormat(get(locale) ?? 'de', {
 			hour: '2-digit',
 			minute: '2-digit',
 		}).format(d);
@@ -52,7 +55,7 @@
 
 	const dateLabel = $derived(formatDate(start));
 	const timeLabel = $derived(
-		event.isAllDay ? 'Ganztägig' : `${formatTime(start)} – ${formatTime(end)}`
+		event.isAllDay ? $_('calendar.event.allDay') : `${formatTime(start)} – ${formatTime(end)}`
 	);
 
 	// Same-day range = compact; otherwise show two dates
@@ -84,38 +87,46 @@
 </svelte:head>
 
 <article class="event">
-	<span class="event__kind">Termin</span>
+	<span class="event__kind">{$_('calendar.shared_view.kind')}</span>
 	<h1 class="event__title">{event.title}</h1>
 
 	<dl class="event__meta">
 		<div class="event__row">
-			<dt>Wann</dt>
+			<dt>{$_('calendar.shared_view.label_when')}</dt>
 			<dd>
 				<div class="event__date">{dateRangeLabel}</div>
 				<div class="event__time">{timeLabel}</div>
 				{#if event.timezone}
-					<div class="event__tz">Zeitzone: {event.timezone}</div>
+					<div class="event__tz">
+						{$_('calendar.shared_view.timezone_prefix', { values: { tz: event.timezone } })}
+					</div>
 				{/if}
 			</dd>
 		</div>
 
 		{#if event.location}
 			<div class="event__row">
-				<dt>Wo</dt>
+				<dt>{$_('calendar.shared_view.label_where')}</dt>
 				<dd>{event.location}</dd>
 			</div>
 		{/if}
 	</dl>
 
-	<a class="event__ics" href={icsUrl} download="event.ics">📅 Zum eigenen Kalender hinzufügen</a>
+	<a class="event__ics" href={icsUrl} download="event.ics"
+		>{$_('calendar.shared_view.add_to_calendar')}</a
+	>
 
 	{#if expiresAt}
 		<p class="event__expiry">
-			Dieser Link läuft am {new Intl.DateTimeFormat('de-DE', {
-				day: '2-digit',
-				month: 'long',
-				year: 'numeric',
-			}).format(new Date(expiresAt))} ab.
+			{$_('calendar.shared_view.expiry', {
+				values: {
+					date: new Intl.DateTimeFormat(get(locale) ?? 'de', {
+						day: '2-digit',
+						month: 'long',
+						year: 'numeric',
+					}).format(new Date(expiresAt)),
+				},
+			})}
 		</p>
 	{/if}
 </article>

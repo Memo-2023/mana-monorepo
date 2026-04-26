@@ -3,6 +3,7 @@
   Mini week strip + today's events. Floating input at bottom.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { db } from '$lib/data/database';
 	import { eventsStore } from './stores/events.svelte';
 	import { useAllCalendarItems } from './queries';
@@ -61,16 +62,24 @@
 		return new Date(iso).toLocaleTimeString('de', { hour: '2-digit', minute: '2-digit' });
 	}
 
-	const WEEKDAYS = [
-		'Sonntag',
-		'Montag',
-		'Dienstag',
-		'Mittwoch',
-		'Donnerstag',
-		'Freitag',
-		'Samstag',
-	];
-	const dayNames = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+	const WEEKDAYS = $derived([
+		$_('calendar.weekday_long.sun'),
+		$_('calendar.weekday_long.mon'),
+		$_('calendar.weekday_long.tue'),
+		$_('calendar.weekday_long.wed'),
+		$_('calendar.weekday_long.thu'),
+		$_('calendar.weekday_long.fri'),
+		$_('calendar.weekday_long.sat'),
+	]);
+	const dayNames = $derived([
+		$_('calendar.weekday_short.mon'),
+		$_('calendar.weekday_short.tue'),
+		$_('calendar.weekday_short.wed'),
+		$_('calendar.weekday_short.thu'),
+		$_('calendar.weekday_short.fri'),
+		$_('calendar.weekday_short.sat'),
+		$_('calendar.weekday_short.sun'),
+	]);
 
 	function formatDateLabel(iso: string): string {
 		const date = new Date(iso);
@@ -78,8 +87,9 @@
 		const todayDate = new Date(now);
 		const tomorrowDate = new Date(todayDate);
 		tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-		if (dateStr === todayStr) return 'Heute';
-		if (dateStr === tomorrowDate.toISOString().split('T')[0]) return 'Morgen';
+		if (dateStr === todayStr) return $_('calendar.calendar.today');
+		if (dateStr === tomorrowDate.toISOString().split('T')[0])
+			return $_('calendar.calendar.tomorrow');
 		// Within 7 days: show weekday name
 		const diffMs = date.getTime() - todayDate.getTime();
 		const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
@@ -94,7 +104,7 @@
 			? [
 					{
 						id: 'open',
-						label: 'Öffnen',
+						label: $_('calendar.list_view.open_action'),
 						icon: PencilSimple,
 						action: () => {
 							const target = ctxMenu.state.target;
@@ -104,7 +114,7 @@
 					{ id: 'div', label: '', type: 'divider' as const },
 					{
 						id: 'delete',
-						label: 'Löschen',
+						label: $_('calendar.list_view.delete_action'),
 						icon: Trash,
 						variant: 'danger' as const,
 						action: () => {
@@ -211,7 +221,7 @@
 					<span class="event-date">{formatDateLabel(event.startTime)}</span>
 					<span class="event-time">
 						{#if event.isAllDay}
-							Ganztägig
+							{$_('calendar.event.allDay')}
 						{:else}
 							{formatTime(event.startTime)}
 						{/if}
@@ -222,20 +232,20 @@
 
 		{#if upcomingEvents.length === 0}
 			{#if hasActiveSceneScope()}
-				<ScopeEmptyState label="Termine" />
+				<ScopeEmptyState label={$_('calendar.list_view.empty_label')} />
 			{:else}
-				<p class="empty">Keine Termine</p>
+				<p class="empty">{$_('calendar.list_view.empty_text')}</p>
 			{/if}
 		{/if}
 	</div>
 
 	<FloatingInputBar
 		bind:value={newTitle}
-		placeholder="Neuer Termin..."
+		placeholder={$_('calendar.list_view.placeholder_new_event')}
 		onSubmit={createEvent}
 		voice
 		voiceFeature="calendar-voice-capture"
-		voiceReason="Termine werden verschlüsselt gespeichert. Dafür brauchst du ein Mana-Konto."
+		voiceReason={$_('calendar.list_view.voice_reason')}
 		onVoiceComplete={handleVoiceComplete}
 	/>
 

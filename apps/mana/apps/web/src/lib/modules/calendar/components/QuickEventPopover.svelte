@@ -72,14 +72,14 @@
 
 	const calendarColor = $derived(getCalendarColor(calendarsCtx.value, calendarId || ''));
 
-	const RECURRENCE_OPTIONS = [
-		{ value: '', label: 'Keine Wiederholung' },
-		{ value: 'FREQ=DAILY', label: 'Täglich' },
-		{ value: 'FREQ=WEEKLY', label: 'Wöchentlich' },
-		{ value: 'FREQ=WEEKLY;INTERVAL=2', label: 'Alle 2 Wochen' },
-		{ value: 'FREQ=MONTHLY', label: 'Monatlich' },
-		{ value: 'FREQ=YEARLY', label: 'Jährlich' },
-	];
+	const RECURRENCE_OPTIONS = $derived([
+		{ value: '', label: $_('calendar.recurrence.none') },
+		{ value: 'FREQ=DAILY', label: $_('calendar.recurrence.daily') },
+		{ value: 'FREQ=WEEKLY', label: $_('calendar.recurrence.weekly') },
+		{ value: 'FREQ=WEEKLY;INTERVAL=2', label: $_('calendar.recurrence.every_2_weeks') },
+		{ value: 'FREQ=MONTHLY', label: $_('calendar.recurrence.monthly') },
+		{ value: 'FREQ=YEARLY', label: $_('calendar.recurrence.yearly') },
+	]);
 
 	function handleSubmit(e: Event) {
 		e.preventDefault();
@@ -143,7 +143,7 @@
 	class="popover"
 	style="top: {popoverPos.top}px; left: {popoverPos.left}px;"
 	role="dialog"
-	aria-label="Termin erstellen"
+	aria-label={$_('calendar.quick_event.aria_dialog')}
 >
 	<!-- Color accent bar -->
 	<div class="accent-bar" style="background-color: {calendarColor};"></div>
@@ -151,7 +151,7 @@
 	<form onsubmit={handleSubmit}>
 		<!-- Header -->
 		<div class="popover-header">
-			<span class="header-title">Neuer Termin</span>
+			<span class="header-title">{$_('calendar.quick_event.header_new')}</span>
 			<button type="button" class="close-btn" onclick={onClose} aria-label={$_('common.close')}>
 				<X size={16} />
 			</button>
@@ -164,7 +164,7 @@
 				bind:this={titleInput}
 				bind:value={title}
 				type="text"
-				placeholder="Titel hinzufügen"
+				placeholder={$_('calendar.quick_event.placeholder_title')}
 				class="title-input"
 				required
 			/>
@@ -177,7 +177,8 @@
 					class:active={blockType === 'event'}
 					onclick={() => (blockType = 'event')}
 				>
-					<CalendarBlank size={12} /> Termin
+					<CalendarBlank size={12} />
+					{$_('calendar.quick_event.type_event')}
 				</button>
 				<button
 					type="button"
@@ -185,7 +186,8 @@
 					class:active={blockType === 'timeEntry'}
 					onclick={() => (blockType = 'timeEntry')}
 				>
-					<Timer size={12} /> Zeiterfassung
+					<Timer size={12} />
+					{$_('calendar.quick_event.type_time_entry')}
 				</button>
 				<button
 					type="button"
@@ -193,7 +195,8 @@
 					class:active={blockType === 'habit'}
 					onclick={() => (blockType = 'habit')}
 				>
-					<Heart size={12} /> Habit
+					<Heart size={12} />
+					{$_('calendar.quick_event.type_habit')}
 				</button>
 			</div>
 
@@ -217,7 +220,7 @@
 			<!-- All-day toggle -->
 			<label class="form-row clickable">
 				<CalendarBlank size={16} class="row-icon-el" />
-				<span class="row-label">Ganztägig</span>
+				<span class="row-label">{$_('calendar.event.allDay')}</span>
 				<input type="checkbox" bind:checked={isAllDay} class="toggle-cb" />
 			</label>
 
@@ -226,14 +229,14 @@
 				<Clock size={16} class="row-icon-el" />
 				<div class="datetime-fields">
 					<div class="dt-group">
-						<span class="dt-label">Beginn</span>
+						<span class="dt-label">{$_('calendar.event.start')}</span>
 						<input type="date" bind:value={startDateStr} class="dt-input" />
 						{#if !isAllDay}
 							<input type="time" bind:value={startTimeStr} class="dt-input time" />
 						{/if}
 					</div>
 					<div class="dt-group">
-						<span class="dt-label">Ende</span>
+						<span class="dt-label">{$_('calendar.event.end')}</span>
 						<input type="date" bind:value={endDateStr} class="dt-input" />
 						{#if !isAllDay}
 							<input type="time" bind:value={endTimeStr} class="dt-input time" />
@@ -269,7 +272,12 @@
 			<!-- Location -->
 			<div class="form-row">
 				<MapPin size={16} class="row-icon-el" />
-				<input bind:value={location} type="text" placeholder="Ort hinzufügen" class="field-input" />
+				<input
+					bind:value={location}
+					type="text"
+					placeholder={$_('calendar.quick_event.placeholder_location')}
+					class="field-input"
+				/>
 			</div>
 
 			<!-- Description -->
@@ -277,7 +285,7 @@
 				<TextAlignLeft size={16} class="row-icon-el" />
 				<textarea
 					bind:value={description}
-					placeholder="Beschreibung"
+					placeholder={$_('calendar.quick_event.placeholder_description')}
 					rows="2"
 					class="field-input field-textarea"
 				></textarea>

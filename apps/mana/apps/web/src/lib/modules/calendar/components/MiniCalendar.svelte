@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getDateFnsLocale } from '$lib/i18n/format';
+	import { _ } from 'svelte-i18n';
 	import {
 		format,
 		startOfMonth,
@@ -32,7 +33,15 @@
 		return eachDayOfInterval({ start: calendarStart, end: calendarEnd });
 	});
 
-	const weekDays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+	const weekDays = $derived([
+		$_('calendar.weekday_short.mon'),
+		$_('calendar.weekday_short.tue'),
+		$_('calendar.weekday_short.wed'),
+		$_('calendar.weekday_short.thu'),
+		$_('calendar.weekday_short.fri'),
+		$_('calendar.weekday_short.sat'),
+		$_('calendar.weekday_short.sun'),
+	]);
 </script>
 
 <div class="mini-calendar">
@@ -40,7 +49,7 @@
 		<button
 			class="nav-btn"
 			onclick={() => (currentMonth = subMonths(currentMonth, 1))}
-			aria-label="Vorheriger Monat"
+			aria-label={$_('calendar.mini_cal.prev_aria')}
 		>
 			<CaretLeft size={16} />
 		</button>
@@ -50,7 +59,7 @@
 		<button
 			class="nav-btn"
 			onclick={() => (currentMonth = addMonths(currentMonth, 1))}
-			aria-label="Nächster Monat"
+			aria-label={$_('calendar.mini_cal.next_aria')}
 		>
 			<CaretRight size={16} />
 		</button>

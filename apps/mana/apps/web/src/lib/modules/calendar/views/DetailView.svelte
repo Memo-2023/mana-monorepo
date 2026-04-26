@@ -3,6 +3,7 @@
   All fields are always editable. Changes auto-save on blur.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { formatDate } from '$lib/i18n/format';
 	import { db } from '$lib/data/database';
 	import { decryptRecord } from '$lib/data/crypto';
@@ -86,7 +87,8 @@
 		const startTime = editAllDay ? `${editDate}T00:00:00` : `${editDate}T${editStartTime}:00`;
 		const endTime = editAllDay ? `${editDate}T23:59:59` : `${editDate}T${editEndTime}:00`;
 		await eventsStore.updateEvent(eventId, {
-			title: editTitle.trim() || detail.entity?.title || 'Untitled',
+			title:
+				editTitle.trim() || detail.entity?.title || $_('calendar.detail_view.untitled_fallback'),
 			startTime,
 			endTime,
 			isAllDay: editAllDay,
@@ -126,8 +128,8 @@
 		const id = eventId;
 		await eventsStore.deleteEvent(id);
 		goBack();
-		toastStore.undo('Termin gelöscht', () => {
-			db.table('events').update(id, { deletedAt: undefined, updatedAt: new Date().toISOString() });
+		toastStore.undo($_('calendar.detail_view.toast_deleted'), () => {
+			db.table('events').update(id, { deletedAt: undefined });
 		});
 	}
 </script>
@@ -135,11 +137,11 @@
 <DetailViewShell
 	entity={detail.entity}
 	loading={detail.loading}
-	notFoundLabel="Termin nicht gefunden"
+	notFoundLabel={$_('calendar.detail_view.not_found')}
 	confirmDelete={detail.confirmDelete}
 	onAskDelete={detail.askDelete}
 	onCancelDelete={detail.cancelDelete}
-	confirmDeleteLabel="Termin wirklich löschen?"
+	confirmDeleteLabel={$_('calendar.detail_view.confirm_delete')}
 	onConfirmDelete={deleteEvent}
 >
 	{#snippet body(event)}
@@ -148,12 +150,12 @@
 			bind:value={editTitle}
 			onfocus={detail.focus}
 			onblur={saveField}
-			placeholder="Titel..."
+			placeholder={$_('calendar.detail_view.placeholder_title')}
 		/>
 
 		<div class="properties">
 			<div class="prop-row prop-row--labeled">
-				<span class="prop-label">Sichtbarkeit</span>
+				<span class="prop-label">{$_('calendar.detail_view.label_visibility')}</span>
 				<VisibilityPicker level={event.visibility ?? 'private'} onChange={handleVisibilityChange} />
 			</div>
 
@@ -201,7 +203,7 @@
 					{/if}
 					<label class="allday-label">
 						<input type="checkbox" bind:checked={editAllDay} onchange={handleAllDayChange} />
-						Ganztägig
+						{$_('calendar.detail_view.label_allday')}
 					</label>
 				</div>
 			</div>
@@ -213,7 +215,7 @@
 					bind:value={editLocation}
 					onfocus={detail.focus}
 					onblur={saveField}
-					placeholder="Ort hinzufügen..."
+					placeholder={$_('calendar.detail_view.placeholder_location')}
 				/>
 			</div>
 
@@ -227,7 +229,7 @@
 
 		{#if eventTags.length > 0}
 			<div class="section">
-				<span class="section-label">Tags</span>
+				<span class="section-label">{$_('calendar.detail_view.section_tags')}</span>
 				<div class="tags-list">
 					{#each eventTags as tag (tag.id)}
 						<button
@@ -247,23 +249,31 @@
 		<LinkedItems recordRef={{ app: 'calendar', collection: 'events', id: eventId }} {navigate} />
 
 		<div class="section">
-			<span class="section-label">Beschreibung</span>
+			<span class="section-label">{$_('calendar.detail_view.section_description')}</span>
 			<textarea
 				class="description-input"
 				bind:value={editDescription}
 				onfocus={detail.focus}
 				onblur={saveField}
-				placeholder="Beschreibung hinzufügen..."
+				placeholder={$_('calendar.detail_view.placeholder_description')}
 				rows={3}
 			></textarea>
 		</div>
 
 		<div class="meta">
 			{#if event.createdAt}
-				<span>Erstellt: {formatDate(new Date(event.createdAt))}</span>
+				<span
+					>{$_('calendar.detail_view.meta_created', {
+						values: { date: formatDate(new Date(event.createdAt)) },
+					})}</span
+				>
 			{/if}
 			{#if event.updatedAt}
-				<span>Bearbeitet: {formatDate(new Date(event.updatedAt))}</span>
+				<span
+					>{$_('calendar.detail_view.meta_updated', {
+						values: { date: formatDate(new Date(event.updatedAt)) },
+					})}</span
+				>
 			{/if}
 		</div>
 	{/snippet}

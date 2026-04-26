@@ -4,6 +4,7 @@
 -->
 <script lang="ts">
 	import { getDateFnsLocale } from '$lib/i18n/format';
+	import { _ } from 'svelte-i18n';
 	import { db } from '$lib/data/database';
 	import type { LocalTimeBlock } from '$lib/data/time-blocks/types';
 	import { toTimeBlock, findFreeSlots } from '$lib/data/time-blocks/queries';
@@ -49,19 +50,19 @@
 	}
 
 	function formatDayLabel(date: Date): string {
-		if (isToday(date)) return 'Heute';
-		if (isTomorrow(date)) return 'Morgen';
+		if (isToday(date)) return $_('calendar.calendar.today');
+		if (isTomorrow(date)) return $_('calendar.calendar.tomorrow');
 		return format(date, 'EEE, d. MMM', { locale: getDateFnsLocale() });
 	}
 </script>
 
 {#if loading}
-	<div class="slot-loading">Suche freie Zeiten...</div>
+	<div class="slot-loading">{$_('calendar.slots.loading')}</div>
 {:else if slots.length === 0}
-	<div class="slot-empty">Keine freien Slots gefunden</div>
+	<div class="slot-empty">{$_('calendar.slots.empty')}</div>
 {:else}
 	<div class="slot-list">
-		<span class="slot-label">Freie Zeiten</span>
+		<span class="slot-label">{$_('calendar.slots.label')}</span>
 		{#each slots as slot}
 			<button class="slot-btn" onclick={() => onSelect(slot.start, slot.end)}>
 				<CalendarBlank size={12} />
@@ -69,7 +70,9 @@
 				<span class="slot-time">
 					{format(slot.start, 'HH:mm')}–{format(slot.end, 'HH:mm')}
 				</span>
-				<span class="slot-duration">{slot.durationMinutes}min</span>
+				<span class="slot-duration"
+					>{$_('calendar.slots.duration_suffix', { values: { n: slot.durationMinutes } })}</span
+				>
 			</button>
 		{/each}
 	</div>

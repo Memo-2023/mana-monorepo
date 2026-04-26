@@ -79,7 +79,7 @@
 
 	// Format time display
 	function formatEventTime(ev: CalendarEvent): string {
-		if (ev.isAllDay) return 'Ganztägig';
+		if (ev.isAllDay) return $_('calendar.event.allDay');
 		const start = toDate(ev.startTime);
 		const end = toDate(ev.endTime);
 		const dateStr = format(start, 'EEEE, d. MMMM yyyy', { locale: getDateFnsLocale() });
@@ -102,32 +102,36 @@
 
 	function formatRecurrence(rule: string): string {
 		if (!rule) return '';
-		if (rule.includes('FREQ=DAILY')) return 'Täglich';
+		if (rule.includes('FREQ=DAILY')) return $_('calendar.recurrence.daily');
 		if (rule.includes('FREQ=WEEKLY')) {
-			if (rule.includes('INTERVAL=2')) return 'Alle 2 Wochen';
+			if (rule.includes('INTERVAL=2')) return $_('calendar.recurrence.every_2_weeks');
 			if (rule.includes('BYDAY=')) {
 				const days = rule.match(/BYDAY=([A-Z,]+)/)?.[1];
 				if (days) {
 					const dayMap: Record<string, string> = {
-						MO: 'Mo',
-						TU: 'Di',
-						WE: 'Mi',
-						TH: 'Do',
-						FR: 'Fr',
-						SA: 'Sa',
-						SU: 'So',
+						MO: $_('calendar.weekday_short.mon'),
+						TU: $_('calendar.weekday_short.tue'),
+						WE: $_('calendar.weekday_short.wed'),
+						TH: $_('calendar.weekday_short.thu'),
+						FR: $_('calendar.weekday_short.fri'),
+						SA: $_('calendar.weekday_short.sat'),
+						SU: $_('calendar.weekday_short.sun'),
 					};
-					return `Wöchentlich (${days
-						.split(',')
-						.map((d) => dayMap[d] || d)
-						.join(', ')})`;
+					return $_('calendar.recurrence.weekly_with_days', {
+						values: {
+							days: days
+								.split(',')
+								.map((d) => dayMap[d] || d)
+								.join(', '),
+						},
+					});
 				}
 			}
-			return 'Wöchentlich';
+			return $_('calendar.recurrence.weekly');
 		}
-		if (rule.includes('FREQ=MONTHLY')) return 'Monatlich';
-		if (rule.includes('FREQ=YEARLY')) return 'Jährlich';
-		return 'Wiederkehrend';
+		if (rule.includes('FREQ=MONTHLY')) return $_('calendar.recurrence.monthly');
+		if (rule.includes('FREQ=YEARLY')) return $_('calendar.recurrence.yearly');
+		return $_('calendar.recurrence.recurring_fallback');
 	}
 
 	async function handleSave(data: Parameters<typeof eventsStore.updateEvent>[1]) {
@@ -170,7 +174,7 @@
 		if (isRecurring || hasParent) {
 			showDeleteOptions = true;
 		} else {
-			if (confirm('Diesen Termin löschen?')) {
+			if (confirm($_('calendar.event_modal.confirm_delete_single'))) {
 				eventsStore.deleteEvent(event.id);
 				onClose();
 			}
@@ -181,8 +185,12 @@
 		const start = toDate(event.startTime);
 		const text = [
 			event.title,
-			event.isAllDay ? 'Ganztägig' : `${format(start, 'dd.MM.yyyy HH:mm')}`,
-			event.location ? `Ort: ${event.location}` : '',
+			event.isAllDay ? $_('calendar.event.allDay') : `${format(start, 'dd.MM.yyyy HH:mm')}`,
+			event.location
+				? $_('calendar.event_modal.clipboard_location_prefix', {
+						values: { location: event.location },
+					})
+				: '',
 			event.description || '',
 		]
 			.filter(Boolean)
@@ -222,7 +230,7 @@
 		<div class="modal-header">
 			<div class="header-left">
 				<h2 id="modal-title" class="modal-title">
-					{isEditing ? 'Termin bearbeiten' : event.title}
+					{isEditing ? $_('calendar.event_modal.editing_title') : event.title}
 				</h2>
 				{#if !isEditing && calendarName}
 					<span class="calendar-badge">
@@ -233,7 +241,11 @@
 			</div>
 			<div class="modal-actions">
 				{#if !isEditing}
-					<button class="btn btn-ghost" onclick={copyToClipboard} title="Kopieren">
+					<button
+						class="btn btn-ghost"
+						onclick={copyToClipboard}
+						title={$_('calendar.event_modal.copy_title')}
+					>
 						{#if copied}<Check size={16} />{:else}<Copy size={16} />{/if}
 					</button>
 					<button class="btn btn-ghost" onclick={handleEditClick} title={$_('common.edit')}>
@@ -266,7 +278,7 @@
 				<div class="event-details">
 					<!-- Visibility -->
 					<div class="detail-row">
-						<span class="detail-label">Sichtbarkeit</span>
+						<span class="detail-label">{$_('calendar.event_modal.label_visibility')}</span>
 						<div class="detail-content">
 							<VisibilityPicker level={event.visibility} onChange={handleVisibilityChange} />
 						</div>
@@ -275,7 +287,7 @@
 					<!-- Share link (only when visibility = unlisted) -->
 					{#if event.visibility === 'unlisted' && event.unlistedToken && shareUrl}
 						<div class="detail-row">
-							<span class="detail-label">Link</span>
+							<span class="detail-label">{$_('calendar.event_modal.label_share_link')}</span>
 							<div class="detail-content">
 								<SharedLinkControls
 									token={event.unlistedToken}
@@ -347,14 +359,22 @@
 					<!-- Metadata -->
 					<div class="detail-meta-row">
 						<span
-							>Erstellt: {format(new Date(event.createdAt), 'dd. MMM yyyy', {
-								locale: getDateFnsLocale(),
+							>{$_('calendar.event_modal.created_at', {
+								values: {
+									date: format(new Date(event.createdAt), 'dd. MMM yyyy', {
+										locale: getDateFnsLocale(),
+									}),
+								},
 							})}</span
 						>
 						{#if event.updatedAt !== event.createdAt}
 							<span
-								>· Bearbeitet: {format(new Date(event.updatedAt), 'dd. MMM yyyy', {
-									locale: getDateFnsLocale(),
+								>{$_('calendar.event_modal.updated_at', {
+									values: {
+										date: format(new Date(event.updatedAt), 'dd. MMM yyyy', {
+											locale: getDateFnsLocale(),
+										}),
+									},
 								})}</span
 							>
 						{/if}
@@ -377,14 +397,14 @@
 		<!-- svelte-ignore a11y_interactive_supports_focus -->
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div class="delete-dialog" role="dialog" aria-modal="true" onclick={(e) => e.stopPropagation()}>
-			<h3 class="delete-title">Wiederkehrenden Termin bearbeiten</h3>
-			<p class="delete-text">Möchtest du nur diesen Termin oder alle zukünftigen bearbeiten?</p>
+			<h3 class="delete-title">{$_('calendar.event_modal.recur_edit_title')}</h3>
+			<p class="delete-text">{$_('calendar.event_modal.recur_edit_text')}</p>
 			<div class="delete-actions">
 				<button class="btn btn-outline" onclick={() => startEdit('single')}>
-					Nur diesen Termin
+					{$_('calendar.event_modal.recur_edit_only_this')}
 				</button>
 				<button class="btn btn-primary-full" onclick={() => startEdit('all')}>
-					Alle zukünftigen Termine
+					{$_('calendar.event_modal.recur_edit_all_future')}
 				</button>
 				<button class="btn btn-ghost" onclick={() => (showEditOptions = false)}>
 					{$_('common.cancel')}
@@ -405,14 +425,14 @@
 	>
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div class="delete-dialog" role="dialog" aria-modal="true" onclick={(e) => e.stopPropagation()}>
-			<h3 class="delete-title">Wiederkehrenden Termin löschen</h3>
-			<p class="delete-text">Möchtest du nur diesen Termin oder die gesamte Serie löschen?</p>
+			<h3 class="delete-title">{$_('calendar.event_modal.recur_delete_title')}</h3>
+			<p class="delete-text">{$_('calendar.event_modal.recur_delete_text')}</p>
 			<div class="delete-actions">
 				<button class="btn btn-outline" onclick={() => handleDelete('this')}>
-					Nur diesen Termin
+					{$_('calendar.event_modal.recur_delete_only_this')}
 				</button>
 				<button class="btn btn-destructive" onclick={() => handleDelete('all')}>
-					Alle Termine der Serie
+					{$_('calendar.event_modal.recur_delete_all')}
 				</button>
 				<button class="btn btn-ghost" onclick={() => (showDeleteOptions = false)}>
 					{$_('common.cancel')}

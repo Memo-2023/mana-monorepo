@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { RRule } from 'rrule';
 
 	interface Props {
@@ -20,22 +21,22 @@
 	let count = $state(parsed?.count ?? 10);
 	let untilDate = $state(parsed?.until ?? '');
 
-	const DAYS = [
-		{ value: 0, short: 'So', rrule: 'SU' },
-		{ value: 1, short: 'Mo', rrule: 'MO' },
-		{ value: 2, short: 'Di', rrule: 'TU' },
-		{ value: 3, short: 'Mi', rrule: 'WE' },
-		{ value: 4, short: 'Do', rrule: 'TH' },
-		{ value: 5, short: 'Fr', rrule: 'FR' },
-		{ value: 6, short: 'Sa', rrule: 'SA' },
-	];
+	const DAYS = $derived([
+		{ value: 0, short: $_('calendar.weekday_short.sun'), rrule: 'SU' },
+		{ value: 1, short: $_('calendar.weekday_short.mon'), rrule: 'MO' },
+		{ value: 2, short: $_('calendar.weekday_short.tue'), rrule: 'TU' },
+		{ value: 3, short: $_('calendar.weekday_short.wed'), rrule: 'WE' },
+		{ value: 4, short: $_('calendar.weekday_short.thu'), rrule: 'TH' },
+		{ value: 5, short: $_('calendar.weekday_short.fri'), rrule: 'FR' },
+		{ value: 6, short: $_('calendar.weekday_short.sat'), rrule: 'SA' },
+	]);
 
-	const FREQ_LABELS: Record<string, string> = {
-		DAILY: 'Tag(e)',
-		WEEKLY: 'Woche(n)',
-		MONTHLY: 'Monat(e)',
-		YEARLY: 'Jahr(e)',
-	};
+	const FREQ_LABELS = $derived<Record<string, string>>({
+		DAILY: $_('calendar.recurrence.unit_freq_daily'),
+		WEEKLY: $_('calendar.recurrence.unit_freq_weekly'),
+		MONTHLY: $_('calendar.recurrence.unit_freq_monthly'),
+		YEARLY: $_('calendar.recurrence.unit_freq_yearly'),
+	});
 
 	function toggleDay(day: number) {
 		if (selectedDays.includes(day)) {
@@ -112,35 +113,43 @@
 
 	// Preview text
 	let preview = $derived.by(() => {
-		let text = `Alle ${interval > 1 ? interval + ' ' : ''}${FREQ_LABELS[freq]}`;
+		const unit = FREQ_LABELS[freq];
+		let text =
+			interval > 1
+				? $_('calendar.recurrence.every_n_unit', { values: { n: interval, unit } })
+				: $_('calendar.recurrence.every_unit', { values: { unit } });
 		if (freq === 'WEEKLY' && selectedDays.length > 0 && selectedDays.length < 7) {
-			text += ` an ${selectedDays.map((d) => DAYS[d].short).join(', ')}`;
+			text += $_('calendar.recurrence.preview_at_days', {
+				values: { days: selectedDays.map((d) => DAYS[d].short).join(', ') },
+			});
 		}
-		if (endType === 'count') text += `, ${count}x`;
-		else if (endType === 'until' && untilDate) text += ` bis ${untilDate}`;
+		if (endType === 'count')
+			text += $_('calendar.recurrence.preview_count_suffix', { values: { count } });
+		else if (endType === 'until' && untilDate)
+			text += $_('calendar.recurrence.preview_until_suffix', { values: { date: untilDate } });
 		return text;
 	});
 </script>
 
 <div class="recurrence-builder">
-	<div class="builder-header">Benutzerdefinierte Wiederholung</div>
+	<div class="builder-header">{$_('calendar.recurrence.builder_title')}</div>
 
 	<!-- Frequency + Interval -->
 	<div class="builder-row">
-		<span class="row-label">Alle</span>
+		<span class="row-label">{$_('calendar.recurrence.builder_every_label')}</span>
 		<input type="number" class="interval-input" bind:value={interval} min="1" max="99" />
 		<select class="freq-select" bind:value={freq}>
-			<option value="DAILY">Tag(e)</option>
-			<option value="WEEKLY">Woche(n)</option>
-			<option value="MONTHLY">Monat(e)</option>
-			<option value="YEARLY">Jahr(e)</option>
+			<option value="DAILY">{$_('calendar.recurrence.unit_freq_daily')}</option>
+			<option value="WEEKLY">{$_('calendar.recurrence.unit_freq_weekly')}</option>
+			<option value="MONTHLY">{$_('calendar.recurrence.unit_freq_monthly')}</option>
+			<option value="YEARLY">{$_('calendar.recurrence.unit_freq_yearly')}</option>
 		</select>
 	</div>
 
 	<!-- Weekday picker (only for WEEKLY) -->
 	{#if freq === 'WEEKLY'}
 		<div class="builder-section">
-			<span class="section-label">Wochentage</span>
+			<span class="section-label">{$_('calendar.recurrence.builder_weekdays_label')}</span>
 			<div class="day-picker">
 				{#each DAYS as day}
 					<button
@@ -158,23 +167,23 @@
 
 	<!-- End condition -->
 	<div class="builder-section">
-		<span class="section-label">Endet</span>
+		<span class="section-label">{$_('calendar.recurrence.builder_end_label')}</span>
 		<div class="end-options">
 			<label class="radio-label">
 				<input type="radio" bind:group={endType} value="never" />
-				<span>Nie</span>
+				<span>{$_('calendar.recurrence.builder_end_never')}</span>
 			</label>
 			<label class="radio-label">
 				<input type="radio" bind:group={endType} value="count" />
-				<span>Nach</span>
+				<span>{$_('calendar.recurrence.builder_end_after')}</span>
 				{#if endType === 'count'}
 					<input type="number" class="count-input" bind:value={count} min="1" max="999" />
-					<span>Terminen</span>
+					<span>{$_('calendar.recurrence.builder_end_after_unit')}</span>
 				{/if}
 			</label>
 			<label class="radio-label">
 				<input type="radio" bind:group={endType} value="until" />
-				<span>Am</span>
+				<span>{$_('calendar.recurrence.builder_end_until')}</span>
 				{#if endType === 'until'}
 					<input type="date" class="until-input" bind:value={untilDate} />
 				{/if}
@@ -187,8 +196,11 @@
 
 	<!-- Actions -->
 	<div class="builder-actions">
-		<button type="button" class="btn btn-secondary" onclick={onCancel}>Abbrechen</button>
-		<button type="button" class="btn btn-primary" onclick={handleApply}>Übernehmen</button>
+		<button type="button" class="btn btn-secondary" onclick={onCancel}>{$_('common.cancel')}</button
+		>
+		<button type="button" class="btn btn-primary" onclick={handleApply}
+			>{$_('calendar.recurrence.builder_apply')}</button
+		>
 	</div>
 </div>
 

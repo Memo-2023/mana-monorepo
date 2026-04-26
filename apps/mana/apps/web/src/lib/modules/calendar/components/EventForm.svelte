@@ -112,14 +112,14 @@
 
 	// Recurrence options
 	const CUSTOM_VALUE = '__custom__';
-	const recurrenceOptions = [
-		{ value: '', label: 'Keine Wiederholung' },
-		{ value: 'FREQ=DAILY', label: 'Täglich' },
-		{ value: 'FREQ=WEEKLY', label: 'Wöchentlich' },
-		{ value: 'FREQ=MONTHLY', label: 'Monatlich' },
-		{ value: 'FREQ=YEARLY', label: 'Jährlich' },
-		{ value: CUSTOM_VALUE, label: 'Benutzerdefiniert...' },
-	];
+	const recurrenceOptions = $derived([
+		{ value: '', label: $_('calendar.recurrence.none') },
+		{ value: 'FREQ=DAILY', label: $_('calendar.recurrence.daily') },
+		{ value: 'FREQ=WEEKLY', label: $_('calendar.recurrence.weekly') },
+		{ value: 'FREQ=MONTHLY', label: $_('calendar.recurrence.monthly') },
+		{ value: 'FREQ=YEARLY', label: $_('calendar.recurrence.yearly') },
+		{ value: CUSTOM_VALUE, label: $_('calendar.recurrence.custom') },
+	]);
 
 	let showCustomBuilder = $state(false);
 
@@ -156,30 +156,32 @@
 				.map((p) => p.split('='))
 		);
 		const freqMap: Record<string, string> = {
-			DAILY: 'Täglich',
-			WEEKLY: 'Wöchentlich',
-			MONTHLY: 'Monatlich',
-			YEARLY: 'Jährlich',
+			DAILY: $_('calendar.recurrence.daily'),
+			WEEKLY: $_('calendar.recurrence.weekly'),
+			MONTHLY: $_('calendar.recurrence.monthly'),
+			YEARLY: $_('calendar.recurrence.yearly'),
 		};
-		let text = freqMap[parts.FREQ] ?? 'Wiederkehrend';
+		let text = freqMap[parts.FREQ] ?? $_('calendar.recurrence.recurring_fallback');
 		if (parts.INTERVAL && parseInt(parts.INTERVAL) > 1) {
 			const unitMap: Record<string, string> = {
-				DAILY: 'Tage',
-				WEEKLY: 'Wochen',
-				MONTHLY: 'Monate',
-				YEARLY: 'Jahre',
+				DAILY: $_('calendar.recurrence.unit_days'),
+				WEEKLY: $_('calendar.recurrence.unit_weeks'),
+				MONTHLY: $_('calendar.recurrence.unit_months'),
+				YEARLY: $_('calendar.recurrence.unit_years'),
 			};
-			text = `Alle ${parts.INTERVAL} ${unitMap[parts.FREQ] ?? ''}`;
+			text = $_('calendar.recurrence.every_n_unit', {
+				values: { n: parts.INTERVAL, unit: unitMap[parts.FREQ] ?? '' },
+			});
 		}
 		if (parts.BYDAY) {
 			const dayMap: Record<string, string> = {
-				MO: 'Mo',
-				TU: 'Di',
-				WE: 'Mi',
-				TH: 'Do',
-				FR: 'Fr',
-				SA: 'Sa',
-				SU: 'So',
+				MO: $_('calendar.weekday_short.mon'),
+				TU: $_('calendar.weekday_short.tue'),
+				WE: $_('calendar.weekday_short.wed'),
+				TH: $_('calendar.weekday_short.thu'),
+				FR: $_('calendar.weekday_short.fri'),
+				SA: $_('calendar.weekday_short.sat'),
+				SU: $_('calendar.weekday_short.sun'),
 			};
 			text += ` (${parts.BYDAY.split(',')
 				.map((d: string) => dayMap[d] || d)
@@ -192,23 +194,25 @@
 <form
 	onsubmit={handleSubmit}
 	class="event-form"
-	aria-label={mode === 'create' ? 'Termin erstellen' : 'Termin bearbeiten'}
+	aria-label={mode === 'create'
+		? $_('calendar.event_form.aria_create')
+		: $_('calendar.event_form.aria_edit')}
 >
 	<div class="field">
-		<label for="title" class="label">Titel *</label>
+		<label for="title" class="label">{$_('calendar.event_form.label_title_required')}</label>
 		<input
 			type="text"
 			id="title"
 			class="input"
 			bind:value={title}
-			placeholder="Terminname eingeben"
+			placeholder={$_('calendar.event_form.placeholder_title')}
 			required
 		/>
 	</div>
 
 	{#if mode === 'create' && calendarOptions.length > 1}
 		<div class="field">
-			<label for="calendar" class="label">Kalender</label>
+			<label for="calendar" class="label">{$_('calendar.event.calendar')}</label>
 			<select id="calendar" class="input" bind:value={calendarId}>
 				{#each calendarOptions as cal}
 					<option value={cal.id}>{cal.name}</option>
@@ -220,18 +224,18 @@
 	<div class="field">
 		<label class="checkbox-label">
 			<input type="checkbox" bind:checked={isAllDay} class="checkbox" />
-			<span>Ganztägig</span>
+			<span>{$_('calendar.event.allDay')}</span>
 		</label>
 	</div>
 
 	<div class="field-row">
 		<div class="field flex-1">
-			<label for="startDate" class="label">Beginn</label>
+			<label for="startDate" class="label">{$_('calendar.event.start')}</label>
 			<input type="date" id="startDate" class="input" bind:value={startDate} required />
 		</div>
 		{#if !isAllDay}
 			<div class="field flex-1">
-				<label for="startTime" class="label">Uhrzeit</label>
+				<label for="startTime" class="label">{$_('calendar.event_form.label_time')}</label>
 				<input type="time" id="startTime" class="input" bind:value={startTime} required />
 			</div>
 		{/if}
@@ -239,12 +243,12 @@
 
 	<div class="field-row">
 		<div class="field flex-1">
-			<label for="endDate" class="label">Ende</label>
+			<label for="endDate" class="label">{$_('calendar.event.end')}</label>
 			<input type="date" id="endDate" class="input" bind:value={endDate} required />
 		</div>
 		{#if !isAllDay}
 			<div class="field flex-1">
-				<label for="endTime" class="label">Uhrzeit</label>
+				<label for="endTime" class="label">{$_('calendar.event_form.label_time')}</label>
 				<input type="time" id="endTime" class="input" bind:value={endTime} required />
 			</div>
 		{/if}
@@ -257,7 +261,7 @@
 	{/if}
 
 	<div class="field">
-		<label for="recurrence" class="label">Wiederholung</label>
+		<label for="recurrence" class="label">{$_('calendar.event_form.label_recurrence')}</label>
 		<select id="recurrence" class="input" value={selectValue} onchange={handleRecurrenceChange}>
 			{#each recurrenceOptions as opt}
 				<option value={opt.value}>{opt.label}</option>
@@ -265,7 +269,9 @@
 		</select>
 		{#if isCustomRule && !showCustomBuilder}
 			<button type="button" class="custom-rule-preview" onclick={() => (showCustomBuilder = true)}>
-				{formatCustomPreview(recurrenceRule)} — Bearbeiten
+				{$_('calendar.event_form.recur_edit_suffix', {
+					values: { preview: formatCustomPreview(recurrenceRule) },
+				})}
 			</button>
 		{/if}
 	</div>
@@ -279,29 +285,29 @@
 	{/if}
 
 	<div class="field">
-		<label for="location" class="label">Ort</label>
+		<label for="location" class="label">{$_('calendar.event.location')}</label>
 		<input
 			type="text"
 			id="location"
 			class="input"
 			bind:value={location}
-			placeholder="Ort eingeben..."
+			placeholder={$_('calendar.event_form.placeholder_location')}
 		/>
 	</div>
 
 	<div class="field">
-		<label for="description" class="label">Beschreibung</label>
+		<label for="description" class="label">{$_('calendar.event.description')}</label>
 		<textarea
 			id="description"
 			class="input textarea"
 			rows="3"
 			bind:value={description}
-			placeholder="Beschreibung hinzufügen"
+			placeholder={$_('calendar.event_form.placeholder_description')}
 		></textarea>
 	</div>
 
 	<div class="field">
-		<span class="label">Tags</span>
+		<span class="label">{$_('calendar.event_form.label_tags')}</span>
 		<TagField
 			tags={allTags.value}
 			selectedIds={selectedTagIds}

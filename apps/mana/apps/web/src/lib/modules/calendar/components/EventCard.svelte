@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import type { CalendarEvent } from '../types';
 	import { eventsStore } from '../stores/events.svelte';
 	import {
@@ -96,7 +97,7 @@
 	style:background-color={color}
 	role="button"
 	tabindex="0"
-	aria-label={event.title || 'Neuer Termin'}
+	aria-label={event.title || $_('calendar.event_card.new_event_label')}
 	onpointerdown={handlePointerDown}
 	onclick={handleClick}
 	onkeydown={handleKeydown}
@@ -107,7 +108,7 @@
 			class="resize-handle top"
 			onpointerdown={handleResizeTop}
 			role="slider"
-			aria-label="Startzeit ändern"
+			aria-label={$_('calendar.event.changeStartTime')}
 			aria-valuenow={0}
 			tabindex="-1"
 		></div>
@@ -130,13 +131,19 @@
 
 		<span class="event-time">{formattedTime}</span>
 		{#if event.parentBlockId}
-			<span class="repeat-icon" title="Wiederkehrend"><ArrowsClockwise size={9} /></span>
+			<span class="repeat-icon" title={$_('calendar.event_card.recurring_title')}
+				><ArrowsClockwise size={9} /></span
+			>
 		{/if}
 		{#if event.linkedBlockId}
-			<span class="linked-badge" title="Durchgeführt"><CheckCircle size={10} weight="fill" /></span>
+			<span class="linked-badge" title={$_('calendar.event_card.linked_title')}
+				><CheckCircle size={10} weight="fill" /></span
+			>
 		{/if}
 	</div>
-	<span class="event-title">{event.title || (isDraft ? 'Neuer Termin' : '')}</span>
+	<span class="event-title"
+		>{event.title || (isDraft ? $_('calendar.event_card.new_event_label') : '')}</span
+	>
 	{#if event.location}
 		<span class="event-location">{event.location}</span>
 	{/if}
@@ -146,7 +153,7 @@
 			class="resize-handle bottom"
 			onpointerdown={handleResizeBottom}
 			role="slider"
-			aria-label="Endzeit ändern"
+			aria-label={$_('calendar.event.changeEndTime')}
 			aria-valuenow={0}
 			tabindex="-1"
 		></div>
