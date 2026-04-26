@@ -61,8 +61,7 @@ describe('workbenchHomeSeedId', () => {
 
 describe('seedWorkbenchHomeOn', () => {
 	it('inserts a Home scene with the deterministic id and default apps', async () => {
-		const inserted = await seedWorkbenchHomeOn(db.workbenchScenes, 'space-abc');
-		expect(inserted).toBe(true);
+		await seedWorkbenchHomeOn(db.workbenchScenes, 'space-abc');
 
 		const row = await db.workbenchScenes.get('seed-home-space-abc');
 		expect(row).toMatchObject({
@@ -78,8 +77,7 @@ describe('seedWorkbenchHomeOn', () => {
 
 	it('is a no-op when the seeded row already exists', async () => {
 		await seedWorkbenchHomeOn(db.workbenchScenes, 'space-abc');
-		const second = await seedWorkbenchHomeOn(db.workbenchScenes, 'space-abc');
-		expect(second).toBe(false);
+		await seedWorkbenchHomeOn(db.workbenchScenes, 'space-abc');
 
 		const all = await db.workbenchScenes.toArray();
 		expect(all).toHaveLength(1);

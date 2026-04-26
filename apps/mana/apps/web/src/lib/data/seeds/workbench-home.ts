@@ -47,17 +47,16 @@ export function workbenchHomeSeedId(spaceId: string): string {
 
 /**
  * Pure-ish: takes a Dexie Table reference, ensures a Home scene exists
- * for the given Space. Returns true when a new row was inserted, false
- * when the deterministic-id row was already there. The creating-hook
- * stamps the actor / timestamps fields; this function only owns the
- * deterministic-id + default-shape contract.
+ * for the given Space. No-ops when the deterministic-id row is already
+ * there. The creating-hook stamps actor + timestamps; this function
+ * only owns the deterministic-id + default-shape contract.
  */
 export async function seedWorkbenchHomeOn(
 	table: Table<LocalWorkbenchScene, string>,
 	spaceId: string
-): Promise<boolean> {
+): Promise<void> {
 	const id = workbenchHomeSeedId(spaceId);
-	if (await table.get(id)) return false;
+	if (await table.get(id)) return;
 
 	const now = new Date().toISOString();
 	const row: LocalWorkbenchScene & { spaceId: string } = {
@@ -70,7 +69,6 @@ export async function seedWorkbenchHomeOn(
 		spaceId,
 	};
 	await table.add(row);
-	return true;
 }
 
 registerSpaceSeed('workbench-home', async (spaceId) => {

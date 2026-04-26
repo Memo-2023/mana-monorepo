@@ -1097,24 +1097,74 @@ db.version(47).stores({
 	augurEntries: 'id, kind, outcome, vibe, sourceCategory, encounteredAt, expectedBy, isArchived',
 });
 
-// v48 — One-shot dedup of duplicate "Home" scenes that the seeding race
-// in `stores/workbench-scenes.svelte.ts` has been accumulating since the
-// Spaces-Foundation migration shipped 2026-04-22. The seeder writes new
-// scenes without `spaceId`, so the creating-hook stamps them with the
-// `_personal:<userId>` sentinel. The dedup check in
-// `onActiveSpaceChanged` filters by the *real* space UUID and never
-// finds them — every login adds another Home row.
+// v48 — One-shot dedup of duplicate "Home" scenes the seeding race
+// accumulated before the per-space-seeds registry shipped. The old
+// seeder wrote rows without `spaceId`, so the creating-hook stamped
+// them with the personal sentinel and the per-Space dedup check
+// (filtering by real Space UUID) never found them — every login added
+// another Home row.
 //
-// This upgrade is the soft cleanup. The structural fix (per-space-seeds
-// registry + deterministic ids + creating-hook hardening) ships in
-// follow-up commits — see docs/plans/workbench-seeding-cleanup.md.
-//
-// No schema/index change. The upgrade only soft-deletes the loser rows
-// (sets `deletedAt`) so mana-sync propagates the cleanup to other
-// devices instead of resurrecting them on next pull.
+// Collapses survivors per (spaceId, name='Home') by merging openApps
+// (dedup by appId) and soft-deleting losers. User-customised Homes
+// (description / wallpaper / agent / scope tags) are excluded from
+// grouping so a deliberate two-Home setup stays intact. Survivor pick:
+// most openApps wins, ties break by most-recent updatedAt. Mana-sync
+// propagates the soft-deletes to other devices.
+// See docs/plans/workbench-seeding-cleanup.md.
 db.version(48).upgrade(async (tx) => {
-	const { dedupHomeScenesOn } = await import('./scope/dedup-workbench-scenes');
-	const removed = await dedupHomeScenesOn(tx.table('workbenchScenes'));
+	type Row = Record<string, unknown> & { id: string };
+	const rows = (await tx.table('workbenchScenes').toArray()) as Row[];
+
+	const groups = new Map<string, Row[]>();
+	for (const row of rows) {
+		if (row.deletedAt) continue;
+		if (row.name !== 'Home') continue;
+		if (row.description) continue;
+		if (row.wallpaper) continue;
+		if (row.viewingAsAgentId) continue;
+		const scope = row.scopeTagIds;
+		if (Array.isArray(scope) && scope.length > 0) continue;
+		const spaceId = row.spaceId;
+		if (typeof spaceId !== 'string' || !spaceId) continue;
+		let group = groups.get(spaceId);
+		if (!group) groups.set(spaceId, (group = []));
+		group.push(row);
+	}
+
+	const now = new Date().toISOString();
+	let removed = 0;
+
+	for (const group of groups.values()) {
+		if (group.length <= 1) continue;
+		group.sort((a, b) => {
+			const aLen = Array.isArray(a.openApps) ? a.openApps.length : 0;
+			const bLen = Array.isArray(b.openApps) ? b.openApps.length : 0;
+			if (aLen !== bLen) return bLen - aLen;
+			return String(b.updatedAt ?? '').localeCompare(String(a.updatedAt ?? ''));
+		});
+		const [survivor, ...losers] = group;
+		const merged: unknown[] = Array.isArray(survivor.openApps) ? [...survivor.openApps] : [];
+		const seen = new Set(merged.map((a) => (a as { appId: string }).appId));
+		for (const loser of losers) {
+			const apps = Array.isArray(loser.openApps) ? loser.openApps : [];
+			for (const app of apps) {
+				const appId = (app as { appId: string }).appId;
+				if (!seen.has(appId)) {
+					seen.add(appId);
+					merged.push(app);
+				}
+			}
+		}
+		const survivorAppCount = Array.isArray(survivor.openApps) ? survivor.openApps.length : 0;
+		if (merged.length !== survivorAppCount) {
+			await tx.table('workbenchScenes').update(survivor.id, { openApps: merged, updatedAt: now });
+		}
+		for (const loser of losers) {
+			await tx.table('workbenchScenes').update(loser.id, { deletedAt: now, updatedAt: now });
+			removed += 1;
+		}
+	}
+
 	if (removed > 0) {
 		console.info(`[workbench-scenes v48] deduped ${removed} duplicate Home scenes`);
 	}

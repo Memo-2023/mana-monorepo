@@ -15,7 +15,7 @@
  * barrel before `loadActiveSpace`, so by the time `setActiveSpace`
  * fires, every seeder is already in the map.
  *
- * See docs/plans/workbench-seeding-cleanup.md §"Schicht B + C".
+ * See docs/plans/workbench-seeding-cleanup.md.
  */
 
 type Seeder = (spaceId: string) => Promise<void>;
