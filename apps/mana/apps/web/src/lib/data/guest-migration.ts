@@ -33,7 +33,7 @@
  * real user id.
  */
 
-import { db, SYNC_APP_MAP, FIELD_TIMESTAMPS_KEY } from './database';
+import { db, SYNC_APP_MAP, FIELD_META_KEY } from './database';
 import { GUEST_USER_ID } from './current-user';
 import { encryptRecord } from './crypto/record-helpers';
 import { waitForActiveKey } from './crypto/key-provider';
@@ -110,9 +110,9 @@ export async function migrateGuestDataToUser(newUserId: string): Promise<GuestMi
 					// Strip the bookkeeping fields the creating-hook will rebuild.
 					// Importantly, drop `userId` so the hook stamps the new id from
 					// getEffectiveUserId() instead of preserving 'guest'.
-					const { userId: _oldUser, [FIELD_TIMESTAMPS_KEY]: _oldFt, ...clean } = record;
+					const { userId: _oldUser, [FIELD_META_KEY]: _oldMeta, ...clean } = record;
 					void _oldUser;
-					void _oldFt;
+					void _oldMeta;
 
 					// Catch-up encryption: guest writes left these fields as
 					// plaintext because no key was available. Now that the

@@ -20,20 +20,28 @@ import {
 	toSyncName,
 	fromSyncName,
 	beginApplyingTables,
-	FIELD_TIMESTAMPS_KEY,
-	FIELD_ACTORS_KEY,
-	LAST_ACTOR_KEY,
+	FIELD_META_KEY,
 	setPendingChangeListener,
 } from './database';
 import { isQuotaError, cleanupTombstones, notifyQuotaExceeded } from './quota';
 import { emitSyncTelemetry, categorizeSyncError } from './sync-telemetry';
-import { USER_ACTOR, type Actor } from './events/actor';
+import {
+	USER_ACTOR,
+	makeFieldMeta,
+	type Actor,
+	type FieldMeta,
+	type FieldOrigin,
+} from './events/actor';
 
-/** Reads the per-field actor map off a record; empty for legacy rows. */
-function readFieldActors(record: unknown): Record<string, Actor> {
+/**
+ * Reads the per-field write metadata off a record. Returns an empty
+ * map for records that pre-date the field-meta migration so callers
+ * can fall back to record-level `updatedAt`.
+ */
+export function readFieldMeta(record: unknown): Record<string, FieldMeta> {
 	if (!record || typeof record !== 'object') return {};
-	const fa = (record as Record<string, unknown>)[FIELD_ACTORS_KEY];
-	return fa && typeof fa === 'object' ? (fa as Record<string, Actor>) : {};
+	const fm = (record as Record<string, unknown>)[FIELD_META_KEY];
+	return fm && typeof fm === 'object' ? (fm as Record<string, FieldMeta>) : {};
 }
 
 // ─── Types ────────────────────────────────────────────────────
@@ -41,10 +49,12 @@ function readFieldActors(record: unknown): Record<string, Actor> {
 /** Operations the sync protocol supports. */
 export type SyncOp = 'insert' | 'update' | 'delete';
 
-/** A single field-level change carrying its own LWW timestamp. */
+/** A single field-level change carrying its own LWW timestamp.
+ *  Per-field actor + origin live at the row level on `SyncChange`
+ *  (each push = one actor + one origin), never per field. */
 export interface FieldChange {
 	value: unknown;
-	updatedAt: string;
+	at: string;
 }
 
 /**
@@ -87,6 +97,15 @@ export interface SyncChange {
 	 * for back-compat with pre-actor clients.
 	 */
 	actor?: Actor;
+	/**
+	 * Pipeline origin of the write — what kind of code path produced the
+	 * value. Drives conflict-detection: only `'user'`-origin writes can
+	 * lose to a later server overwrite and surface as a conflict toast.
+	 * Server-applied pulls always take `'server-replay'` regardless of
+	 * what the originating client stamped, because the local client
+	 * never typed the value itself.
+	 */
+	origin?: FieldOrigin;
 }
 
 interface PendingChange {
@@ -99,6 +118,7 @@ interface PendingChange {
 	data?: Record<string, unknown>;
 	deletedAt?: string;
 	actor?: Actor;
+	origin?: FieldOrigin;
 	createdAt: string;
 	/**
 	 * The Space (Better Auth organization id) the record belongs to. Stamped
@@ -126,7 +146,7 @@ interface SyncMeta {
 function isFieldChange(v: unknown): v is FieldChange {
 	if (!v || typeof v !== 'object') return false;
 	const f = v as Record<string, unknown>;
-	return 'value' in f && (f.updatedAt === undefined || typeof f.updatedAt === 'string');
+	return 'value' in f && (f.at === undefined || typeof f.at === 'string');
 }
 
 function isFieldsMap(v: unknown): v is Record<string, FieldChange> {
@@ -162,21 +182,14 @@ export function isValidSyncChange(v: unknown): v is SyncChange {
 	// malformed actor doesn't corrupt data; worst case the Workbench shows
 	// "unknown" for that change.
 	if (c.actor !== undefined && (typeof c.actor !== 'object' || c.actor === null)) return false;
+	// `origin` is a fixed enum on the producing side; we accept any string
+	// here so a future enum extension on the server doesn't fail validation
+	// on older clients. The apply-path forces `'server-replay'` regardless.
+	if (c.origin !== undefined && typeof c.origin !== 'string') return false;
 	return true;
 }
 
 // ─── Apply Server Changes (top-level so unit tests can import directly) ──
-
-/**
- * Reads the per-field LWW timestamps off a record. Returns an empty map for
- * legacy records that pre-date __fieldTimestamps so callers can fall back to
- * record-level `updatedAt`.
- */
-export function readFieldTimestamps(record: unknown): Record<string, string> {
-	if (!record || typeof record !== 'object') return {};
-	const ft = (record as Record<string, unknown>)[FIELD_TIMESTAMPS_KEY];
-	return ft && typeof ft === 'object' ? (ft as Record<string, string>) : {};
-}
 
 /**
  * Applies a batch of server changes to the local Dexie database with
@@ -320,24 +333,33 @@ export async function applyServerChanges(appId: string, changes: unknown[]): Pro
 						for (const change of tableChanges) {
 							const recordId = change.id;
 
+							// All writes from this path are server-replays from the
+							// local client's perspective: even an originally `'user'`-
+							// origin push from another device arrives here as a pull,
+							// and the local user never typed it. Stamping `'server-replay'`
+							// keeps conflict-detection (F2) from treating later
+							// overwrites as "lost edits".
+							const replayOrigin: FieldOrigin = 'server-replay';
+
 							if (change.deletedAt || change.op === 'delete') {
 								const existing = await table.get(recordId);
 								if (!existing) continue;
 								if (change.deletedAt) {
-									const localFT = readFieldTimestamps(existing);
+									const localMeta = readFieldMeta(existing);
 									const serverTime = change.deletedAt;
 									const localDeletedAtTime =
-										localFT.deletedAt ??
+										localMeta.deletedAt?.at ??
 										((existing as Record<string, unknown>).deletedAt as string | undefined) ??
 										'';
 									if (serverTime >= localDeletedAtTime) {
+										const tombActor: Actor = change.actor ?? USER_ACTOR;
 										await table.update(recordId, {
 											deletedAt: serverTime,
 											updatedAt: serverTime,
-											[FIELD_TIMESTAMPS_KEY]: {
-												...localFT,
-												deletedAt: serverTime,
-												updatedAt: serverTime,
+											[FIELD_META_KEY]: {
+												...localMeta,
+												deletedAt: makeFieldMeta(serverTime, tombActor, replayOrigin),
+												updatedAt: makeFieldMeta(serverTime, tombActor, replayOrigin),
 											},
 										});
 									}
@@ -359,51 +381,32 @@ export async function applyServerChanges(appId: string, changes: unknown[]): Pro
 								const changeActor: Actor = change.actor ?? USER_ACTOR;
 
 								if (!existing) {
-									const ft: Record<string, string> = {};
-									const fa: Record<string, Actor> = {};
+									const fieldMeta: Record<string, FieldMeta> = {};
 									for (const key of Object.keys(changeData)) {
-										if (
-											key === 'id' ||
-											key === FIELD_TIMESTAMPS_KEY ||
-											key === FIELD_ACTORS_KEY ||
-											key === LAST_ACTOR_KEY
-										) {
-											continue;
-										}
-										ft[key] = recordTime;
-										fa[key] = changeActor;
+										if (key === 'id' || key === FIELD_META_KEY) continue;
+										fieldMeta[key] = makeFieldMeta(recordTime, changeActor, replayOrigin);
 									}
 									await table.put({
 										...changeData,
 										id: recordId,
-										[FIELD_TIMESTAMPS_KEY]: ft,
-										[FIELD_ACTORS_KEY]: fa,
-										[LAST_ACTOR_KEY]: changeActor,
+										[FIELD_META_KEY]: fieldMeta,
 									});
 								} else {
-									const localFT = readFieldTimestamps(existing);
-									const localFA = readFieldActors(existing);
+									const localMeta = readFieldMeta(existing);
 									const localUpdatedAt =
 										((existing as Record<string, unknown>).updatedAt as string | undefined) ?? '';
 									const updates: Record<string, unknown> = {};
-									const newFT: Record<string, string> = { ...localFT };
-									const newFA: Record<string, Actor> = { ...localFA };
+									const newMeta: Record<string, FieldMeta> = { ...localMeta };
 
 									for (const [key, val] of Object.entries(changeData)) {
-										if (
-											key === 'id' ||
-											key === FIELD_TIMESTAMPS_KEY ||
-											key === FIELD_ACTORS_KEY ||
-											key === LAST_ACTOR_KEY
-										) {
-											continue;
-										}
-										const localFieldTime = localFT[key] ?? localUpdatedAt;
+										if (key === 'id' || key === FIELD_META_KEY) continue;
+										const localFieldTime = localMeta[key]?.at ?? localUpdatedAt;
 										if (recordTime >= localFieldTime) {
 											// Conflict signal: server STRICTLY wins (>) and the local
 											// field had a non-empty value that differs from the new
 											// one. Equal-time ties don't fire because there's no
-											// edit to lose.
+											// edit to lose. F2 will additionally gate this on
+											// localMeta[key].origin === 'user'.
 											const localValue = (existing as Record<string, unknown>)[key];
 											if (
 												recordTime > localFieldTime &&
@@ -421,14 +424,11 @@ export async function applyServerChanges(appId: string, changes: unknown[]): Pro
 												});
 											}
 											updates[key] = val;
-											newFT[key] = recordTime;
-											newFA[key] = changeActor;
+											newMeta[key] = makeFieldMeta(recordTime, changeActor, replayOrigin);
 										}
 									}
 									if (Object.keys(updates).length > 0) {
-										updates[FIELD_TIMESTAMPS_KEY] = newFT;
-										updates[FIELD_ACTORS_KEY] = newFA;
-										updates[LAST_ACTOR_KEY] = changeActor;
+										updates[FIELD_META_KEY] = newMeta;
 										await table.update(recordId, updates);
 									}
 								}
@@ -443,35 +443,29 @@ export async function applyServerChanges(appId: string, changes: unknown[]): Pro
 									// record was deleted locally — recreate it under the server's
 									// authority.
 									const record: Record<string, unknown> = { id: recordId };
-									const ft: Record<string, string> = {};
-									const fa: Record<string, Actor> = {};
+									const fieldMeta: Record<string, FieldMeta> = {};
 									const fallback = new Date().toISOString();
 									for (const [key, fc] of Object.entries(serverFields)) {
 										record[key] = fc.value;
-										ft[key] = fc.updatedAt ?? fallback;
-										fa[key] = changeActor;
+										fieldMeta[key] = makeFieldMeta(fc.at ?? fallback, changeActor, replayOrigin);
 									}
-									record[FIELD_TIMESTAMPS_KEY] = ft;
-									record[FIELD_ACTORS_KEY] = fa;
-									record[LAST_ACTOR_KEY] = changeActor;
+									record[FIELD_META_KEY] = fieldMeta;
 									await table.put(record);
 								} else {
-									// Per-field comparison. Falls back to record-level updatedAt
-									// only for legacy records that pre-date __fieldTimestamps.
-									const localFT = readFieldTimestamps(existing);
-									const localFA = readFieldActors(existing);
+									// Per-field comparison.
+									const localMeta = readFieldMeta(existing);
 									const localUpdatedAt =
 										((existing as Record<string, unknown>).updatedAt as string | undefined) ?? '';
 									const updates: Record<string, unknown> = {};
-									const newFT: Record<string, string> = { ...localFT };
-									const newFA: Record<string, Actor> = { ...localFA };
+									const newMeta: Record<string, FieldMeta> = { ...localMeta };
 
 									for (const [key, fc] of Object.entries(serverFields)) {
-										const serverTime = fc.updatedAt ?? '';
-										const localFieldTime = localFT[key] ?? localUpdatedAt;
+										const serverTime = fc.at ?? '';
+										const localFieldTime = localMeta[key]?.at ?? localUpdatedAt;
 										if (serverTime >= localFieldTime) {
 											// Same conflict criteria as the insert-as-update path:
 											// strictly newer + non-empty local + actually different.
+											// F2 will additionally gate on localMeta[key].origin === 'user'.
 											const localValue = (existing as Record<string, unknown>)[key];
 											if (
 												serverTime > localFieldTime &&
@@ -489,14 +483,11 @@ export async function applyServerChanges(appId: string, changes: unknown[]): Pro
 												});
 											}
 											updates[key] = fc.value;
-											newFT[key] = serverTime;
-											newFA[key] = changeActor;
+											newMeta[key] = makeFieldMeta(serverTime, changeActor, replayOrigin);
 										}
 									}
 									if (Object.keys(updates).length > 0) {
-										updates[FIELD_TIMESTAMPS_KEY] = newFT;
-										updates[FIELD_ACTORS_KEY] = newFA;
-										updates[LAST_ACTOR_KEY] = changeActor;
+										updates[FIELD_META_KEY] = newMeta;
 										await table.update(recordId, updates);
 									}
 								}

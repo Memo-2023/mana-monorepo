@@ -51,7 +51,7 @@ export const memosStore = {
 			// createdAt + updatedAt are required by LocalMemo's type but the
 			// previous create() never set them — DetailView showed
 			// "Erstellt: Invalid Date" for every memo. The Dexie creating
-			// hook only auto-stamps userId + __fieldTimestamps; module
+			// hook only auto-stamps userId + __fieldMeta; module
 			// stores have to set their own createdAt/updatedAt explicitly
 			// (consistent with the rest of the Mana modules).
 			createdAt: now,

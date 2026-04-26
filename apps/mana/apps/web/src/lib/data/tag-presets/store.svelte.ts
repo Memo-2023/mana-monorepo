@@ -198,8 +198,8 @@ export const tagPresetsStore = {
 		}
 
 		// Encrypt + write each row. The Dexie creating-hook stamps
-		// __lastActor / __fieldActors automatically; spaceId is
-		// pre-populated here so the hook leaves it alone.
+		// __fieldMeta automatically; spaceId is pre-populated here so
+		// the hook leaves it alone.
 		await db.transaction('rw', db.table('globalTags'), db.table('tagGroups'), async () => {
 			for (const group of groupsToWrite) {
 				await encryptRecord('tagGroups', group);

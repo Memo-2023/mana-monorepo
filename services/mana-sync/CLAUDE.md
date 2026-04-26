@@ -57,9 +57,11 @@ CLIENT -> SERVER:
       "id": "todo-123",
       "op": "update",
       "fields": {
-        "title": { "value": "Buy milk", "updatedAt": "2024-01-01T10:05:00Z" },
-        "completed": { "value": true, "updatedAt": "2024-01-01T10:06:00Z" }
-      }
+        "title": { "value": "Buy milk", "at": "2024-01-01T10:05:00Z" },
+        "completed": { "value": true, "at": "2024-01-01T10:06:00Z" }
+      },
+      "actor": { "kind": "user", "principalId": "user-1", "displayName": "Du" },
+      "origin": "user"
     }
   ]
 }
@@ -159,15 +161,19 @@ sync_changes (
   user_id TEXT NOT NULL,
   op TEXT NOT NULL CHECK (insert | update | delete),
   data JSONB,
-  field_timestamps JSONB DEFAULT '{}',
+  field_meta JSONB DEFAULT '{}',
   client_id TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT now(),
   schema_version INT NOT NULL DEFAULT 1,
-  actor JSONB  -- AI Workbench attribution: { kind: user|ai|system, ... }
+  actor JSONB,  -- AI Workbench attribution: { kind: user|ai|system, ... }
+  origin TEXT,  -- pipeline: user | agent | system | migration
+  space_id TEXT
 )
 ```
 
 **`actor` column (2026-04-14)**: Opaque JSON blob the webapp stamps on every change to distinguish user writes from autonomous AI writes and derived subsystem writes. Server does NOT parse the shape — just persists + re-emits. Pre-actor clients omit the field; the column is nullable. See `apps/mana/apps/web/src/lib/data/events/actor.ts` for the discriminated union + `COMPANION_BRAIN_ARCHITECTURE.md §20` for the full pipeline.
+
+**`origin` column + `field_meta` rename (2026-04-26, F1 of `docs/plans/sync-field-meta-overhaul.md`)**: `field_timestamps` was renamed to `field_meta` for symmetry with the client-side `__fieldMeta` and to reserve room for richer per-field metadata. The new `origin` column carries the pipeline that produced the write on the originating client (`user` / `agent` / `system` / `migration`) — drives client-side conflict-detection: only `'user'`-origin writes can lose to a server overwrite and surface a conflict toast (F2). FieldChange wire shape changed from `{ value, updatedAt }` to `{ value, at }` to match.
 
 Indexes: `(user_id, app_id, created_at)`, `(table_name, record_id, created_at)`, `(user_id, app_id, table_name, created_at)`
 

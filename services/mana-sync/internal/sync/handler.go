@@ -90,18 +90,19 @@ func changeFromRow(row store.ChangeRow) Change {
 		Op:            row.Op,
 		SpaceID:       row.SpaceID,
 		Actor:         row.Actor,
+		Origin:        row.Origin,
 	}
 	switch row.Op {
 	case "insert":
 		c.Data = row.Data
 	case "update":
 		c.Fields = make(map[string]*FieldChange)
-		for field, ts := range row.FieldTimestamps {
+		for field, ts := range row.FieldMeta {
 			value, ok := row.Data[field]
 			if !ok {
 				continue
 			}
-			c.Fields[field] = &FieldChange{Value: value, UpdatedAt: ts}
+			c.Fields[field] = &FieldChange{Value: value, At: ts}
 		}
 	case "delete":
 		if deletedAt, ok := row.Data["deletedAt"].(string); ok {
@@ -181,15 +182,15 @@ func (h *Handler) HandleSync(w http.ResponseWriter, r *http.Request) {
 	for _, change := range changeset.Changes {
 		affectedTables[change.Table] = struct{}{}
 
-		// Build data and field timestamps
+		// Build data and field metadata.
 		data := change.Data
-		fieldTimestamps := make(map[string]string)
+		fieldMeta := make(map[string]string)
 
 		if change.Op == "update" && change.Fields != nil {
 			data = make(map[string]any)
 			for field, fc := range change.Fields {
 				data[field] = fc.Value
-				fieldTimestamps[field] = fc.UpdatedAt
+				fieldMeta[field] = fc.At
 			}
 		}
 
@@ -215,7 +216,7 @@ func (h *Handler) HandleSync(w http.ResponseWriter, r *http.Request) {
 		// clients still get indexed correctly. Empty string lands as SQL
 		// NULL via RecordChange.
 		spaceID := extractSpaceID(change)
-		err := h.store.RecordChange(ctx, appID, change.Table, change.ID, userID, spaceID, change.Op, clientID, data, fieldTimestamps, rowSchemaVersion, change.Actor)
+		err := h.store.RecordChange(ctx, appID, change.Table, change.ID, userID, spaceID, change.Op, clientID, data, fieldMeta, rowSchemaVersion, change.Actor, change.Origin)
 		if err != nil {
 			slog.Error("failed to record change", "error", err, "table", change.Table, "id", change.ID)
 			http.Error(w, "failed to record change: "+err.Error(), http.StatusInternalServerError)
@@ -459,15 +460,15 @@ func (h *Handler) HandleStream(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) convertChanges(rows []store.ChangeRow) []Change {
 	changes := make([]Change, 0, len(rows))
 	for _, row := range rows {
-		c := Change{Table: row.TableName, ID: row.RecordID, Op: row.Op, Actor: row.Actor}
+		c := Change{Table: row.TableName, ID: row.RecordID, Op: row.Op, Actor: row.Actor, Origin: row.Origin}
 		switch row.Op {
 		case "insert":
 			c.Data = row.Data
 		case "update":
 			c.Fields = make(map[string]*FieldChange)
-			for field, ts := range row.FieldTimestamps {
+			for field, ts := range row.FieldMeta {
 				if value, ok := row.Data[field]; ok {
-					c.Fields[field] = &FieldChange{Value: value, UpdatedAt: ts}
+					c.Fields[field] = &FieldChange{Value: value, At: ts}
 				}
 			}
 		case "delete":

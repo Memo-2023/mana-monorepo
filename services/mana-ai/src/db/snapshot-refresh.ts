@@ -29,7 +29,7 @@ interface ChangeRow {
 	record_id: string;
 	op: string;
 	data: Record<string, unknown> | null;
-	field_timestamps: Record<string, string> | null;
+	field_meta: Record<string, string> | null;
 	created_at: Date;
 }
 
@@ -96,7 +96,7 @@ async function refreshOne(
 		userId,
 		async (tx) =>
 			tx<ChangeRow[]>`
-			SELECT user_id, record_id, op, data, field_timestamps, created_at
+			SELECT user_id, record_id, op, data, field_meta, created_at
 			FROM sync_changes
 			WHERE app_id = 'ai'
 			  AND table_name = 'aiMissions'
@@ -124,8 +124,7 @@ async function refreshOne(
 					record_id: missionId,
 					op: 'insert',
 					data: seed.record,
-					field_timestamps:
-						(seed.record.__fieldTimestamps as Record<string, string> | undefined) ?? null,
+					field_meta: (seed.record.__fieldMeta as Record<string, string> | undefined) ?? null,
 					created_at: seed.last_applied_at,
 				},
 			]
@@ -167,26 +166,26 @@ async function refreshOne(
  */
 function mergeRaw(rows: readonly ChangeRow[]): Record<string, unknown> | null {
 	let record: Record<string, unknown> | null = null;
-	let ft: Record<string, string> = {};
+	let fm: Record<string, string> = {};
 
 	for (const row of rows) {
 		if (row.op === 'delete') return null;
 		if (!record) {
 			record = row.data ? { id: row.record_id, ...row.data } : { id: row.record_id };
-			ft = { ...(row.field_timestamps ?? {}) };
+			fm = { ...(row.field_meta ?? {}) };
 			continue;
 		}
 		if (!row.data) continue;
-		const rowFT = row.field_timestamps ?? {};
+		const rowFM = row.field_meta ?? {};
 		for (const [k, v] of Object.entries(row.data)) {
-			const serverTime = rowFT[k] ?? row.created_at.toISOString();
-			const localTime = ft[k] ?? '';
+			const serverTime = rowFM[k] ?? row.created_at.toISOString();
+			const localTime = fm[k] ?? '';
 			if (serverTime >= localTime) {
 				record[k] = v;
-				ft[k] = serverTime;
+				fm[k] = serverTime;
 			}
 		}
 	}
-	if (record) record.__fieldTimestamps = ft;
+	if (record) record.__fieldMeta = fm;
 	return record;
 }

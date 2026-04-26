@@ -1,6 +1,20 @@
 # LLM-Fallback via Model-Aliases — Plan
 
-_Drafted 2026-04-26. Status: **spec**, nicht implementiert. Bau-Trigger: User-Entscheidung nach dem Schreiben-Modul-Generation-Ausfall heute (GPU-Server offline → 75 s Hang → mana-llm 500 → Frontend "Fehlgeschlagen")._
+_Drafted 2026-04-26. **Status: SHIPPED** (M1–M5 alle gemerged am 2026-04-26)._
+Auslöser: Schreiben-Modul-Generation-Ausfall (GPU-Server offline → 75 s Hang → mana-llm 500). Lösung: in einem Tag in fünf Schritten gebaut + getestet (115 Tests grün).
+
+| M | Commit | Geliefert |
+|---|---|---|
+| M1 | `dff8629e1` | `AliasRegistry` + `aliases.yaml` SSOT, 32 Tests |
+| M2 | `59557e62d` | `ProviderHealthCache` + `HealthProbe`, 32 Tests |
+| M3 | `3046da3b1` | `_execute_with_fallback`, Streaming pre-first-byte, 22 Tests, alle Legacy-Fallback-Pfade purged |
+| M4 | `8a49e3ffd` | `X-Mana-LLM-Resolved`-Header, 3 Prometheus-Metriken, `/v1/aliases` + `/v1/health` Endpoints, SIGHUP-Reload, 16 Tests |
+| M5 | `fea3adf5f` | 14 Consumer-Sites migriert, SSOT in `@mana/shared-ai`, `validate-llm-strings.mjs` Drift-Gate über 2538 Files |
+
+**Status der "Open Questions" am Ende:** alle drei dokumentiert geblieben (kein Showstopper für Phase 1):
+- 429-Rate-Limit kürzeres Backoff: aktuell wie ConnectError behandelt; Refinement bei Bedarf.
+- Alias-Versionierung: nicht nötig solange Reload atomar bleibt.
+- mana-credits Modell→Preis-Tabelle: bei nächster Credits-Code-Änderung prüfen.
 
 Macht die LLM-Pipeline resilient gegen Provider-Ausfälle (heute: GPU-Server `mana-gpu` offline, Ollama unerreichbar; morgen: Groq-API-Limit, Anthropic-Outage, …). Statt jedem Consumer eine Retry-Logik mit konkreten Modell-Strings beizubringen, gibt mana-llm zukünftig **Model-Aliases** aus, die Health-Cache-bewusst auf eine Provider-Chain auflösen. Consumer-Code kennt nur noch `mana/long-form`, nicht mehr `ollama/gemma3:12b`.
 

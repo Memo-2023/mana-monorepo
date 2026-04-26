@@ -8,7 +8,7 @@ function row(overrides: Record<string, unknown>) {
 		user_id: 'u-1',
 		op: 'insert',
 		data: null,
-		field_timestamps: null,
+		field_meta: null,
 		created_at: new Date('2026-04-15T00:00:00Z'),
 		...overrides,
 	} as Parameters<typeof mergeAndFilter>[0][number];
@@ -99,7 +99,7 @@ describe('mergeAndFilter', () => {
 					iterations: [],
 					nextRunAt: '2026-04-15T00:00:00Z',
 				},
-				field_timestamps: {
+				field_meta: {
 					state: '2026-04-15T00:00:00Z',
 					title: '2026-04-15T00:00:00Z',
 					nextRunAt: '2026-04-15T00:00:00Z',
@@ -108,7 +108,7 @@ describe('mergeAndFilter', () => {
 			row({
 				created_at: new Date('2026-04-15T01:00:00Z'),
 				data: { title: 'new' },
-				field_timestamps: { title: '2026-04-15T01:00:00Z' },
+				field_meta: { title: '2026-04-15T01:00:00Z' },
 			}),
 		];
 		const out = mergeAndFilter(rows, 'u-1', NOW);

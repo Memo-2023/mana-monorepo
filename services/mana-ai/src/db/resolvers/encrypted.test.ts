@@ -118,7 +118,7 @@ describe('encrypted resolver', () => {
 					{
 						op: 'insert',
 						data: { title: encTitle, content: encContent, createdAt: '2026-04-15' },
-						field_timestamps: null,
+						field_meta: null,
 						created_at: new Date(0),
 					},
 				],
@@ -157,7 +157,7 @@ describe('encrypted resolver', () => {
 					{
 						op: 'insert',
 						data: { title: enc },
-						field_timestamps: null,
+						field_meta: null,
 						created_at: new Date(0),
 					},
 				],

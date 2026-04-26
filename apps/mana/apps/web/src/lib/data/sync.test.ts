@@ -35,13 +35,14 @@ vi.mock('$lib/triggers/inline-suggest', () => ({
 
 import {
 	isValidSyncChange,
-	readFieldTimestamps,
+	readFieldMeta,
 	applyServerChanges,
 	subscribeSyncConflicts,
 	type SyncChange,
 	type SyncConflictPayload,
 } from './sync';
-import { db, FIELD_TIMESTAMPS_KEY } from './database';
+import { db, FIELD_META_KEY } from './database';
+import { makeFieldMeta, USER_ACTOR } from './events/actor';
 
 // ─── Pure tests ──────────────────────────────────────────────────
 
@@ -63,8 +64,8 @@ describe('isValidSyncChange', () => {
 			id: 'task-1',
 			op: 'update',
 			fields: {
-				title: { value: 'updated', updatedAt: '2026-04-01T10:00:00Z' },
-				priority: { value: 'high', updatedAt: '2026-04-01T10:01:00Z' },
+				title: { value: 'updated', at: '2026-04-01T10:00:00Z' },
+				priority: { value: 'high', at: '2026-04-01T10:01:00Z' },
 			},
 		};
 		expect(isValidSyncChange(change)).toBe(true);
@@ -112,12 +113,12 @@ describe('isValidSyncChange', () => {
 			})
 		).toBe(false);
 
-		// updatedAt must be a string when present
+		// `at` must be a string when present
 		expect(
 			isValidSyncChange({
 				...baseInsert,
 				op: 'update',
-				fields: { title: { value: 'x', updatedAt: 12345 } },
+				fields: { title: { value: 'x', at: 12345 } },
 			})
 		).toBe(false);
 	});
@@ -131,25 +132,28 @@ describe('isValidSyncChange', () => {
 	});
 });
 
-describe('readFieldTimestamps', () => {
-	it('returns the field-timestamps map when present', () => {
-		const ft = { title: '2026-04-01T10:00:00Z', priority: '2026-04-01T11:00:00Z' };
-		const record = { id: 'x', [FIELD_TIMESTAMPS_KEY]: ft };
-		expect(readFieldTimestamps(record)).toEqual(ft);
+describe('readFieldMeta', () => {
+	it('returns the field-meta map when present', () => {
+		const fieldMeta = {
+			title: makeFieldMeta('2026-04-01T10:00:00Z', USER_ACTOR, 'user'),
+			priority: makeFieldMeta('2026-04-01T11:00:00Z', USER_ACTOR, 'user'),
+		};
+		const record = { id: 'x', [FIELD_META_KEY]: fieldMeta };
+		expect(readFieldMeta(record)).toEqual(fieldMeta);
 	});
 
 	it('returns an empty map when the field is missing (legacy record)', () => {
-		expect(readFieldTimestamps({ id: 'x' })).toEqual({});
+		expect(readFieldMeta({ id: 'x' })).toEqual({});
 	});
 
 	it('handles null and non-object inputs gracefully', () => {
-		expect(readFieldTimestamps(null)).toEqual({});
-		expect(readFieldTimestamps(undefined)).toEqual({});
-		expect(readFieldTimestamps(42)).toEqual({});
+		expect(readFieldMeta(null)).toEqual({});
+		expect(readFieldMeta(undefined)).toEqual({});
+		expect(readFieldMeta(42)).toEqual({});
 	});
 
-	it('returns an empty map if __fieldTimestamps is not an object', () => {
-		expect(readFieldTimestamps({ id: 'x', [FIELD_TIMESTAMPS_KEY]: 'not-a-map' })).toEqual({});
+	it('returns an empty map if __fieldMeta is not an object', () => {
+		expect(readFieldMeta({ id: 'x', [FIELD_META_KEY]: 'not-a-map' })).toEqual({});
 	});
 });
 
@@ -169,7 +173,7 @@ describe('applyServerChanges (Dexie integration)', () => {
 		}
 	});
 
-	it('inserts a new record with __fieldTimestamps populated', async () => {
+	it('inserts a new record with __fieldMeta populated', async () => {
 		await applyServerChanges('todo', [
 			{
 				table: 'tasks',
@@ -189,9 +193,11 @@ describe('applyServerChanges (Dexie integration)', () => {
 		const stored = await db.table('tasks').get('task-A');
 		expect(stored).toBeDefined();
 		expect(stored.title).toBe('Buy milk');
-		const ft = readFieldTimestamps(stored);
-		expect(ft.title).toBe('2026-04-01T10:00:00Z');
-		expect(ft.priority).toBe('2026-04-01T10:00:00Z');
+		const fm = readFieldMeta(stored);
+		expect(fm.title?.at).toBe('2026-04-01T10:00:00Z');
+		expect(fm.priority?.at).toBe('2026-04-01T10:00:00Z');
+		// applyServerChanges stamps replays with origin='server-replay'
+		expect(fm.title?.origin).toBe('server-replay');
 	});
 
 	it('field-level LWW: server wins per-field when newer', async () => {
@@ -213,8 +219,8 @@ describe('applyServerChanges (Dexie integration)', () => {
 				id: 'task-B',
 				op: 'update',
 				fields: {
-					title: { value: 'new title', updatedAt: '2099-01-01T00:00:00Z' },
-					priority: { value: 'high', updatedAt: '2099-01-01T00:00:00Z' },
+					title: { value: 'new title', at: '2099-01-01T00:00:00Z' },
+					priority: { value: 'high', at: '2099-01-01T00:00:00Z' },
 				},
 			},
 		]);
@@ -223,9 +229,9 @@ describe('applyServerChanges (Dexie integration)', () => {
 		expect(stored.title).toBe('new title');
 		expect(stored.priority).toBe('high');
 
-		const ft = readFieldTimestamps(stored);
-		expect(ft.title).toBe('2099-01-01T00:00:00Z');
-		expect(ft.priority).toBe('2099-01-01T00:00:00Z');
+		const fm = readFieldMeta(stored);
+		expect(fm.title?.at).toBe('2099-01-01T00:00:00Z');
+		expect(fm.priority?.at).toBe('2099-01-01T00:00:00Z');
 	});
 
 	it('field-level LWW: split outcome when one field is newer and one older', async () => {
@@ -257,8 +263,8 @@ describe('applyServerChanges (Dexie integration)', () => {
 				id: 'task-C',
 				op: 'update',
 				fields: {
-					title: { value: 'server title (loser)', updatedAt: '1970-01-01T00:00:00Z' },
-					priority: { value: 'medium (winner)', updatedAt: '2099-01-01T00:00:00Z' },
+					title: { value: 'server title (loser)', at: '1970-01-01T00:00:00Z' },
+					priority: { value: 'medium (winner)', at: '2099-01-01T00:00:00Z' },
 				},
 			},
 		]);
@@ -381,7 +387,7 @@ describe('applyServerChanges (Dexie integration)', () => {
 						id: 'task-conflict-1',
 						op: 'update',
 						fields: {
-							title: { value: 'their version', updatedAt: '2099-01-01T00:00:00Z' },
+							title: { value: 'their version', at: '2099-01-01T00:00:00Z' },
 						},
 					},
 				]);
@@ -413,7 +419,7 @@ describe('applyServerChanges (Dexie integration)', () => {
 						id: 'task-conflict-2',
 						op: 'update',
 						fields: {
-							title: { value: 'first server title', updatedAt: '2099-01-01T00:00:00Z' },
+							title: { value: 'first server title', at: '2099-01-01T00:00:00Z' },
 						},
 					},
 				]);
@@ -438,7 +444,7 @@ describe('applyServerChanges (Dexie integration)', () => {
 						id: 'task-conflict-3',
 						op: 'update',
 						fields: {
-							title: { value: 'same value', updatedAt: '2099-01-01T00:00:00Z' },
+							title: { value: 'same value', at: '2099-01-01T00:00:00Z' },
 						},
 					},
 				]);
@@ -463,8 +469,8 @@ describe('applyServerChanges (Dexie integration)', () => {
 						id: 'task-conflict-4',
 						op: 'update',
 						fields: {
-							title: { value: 'server title', updatedAt: '2099-01-01T00:00:00Z' },
-							priority: { value: 'high', updatedAt: '2099-01-01T00:00:00Z' },
+							title: { value: 'server title', at: '2099-01-01T00:00:00Z' },
+							priority: { value: 'high', at: '2099-01-01T00:00:00Z' },
 						},
 					},
 				]);
@@ -500,7 +506,7 @@ describe('applyServerChanges (Dexie integration)', () => {
 						id: 'task-conflict-5',
 						op: 'update',
 						fields: {
-							title: { value: 'changed', updatedAt: '2026-04-01T00:00:00Z' }, // exact tie
+							title: { value: 'changed', at: '2026-04-01T00:00:00Z' }, // exact tie
 						},
 					},
 				]);

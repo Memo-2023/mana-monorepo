@@ -94,8 +94,8 @@ describe('notes encryption pilot', () => {
 		expect(stored.isPinned).toBe(false);
 		expect(stored.isArchived).toBe(false);
 		expect(stored.userId).toBe('test-user');
-		// Auto-stamped __fieldTimestamps stays plaintext too — LWW relies on it.
-		expect((stored as unknown as Record<string, unknown>).__fieldTimestamps).toBeDefined();
+		// Auto-stamped __fieldMeta stays plaintext too — LWW relies on it.
+		expect((stored as unknown as Record<string, unknown>).__fieldMeta).toBeDefined();
 	});
 
 	it('updates encrypt the modified content fields, leave flags untouched', async () => {

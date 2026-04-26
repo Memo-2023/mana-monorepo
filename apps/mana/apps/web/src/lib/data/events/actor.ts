@@ -28,6 +28,8 @@ export type {
 	AiActor,
 	SystemActor,
 	SystemSource,
+	FieldMeta,
+	FieldOrigin,
 } from '@mana/shared-ai';
 export {
 	SYSTEM_PROJECTION,
@@ -47,6 +49,8 @@ export {
 	isAiActor,
 	isSystemActor,
 	isFromMissionRunner,
+	makeFieldMeta,
+	isUserOriginatedField,
 } from '@mana/shared-ai';
 
 /**

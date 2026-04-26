@@ -6,7 +6,7 @@ interface ChangeRow {
 	record_id: string;
 	op: string;
 	data: Record<string, unknown> | null;
-	field_timestamps: Record<string, string> | null;
+	field_meta: Record<string, string> | null;
 	created_at: Date;
 }
 
@@ -16,7 +16,7 @@ function row(overrides: Record<string, unknown>): ChangeRow {
 		record_id: 'agent-1',
 		op: 'insert',
 		data: null,
-		field_timestamps: null,
+		field_meta: null,
 		created_at: new Date('2026-04-15T00:00:00Z'),
 		...overrides,
 	} as ChangeRow;
@@ -48,7 +48,7 @@ describe('mergeRaw (agents)', () => {
 			row({
 				op: 'insert',
 				data: { name: 'A', role: 'old role', state: 'active' },
-				field_timestamps: {
+				field_meta: {
 					name: '2026-04-15T00:00:00Z',
 					role: '2026-04-15T00:00:00Z',
 					state: '2026-04-15T00:00:00Z',
@@ -58,7 +58,7 @@ describe('mergeRaw (agents)', () => {
 			row({
 				op: 'update',
 				data: { role: 'new role' },
-				field_timestamps: { role: '2026-04-15T12:00:00Z' },
+				field_meta: { role: '2026-04-15T12:00:00Z' },
 				created_at: new Date('2026-04-15T12:00:00Z'),
 			}),
 		]);
@@ -71,12 +71,12 @@ describe('mergeRaw (agents)', () => {
 			row({
 				op: 'insert',
 				data: { name: 'A' },
-				field_timestamps: { name: '2026-04-15T12:00:00Z' },
+				field_meta: { name: '2026-04-15T12:00:00Z' },
 			}),
 			row({
 				op: 'update',
 				data: { name: 'B' },
-				field_timestamps: { name: '2026-04-15T00:00:00Z' },
+				field_meta: { name: '2026-04-15T00:00:00Z' },
 				created_at: new Date('2026-04-14T00:00:00Z'),
 			}),
 		]);

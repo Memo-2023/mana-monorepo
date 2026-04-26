@@ -78,6 +78,11 @@ export async function readLatestRecords(
 /**
  * Write a new record via sync_changes INSERT. The record will appear
  * on the user's devices on their next sync cycle.
+ *
+ * MCP-Tool calls always carry `origin='agent'` because the pipeline
+ * that produced the value is an AI agent invoking a tool — the
+ * actor's `kind` may be `system` (the MCP server itself) but the
+ * write semantics are agent-driven for conflict-detection purposes.
  */
 export async function writeRecord(
 	userId: string,
@@ -86,17 +91,18 @@ export async function writeRecord(
 	recordId: string,
 	op: 'insert' | 'update' | 'delete',
 	data: Record<string, unknown>,
-	fieldTimestamps: Record<string, string>
+	fieldMeta: Record<string, string>
 ): Promise<void> {
 	await withUser(userId, async (tx) => {
 		await tx`
 			INSERT INTO sync_changes
-				(app_id, table_name, record_id, user_id, op, data, field_timestamps, client_id, schema_version, actor)
+				(app_id, table_name, record_id, user_id, op, data, field_meta, client_id, schema_version, actor, origin)
 			VALUES
 				(${appId}, ${tableName}, ${recordId}, ${userId}, ${op},
-				 ${tx.json(data as never)}, ${tx.json(fieldTimestamps as never)},
+				 ${tx.json(data as never)}, ${tx.json(fieldMeta as never)},
 				 'mcp-server', 1,
-				 ${tx.json({ kind: 'system', principalId: 'system:mcp', displayName: 'MCP Server' } as never)})
+				 ${tx.json({ kind: 'system', principalId: 'system:mcp', displayName: 'MCP Server' } as never)},
+				 'agent')
 		`;
 	});
 }

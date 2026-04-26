@@ -44,7 +44,7 @@ interface ChangeRow {
 	user_id: string;
 	op: string;
 	data: Record<string, unknown> | null;
-	field_timestamps: Record<string, string> | null;
+	field_meta: Record<string, string> | null;
 	created_at: Date;
 }
 
@@ -117,19 +117,19 @@ export function mergeAndFilter(
 			continue;
 		}
 
-		const prevFT = (existing.__fieldTimestamps as Record<string, string> | undefined) ?? {};
-		const nextFT = { ...prevFT };
+		const prevFM = (existing.__fieldMeta as Record<string, string> | undefined) ?? {};
+		const nextFM = { ...prevFM };
 		if (row.data) {
 			for (const [k, v] of Object.entries(row.data)) {
-				const serverTime = row.field_timestamps?.[k] ?? row.created_at.toISOString();
-				const localTime = prevFT[k] ?? '';
+				const serverTime = row.field_meta?.[k] ?? row.created_at.toISOString();
+				const localTime = prevFM[k] ?? '';
 				if (serverTime >= localTime) {
 					existing[k] = v;
-					nextFT[k] = serverTime;
+					nextFM[k] = serverTime;
 				}
 			}
 		}
-		existing.__fieldTimestamps = nextFT;
+		existing.__fieldMeta = nextFM;
 	}
 
 	const missions: ServerMission[] = [];

@@ -20,8 +20,8 @@ import { fire as fireTrigger } from '$lib/triggers/registry';
 import { checkInlineSuggestion } from '$lib/triggers/inline-suggest';
 import { getEffectiveUserId, GUEST_USER_ID } from './current-user';
 import { getEffectiveSpaceId } from './scope/active-space.svelte';
-import { getCurrentActor } from './events/actor';
-import type { Actor } from './events/actor';
+import { getCurrentActor, makeFieldMeta } from './events/actor';
+import type { Actor, FieldMeta, FieldOrigin } from './events/actor';
 import { isQuotaError, notifyQuotaExceeded } from './quota-detect';
 import {
 	SYNC_APP_MAP,
@@ -1231,6 +1231,35 @@ db.version(50).upgrade(async (tx) => {
 	}
 });
 
+// v51 — Lasts module (docs/plans/lasts-module.md M1).
+// Mirror sibling to firsts: the *last* time you did/felt/saw something —
+// either marked manually or surfaced retrospectively by the inference
+// scanner that watches places/contacts/food/habits for frequency drops.
+//
+// Single space-scoped table. Index strategy:
+//   - status for the suspected/confirmed/reclaimed tab filter
+//   - category for the category tab filter
+//   - date for chronological sort + anniversary scans
+//   - recognisedAt for the "recognised X years ago" reminder
+//   - isPinned, isArchived for the standard meta-filters
+db.version(51).stores({
+	lasts: 'id, status, category, date, recognisedAt, isPinned, isArchived',
+});
+
+// v52 — Lasts inference cooldown (docs/plans/lasts-module.md M3).
+// Records dismissed inference candidates so the scanner doesn't keep
+// re-suggesting the same place / contact / habit for ~12 months. ID is
+// deterministic (`${refTable}:${refId}`) for structural idempotency:
+// re-dismissing the same candidate is a Dexie put no-op-equivalent.
+//
+// Plaintext only — refTable/refId/dismissedAt are all metadata, no
+// user-typed content. Indexed by refTable + dismissedAt so the scanner
+// can quickly probe "is this place on cooldown?" and the cooldown sweep
+// can expire entries by age.
+db.version(52).stores({
+	lastsCooldown: 'id, refTable, dismissedAt, [refTable+refId]',
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module
@@ -1360,29 +1389,22 @@ function trackActivity(
 }
 
 /**
- * Hidden field on every synced record holding per-field LWW timestamps.
- * Not indexed, not sent to the server in pending-change payloads.
+ * Hidden field on every synced record carrying per-field write metadata.
+ *
+ * Shape: `{ [fieldKey]: FieldMeta }` where `FieldMeta = { at, actor, origin }`.
+ * Replaces the older triple `__fieldTimestamps` + `__fieldActors` +
+ * `__lastActor` — same information, single source of truth.
+ *
+ * Not indexed, never sent to the server as a top-level payload field
+ * (the wire format carries it as part of `change.fields[k]` instead).
+ *
+ * For `__lastActor` consumers: the previous "actor that last wrote the
+ * record as a whole" is now derived as `__fieldMeta[argmax(at)].actor`.
  */
-export const FIELD_TIMESTAMPS_KEY = '__fieldTimestamps';
-/**
- * Hidden field holding the {@link Actor} that last wrote the record as a
- * whole. Used by the Workbench UI to badge records the AI has touched.
- */
-export const LAST_ACTOR_KEY = '__lastActor';
-/**
- * Hidden field holding the per-field {@link Actor} map, mirroring
- * `__fieldTimestamps`. Enables "the AI changed the due date, the user
- * changed the title" attribution when rendering diffs.
- */
-export const FIELD_ACTORS_KEY = '__fieldActors';
+export const FIELD_META_KEY = '__fieldMeta';
 
 function isInternalKey(key: string): boolean {
-	return (
-		key === 'id' ||
-		key === FIELD_TIMESTAMPS_KEY ||
-		key === LAST_ACTOR_KEY ||
-		key === FIELD_ACTORS_KEY
-	);
+	return key === 'id' || key === FIELD_META_KEY;
 }
 
 /**
@@ -1392,8 +1414,7 @@ function isInternalKey(key: string): boolean {
  * creating-hook continues to stamp `userId` on these; data tables
  * (tasks, events, tags, …) stopped carrying `userId` in Phase 2c of
  * the space-scoped data model rollout — attribution there lives on
- * the Actor fields (`__lastActor` / `__fieldActors`) and tenancy on
- * `spaceId`.
+ * `__fieldMeta` and tenancy on `spaceId`.
  *
  * Keeping this list explicit instead of inferring by naming
  * convention: the audit in docs/plans/space-scoped-data-model.md
@@ -1476,27 +1497,22 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 				}
 			}
 
-			// Stamp every real field with the create-time so future LWW comparisons
-			// have a baseline, and with the actor so field-level attribution works.
-			// Mutates obj in place — Dexie persists the mutation.
-			const ft: Record<string, string> = {};
-			const fa: Record<string, Actor> = {};
+			// Stamp every user-data field with `__fieldMeta[key] = { at, actor, origin }`.
+			// `at` drives field-LWW ordering, `actor` carries attribution forward
+			// across renames, `origin` distinguishes user edits from system /
+			// migration / agent / server-replay writes for conflict-detection.
+			// F1 hardcodes `origin: 'user'` here — F2 will derive it from the
+			// active actor.kind so AI-runner writes land as `'agent'` etc.
+			const origin: FieldOrigin = 'user';
+			const fieldMeta: Record<string, FieldMeta> = {};
 			for (const key of Object.keys(obj)) {
 				if (isInternalKey(key)) continue;
-				ft[key] = now;
-				fa[key] = actor;
+				fieldMeta[key] = makeFieldMeta(now, actor, origin);
 			}
-			objRecord[FIELD_TIMESTAMPS_KEY] = ft;
-			objRecord[FIELD_ACTORS_KEY] = fa;
-			objRecord[LAST_ACTOR_KEY] = actor;
+			objRecord[FIELD_META_KEY] = fieldMeta;
 
-			// Build payload for pending-change WITHOUT the internal bookkeeping fields
-			const {
-				[FIELD_TIMESTAMPS_KEY]: _ft,
-				[FIELD_ACTORS_KEY]: _fa,
-				[LAST_ACTOR_KEY]: _la,
-				...dataForSync
-			} = obj as Record<string, unknown>;
+			// Build payload for pending-change WITHOUT the internal bookkeeping field.
+			const { [FIELD_META_KEY]: _fm, ...dataForSync } = obj as Record<string, unknown>;
 
 			trackPendingChange(tableName, {
 				appId,
@@ -1505,6 +1521,7 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 				op: 'insert',
 				data: dataForSync,
 				actor,
+				origin,
 				createdAt: now,
 				spaceId: typeof objRecord.spaceId === 'string' ? (objRecord.spaceId as string) : undefined,
 			});
@@ -1525,7 +1542,8 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 			if (_applyingTables.has(tableName)) return undefined;
 			const now = new Date().toISOString();
 			const actor: Actor = getCurrentActor();
-			const fields: Record<string, { value: unknown; updatedAt: string }> = {};
+			const origin: FieldOrigin = 'user';
+			const fields: Record<string, { value: unknown; at: string }> = {};
 
 			// userId is immutable after creation. Silently strip any attempt to
 			// reassign it from a local update so a buggy or malicious caller can
@@ -1542,23 +1560,19 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 			if ('spaceId' in mods) delete mods.spaceId;
 			if ('authorId' in mods) delete mods.authorId;
 
-			// Merge field timestamps and field actors: keep existing, overwrite
-			// each modified field with now / current actor.
-			const existingFT =
-				((obj as Record<string, unknown>)[FIELD_TIMESTAMPS_KEY] as
-					| Record<string, string>
+			// Merge __fieldMeta: keep existing entries (so untouched fields
+			// retain their original at/actor/origin), overwrite each modified
+			// field with the current write's metadata.
+			const existingMeta =
+				((obj as Record<string, unknown>)[FIELD_META_KEY] as
+					| Record<string, FieldMeta>
 					| undefined) ?? {};
-			const existingFA =
-				((obj as Record<string, unknown>)[FIELD_ACTORS_KEY] as Record<string, Actor> | undefined) ??
-				{};
-			const newFT: Record<string, string> = { ...existingFT };
-			const newFA: Record<string, Actor> = { ...existingFA };
+			const newMeta: Record<string, FieldMeta> = { ...existingMeta };
 
 			for (const [key, value] of Object.entries(modifications)) {
 				if (isInternalKey(key)) continue;
-				fields[key] = { value, updatedAt: now };
-				newFT[key] = now;
-				newFA[key] = actor;
+				fields[key] = { value, at: now };
+				newMeta[key] = makeFieldMeta(now, actor, origin);
 			}
 
 			const op = (modifications as Record<string, unknown>).deletedAt ? 'delete' : 'update';
@@ -1577,6 +1591,7 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 				op,
 				fields,
 				actor,
+				origin,
 				deletedAt: (modifications as Record<string, unknown>).deletedAt as string | undefined,
 				createdAt: now,
 				spaceId: existingSpaceId,
@@ -1585,13 +1600,10 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 			fireTrigger(appId, tableName, op, modifications as Record<string, unknown>);
 
 			// Returning an object from a Dexie 'updating' hook merges it into the
-			// modifications applied to the record — use this to persist the new
-			// per-field timestamps, per-field actors, and last-actor alongside
-			// the user's update.
+			// modifications applied to the record — use this to persist the merged
+			// __fieldMeta alongside the user's data update.
 			return {
-				[FIELD_TIMESTAMPS_KEY]: newFT,
-				[FIELD_ACTORS_KEY]: newFA,
-				[LAST_ACTOR_KEY]: actor,
+				[FIELD_META_KEY]: newMeta,
 			};
 		});
 	}

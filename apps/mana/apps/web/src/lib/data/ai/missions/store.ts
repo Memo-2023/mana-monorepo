@@ -2,9 +2,8 @@
  * Mission store — CRUD + lifecycle operations.
  *
  * Missions go through the unified Dexie write path, which means the Dexie
- * hooks stamp `userId`, `__lastActor`, `__fieldTimestamps`, `__fieldActors`
- * and track the row into `_pendingChanges`. Callers never touch those
- * fields directly.
+ * hooks stamp `userId` + `__fieldMeta` and track the row into
+ * `_pendingChanges`. Callers never touch those fields directly.
  *
  * Iterations are intentionally stored inline (`Mission.iterations`) rather
  * than in a child table. They are append-only, each Mission stays small

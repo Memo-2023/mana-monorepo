@@ -47,12 +47,23 @@ type Change struct {
 	// clients so cross-device attribution works. Pre-actor clients omit
 	// the field; the column is nullable.
 	Actor json.RawMessage `json:"actor,omitempty"`
+	// Origin describes the pipeline that produced the write on the
+	// originating client: 'user', 'agent', 'system', or 'migration'.
+	// The server stores it verbatim and re-emits to other clients —
+	// receiving clients then apply with origin='server-replay' locally
+	// regardless. Pre-origin clients omit the field; the column is
+	// nullable. See packages/shared-ai/src/field-meta.ts for the
+	// full enumeration and conflict-detection semantics.
+	Origin string `json:"origin,omitempty"`
 }
 
-// FieldChange holds a value and the timestamp when it was last changed.
+// FieldChange holds a value and the timestamp when the field was last
+// written. Per-field actor + origin are not transmitted at the field
+// level — they live at the row level on Change.Actor + Change.Origin
+// because each push represents one (actor, origin) tuple.
 type FieldChange struct {
-	Value     any    `json:"value"`
-	UpdatedAt string `json:"updatedAt"`
+	Value any    `json:"value"`
+	At    string `json:"at"`
 }
 
 // Changeset is a batch of changes sent by a client.
@@ -95,15 +106,16 @@ type PullRequest struct {
 
 // SyncRecord is a row in the sync_changes table.
 type SyncRecord struct {
-	ID              string         `json:"id"`
-	AppID           string         `json:"appId"`
-	TableName       string         `json:"tableName"`
-	RecordID        string         `json:"recordId"`
-	UserID          string         `json:"userId"`
-	Op              string         `json:"op"`
-	Fields          map[string]any `json:"fields,omitempty"`
-	Data            map[string]any `json:"data,omitempty"`
-	FieldTimestamps map[string]string `json:"fieldTimestamps,omitempty"`
-	ClientID        string         `json:"clientId"`
-	CreatedAt       time.Time      `json:"createdAt"`
+	ID        string            `json:"id"`
+	AppID     string            `json:"appId"`
+	TableName string            `json:"tableName"`
+	RecordID  string            `json:"recordId"`
+	UserID    string            `json:"userId"`
+	Op        string            `json:"op"`
+	Fields    map[string]any    `json:"fields,omitempty"`
+	Data      map[string]any    `json:"data,omitempty"`
+	FieldMeta map[string]string `json:"fieldMeta,omitempty"`
+	Origin    string            `json:"origin,omitempty"`
+	ClientID  string            `json:"clientId"`
+	CreatedAt time.Time         `json:"createdAt"`
 }

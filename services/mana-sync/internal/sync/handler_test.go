@@ -19,13 +19,13 @@ type mockStore struct {
 type recordedChange struct {
 	appID, table, recordID, userID, op, clientID string
 	data                                         map[string]any
-	fieldTimestamps                              map[string]string
+	fieldMeta                                    map[string]string
 }
 
 type mockChangeRow struct {
 	ID, TableName, RecordID, Op, ClientID string
 	Data                                  map[string]any
-	FieldTimestamps                       map[string]string
+	FieldMeta                             map[string]string
 }
 
 // mockValidator always returns a fixed user ID.
@@ -102,7 +102,7 @@ func TestChangesetValidation(t *testing.T) {
 				Since:    "2024-01-01T00:00:00Z",
 				Changes: []Change{
 					{Table: "todos", ID: "todo-1", Op: "update", Fields: map[string]*FieldChange{
-						"title": {Value: "Updated", UpdatedAt: "2024-01-01T10:00:00Z"},
+						"title": {Value: "Updated", At: "2024-01-01T10:00:00Z"},
 					}},
 				},
 			},
@@ -260,8 +260,8 @@ func TestFieldChangeRoundTrip(t *testing.T) {
 		ID:    "todo-1",
 		Op:    "update",
 		Fields: map[string]*FieldChange{
-			"title":     {Value: "Buy milk", UpdatedAt: "2024-01-01T10:05:00Z"},
-			"completed": {Value: true, UpdatedAt: "2024-01-01T10:06:00Z"},
+			"title":     {Value: "Buy milk", At: "2024-01-01T10:05:00Z"},
+			"completed": {Value: true, At: "2024-01-01T10:06:00Z"},
 		},
 	}
 
@@ -286,8 +286,8 @@ func TestFieldChangeRoundTrip(t *testing.T) {
 	if titleField.Value != "Buy milk" {
 		t.Errorf("title value = %v, want 'Buy milk'", titleField.Value)
 	}
-	if titleField.UpdatedAt != "2024-01-01T10:05:00Z" {
-		t.Errorf("title updatedAt = %q, want '2024-01-01T10:05:00Z'", titleField.UpdatedAt)
+	if titleField.At != "2024-01-01T10:05:00Z" {
+		t.Errorf("title at = %q, want '2024-01-01T10:05:00Z'", titleField.At)
 	}
 
 	completedField := decoded.Fields["completed"]

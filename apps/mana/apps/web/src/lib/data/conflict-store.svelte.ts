@@ -37,7 +37,6 @@
 
 import { db } from './database';
 import { subscribeSyncConflicts, type SyncConflictPayload } from './sync';
-import { FIELD_TIMESTAMPS_KEY } from './database';
 
 /** How long a conflict stays visible before auto-dismissing. */
 const CONFLICT_TTL_MS = 30_000;
@@ -155,24 +154,16 @@ async function restore(id: string): Promise<void> {
 
 	const now = new Date().toISOString();
 	const updates: Record<string, unknown> = { updatedAt: now };
-	const ftPatch: Record<string, string> = {};
 
 	for (const [field, info] of Object.entries(conflict.fields)) {
 		updates[field] = info.wasLocal;
-		ftPatch[field] = now;
 	}
 
-	// Read the current row's __fieldTimestamps and merge our patch in
-	// so we don't blow away unrelated server-side timestamps.
-	const row = await db.table(conflict.tableName).get(conflict.recordId);
-	if (row) {
-		const existingFT =
-			((row as Record<string, unknown>)[FIELD_TIMESTAMPS_KEY] as Record<string, string>) ?? {};
-		updates[FIELD_TIMESTAMPS_KEY] = { ...existingFT, ...ftPatch };
-	} else {
-		updates[FIELD_TIMESTAMPS_KEY] = ftPatch;
-	}
-
+	// The Dexie updating-hook re-stamps `__fieldMeta` for every modified
+	// field with origin='user' and `at: now`, which is exactly what we
+	// want here: the restore is a fresh user edit that should win LWW
+	// against the server's overwrite on the next sync round. No manual
+	// __fieldMeta patching needed.
 	try {
 		await db.table(conflict.tableName).update(conflict.recordId, updates);
 	} catch (err) {

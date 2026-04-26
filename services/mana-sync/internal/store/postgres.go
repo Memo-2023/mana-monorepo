@@ -51,7 +51,13 @@ func (s *Store) Migrate(ctx context.Context) error {
 			user_id TEXT NOT NULL,
 			op TEXT NOT NULL CHECK (op IN ('insert', 'update', 'delete')),
 			data JSONB,
-			field_timestamps JSONB DEFAULT '{}',
+			-- field_meta: per-field write timestamps as { [field]: ISO }.
+			-- Replaces the older field_timestamps column with the same
+			-- semantics; kept JSONB for forward compatibility if we ever
+			-- need to attach per-field actor or origin separately again.
+			-- Renamed alongside the docs/plans/sync-field-meta-overhaul.md
+			-- rollout (F1) — see plan for the full architecture.
+			field_meta JSONB DEFAULT '{}',
 			client_id TEXT NOT NULL,
 			created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 			-- M2: schema_version lets us evolve the Change wire shape over time.
@@ -62,7 +68,12 @@ func (s *Store) Migrate(ctx context.Context) error {
 			-- AI Workbench: opaque actor JSON (user / ai / system). Null for
 			-- pre-actor clients; the webapp stamps every change with it from
 			-- the Dexie hook onward. Server-side we just persist and re-emit.
-			actor JSONB
+			actor JSONB,
+			-- Pipeline origin of the write on the originating client:
+			-- 'user', 'agent', 'system', or 'migration'. Receiving clients
+			-- treat every server-pulled change as 'server-replay' locally
+			-- regardless. See packages/shared-ai/src/field-meta.ts.
+			origin TEXT
 		);
 
 		-- Idempotent add for databases created before M2 shipped.
@@ -72,6 +83,10 @@ func (s *Store) Migrate(ctx context.Context) error {
 		-- Idempotent add for databases created before the AI Workbench.
 		ALTER TABLE sync_changes
 			ADD COLUMN IF NOT EXISTS actor JSONB;
+
+		-- Idempotent add for databases created before the field-meta overhaul.
+		ALTER TABLE sync_changes
+			ADD COLUMN IF NOT EXISTS origin TEXT;
 
 		-- Idempotent add for databases created before the Spaces foundation.
 		-- Nullable so pre-v28 clients (which don't stamp a spaceId) can
@@ -215,7 +230,11 @@ func (s *Store) withUserAndMemberships(
 // `actor` is the opaque JSON blob the webapp stamps on every change (see
 // `data/events/actor.ts`). Pass nil for pre-actor callers; the column is
 // nullable and cross-device consumers treat a missing actor as `user`.
-func (s *Store) RecordChange(ctx context.Context, appID, tableName, recordID, userID, spaceID, op, clientID string, data map[string]any, fieldTimestamps map[string]string, schemaVersion int, actor json.RawMessage) error {
+//
+// `origin` describes the pipeline that produced the write on the originating
+// client (`user` / `agent` / `system` / `migration`). Empty for pre-origin
+// callers; the column is nullable.
+func (s *Store) RecordChange(ctx context.Context, appID, tableName, recordID, userID, spaceID, op, clientID string, data map[string]any, fieldMeta map[string]string, schemaVersion int, actor json.RawMessage, origin string) error {
 	if schemaVersion <= 0 {
 		schemaVersion = 1
 	}
@@ -225,9 +244,9 @@ func (s *Store) RecordChange(ctx context.Context, appID, tableName, recordID, us
 		return fmt.Errorf("marshal data: %w", err)
 	}
 
-	ftJSON, err := json.Marshal(fieldTimestamps)
+	fmJSON, err := json.Marshal(fieldMeta)
 	if err != nil {
-		return fmt.Errorf("marshal field_timestamps: %w", err)
+		return fmt.Errorf("marshal field_meta: %w", err)
 	}
 
 	// pgx serializes a nil []byte as NULL for JSONB columns, which is what
@@ -246,12 +265,18 @@ func (s *Store) RecordChange(ctx context.Context, appID, tableName, recordID, us
 		spaceIDParam = &spaceID
 	}
 
+	// Same nullable handling for origin: empty string lands as SQL NULL.
+	var originParam *string
+	if origin != "" {
+		originParam = &origin
+	}
+
 	return s.withUser(ctx, userID, func(tx pgx.Tx) error {
 		query := `
-			INSERT INTO sync_changes (app_id, table_name, record_id, user_id, space_id, op, data, field_timestamps, client_id, schema_version, actor)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+			INSERT INTO sync_changes (app_id, table_name, record_id, user_id, space_id, op, data, field_meta, client_id, schema_version, actor, origin)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 		`
-		_, err := tx.Exec(ctx, query, appID, tableName, recordID, userID, spaceIDParam, op, dataJSON, ftJSON, clientID, schemaVersion, actorJSON)
+		_, err := tx.Exec(ctx, query, appID, tableName, recordID, userID, spaceIDParam, op, dataJSON, fmJSON, clientID, schemaVersion, actorJSON, originParam)
 		return err
 	})
 }
@@ -270,7 +295,7 @@ func (s *Store) GetChangesSince(ctx context.Context, userID, appID, tableName, s
 	var changes []ChangeRow
 	err = s.withUserAndMemberships(ctx, userID, spaceIDs, func(tx pgx.Tx) error {
 		query := `
-			SELECT id, table_name, record_id, op, data, field_timestamps, client_id, created_at, schema_version, space_id, actor
+			SELECT id, table_name, record_id, op, data, field_meta, client_id, created_at, schema_version, space_id, actor, origin
 			FROM sync_changes
 			WHERE (user_id = $1 OR space_id = ANY($7)) AND app_id = $2 AND table_name = $3
 				AND created_at > $4 AND client_id != $5
@@ -285,24 +310,27 @@ func (s *Store) GetChangesSince(ctx context.Context, userID, appID, tableName, s
 
 		for rows.Next() {
 			var c ChangeRow
-			var dataJSON, ftJSON, actorJSON []byte
-			var spaceID *string
+			var dataJSON, fmJSON, actorJSON []byte
+			var spaceID, origin *string
 
-			if err := rows.Scan(&c.ID, &c.TableName, &c.RecordID, &c.Op, &dataJSON, &ftJSON, &c.ClientID, &c.CreatedAt, &c.SchemaVersion, &spaceID, &actorJSON); err != nil {
+			if err := rows.Scan(&c.ID, &c.TableName, &c.RecordID, &c.Op, &dataJSON, &fmJSON, &c.ClientID, &c.CreatedAt, &c.SchemaVersion, &spaceID, &actorJSON, &origin); err != nil {
 				return err
 			}
 
 			if spaceID != nil {
 				c.SpaceID = *spaceID
 			}
+			if origin != nil {
+				c.Origin = *origin
+			}
 			if dataJSON != nil {
 				if err := json.Unmarshal(dataJSON, &c.Data); err != nil {
 					return fmt.Errorf("unmarshal data for record %s: %w", c.RecordID, err)
 				}
 			}
-			if ftJSON != nil {
-				if err := json.Unmarshal(ftJSON, &c.FieldTimestamps); err != nil {
-					return fmt.Errorf("unmarshal field_timestamps for record %s: %w", c.RecordID, err)
+			if fmJSON != nil {
+				if err := json.Unmarshal(fmJSON, &c.FieldMeta); err != nil {
+					return fmt.Errorf("unmarshal field_meta for record %s: %w", c.RecordID, err)
 				}
 			}
 			if len(actorJSON) > 0 {
@@ -328,7 +356,7 @@ func (s *Store) GetAllChangesSince(ctx context.Context, userID, appID, since, ex
 	var changes []ChangeRow
 	err = s.withUserAndMemberships(ctx, userID, spaceIDs, func(tx pgx.Tx) error {
 		query := `
-			SELECT id, table_name, record_id, op, data, field_timestamps, client_id, created_at, schema_version, space_id, actor
+			SELECT id, table_name, record_id, op, data, field_meta, client_id, created_at, schema_version, space_id, actor, origin
 			FROM sync_changes
 			WHERE (user_id = $1 OR space_id = ANY($5)) AND app_id = $2
 				AND created_at > $3 AND client_id != $4
@@ -343,24 +371,27 @@ func (s *Store) GetAllChangesSince(ctx context.Context, userID, appID, since, ex
 
 		for rows.Next() {
 			var c ChangeRow
-			var dataJSON, ftJSON, actorJSON []byte
-			var spaceID *string
+			var dataJSON, fmJSON, actorJSON []byte
+			var spaceID, origin *string
 
-			if err := rows.Scan(&c.ID, &c.TableName, &c.RecordID, &c.Op, &dataJSON, &ftJSON, &c.ClientID, &c.CreatedAt, &c.SchemaVersion, &spaceID, &actorJSON); err != nil {
+			if err := rows.Scan(&c.ID, &c.TableName, &c.RecordID, &c.Op, &dataJSON, &fmJSON, &c.ClientID, &c.CreatedAt, &c.SchemaVersion, &spaceID, &actorJSON, &origin); err != nil {
 				return err
 			}
 
 			if spaceID != nil {
 				c.SpaceID = *spaceID
 			}
+			if origin != nil {
+				c.Origin = *origin
+			}
 			if dataJSON != nil {
 				if err := json.Unmarshal(dataJSON, &c.Data); err != nil {
 					return fmt.Errorf("unmarshal data for record %s: %w", c.RecordID, err)
 				}
 			}
-			if ftJSON != nil {
-				if err := json.Unmarshal(ftJSON, &c.FieldTimestamps); err != nil {
-					return fmt.Errorf("unmarshal field_timestamps for record %s: %w", c.RecordID, err)
+			if fmJSON != nil {
+				if err := json.Unmarshal(fmJSON, &c.FieldMeta); err != nil {
+					return fmt.Errorf("unmarshal field_meta for record %s: %w", c.RecordID, err)
 				}
 			}
 			if len(actorJSON) > 0 {
@@ -382,7 +413,7 @@ func (s *Store) GetAllChangesSince(ctx context.Context, userID, appID, since, ex
 func (s *Store) StreamAllUserChanges(ctx context.Context, userID string, fn func(ChangeRow) error) error {
 	return s.withUser(ctx, userID, func(tx pgx.Tx) error {
 		query := `
-			SELECT id, app_id, table_name, record_id, op, data, field_timestamps, client_id, created_at, schema_version, space_id, actor
+			SELECT id, app_id, table_name, record_id, op, data, field_meta, client_id, created_at, schema_version, space_id, actor, origin
 			FROM sync_changes
 			WHERE user_id = $1
 			ORDER BY created_at ASC, id ASC
@@ -395,22 +426,25 @@ func (s *Store) StreamAllUserChanges(ctx context.Context, userID string, fn func
 
 		for rows.Next() {
 			var c ChangeRow
-			var dataJSON, ftJSON, actorJSON []byte
-			var spaceID *string
-			if err := rows.Scan(&c.ID, &c.AppID, &c.TableName, &c.RecordID, &c.Op, &dataJSON, &ftJSON, &c.ClientID, &c.CreatedAt, &c.SchemaVersion, &spaceID, &actorJSON); err != nil {
+			var dataJSON, fmJSON, actorJSON []byte
+			var spaceID, origin *string
+			if err := rows.Scan(&c.ID, &c.AppID, &c.TableName, &c.RecordID, &c.Op, &dataJSON, &fmJSON, &c.ClientID, &c.CreatedAt, &c.SchemaVersion, &spaceID, &actorJSON, &origin); err != nil {
 				return fmt.Errorf("scan: %w", err)
 			}
 			if spaceID != nil {
 				c.SpaceID = *spaceID
+			}
+			if origin != nil {
+				c.Origin = *origin
 			}
 			if dataJSON != nil {
 				if err := json.Unmarshal(dataJSON, &c.Data); err != nil {
 					return fmt.Errorf("unmarshal data for record %s: %w", c.RecordID, err)
 				}
 			}
-			if ftJSON != nil {
-				if err := json.Unmarshal(ftJSON, &c.FieldTimestamps); err != nil {
-					return fmt.Errorf("unmarshal field_timestamps for record %s: %w", c.RecordID, err)
+			if fmJSON != nil {
+				if err := json.Unmarshal(fmJSON, &c.FieldMeta); err != nil {
+					return fmt.Errorf("unmarshal field_meta for record %s: %w", c.RecordID, err)
 				}
 			}
 			if len(actorJSON) > 0 {
@@ -426,16 +460,20 @@ func (s *Store) StreamAllUserChanges(ctx context.Context, userID string, fn func
 
 // ChangeRow is a row from the sync_changes table.
 type ChangeRow struct {
-	AppID           string
-	ID              string
-	TableName       string
-	RecordID        string
-	Op              string
-	Data            map[string]any
-	FieldTimestamps map[string]string
-	ClientID        string
-	CreatedAt       time.Time
-	SchemaVersion   int
+	AppID         string
+	ID            string
+	TableName     string
+	RecordID      string
+	Op            string
+	Data          map[string]any
+	// FieldMeta carries per-field write timestamps as { [field]: ISO }.
+	// Per-field actor + origin live at the row level (Actor + Origin
+	// below) — each push represents one (actor, origin) tuple, so
+	// duplicating them per-field would be redundant on the wire.
+	FieldMeta     map[string]string
+	ClientID      string
+	CreatedAt     time.Time
+	SchemaVersion int
 	// SpaceID is empty for pre-v28 rows. Consumers use it to partition
 	// the reader cache per space; an empty string means "implicit personal"
 	// until the bootstrap reconciliation fills it in.
@@ -443,4 +481,8 @@ type ChangeRow struct {
 	// Actor is nil for rows written by pre-actor clients. Consumers on
 	// other devices render a missing actor as "user".
 	Actor json.RawMessage
+	// Origin describes the pipeline that produced the write on the
+	// originating client. Empty for pre-origin clients; consumers treat
+	// missing as "user". See packages/shared-ai/src/field-meta.ts.
+	Origin string
 }

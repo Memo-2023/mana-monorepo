@@ -16,7 +16,7 @@ import { withUser } from '../connection';
 interface ChangeRow {
 	op: string;
 	data: Record<string, unknown> | null;
-	field_timestamps: Record<string, string> | null;
+	field_meta: Record<string, string> | null;
 	created_at: Date;
 }
 
@@ -29,7 +29,7 @@ export async function replayRecord(
 ): Promise<Record<string, unknown> | null> {
 	return withUser(sql, userId, async (tx) => {
 		const rows = await tx<ChangeRow[]>`
-			SELECT op, data, field_timestamps, created_at
+			SELECT op, data, field_meta, created_at
 			FROM sync_changes
 			WHERE user_id = ${userId}
 				AND app_id = ${appId}
@@ -40,7 +40,7 @@ export async function replayRecord(
 		if (rows.length === 0) return null;
 
 		let record: Record<string, unknown> | null = null;
-		let fieldTimestamps: Record<string, string> = {};
+		let fieldMeta: Record<string, string> = {};
 
 		for (const row of rows) {
 			if (row.op === 'delete') {
@@ -49,20 +49,20 @@ export async function replayRecord(
 
 			if (!record) {
 				record = row.data ? { id: recordId, ...row.data } : { id: recordId };
-				if (row.field_timestamps) {
-					fieldTimestamps = { ...row.field_timestamps };
+				if (row.field_meta) {
+					fieldMeta = { ...row.field_meta };
 				}
 				continue;
 			}
 
 			if (!row.data) continue;
-			const rowFT = row.field_timestamps ?? {};
+			const rowFM = row.field_meta ?? {};
 			for (const [k, v] of Object.entries(row.data)) {
-				const serverTime = rowFT[k] ?? row.created_at.toISOString();
-				const localTime = fieldTimestamps[k] ?? '';
+				const serverTime = rowFM[k] ?? row.created_at.toISOString();
+				const localTime = fieldMeta[k] ?? '';
 				if (serverTime >= localTime) {
 					record[k] = v;
-					fieldTimestamps[k] = serverTime;
+					fieldMeta[k] = serverTime;
 				}
 			}
 		}

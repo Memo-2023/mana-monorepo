@@ -88,17 +88,15 @@ function buildActor(input: AppendIterationInput): Actor {
 
 export async function appendServerIteration(sql: Sql, input: AppendIterationInput): Promise<void> {
 	const { userId, missionId, allIterations, nowIso } = input;
-	const fieldsPayload = {
-		iterations: { value: allIterations, updatedAt: nowIso },
-		updatedAt: { value: nowIso, updatedAt: nowIso },
-	};
-	const fieldTimestamps = {
+	const fieldMeta = {
 		iterations: nowIso,
 		updatedAt: nowIso,
 	};
 	// The mana-sync Go handler stores `data` on inserts and `fields` on
 	// updates — for our update we populate the `data` JSONB with the
-	// winning values and `field_timestamps` with the per-field stamps.
+	// winning values and `field_meta` with the per-field stamps. Per-row
+	// origin is `'agent'` — every server-side iteration write is an agent
+	// write from the point of view of the originating "client".
 	const data = {
 		iterations: allIterations,
 		updatedAt: nowIso,
@@ -109,25 +107,19 @@ export async function appendServerIteration(sql: Sql, input: AppendIterationInpu
 	// inferred type. Cast at the boundary — the JSON serialization still
 	// happens correctly at runtime.
 	const dataJson = data as unknown;
-	const ftJson = fieldTimestamps as unknown;
+	const fmJson = fieldMeta as unknown;
 	const actorJson = buildActor(input) as unknown;
 
 	await withUser(sql, userId, async (tx) => {
 		await tx`
 			INSERT INTO sync_changes
-				(app_id, table_name, record_id, user_id, op, data, field_timestamps, client_id, schema_version, actor)
+				(app_id, table_name, record_id, user_id, op, data, field_meta, client_id, schema_version, actor, origin)
 			VALUES
 				('ai', 'aiMissions', ${missionId}, ${userId}, 'update',
-				 ${tx.json(dataJson as never)}, ${tx.json(ftJson as never)},
-				 'mana-ai-runner', 1, ${tx.json(actorJson as never)})
+				 ${tx.json(dataJson as never)}, ${tx.json(fmJson as never)},
+				 'mana-ai-runner', 1, ${tx.json(actorJson as never)}, 'agent')
 		`;
 	});
-
-	// fieldsPayload is kept as a named local so a future refactor that
-	// needs to emit a `fields`-shaped payload (if mana-sync ever rejects
-	// `data` for updates) has a ready-made map to send. Current contract
-	// accepts either.
-	void fieldsPayload;
 }
 
 /** Convert an {@link AiPlanOutput} from the shared parser into the
