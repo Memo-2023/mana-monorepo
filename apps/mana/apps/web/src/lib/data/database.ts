@@ -1369,6 +1369,41 @@ db.version(54).stores({
 	_clientIdentity: 'id',
 });
 
+// v55 — Sync Field-Meta Overhaul F3 cleanup.
+// The v53 upgrade kept the legacy `updatedAt` field on existing rows so
+// nothing read it during the cut-over (the F3 sweep migrated 121 store
+// files + 43 Local-* types in one pass; v53's comment explicitly
+// deferred the row-rewrite). All reads now go through
+// `deriveUpdatedAt(record)` from `__fieldMeta`, so the orphan field is
+// pure waste — bytes per row, encrypted-blob noise on the encrypted
+// tables, and a confusing artifact in the IndexedDB inspector.
+//
+// Walk every sync-relevant table (the `TABLE_TO_APP` registry) and
+// delete `updatedAt` from each row. Idempotent: rows without the field
+// are a no-op. Local-only tables (_pendingChanges, _activity,
+// _clientIdentity, _aiDebugLog, …) never carried `updatedAt` so they
+// stay out of the sweep.
+db.version(55).upgrade(async (tx) => {
+	const tables = Object.keys(TABLE_TO_APP);
+	for (const tableName of tables) {
+		try {
+			await tx
+				.table(tableName)
+				.toCollection()
+				.modify((row: Record<string, unknown>) => {
+					if ('updatedAt' in row) {
+						delete row.updatedAt;
+					}
+				});
+		} catch {
+			// A table may exist in the registry but not in this Dexie
+			// version (e.g. a future addition with no upgrade row yet).
+			// The sweep is best-effort cleanup, not load-bearing — skip
+			// missing tables silently.
+		}
+	}
+});
+
 // ─── Sync Routing ──────────────────────────────────────────
 // SYNC_APP_MAP, TABLE_TO_SYNC_NAME, TABLE_TO_APP, SYNC_NAME_TO_TABLE,
 // toSyncName() and fromSyncName() are now derived from per-module

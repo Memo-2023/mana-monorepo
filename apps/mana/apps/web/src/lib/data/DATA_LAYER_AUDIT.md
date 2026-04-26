@@ -185,7 +185,7 @@ Logout / Tab-Close → MemoryKeyProvider.setKey(null) → Cyphertext bleibt
 ### Eckdaten
 
 - **120+ Collections** in einer einzigen IndexedDB
-- **Schema-Versionen** 1–54 (v53 ersetzte `updatedAt`-Indizes durch `_updatedAtIndex`, v54 fügte `_clientIdentity` für stabile Client-IDs hinzu)
+- **Schema-Versionen** 1–55 (v53 ersetzte `updatedAt`-Indizes durch `_updatedAtIndex`, v54 fügte `_clientIdentity` für stabile Client-IDs hinzu, v55 löscht den Orphan-`updatedAt`-Wert aus existing rows nach F3-Cutover)
 - **Eager Apps**: mana, todo, calendar, contacts, tags, links — syncen beim Start
 - **Lazy Apps**: starten Sync erst beim ersten Modul-Besuch via `ensureAppSynced()`
 - **Conflict Resolution**: ✅ Origin-gated Field-Level LWW via `__fieldMeta` (siehe Sync Field-Meta Overhaul unten)
@@ -205,6 +205,7 @@ Sieben Phasen, die vier strukturelle Bugs in der Conflict-Detection abgeräumt h
 - **F5** (`d78f57c04`) `userContextStore.ensureDoc()` Public-API entfernt. Internal `getOrCreateLocalDoc()` bleibt als Fallback für brand-new clients deren First-Pull noch nicht durch ist. UI mountet ohne ensureDoc-Race.
 - **F6** (`a031493fe`) Stable `client_id` in Dexie-Tabelle `_clientIdentity`. `restoreClientIdFromDexie()` läuft im (app)-Layout vor `createUnifiedSync` und reconciliated Dexie ↔ localStorage. Dexie ist canonical, localStorage ist fast-read-cache. Survives clear-site-data und incognito flush.
 - **F7** (`2a8e8ff98`) `repair-silent-twin.ts` + `legacy-avatar.ts` Migrationen ersatzlos gelöscht — pre-live, keine Live-Daten brauchen sie. Orphan-localStorage-Flags-Sweep im Boot (`migrations-cleanup.ts`, `119cd2cf8`) räumt die zugehörigen Flags auf.
+- **F3-fu (v55 cleanup)** (_pending_) Dexie v55 row-rewrite: löscht den Orphan-`updatedAt`-Wert aus jedem Row in `Object.keys(TABLE_TO_APP)`. v53 hatte ihn bewusst stehengelassen (Comment "next-version upgrade can drop it"); nach F3+F5 liest niemand mehr `row.updatedAt`, also pure waste. Idempotent — rows ohne das Feld sind ein no-op.
 
 Die vier Bug-Wurzeln (siehe ursprüngliche Diagnose 2026-04-26):
 
