@@ -70,6 +70,7 @@
 		stopMemoroLlmWatcher,
 	} from '$lib/modules/memoro/llm-watcher.svelte';
 	import { createUnifiedSync, restoreClientIdFromDexie } from '$lib/data/sync';
+	import { cleanupOrphanMigrationFlags } from '$lib/data/migrations-cleanup';
 	import { syncBilling } from '$lib/stores/sync-billing.svelte';
 	import { networkStore } from '$lib/stores/network.svelte';
 	import { db } from '$lib/data/database';
@@ -632,6 +633,9 @@
 			// so the next push/pull keeps the same identity the server
 			// already knows.
 			await restoreClientIdFromDexie();
+			// Sweep stale localStorage flags from migration helpers that
+			// have since been deleted (F7 + future cleanups).
+			cleanupOrphanMigrationFlags();
 			const getToken = () => authStore.getValidToken();
 			unifiedSync = createUnifiedSync(SYNC_SERVER_URL, getToken, syncBilling.active);
 			// Expose on window for SYNC_DEBUG.md (Schritt C). Not a security
