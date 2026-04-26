@@ -15,7 +15,7 @@
  * back into the same current version in-place.
  */
 
-import { encryptRecord } from '$lib/data/crypto';
+import { encryptRecord, decryptRecord } from '$lib/data/crypto';
 import { emitDomainEvent } from '$lib/data/events';
 import { generationTable, draftTable, draftVersionTable, writingStyleTable } from '../collections';
 import { callWritingGeneration } from '../api';
@@ -98,13 +98,21 @@ export const generationsStore = {
 	): Promise<string> {
 		const draft = await draftTable.get(draftId);
 		if (!draft) throw new Error(`Draft ${draftId} not found`);
+		// title / briefing / styleOverrides / references are all in the
+		// encrypt-list — without decrypting them first, references is a
+		// ciphertext string and refs.map() blows up.
+		await decryptRecord('writingDrafts', draft);
 
 		const generationId = crypto.randomUUID();
-		const kind: GenerationKind =
-			draft.currentVersionId &&
-			(await draftVersionTable.get(draft.currentVersionId))?.content?.trim()
-				? 'full-regenerate'
-				: 'draft-from-brief';
+		let priorContent = '';
+		if (draft.currentVersionId) {
+			const priorRow = await draftVersionTable.get(draft.currentVersionId);
+			if (priorRow) {
+				await decryptRecord('writingDraftVersions', priorRow);
+				priorContent = priorRow.content ?? '';
+			}
+		}
+		const kind: GenerationKind = priorContent.trim() ? 'full-regenerate' : 'draft-from-brief';
 		const resolved = await loadStyle(draft.styleId);
 		const stylePreset =
 			resolved?.source === 'preset'
@@ -281,6 +289,9 @@ export const generationsStore = {
 	): Promise<{ generationId: string; refined: string }> {
 		const draft = await draftTable.get(draftId);
 		if (!draft) throw new Error(`Draft ${draftId} not found`);
+		// briefing.language sits behind the briefing-encryption — read after
+		// decrypting or the ciphertext-shaped value crashes property access.
+		await decryptRecord('writingDrafts', draft);
 
 		const resolved = await loadStyle(draft.styleId);
 		const stylePreset =
@@ -413,6 +424,9 @@ export const generationsStore = {
 	): Promise<{ before: string; after: string }> {
 		const existing = await draftVersionTable.get(versionId);
 		if (!existing) throw new Error(`Version ${versionId} not found`);
+		// content is encrypted; splice in plaintext or we'd build the new
+		// version by concatenating ciphertext with the replacement.
+		await decryptRecord('writingDraftVersions', existing);
 		const before = existing.content;
 		const after = before.slice(0, selection.start) + replacement + before.slice(selection.end);
 

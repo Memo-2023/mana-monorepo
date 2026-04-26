@@ -12,7 +12,7 @@
  * store and then call `pointToVersion` — never append to an existing version.
  */
 
-import { encryptRecord } from '$lib/data/crypto';
+import { encryptRecord, decryptRecord } from '$lib/data/crypto';
 import { emitDomainEvent } from '$lib/data/events';
 import { getActiveSpace } from '$lib/data/scope';
 import { getEffectiveUserId } from '$lib/data/current-user';
@@ -150,6 +150,9 @@ export const draftsStore = {
 	async updateBriefing(id: string, briefingPatch: Partial<DraftBriefing>) {
 		const existing = await draftTable.get(id);
 		if (!existing) return;
+		// briefing is in the encrypt-list — decrypt before merging or the
+		// ciphertext blob spreads garbage into the patch.
+		await decryptRecord('writingDrafts', existing);
 		const merged: DraftBriefing = { ...existing.briefing, ...briefingPatch };
 		await draftsStore.updateDraft(id, { briefing: merged });
 	},
@@ -227,6 +230,9 @@ export const draftsStore = {
 	) {
 		const source = await draftVersionTable.get(sourceVersionId);
 		if (!source) throw new Error(`Version ${sourceVersionId} not found`);
+		// content is encrypted — decrypt so the checkpoint copies plaintext,
+		// not the ciphertext blob.
+		await decryptRecord('writingDraftVersions', source);
 		const existing = await draftVersionTable.where('draftId').equals(draftId).toArray();
 		const nextNumber = Math.max(0, ...existing.map((v) => v.versionNumber)) + 1;
 
