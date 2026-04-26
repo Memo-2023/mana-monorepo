@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { _ } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
 	import { Gear } from '@mana/shared-icons';
 	import type { ThemeMode, WeekStartDay } from '@mana/shared-theme';
@@ -20,12 +21,12 @@
 		{ id: 'it', label: 'IT' },
 	];
 
-	const colorSchemes = [
-		{ id: 'ocean', label: 'Ozean', color: 'bg-blue-500' },
-		{ id: 'nature', label: 'Natur', color: 'bg-green-500' },
-		{ id: 'lume', label: 'Lume', color: 'bg-amber-500' },
-		{ id: 'stone', label: 'Stein', color: 'bg-slate-500' },
-	];
+	const colorSchemes = $derived([
+		{ id: 'ocean', label: $_('settings.general.color_scheme_ocean'), color: 'bg-blue-500' },
+		{ id: 'nature', label: $_('settings.general.color_scheme_nature'), color: 'bg-green-500' },
+		{ id: 'lume', label: $_('settings.general.color_scheme_lume'), color: 'bg-amber-500' },
+		{ id: 'stone', label: $_('settings.general.color_scheme_stone'), color: 'bg-slate-500' },
+	]);
 
 	async function setThemeMode(mode: ThemeMode) {
 		await userSettings.updateGlobal({
@@ -69,15 +70,15 @@
 <SettingsPanel id="global">
 	<SettingsSectionHeader
 		icon={Gear}
-		title="Allgemein"
-		description="Sprache, Wochenstart & Sounds"
+		title={$_('settings.general.title')}
+		description={$_('settings.general.description')}
 	/>
 
 	<div class="rows">
 		<div class="row">
 			<div class="row-info">
-				<p class="row-title">Anzeigesprache</p>
-				<p class="row-desc">Sprache der Benutzeroberfläche</p>
+				<p class="row-title">{$_('settings.general.language_title')}</p>
+				<p class="row-desc">{$_('settings.general.language_description')}</p>
 			</div>
 			<div class="btn-group">
 				{#each languages as lang}
@@ -92,8 +93,8 @@
 
 		<div class="row">
 			<div class="row-info">
-				<p class="row-title">Farbschema</p>
-				<p class="row-desc">Akzentfarbe der Oberfläche</p>
+				<p class="row-title">{$_('settings.general.color_scheme_title')}</p>
+				<p class="row-desc">{$_('settings.general.color_scheme_description')}</p>
 			</div>
 			<div class="color-group">
 				{#each colorSchemes as scheme}
@@ -109,11 +110,11 @@
 
 		<div class="row">
 			<div class="row-info">
-				<p class="row-title">Farbmodus</p>
-				<p class="row-desc">Hell, Dunkel oder automatisch</p>
+				<p class="row-title">{$_('settings.general.color_mode_title')}</p>
+				<p class="row-desc">{$_('settings.general.color_mode_description')}</p>
 			</div>
 			<div class="btn-group">
-				{#each [{ id: 'light', label: 'Hell' }, { id: 'dark', label: 'Dunkel' }, { id: 'system', label: 'System' }] as mode}
+				{#each [{ id: 'light', label: $_('settings.general.color_mode_light') }, { id: 'dark', label: $_('settings.general.color_mode_dark') }, { id: 'system', label: $_('settings.general.color_mode_system') }] as mode}
 					<button
 						class="choice-btn"
 						class:active={userSettings.globalSettings.theme.mode === mode.id}
@@ -125,33 +126,33 @@
 
 		<div class="row">
 			<div class="row-info">
-				<p class="row-title">Wochenstart</p>
-				<p class="row-desc">Erster Tag der Woche in Kalendern</p>
+				<p class="row-title">{$_('settings.general.week_start_title')}</p>
+				<p class="row-desc">{$_('settings.general.week_start_description')}</p>
 			</div>
 			<div class="btn-group">
 				<button
 					class="choice-btn"
 					class:active={userSettings.general?.weekStartsOn === 'monday'}
-					onclick={() => setWeekStart('monday')}>Montag</button
+					onclick={() => setWeekStart('monday')}>{$_('settings.general.week_start_monday')}</button
 				>
 				<button
 					class="choice-btn"
 					class:active={userSettings.general?.weekStartsOn === 'sunday'}
-					onclick={() => setWeekStart('sunday')}>Sonntag</button
+					onclick={() => setWeekStart('sunday')}>{$_('settings.general.week_start_sunday')}</button
 				>
 			</div>
 		</div>
 
 		<div class="row">
 			<div class="row-info">
-				<p class="row-title">Sounds</p>
-				<p class="row-desc">Sound-Effekte in allen Apps</p>
+				<p class="row-title">{$_('settings.general.sounds_title')}</p>
+				<p class="row-desc">{$_('settings.general.sounds_description')}</p>
 			</div>
 			<button
 				class="toggle"
 				class:on={userSettings.general?.soundsEnabled ?? true}
 				onclick={() => setSounds(!(userSettings.general?.soundsEnabled ?? true))}
-				aria-label="Sounds ein- oder ausschalten"
+				aria-label={$_('settings.general.sounds_aria')}
 				aria-pressed={userSettings.general?.soundsEnabled ?? true}
 			>
 				<span class="toggle-knob"></span>
@@ -160,8 +161,8 @@
 
 		<div class="row">
 			<div class="row-info">
-				<p class="row-title">Onboarding erneut durchlaufen</p>
-				<p class="row-desc">Name, Look und Module neu wählen</p>
+				<p class="row-title">{$_('settings.general.onboarding_title')}</p>
+				<p class="row-desc">{$_('settings.general.onboarding_description')}</p>
 			</div>
 			<button
 				type="button"
@@ -169,7 +170,9 @@
 				onclick={restartOnboarding}
 				disabled={restartingOnboarding}
 			>
-				{restartingOnboarding ? 'Starte…' : 'Starten'}
+				{restartingOnboarding
+					? $_('settings.general.onboarding_starting')
+					: $_('settings.general.onboarding_start')}
 			</button>
 		</div>
 	</div>

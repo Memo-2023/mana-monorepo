@@ -3,6 +3,7 @@
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { _ } from 'svelte-i18n';
 	import { Plus, Trash, Key, PencilSimple, Check, X } from '@mana/shared-icons';
 	import { BUILTIN_BYOK_PROVIDERS, formatCost, type ByokProviderId } from '@mana/shared-llm';
 	import { byokVault } from '$lib/byok';
@@ -43,7 +44,7 @@
 	async function handleAdd() {
 		addError = null;
 		if (!addLabel.trim() || !addApiKey.trim()) {
-			addError = 'Label und API-Key sind Pflicht';
+			addError = $_('settings.byok.label_required');
 			return;
 		}
 		saving = true;
@@ -68,7 +69,7 @@
 	}
 
 	async function handleDelete(id: string) {
-		if (!confirm('Schluessel wirklich loeschen?')) return;
+		if (!confirm($_('settings.byok.confirm_delete'))) return;
 		await byokVault.delete(id);
 		await reload();
 	}
@@ -115,9 +116,9 @@
 
 <div class="byok-manager">
 	{#if vaultLocked}
-		<div class="notice">Vault ist gesperrt — bitte zuerst anmelden um Keys zu verwalten.</div>
+		<div class="notice">{$_('settings.byok.vault_locked')}</div>
 	{:else if loading}
-		<div class="notice subtle">Laedt...</div>
+		<div class="notice subtle">{$_('settings.byok.loading')}</div>
 	{:else}
 		{#if keys.length > 0}
 			<div class="keys-list">
@@ -129,10 +130,10 @@
 								bind:value={editLabel}
 								maxlength="40"
 								class="edit-input"
-								placeholder="Label"
+								placeholder={$_('settings.byok.field_label')}
 							/>
 							<select bind:value={editModel} class="edit-input">
-								<option value="">Default</option>
+								<option value="">{$_('settings.byok.field_default_short')}</option>
 								{#each providerModels(k.provider) as m}
 									<option value={m}>{m}</option>
 								{/each}
@@ -144,21 +145,39 @@
 							<div class="key-info">
 								<div class="key-line">
 									<span class="key-label">{k.label}</span>
-									{#if k.isDefault}<span class="badge">Standard</span>{/if}
+									{#if k.isDefault}
+										<span class="badge">{$_('settings.byok.badge_default')}</span>
+									{/if}
 								</div>
 								<div class="key-meta">
-									{providerDisplay(k.provider)} · {k.model || providerDefaultModel(k.provider)} ·
-									{k.usageCount} Aufrufe · {formatCost(k.totalCostUsd)}
+									{$_('settings.byok.meta_line', {
+										values: {
+											provider: providerDisplay(k.provider),
+											model: k.model || providerDefaultModel(k.provider),
+											count: k.usageCount,
+											cost: formatCost(k.totalCostUsd),
+										},
+									})}
 								</div>
 							</div>
 							<div class="key-actions">
 								{#if !k.isDefault}
-									<button class="btn-link" onclick={() => handleSetDefault(k.id)}>Standard</button>
+									<button class="btn-link" onclick={() => handleSetDefault(k.id)}
+										>{$_('settings.byok.set_default')}</button
+									>
 								{/if}
-								<button class="btn-icon" onclick={() => startEdit(k)} title="Bearbeiten">
+								<button
+									class="btn-icon"
+									onclick={() => startEdit(k)}
+									title={$_('settings.byok.edit')}
+								>
 									<PencilSimple size={12} />
 								</button>
-								<button class="btn-icon danger" onclick={() => handleDelete(k.id)} title="Loeschen">
+								<button
+									class="btn-icon danger"
+									onclick={() => handleDelete(k.id)}
+									title={$_('settings.byok.delete')}
+								>
 									<Trash size={12} />
 								</button>
 							</div>
@@ -172,7 +191,7 @@
 			<div class="add-form">
 				<div class="form-row">
 					<label class="field flex-1">
-						<span class="field-label">Provider</span>
+						<span class="field-label">{$_('settings.byok.field_provider')}</span>
 						<select
 							bind:value={addProvider}
 							onchange={() => (addModel = providerDefaultModel(addProvider))}
@@ -183,17 +202,17 @@
 						</select>
 					</label>
 					<label class="field flex-1">
-						<span class="field-label">Label</span>
+						<span class="field-label">{$_('settings.byok.field_label')}</span>
 						<input
 							type="text"
 							bind:value={addLabel}
-							placeholder="z.B. Privat OpenAI"
+							placeholder={$_('settings.byok.field_label_placeholder')}
 							maxlength="40"
 						/>
 					</label>
 				</div>
 				<label class="field">
-					<span class="field-label">API-Key</span>
+					<span class="field-label">{$_('settings.byok.field_api_key')}</span>
 					<input
 						type="password"
 						bind:value={addApiKey}
@@ -203,15 +222,19 @@
 								? 'sk-ant-...'
 								: addProvider === 'gemini'
 									? 'AIza...'
-									: 'API-Key'}
+									: $_('settings.byok.field_api_key_placeholder_generic')}
 						autocomplete="off"
 					/>
 				</label>
 				<div class="form-row">
 					<label class="field flex-1">
-						<span class="field-label">Modell</span>
+						<span class="field-label">{$_('settings.byok.field_model')}</span>
 						<select bind:value={addModel}>
-							<option value="">Default ({providerDefaultModel(addProvider)})</option>
+							<option value=""
+								>{$_('settings.byok.field_model_default', {
+									values: { model: providerDefaultModel(addProvider) },
+								})}</option
+							>
 							{#each providerModels(addProvider) as m}
 								<option value={m}>{m}</option>
 							{/each}
@@ -219,23 +242,25 @@
 					</label>
 					<label class="checkbox-field">
 						<input type="checkbox" bind:checked={addIsDefault} />
-						<span>Als Standard</span>
+						<span>{$_('settings.byok.field_as_default')}</span>
 					</label>
 				</div>
 				{#if addError}
 					<div class="error">{addError}</div>
 				{/if}
 				<div class="form-actions">
-					<button class="btn-cancel" onclick={() => (showAdd = false)}>Abbrechen</button>
+					<button class="btn-cancel" onclick={() => (showAdd = false)}
+						>{$_('settings.byok.cancel')}</button
+					>
 					<button class="btn-primary" onclick={handleAdd} disabled={saving}>
-						{saving ? 'Speichern...' : 'Speichern'}
+						{saving ? $_('settings.byok.saving') : $_('settings.byok.save')}
 					</button>
 				</div>
 			</div>
 		{:else}
 			<button class="add-button" onclick={() => (showAdd = true)}>
 				<Plus size={14} weight="bold" />
-				{keys.length === 0 ? 'Ersten API-Key hinzufuegen' : 'Weiteren Key hinzufuegen'}
+				{keys.length === 0 ? $_('settings.byok.add_first') : $_('settings.byok.add_more')}
 			</button>
 		{/if}
 	{/if}

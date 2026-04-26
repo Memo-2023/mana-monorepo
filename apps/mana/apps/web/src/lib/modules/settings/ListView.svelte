@@ -7,7 +7,7 @@
 	import { APP_VERSION } from '$lib/version';
 	import SettingsSidebar from '$lib/components/settings/SettingsSidebar.svelte';
 	import {
-		categories,
+		findCategoryByAnchor,
 		type CategoryId,
 		type SearchEntry,
 	} from '$lib/components/settings/searchIndex';
@@ -23,8 +23,8 @@
 
 	function navigateToHash(hash: string) {
 		if (!hash) return;
-		const cat = categories.find((c) => c.anchors.includes(hash));
-		if (cat) activeCategory = cat.id;
+		const cat = findCategoryByAnchor(hash);
+		if (cat) activeCategory = cat;
 		void tick().then(() => {
 			const el = document.getElementById(hash);
 			if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });

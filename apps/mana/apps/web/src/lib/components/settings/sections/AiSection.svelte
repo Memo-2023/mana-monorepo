@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { Robot } from '@mana/shared-icons';
 	import AiSettings from '../AiSettings.svelte';
 	import SettingsPanel from '../SettingsPanel.svelte';
@@ -8,8 +9,8 @@
 <SettingsPanel id="ai-options">
 	<SettingsSectionHeader
 		icon={Robot}
-		title="KI-Optionen"
-		description="Wähle, welche KI-Schichten Mana verwenden darf — von gar keiner bis zu allen"
+		title={$_('settings.ai.title')}
+		description={$_('settings.ai.description')}
 		tone="indigo"
 	/>
 	<AiSettings />

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { _ } from 'svelte-i18n';
 	import { ShieldCheck } from '@mana/shared-icons';
 	import { PasskeyManager, TwoFactorSetup, AuditLog, SessionManager } from '@mana/shared-auth-ui';
 	import { authStore } from '$lib/stores/auth.svelte';
@@ -34,8 +35,8 @@
 <SettingsPanel>
 	<SettingsSectionHeader
 		icon={ShieldCheck}
-		title="Sicherheit"
-		description="Passkeys, 2FA, Verschlüsselung & Sitzungen"
+		title={$_('settings.security.title')}
+		description={$_('settings.security.description')}
 		tone="blue"
 	/>
 </SettingsPanel>

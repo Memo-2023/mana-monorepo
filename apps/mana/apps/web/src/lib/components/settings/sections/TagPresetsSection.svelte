@@ -4,6 +4,7 @@
   See docs/plans/space-scoped-data-model.md §5.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { Plus, Trash, Star, CheckCircle } from '@mana/shared-icons';
 	import { useUserTagPresets } from '$lib/data/tag-presets/queries';
 	import { tagPresetsStore } from '$lib/data/tag-presets/store.svelte';
@@ -42,11 +43,11 @@
 	async function createFromActiveSpace() {
 		error = null;
 		if (!newName.trim()) {
-			error = 'Bitte einen Namen eingeben';
+			error = $_('settings.tag_presets.name_required');
 			return;
 		}
 		if (!activeSpace) {
-			error = 'Kein aktiver Space';
+			error = $_('settings.tag_presets.no_active_space');
 			return;
 		}
 
@@ -86,7 +87,7 @@
 	}
 
 	async function handleDelete(id: string, name: string) {
-		if (!confirm(`Preset „${name}" löschen?`)) return;
+		if (!confirm($_('settings.tag_presets.delete_confirm', { values: { name } }))) return;
 		await tagPresetsStore.deletePreset(id);
 	}
 
@@ -97,17 +98,14 @@
 
 <section id="tag-presets">
 	<header>
-		<h2>Tag-Presets</h2>
-		<p class="hint">
-			Gespeicherte Tag-Sets, die du beim Anlegen eines neuen Space als Start-Vorlage wählen kannst.
-			Änderungen am Preset berühren bereits erstellte Spaces nicht — es ist eine Einweg-Kopie.
-		</p>
+		<h2>{$_('settings.tag_presets.title')}</h2>
+		<p class="hint">{$_('settings.tag_presets.hint')}</p>
 	</header>
 
 	<div class="create-row">
 		<input
 			type="text"
-			placeholder={'Preset-Name (z.B. „Mein Standard-Set")'}
+			placeholder={$_('settings.tag_presets.name_placeholder')}
 			bind:value={newName}
 			disabled={creating || !activeSpace}
 		/>
@@ -120,20 +118,17 @@
 			<Plus size={14} />
 			<span>
 				{creating
-					? 'Erstelle …'
+					? $_('settings.tag_presets.creating')
 					: activeSpace
-						? `Aus „${activeSpace.name}" erstellen`
-						: 'Lade Space …'}
+						? $_('settings.tag_presets.create_from', { values: { name: activeSpace.name } })
+						: $_('settings.tag_presets.loading_space')}
 			</span>
 		</button>
 	</div>
 	{#if error}<p class="error">{error}</p>{/if}
 
 	{#if presets.value.length === 0}
-		<p class="empty">
-			Noch keine Presets. Lege das erste an, indem du dem aktuellen Tag-Set einen Namen gibst — es
-			wird dann automatisch als Default für neue Spaces verwendet.
-		</p>
+		<p class="empty">{$_('settings.tag_presets.empty')}</p>
 	{:else}
 		<ul class="preset-list">
 			{#each presets.value as preset (preset.id)}
@@ -144,14 +139,20 @@
 							{#if preset.isDefault}
 								<span class="default-badge">
 									<CheckCircle size={12} weight="fill" />
-									Default
+									{$_('settings.tag_presets.badge_default')}
 								</span>
 							{/if}
 						</div>
 						<div class="preset-meta">
-							{preset.tags.length} Tag{preset.tags.length === 1 ? '' : 's'}
+							{preset.tags.length === 1
+								? $_('settings.tag_presets.tag_count_one', {
+										values: { count: preset.tags.length },
+									})
+								: $_('settings.tag_presets.tag_count_other', {
+										values: { count: preset.tags.length },
+									})}
 							{#if preset.tags.some((t) => t.groupName)}
-								· mit Gruppen
+								· {$_('settings.tag_presets.with_groups')}
 							{/if}
 						</div>
 					</div>
@@ -161,8 +162,8 @@
 								type="button"
 								class="icon-btn"
 								onclick={() => handleSetDefault(preset.id)}
-								title="Als Default setzen"
-								aria-label="Als Default setzen"
+								title={$_('settings.tag_presets.aria_set_default')}
+								aria-label={$_('settings.tag_presets.aria_set_default')}
 							>
 								<Star size={16} />
 							</button>
@@ -171,8 +172,8 @@
 							type="button"
 							class="icon-btn danger"
 							onclick={() => handleDelete(preset.id, preset.name)}
-							title="Löschen"
-							aria-label="Löschen"
+							title={$_('settings.tag_presets.aria_delete')}
+							aria-label={$_('settings.tag_presets.aria_delete')}
 						>
 							<Trash size={16} />
 						</button>

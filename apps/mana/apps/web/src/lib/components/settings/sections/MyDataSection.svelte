@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { _, locale } from 'svelte-i18n';
+	import { get } from 'svelte/store';
 	import { goto } from '$app/navigation';
 	import {
 		QrCode,
@@ -89,7 +91,8 @@
 	}
 
 	function formatDate(dateStr: string): string {
-		return new Date(dateStr).toLocaleDateString('de-DE', {
+		const lang = get(locale) ?? 'de';
+		return new Date(dateStr).toLocaleDateString(lang, {
 			day: '2-digit',
 			month: '2-digit',
 			year: 'numeric',
@@ -99,7 +102,7 @@
 	}
 
 	function formatNum(n: number): string {
-		return n.toLocaleString('de-DE');
+		return n.toLocaleString(get(locale) ?? 'de');
 	}
 
 	function formatRelativeTime(dateStr: string | undefined): string {
@@ -108,11 +111,13 @@
 		const diffMins = Math.floor(diffMs / 60000);
 		const diffHours = Math.floor(diffMs / 3600000);
 		const diffDays = Math.floor(diffMs / 86400000);
-		if (diffMins < 1) return 'gerade eben';
-		if (diffMins < 60) return `vor ${diffMins} Min`;
-		if (diffHours < 24) return `vor ${diffHours} Std`;
-		if (diffDays < 7) return `vor ${diffDays} Tagen`;
-		return new Date(dateStr).toLocaleDateString('de-DE');
+		if (diffMins < 1) return $_('settings.mydata.relative_just_now');
+		if (diffMins < 60)
+			return $_('settings.mydata.relative_minutes_ago', { values: { n: diffMins } });
+		if (diffHours < 24)
+			return $_('settings.mydata.relative_hours_ago', { values: { n: diffHours } });
+		if (diffDays < 7) return $_('settings.mydata.relative_days_ago', { values: { n: diffDays } });
+		return new Date(dateStr).toLocaleDateString(get(locale) ?? 'de');
 	}
 
 	onMount(() => {
@@ -124,8 +129,8 @@
 <SettingsPanel id="my-data">
 	<SettingsSectionHeader
 		icon={FileText}
-		title="Meine Daten (DSGVO)"
-		description="Übersicht über alle deine gespeicherten Daten"
+		title={$_('settings.mydata.title')}
+		description={$_('settings.mydata.description')}
 		tone="purple"
 	>
 		{#snippet action()}
@@ -135,14 +140,15 @@
 						type="button"
 						class="btn-ghost"
 						onclick={() => (showQRDialog = true)}
-						title="Als QR-Code exportieren"
+						title={$_('settings.mydata.qr_export')}
 					>
 						<QrCode size={14} />
-						<span>QR</span>
+						<span>{$_('settings.mydata.qr_short')}</span>
 					</button>
 					<button type="button" class="btn-primary-sm" onclick={handleExport} disabled={exporting}>
 						<DownloadSimple size={14} />
-						<span>{exporting ? 'Exportiere…' : 'Exportieren'}</span>
+						<span>{exporting ? $_('settings.mydata.exporting') : $_('settings.mydata.export')}</span
+						>
 					</button>
 				</div>
 			{/if}
@@ -154,7 +160,9 @@
 	{:else if error}
 		<div class="error-state">
 			<p class="error-text">{error}</p>
-			<button type="button" class="btn-primary-sm" onclick={loadMyData}> Erneut versuchen </button>
+			<button type="button" class="btn-primary-sm" onclick={loadMyData}>
+				{$_('settings.mydata.retry')}
+			</button>
 		</div>
 	{:else if userData}
 		<div class="rows">
@@ -163,7 +171,7 @@
 					<span>{(userData.user.name || userData.user.email)[0].toUpperCase()}</span>
 				</div>
 				<div class="row-info">
-					<p class="row-title">{userData.user.name || 'Kein Name'}</p>
+					<p class="row-title">{userData.user.name || $_('settings.mydata.no_name')}</p>
 					<p class="row-desc">{userData.user.email}</p>
 				</div>
 				<div class="badges">
@@ -171,12 +179,12 @@
 					{#if userData.user.emailVerified}
 						<span class="badge success">
 							<CheckCircle size={12} weight="fill" />
-							verifiziert
+							{$_('settings.mydata.verified')}
 						</span>
 					{:else}
 						<span class="badge warn">
 							<WarningCircle size={12} weight="fill" />
-							nicht verifiziert
+							{$_('settings.mydata.not_verified')}
 						</span>
 					{/if}
 				</div>
@@ -184,22 +192,22 @@
 
 			<div class="row">
 				<div class="row-info">
-					<p class="row-title">Registriert am</p>
+					<p class="row-title">{$_('settings.mydata.registered_at')}</p>
 				</div>
 				<span class="row-meta">{formatDate(userData.user.createdAt)}</span>
 			</div>
 
 			<div class="row">
 				<div class="row-info">
-					<p class="row-title">Gesamt-Entitäten</p>
-					<p class="row-desc">Datensätze über alle Apps hinweg</p>
+					<p class="row-title">{$_('settings.mydata.total_entities')}</p>
+					<p class="row-desc">{$_('settings.mydata.total_entities_desc')}</p>
 				</div>
 				<span class="value">{formatNum(userData.totals.totalEntities)}</span>
 			</div>
 
 			<div class="row">
 				<div class="row-info">
-					<p class="row-title">Projekte mit Daten</p>
+					<p class="row-title">{$_('settings.mydata.projects_with_data')}</p>
 				</div>
 				<span class="value">
 					{userData.totals.projectsWithData} / {userData.projects.length}
@@ -208,13 +216,12 @@
 		</div>
 
 		<p class="footnote">
-			Keine Tracking-Cookies — anonyme Analyse via Umami. Details in der
-			<a
+			{$_('settings.mydata.footnote_pre')}<a
 				href="https://mana-landing.pages.dev/datenschutz"
 				target="_blank"
 				rel="noopener"
-				class="inline-link">Datenschutzerklärung</a
-			>.
+				class="inline-link">{$_('settings.mydata.footnote_link')}</a
+			>{$_('settings.mydata.footnote_post')}
 		</p>
 	{/if}
 </SettingsPanel>
@@ -224,27 +231,37 @@
 	<SettingsPanel id="auth-data">
 		<SettingsSectionHeader
 			icon={ShieldCheck}
-			title="Authentifizierung"
-			description="Sessions, Accounts & 2FA"
+			title={$_('settings.mydata.auth_title')}
+			description={$_('settings.mydata.auth_description')}
 			tone="blue"
 		/>
 		<div class="rows">
 			<div class="row">
-				<div class="row-info"><p class="row-title">Aktive Sessions</p></div>
+				<div class="row-info">
+					<p class="row-title">{$_('settings.mydata.auth_sessions')}</p>
+				</div>
 				<span class="value">{userData.auth.sessionsCount}</span>
 			</div>
 			<div class="row">
-				<div class="row-info"><p class="row-title">Verknüpfte Accounts</p></div>
+				<div class="row-info">
+					<p class="row-title">{$_('settings.mydata.auth_accounts')}</p>
+				</div>
 				<span class="value">{userData.auth.accountsCount}</span>
 			</div>
 			<div class="row">
-				<div class="row-info"><p class="row-title">Zwei-Faktor (2FA)</p></div>
+				<div class="row-info">
+					<p class="row-title">{$_('settings.mydata.auth_two_fa')}</p>
+				</div>
 				<span class="badge" class:success={userData.auth.has2FA}>
-					{userData.auth.has2FA ? 'Aktiviert' : 'Deaktiviert'}
+					{userData.auth.has2FA
+						? $_('settings.mydata.auth_two_fa_active')
+						: $_('settings.mydata.auth_two_fa_inactive')}
 				</span>
 			</div>
 			<div class="row">
-				<div class="row-info"><p class="row-title">Letzter Login</p></div>
+				<div class="row-info">
+					<p class="row-title">{$_('settings.mydata.auth_last_login')}</p>
+				</div>
 				<span class="row-meta">
 					{userData.auth.lastLoginAt ? formatDate(userData.auth.lastLoginAt) : '—'}
 				</span>
@@ -256,25 +273,33 @@
 	<SettingsPanel id="credits-data">
 		<SettingsSectionHeader
 			icon={CurrencyCircleDollar}
-			title="Credits"
-			description="Guthaben & Transaktionen"
+			title={$_('settings.mydata.credits_title')}
+			description={$_('settings.mydata.credits_description')}
 			tone="yellow"
 		/>
 		<div class="rows">
 			<div class="row">
-				<div class="row-info"><p class="row-title">Aktueller Stand</p></div>
+				<div class="row-info">
+					<p class="row-title">{$_('settings.mydata.credits_balance')}</p>
+				</div>
 				<span class="value emphasized">{formatNum(userData.credits.balance)}</span>
 			</div>
 			<div class="row">
-				<div class="row-info"><p class="row-title">Gesamt verdient</p></div>
+				<div class="row-info">
+					<p class="row-title">{$_('settings.mydata.credits_total_earned')}</p>
+				</div>
 				<span class="value success-text">+{formatNum(userData.credits.totalEarned)}</span>
 			</div>
 			<div class="row">
-				<div class="row-info"><p class="row-title">Gesamt ausgegeben</p></div>
+				<div class="row-info">
+					<p class="row-title">{$_('settings.mydata.credits_total_spent')}</p>
+				</div>
 				<span class="value danger-text">−{formatNum(userData.credits.totalSpent)}</span>
 			</div>
 			<div class="row">
-				<div class="row-info"><p class="row-title">Transaktionen</p></div>
+				<div class="row-info">
+					<p class="row-title">{$_('settings.mydata.credits_transactions')}</p>
+				</div>
 				<span class="value">{userData.credits.transactionsCount}</span>
 			</div>
 		</div>
@@ -284,15 +309,15 @@
 	<SettingsPanel id="project-data">
 		<SettingsSectionHeader
 			icon={FolderOpen}
-			title="Projektdaten"
-			description="Datensätze pro App"
+			title={$_('settings.mydata.project_title')}
+			description={$_('settings.mydata.project_description')}
 		/>
 		<table class="project-table">
 			<thead>
 				<tr>
-					<th class="col-app">App</th>
-					<th class="col-num">Einträge</th>
-					<th class="col-time">Letzte Aktivität</th>
+					<th class="col-app">{$_('settings.mydata.col_app')}</th>
+					<th class="col-num">{$_('settings.mydata.col_count')}</th>
+					<th class="col-time">{$_('settings.mydata.col_time')}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -308,9 +333,9 @@
 									class:error={!project.available}
 									title={project.available
 										? project.totalCount > 0
-											? 'Aktiv'
-											: 'Keine Daten'
-										: project.error || 'Nicht verfügbar'}
+											? $_('settings.mydata.project_status_active')
+											: $_('settings.mydata.project_status_empty')
+										: project.error || $_('settings.mydata.project_status_unavailable')}
 								></span>
 								<span class="app-icon">
 									{#if AppIcon}
@@ -333,7 +358,9 @@
 							{#if project.available}
 								<span class="muted">{formatRelativeTime(project.lastActivityAt)}</span>
 							{:else}
-								<span class="muted err">{project.error || 'nicht erreichbar'}</span>
+								<span class="muted err"
+									>{project.error || $_('settings.mydata.project_unreachable')}</span
+								>
 							{/if}
 						</td>
 					</tr>
@@ -346,29 +373,39 @@
 	<SettingsPanel id="retention">
 		<SettingsSectionHeader
 			icon={Clock}
-			title="Aufbewahrungsfristen"
-			description="Wie lange wir deine Daten speichern"
+			title={$_('settings.mydata.retention_title')}
+			description={$_('settings.mydata.retention_description')}
 		/>
 		<div class="rows">
 			<div class="row">
-				<div class="row-info"><p class="row-title">Benutzerkonto & Profil</p></div>
-				<span class="row-meta">Bis zur Löschung</span>
+				<div class="row-info">
+					<p class="row-title">{$_('settings.mydata.retention_account')}</p>
+				</div>
+				<span class="row-meta">{$_('settings.mydata.retention_account_value')}</span>
 			</div>
 			<div class="row">
-				<div class="row-info"><p class="row-title">Sessions & Login-Historie</p></div>
-				<span class="row-meta">90 Tage nach Ablauf</span>
+				<div class="row-info">
+					<p class="row-title">{$_('settings.mydata.retention_sessions')}</p>
+				</div>
+				<span class="row-meta">{$_('settings.mydata.retention_sessions_value')}</span>
 			</div>
 			<div class="row">
-				<div class="row-info"><p class="row-title">Credit-Transaktionen</p></div>
-				<span class="row-meta">10 Jahre (gesetzlich)</span>
+				<div class="row-info">
+					<p class="row-title">{$_('settings.mydata.retention_credit')}</p>
+				</div>
+				<span class="row-meta">{$_('settings.mydata.retention_credit_value')}</span>
 			</div>
 			<div class="row">
-				<div class="row-info"><p class="row-title">Security-Logs</p></div>
-				<span class="row-meta">1 Jahr</span>
+				<div class="row-info">
+					<p class="row-title">{$_('settings.mydata.retention_security')}</p>
+				</div>
+				<span class="row-meta">{$_('settings.mydata.retention_security_value')}</span>
 			</div>
 			<div class="row">
-				<div class="row-info"><p class="row-title">Projektdaten (Chat, Todo, …)</p></div>
-				<span class="row-meta">Bis zur Löschung</span>
+				<div class="row-info">
+					<p class="row-title">{$_('settings.mydata.retention_project')}</p>
+				</div>
+				<span class="row-meta">{$_('settings.mydata.retention_project_value')}</span>
 			</div>
 		</div>
 	</SettingsPanel>
@@ -380,21 +417,18 @@
 	<SettingsPanel id="danger-zone">
 		<SettingsSectionHeader
 			icon={Warning}
-			title="Gefahrenzone"
-			description="Unwiderrufliche Aktionen"
+			title={$_('settings.mydata.danger_title')}
+			description={$_('settings.mydata.danger_description')}
 			tone="red"
 		/>
 		<div class="rows">
 			<div class="row">
 				<div class="row-info">
-					<p class="row-title">Alle meine Daten löschen</p>
-					<p class="row-desc">
-						Löscht dein Konto und alle verbundenen Daten dauerhaft aus allen Projekten. Kann nicht
-						rückgängig gemacht werden.
-					</p>
+					<p class="row-title">{$_('settings.mydata.danger_delete_title')}</p>
+					<p class="row-desc">{$_('settings.mydata.danger_delete_desc')}</p>
 				</div>
 				<button type="button" class="btn-danger" onclick={() => (showDeleteDialog = true)}>
-					Daten löschen
+					{$_('settings.mydata.danger_delete_btn')}
 				</button>
 			</div>
 		</div>

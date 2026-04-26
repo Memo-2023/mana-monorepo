@@ -9,6 +9,7 @@
 -->
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
+	import { _ } from 'svelte-i18n';
 	import {
 		Lock,
 		LockOpen,
@@ -67,7 +68,7 @@
 		const expected = (generatedCode ?? '').replace(/[\s-]/g, '').toUpperCase();
 		const actual = confirmCodeInput.replace(/[\s-]/g, '').toUpperCase();
 		if (actual !== expected) {
-			zkError = 'Der eingegebene Code stimmt nicht mit dem angezeigten überein.';
+			zkError = $_('settings.vault.err_code_mismatch');
 			return;
 		}
 		zkSetupStep = 'enabling';
@@ -81,7 +82,7 @@
 			zkSetupStep = 'enabled';
 			generatedCode = null;
 			confirmCodeInput = '';
-			toast.success('Zero-Knowledge-Modus aktiviert');
+			toast.success($_('settings.vault.toast_zk_enabled'));
 		} catch (e) {
 			zkError = (e as Error).message;
 		} finally {
@@ -94,7 +95,7 @@
 		zkBusy = true;
 		try {
 			await vaultClient.disableZeroKnowledge();
-			toast.success('Zero-Knowledge-Modus deaktiviert');
+			toast.success($_('settings.vault.toast_zk_disabled'));
 			confirmDisableZk = false;
 			zkSetupStep = 'idle';
 		} catch (e) {
@@ -109,7 +110,7 @@
 		zkBusy = true;
 		try {
 			await vaultClient.clearRecoveryCode();
-			toast.success('Recovery-Code entfernt');
+			toast.success($_('settings.vault.toast_recovery_cleared'));
 			confirmClearRecovery = false;
 			zkSetupStep = 'idle';
 			hasRecoveryWrap = false;
@@ -123,8 +124,8 @@
 	function handleCopyCode() {
 		if (!generatedCode) return;
 		navigator.clipboard.writeText(generatedCode).then(
-			() => toast.success('Code in die Zwischenablage kopiert'),
-			() => toast.error('Konnte Code nicht kopieren')
+			() => toast.success($_('settings.vault.toast_clipboard_ok')),
+			() => toast.error($_('settings.vault.toast_clipboard_failed'))
 		);
 	}
 
@@ -145,8 +146,8 @@
 	function handleCopyRotatedCode() {
 		if (!rotatedCode) return;
 		navigator.clipboard.writeText(rotatedCode).then(
-			() => toast.success('Code in die Zwischenablage kopiert'),
-			() => toast.error('Konnte Code nicht kopieren')
+			() => toast.success($_('settings.vault.toast_clipboard_ok')),
+			() => toast.error($_('settings.vault.toast_clipboard_failed'))
 		);
 	}
 
@@ -201,9 +202,9 @@
 		const result = await vaultClient.unlock();
 		vaultState = result;
 		if (result.status === 'unlocked') {
-			toast.success('Verschlüsselungsschlüssel geladen');
+			toast.success($_('settings.vault.toast_unlocked'));
 		} else {
-			toast.error(`Schlüssel konnte nicht geladen werden: ${result.status}`);
+			toast.error($_('settings.vault.toast_unlock_failed', { values: { status: result.status } }));
 		}
 	}
 
@@ -214,9 +215,11 @@
 			vaultState = result;
 			confirmRotate = false;
 			if (result.status === 'unlocked') {
-				toast.success('Schlüssel rotiert. Neue Schreibvorgänge verwenden den neuen Schlüssel.');
+				toast.success($_('settings.vault.toast_rotated'));
 			} else {
-				toast.error(`Rotation fehlgeschlagen: ${result.status}`);
+				toast.error(
+					$_('settings.vault.toast_rotate_failed', { values: { status: result.status } })
+				);
 			}
 		} finally {
 			rotating = false;
@@ -229,15 +232,19 @@
 		tone: BadgeTone;
 		icon: Component;
 	} {
-		if (s.status === 'unlocked') return { label: 'Verschlüsselt', tone: 'green', icon: Lock };
-		if (s.status === 'locked') return { label: 'Gesperrt', tone: 'amber', icon: LockOpen };
+		if (s.status === 'unlocked')
+			return { label: $_('settings.vault.badge_encrypted'), tone: 'green', icon: Lock };
+		if (s.status === 'locked')
+			return { label: $_('settings.vault.badge_locked'), tone: 'amber', icon: LockOpen };
 		if (s.status === 'awaiting-recovery-code')
-			return { label: 'Recovery-Code erforderlich', tone: 'amber', icon: Key };
+			return { label: $_('settings.vault.badge_recovery_required'), tone: 'amber', icon: Key };
 		if (s.reason === 'auth')
-			return { label: 'Anmeldung erforderlich', tone: 'red', icon: WarningCircle };
-		if (s.reason === 'network') return { label: 'Netzwerkfehler', tone: 'red', icon: WifiSlash };
-		if (s.reason === 'server') return { label: 'Server-Fehler', tone: 'red', icon: WarningCircle };
-		return { label: 'Unbekannter Fehler', tone: 'red', icon: WarningCircle };
+			return { label: $_('settings.vault.badge_auth_required'), tone: 'red', icon: WarningCircle };
+		if (s.reason === 'network')
+			return { label: $_('settings.vault.badge_network_error'), tone: 'red', icon: WifiSlash };
+		if (s.reason === 'server')
+			return { label: $_('settings.vault.badge_server_error'), tone: 'red', icon: WarningCircle };
+		return { label: $_('settings.vault.badge_unknown_error'), tone: 'red', icon: WarningCircle };
 	}
 
 	const badge = $derived(statusBadge(vaultState));
@@ -260,8 +267,8 @@
 
 <SettingsSectionHeader
 	icon={Lock}
-	title="Verschlüsselung"
-	description="Sensitive Felder werden mit AES-GCM-256 verschlüsselt, bevor sie in die lokale Datenbank geschrieben werden."
+	title={$_('settings.vault.title')}
+	description={$_('settings.vault.description')}
 	tone="blue"
 	action={statusBadgeSnippet}
 />
@@ -271,45 +278,47 @@
 	<div class="status-body">
 		{#if vaultState.status === 'unlocked'}
 			<p class="status-text">
-				Dein persönlicher Schlüssel ist auf diesem Gerät geladen.
-				<strong>{totalEncryptedFields} Felder</strong>
-				über <strong>{encryptedTables.length} Tabellen</strong> werden verschlüsselt gespeichert.
+				{$_('settings.vault.status_unlocked_pre')}
+				<strong
+					>{$_('settings.vault.status_unlocked_fields', {
+						values: { count: totalEncryptedFields },
+					})}</strong
+				>
+				<strong
+					>{$_('settings.vault.status_unlocked_tables', {
+						values: { count: encryptedTables.length },
+					})}</strong
+				>
+				{$_('settings.vault.status_unlocked_post')}
 			</p>
 		{:else if vaultState.status === 'locked'}
-			<p class="status-text">
-				Dein Schlüssel ist nicht geladen. Verschlüsselte Inhalte können nicht gelesen werden, bis du
-				dich erneut anmeldest oder den Schlüssel manuell lädst.
-			</p>
+			<p class="status-text">{$_('settings.vault.status_locked')}</p>
 			<button class="btn btn-primary" type="button" onclick={handleUnlock}>
-				Schlüssel jetzt laden
+				{$_('settings.vault.status_load_now')}
 			</button>
 		{:else}
-			<p class="status-text">
-				Es gab ein Problem beim Laden deines Verschlüsselungsschlüssels. Bitte melde dich neu an
-				oder prüfe deine Internetverbindung.
-			</p>
-			<button class="btn" type="button" onclick={handleUnlock}>Erneut versuchen</button>
+			<p class="status-text">{$_('settings.vault.status_error')}</p>
+			<button class="btn" type="button" onclick={handleUnlock}
+				>{$_('settings.vault.status_retry')}</button
+			>
 		{/if}
 	</div>
 
 	<!-- What Mana can see (threat-model disclosure, moved near top) -->
 	<div class="subsection">
-		<h3 class="subsection-title">Was Mana sehen kann</h3>
+		<h3 class="subsection-title">{$_('settings.vault.threat_title')}</h3>
 		<ul class="disclosure-list">
 			<li>
-				<strong>Was Mana nie sieht:</strong> deine verschlüsselten Inhalte (Chat, Notizen, Träume, Memos,
-				Kontaktdetails, Zyklus-Notizen, Transaktionsbeschreibungen, …). Sie verlassen dein Gerät nur als
-				unleserlicher Blob.
+				<strong>{$_('settings.vault.threat_never_label')}</strong>
+				{$_('settings.vault.threat_never_body')}
 			</li>
 			<li>
-				<strong>Was Mana technisch entschlüsseln könnte:</strong> deinen Master-Key, falls ein Mitarbeiter
-				mit Zugriff auf den Schlüsselverschlüsselungsschlüssel aktiv darauf zugreift. In der Praxis ist
-				das gegen alle realistischen Bedrohungen außer einer gerichtlich erzwungenen Offenlegung gegen
-				Mana selbst geschützt.
+				<strong>{$_('settings.vault.threat_could_label')}</strong>
+				{$_('settings.vault.threat_could_body')}
 			</li>
 			<li>
-				<strong>Was strukturell sichtbar bleibt:</strong> Anzahl deiner Notizen / Chats / Kontakte, Zeitstempel,
-				Verbindungen zwischen Records. Die Inhalte selbst nicht.
+				<strong>{$_('settings.vault.threat_visible_label')}</strong>
+				{$_('settings.vault.threat_visible_body')}
 			</li>
 		</ul>
 	</div>
@@ -317,16 +326,14 @@
 	<!-- Encrypted fields list -->
 	<div class="subsection">
 		<div class="subsection-head">
-			<h3 class="subsection-title">Verschlüsselte Felder</h3>
+			<h3 class="subsection-title">{$_('settings.vault.fields_title')}</h3>
 			<span class="subsection-meta">
-				{totalEncryptedFields} Felder · {encryptedTables.length} Tabellen
+				{$_('settings.vault.fields_meta', {
+					values: { fields: totalEncryptedFields, tables: encryptedTables.length },
+				})}
 			</span>
 		</div>
-		<p class="subsection-desc">
-			Welche Spalten in welchen Tabellen verschlüsselt am Gerät liegen. Strukturelle Metadaten (IDs,
-			Zeitstempel, Status-Flags) bleiben absichtlich im Klartext, damit Indizes, Sortierungen und
-			Sync weiter funktionieren.
-		</p>
+		<p class="subsection-desc">{$_('settings.vault.fields_description')}</p>
 		<ul class="table-list">
 			{#each visibleTables as { table, fields } (table)}
 				<li>
@@ -337,7 +344,9 @@
 		</ul>
 		{#if hiddenTableCount > 0}
 			<button type="button" class="expand-btn" onclick={() => (fieldsExpanded = !fieldsExpanded)}>
-				{fieldsExpanded ? 'Weniger anzeigen' : `${hiddenTableCount} weitere anzeigen`}
+				{fieldsExpanded
+					? $_('settings.vault.show_less')
+					: $_('settings.vault.show_more', { values: { count: hiddenTableCount } })}
 			</button>
 		{/if}
 	</div>
@@ -345,21 +354,19 @@
 	<!-- Zero-knowledge mode -->
 	<div class="subsection">
 		<div class="subsection-head">
-			<h3 class="subsection-title">Zero-Knowledge-Modus</h3>
+			<h3 class="subsection-title">{$_('settings.vault.zk_title')}</h3>
 			<span class="zk-state-pill" class:on={zkActive}>
-				{zkActive ? 'Aktiv' : 'Nicht aktiv'}
+				{zkActive ? $_('settings.vault.zk_state_active') : $_('settings.vault.zk_state_inactive')}
 			</span>
 		</div>
 		<p class="subsection-desc">
-			<strong>Optional, fortgeschritten.</strong> Im Zero-Knowledge-Modus speichert Mana deinen
-			Schlüssel <em>nur noch in einer Form, die wir selbst nicht entschlüsseln können</em>. Du
-			brauchst dann beim Login von einem neuen Gerät deinen Recovery-Code, um deine Daten
-			freizuschalten.
+			<strong>{$_('settings.vault.zk_desc_optional')}</strong>{$_(
+				'settings.vault.zk_desc_body_pre'
+			)}<em>{$_('settings.vault.zk_desc_body_em')}</em>{$_('settings.vault.zk_desc_body_post')}
 		</p>
 		<p class="subsection-desc">
-			<strong>Vorteil:</strong> selbst ein Mana-Mitarbeiter mit Vollzugriff auf den Server kann
-			deine Inhalte nicht mehr lesen. <strong>Risiko:</strong> wenn du den Recovery-Code verlierst, sind
-			deine Daten unwiderruflich weg — wir haben dann keinen Backup-Schlüssel mehr.
+			<strong>{$_('settings.vault.zk_pro_label')}</strong>{$_('settings.vault.zk_pro_body')}
+			<strong>{$_('settings.vault.zk_con_label')}</strong>{$_('settings.vault.zk_con_body')}
 		</p>
 
 		{#if zkError}
@@ -373,10 +380,7 @@
 			{#if hasRecoveryWrap}
 				<div class="inline-alert tone-amber">
 					<WarningCircle size={16} weight="fill" />
-					<span>
-						Du hast bereits einen Recovery-Code gespeichert, aber Zero-Knowledge ist noch nicht
-						aktiv. Du kannst direkt aktivieren oder den Code zurücksetzen.
-					</span>
+					<span>{$_('settings.vault.zk_existing_warn')}</span>
 				</div>
 				<div class="actions">
 					<button
@@ -385,7 +389,7 @@
 						disabled={vaultState.status !== 'unlocked' || zkBusy}
 						onclick={handleEnableZeroKnowledge}
 					>
-						{zkBusy ? 'Aktiviere …' : 'Zero-Knowledge jetzt aktivieren'}
+						{zkBusy ? $_('settings.vault.zk_enabling') : $_('settings.vault.zk_enable_now')}
 					</button>
 					<button
 						class="btn"
@@ -393,7 +397,7 @@
 						disabled={vaultState.status !== 'unlocked' || zkBusy}
 						onclick={handleSetupRecoveryCode}
 					>
-						Neuen Recovery-Code generieren
+						{$_('settings.vault.zk_generate_new')}
 					</button>
 					{#if !confirmClearRecovery}
 						<button
@@ -402,7 +406,7 @@
 							disabled={zkBusy}
 							onclick={() => (confirmClearRecovery = true)}
 						>
-							Recovery-Code entfernen
+							{$_('settings.vault.zk_clear')}
 						</button>
 					{:else}
 						<button
@@ -411,7 +415,7 @@
 							disabled={zkBusy}
 							onclick={handleClearRecoveryCode}
 						>
-							{zkBusy ? 'Entferne …' : 'Ja, entfernen'}
+							{zkBusy ? $_('settings.vault.zk_clearing') : $_('settings.vault.zk_clear_confirm')}
 						</button>
 						<button
 							class="btn btn-ghost"
@@ -419,7 +423,7 @@
 							disabled={zkBusy}
 							onclick={() => (confirmClearRecovery = false)}
 						>
-							Abbrechen
+							{$_('settings.vault.cancel')}
 						</button>
 					{/if}
 				</div>
@@ -431,7 +435,7 @@
 						disabled={vaultState.status !== 'unlocked' || zkBusy}
 						onclick={handleSetupRecoveryCode}
 					>
-						{zkBusy ? 'Generiere …' : 'Recovery-Code einrichten'}
+						{zkBusy ? $_('settings.vault.zk_generating') : $_('settings.vault.zk_setup')}
 					</button>
 				</div>
 			{/if}
@@ -441,24 +445,24 @@
 			<div class="wizard-step">
 				<div class="step-head">
 					<span class="step-num">1</span>
-					<h4 class="step-title">Code sicher aufschreiben</h4>
+					<h4 class="step-title">{$_('settings.vault.step_1_title')}</h4>
 				</div>
 				<p class="subsection-desc">
-					Speichere diesen Code an einem sicheren Ort (Passwort-Manager, ausgedruckt im Tresor, …). <strong
-						>Wir zeigen ihn dir nur ein einziges Mal.</strong
+					{$_('settings.vault.step_1_desc_pre')}<strong
+						>{$_('settings.vault.step_1_desc_strong')}</strong
 					>
 				</p>
 				<div class="recovery-code">{generatedCode}</div>
 				<div class="actions">
 					<button class="btn" type="button" onclick={handleCopyCode}>
 						<Copy size={14} weight="bold" />
-						Kopieren
+						{$_('settings.vault.copy')}
 					</button>
 					<button class="btn btn-primary" type="button" onclick={handleStartConfirm}>
-						Ich habe den Code gesichert →
+						{$_('settings.vault.step_1_continue')}
 					</button>
 					<button class="btn btn-ghost" type="button" onclick={handleResetSetup}>
-						Abbrechen
+						{$_('settings.vault.cancel')}
 					</button>
 				</div>
 			</div>
@@ -468,17 +472,14 @@
 			<div class="wizard-step">
 				<div class="step-head">
 					<span class="step-num">2</span>
-					<h4 class="step-title">Code zurück eintippen</h4>
+					<h4 class="step-title">{$_('settings.vault.step_2_title')}</h4>
 				</div>
-				<p class="subsection-desc">
-					Tippe (oder paste) den Code, den du gerade gespeichert hast. So stellen wir sicher, dass
-					der Backup wirklich vollständig ist.
-				</p>
+				<p class="subsection-desc">{$_('settings.vault.step_2_desc')}</p>
 				<input
 					class="recovery-input"
 					type="text"
 					bind:value={confirmCodeInput}
-					placeholder="1A2B-3C4D-5E6F-..."
+					placeholder={$_('settings.vault.step_2_placeholder')}
 					autocomplete="off"
 					spellcheck="false"
 				/>
@@ -489,10 +490,10 @@
 						disabled={!confirmCodeInput.trim()}
 						onclick={handleConfirmCode}
 					>
-						Code bestätigen
+						{$_('settings.vault.step_2_confirm')}
 					</button>
 					<button class="btn btn-ghost" type="button" onclick={handleResetSetup}>
-						Abbrechen
+						{$_('settings.vault.cancel')}
 					</button>
 				</div>
 			</div>
@@ -502,18 +503,16 @@
 			<div class="wizard-step">
 				<div class="step-head">
 					<span class="step-num">3</span>
-					<h4 class="step-title">Zero-Knowledge-Modus aktivieren</h4>
+					<h4 class="step-title">{$_('settings.vault.step_3_title')}</h4>
 				</div>
 				<p class="subsection-desc">
-					Wenn du jetzt aktivierst, löscht der Server seine Kopie deines Schlüssels. Ab sofort
-					kannst du <strong>nur noch mit dem Recovery-Code</strong> auf deine verschlüsselten Daten zugreifen.
+					{$_('settings.vault.step_3_desc_pre')}<strong
+						>{$_('settings.vault.step_3_desc_strong')}</strong
+					>{$_('settings.vault.step_3_desc_post')}
 				</p>
 				<div class="inline-alert tone-red">
 					<WarningCircle size={16} weight="fill" />
-					<span>
-						Diese Aktion ist nicht rückgängig zu machen ohne den Recovery-Code. Wenn du deinen Code
-						verlegst, sind deine Inhalte verloren.
-					</span>
+					<span>{$_('settings.vault.step_3_warn')}</span>
 				</div>
 				<div class="actions">
 					<button
@@ -522,10 +521,10 @@
 						disabled={zkBusy}
 						onclick={handleEnableZeroKnowledge}
 					>
-						{zkBusy ? 'Aktiviere …' : 'Ja, Zero-Knowledge-Modus aktivieren'}
+						{zkBusy ? $_('settings.vault.zk_enabling') : $_('settings.vault.step_3_confirm')}
 					</button>
 					<button class="btn btn-ghost" type="button" disabled={zkBusy} onclick={handleResetSetup}>
-						Abbrechen
+						{$_('settings.vault.cancel')}
 					</button>
 				</div>
 			</div>

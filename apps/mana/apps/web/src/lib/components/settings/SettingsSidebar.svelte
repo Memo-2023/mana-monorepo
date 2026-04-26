@@ -4,9 +4,10 @@
   parent owns the active category.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { MagnifyingGlass, X } from '@mana/shared-icons';
 	import {
-		categories as defaultCategories,
+		getCategories,
 		searchSettings,
 		type Category,
 		type CategoryId,
@@ -21,10 +22,11 @@
 		categories?: Category[];
 	}
 
-	let { activeCategory, onSelect, onJump, categories = defaultCategories }: Props = $props();
+	let { activeCategory, onSelect, onJump, categories: categoriesOverride }: Props = $props();
+	const categories = $derived(categoriesOverride ?? getCategories($_));
 
 	let query = $state('');
-	let results = $derived(searchSettings(query));
+	let results = $derived(searchSettings($_, query));
 	let highlightedCategoryIds = $derived(new Set(results.map((r) => r.category)));
 
 	function clearSearch() {
@@ -37,7 +39,7 @@
 	}
 </script>
 
-<aside class="settings-sidebar" aria-label="Einstellungs-Kategorien">
+<aside class="settings-sidebar" aria-label={$_('settings.sidebar.aria_categories')}>
 	<!-- Search -->
 	<div class="search-wrapper">
 		<span class="search-icon">
@@ -45,17 +47,22 @@
 		</span>
 		<input
 			type="search"
-			placeholder="Einstellungen suchen…"
+			placeholder={$_('settings.sidebar.search_placeholder')}
 			bind:value={query}
 			class="search-input"
-			aria-label="Einstellungen durchsuchen"
+			aria-label={$_('settings.sidebar.aria_search')}
 			onkeydown={(e) => {
 				if (e.key === 'Escape') clearSearch();
 				else if (e.key === 'Enter' && results[0]) handleResultClick(results[0]);
 			}}
 		/>
 		{#if query}
-			<button type="button" class="clear-btn" onclick={clearSearch} aria-label="Suche leeren">
+			<button
+				type="button"
+				class="clear-btn"
+				onclick={clearSearch}
+				aria-label={$_('settings.sidebar.aria_clear')}
+			>
 				<X size={14} />
 			</button>
 		{/if}
@@ -75,7 +82,9 @@
 			{/each}
 		</ul>
 	{:else if query}
-		<div class="no-results">Keine Treffer für „{query}"</div>
+		<div class="no-results">
+			{$_('settings.sidebar.no_results', { values: { query } })}
+		</div>
 	{/if}
 
 	<div class="chip-row" role="tablist">

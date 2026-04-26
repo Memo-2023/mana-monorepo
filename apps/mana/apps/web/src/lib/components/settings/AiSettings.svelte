@@ -7,6 +7,7 @@
 	 * means for privacy + speed + cost. The cloud tier is gated behind
 	 * an additional consent step the first time it's enabled.
 	 */
+	import { _ } from 'svelte-i18n';
 	import { llmSettingsState, updateLlmSettings, tierLabel, type LlmTier } from '@mana/shared-llm';
 	import {
 		isLocalLlmSupported,
@@ -62,53 +63,53 @@
 		warning?: string;
 	};
 
-	const tierCards: TierCard[] = [
+	const tierCards = $derived<TierCard[]>([
 		{
 			tier: 'browser',
 			icon: Cpu,
-			title: 'Auf deinem Gerät',
-			subtitle: 'Gemma 4 E2B (Google) im Browser',
+			title: $_('settings.ai.tier_browser_title'),
+			subtitle: $_('settings.ai.tier_browser_subtitle'),
 			bullets: [
-				'100% lokal — Daten verlassen dein Gerät nicht',
-				'~500 MB einmaliger Download',
-				'Braucht WebGPU + 2 GB freien GPU-Speicher',
+				$_('settings.ai.tier_browser_bullet_1'),
+				$_('settings.ai.tier_browser_bullet_2'),
+				$_('settings.ai.tier_browser_bullet_3'),
 			],
 		},
 		{
 			tier: 'mana-server',
 			icon: HardDrive,
-			title: 'Mana-Server',
-			subtitle: 'Selbst-gehostet auf unserem Mac Mini',
+			title: $_('settings.ai.tier_mana_server_title'),
+			subtitle: $_('settings.ai.tier_mana_server_subtitle'),
 			bullets: [
-				'Schneller und stärker als Browser-LLM',
-				'Daten laufen verschlüsselt zu unserem Server',
-				'Keine Inhalte werden gespeichert',
+				$_('settings.ai.tier_mana_server_bullet_1'),
+				$_('settings.ai.tier_mana_server_bullet_2'),
+				$_('settings.ai.tier_mana_server_bullet_3'),
 			],
 		},
 		{
 			tier: 'byok',
 			icon: Key,
-			title: 'Eigener API-Key',
-			subtitle: 'OpenAI, Anthropic, Google Gemini oder Mistral',
+			title: $_('settings.ai.tier_byok_title'),
+			subtitle: $_('settings.ai.tier_byok_subtitle'),
 			bullets: [
-				'Direkt aus dem Browser — keine Mana-Server-Zwischenstation',
-				'Du zahlst beim Provider, wir sehen nichts davon',
-				'Schlüssel werden verschlüsselt in deinem Vault gespeichert',
+				$_('settings.ai.tier_byok_bullet_1'),
+				$_('settings.ai.tier_byok_bullet_2'),
+				$_('settings.ai.tier_byok_bullet_3'),
 			],
 		},
 		{
 			tier: 'cloud',
 			icon: Cloud,
-			title: 'Google Gemini',
-			subtitle: 'Cloud-API über unseren Server-Proxy',
+			title: $_('settings.ai.tier_cloud_title'),
+			subtitle: $_('settings.ai.tier_cloud_subtitle'),
 			bullets: [
-				'Stärkste Qualität für komplexe Aufgaben',
-				'Schnellste Antworten',
-				'Daten werden von Google verarbeitet',
+				$_('settings.ai.tier_cloud_bullet_1'),
+				$_('settings.ai.tier_cloud_bullet_2'),
+				$_('settings.ai.tier_cloud_bullet_3'),
 			],
-			warning: 'Nur empfehlenswert für nicht-sensitive Inhalte',
+			warning: $_('settings.ai.tier_cloud_warning'),
 		},
-	];
+	]);
 
 	function isEnabled(tier: LlmTier): boolean {
 		return settings.allowedTiers.includes(tier);
@@ -125,15 +126,11 @@
 		</div>
 		<div class="tier-body">
 			<div class="tier-title-line">
-				<span class="tier-title">Lokal (ohne KI)</span>
-				<span class="tier-badge tier-badge-always">immer aktiv</span>
+				<span class="tier-title">{$_('settings.ai.tier_local_title')}</span>
+				<span class="tier-badge tier-badge-always">{$_('settings.ai.tier_local_badge')}</span>
 			</div>
-			<p class="tier-subtitle">Basis-Funktionen ohne jede KI</p>
-			<p class="tier0-desc">
-				Mana funktioniert auch ganz ohne KI: Datum-Erkennung, Suche und einfache Klassifikation
-				laufen über klassische Algorithmen. Manche Funktionen sind dann begrenzt, dafür ist alles
-				100% offline und kostet nichts.
-			</p>
+			<p class="tier-subtitle">{$_('settings.ai.tier_local_subtitle')}</p>
+			<p class="tier0-desc">{$_('settings.ai.tier_local_description')}</p>
 		</div>
 	</div>
 
@@ -157,7 +154,7 @@
 					<div class="tier-title-line">
 						<span class="tier-title">{card.title}</span>
 						{#if enabled}
-							<span class="tier-badge">aktiv</span>
+							<span class="tier-badge">{$_('settings.ai.badge_active')}</span>
 						{/if}
 					</div>
 					<p class="tier-subtitle">{card.subtitle}</p>
@@ -176,12 +173,15 @@
 					{#if card.tier === 'browser' && enabled && webgpuSupported}
 						<div class="tier-extra">
 							{#if browserCacheReady}
-								<span class="status-ok">✓ Modell geladen</span>
+								<span class="status-ok">{$_('settings.ai.tier_browser_loaded')}</span>
 							{:else if localLlmStatus.current.state === 'downloading'}
 								<span class="status-muted">
-									Lade {defaultModelInfo.displayName} ({(
-										localLlmStatus.current.progress * 100
-									).toFixed(0)}%)…
+									{$_('settings.ai.tier_browser_loading', {
+										values: {
+											name: defaultModelInfo.displayName,
+											percent: (localLlmStatus.current.progress * 100).toFixed(0),
+										},
+									})}
 								</span>
 							{:else}
 								<!-- svelte-ignore node_invalid_placement_ssr -->
@@ -195,8 +195,10 @@
 									class="action-btn"
 								>
 									{loadingBrowser
-										? 'Lade…'
-										: `Modell laden (~${defaultModelInfo.downloadSizeMb} MB)`}
+										? $_('settings.ai.tier_browser_load_btn_loading')
+										: $_('settings.ai.tier_browser_load_btn', {
+												values: { size: defaultModelInfo.downloadSizeMb },
+											})}
 								</button>
 							{/if}
 						</div>
@@ -204,8 +206,7 @@
 
 					{#if card.tier === 'browser' && tierBlocked}
 						<p class="tier-blocked-note">
-							WebGPU nicht verfügbar in deinem Browser. Funktioniert in Chrome/Edge 113+ oder Safari
-							18+.
+							{$_('settings.ai.tier_browser_blocked')}
 						</p>
 					{/if}
 
@@ -227,11 +228,8 @@
 							onkeydown={(e) => e.stopPropagation()}
 							role="presentation"
 						>
-							<p class="consent-title">Bestätigung erforderlich</p>
-							<p class="consent-desc">
-								Cloud-Anfragen senden deine Inhalte an Google. Bitte bestätige, dass du das
-								verstanden hast und akzeptierst.
-							</p>
+							<p class="consent-title">{$_('settings.ai.tier_cloud_consent_title')}</p>
+							<p class="consent-desc">{$_('settings.ai.tier_cloud_consent_desc')}</p>
 							<!-- svelte-ignore node_invalid_placement_ssr -->
 							<button
 								type="button"
@@ -241,7 +239,7 @@
 								}}
 								class="consent-btn"
 							>
-								Verstanden, Cloud aktivieren
+								{$_('settings.ai.tier_cloud_consent_btn')}
 							</button>
 						</div>
 					{/if}
@@ -253,7 +251,7 @@
 							onkeydown={(e) => e.stopPropagation()}
 							role="presentation"
 						>
-							<span class="status-ok">✓ Cloud-Zustimmung erteilt</span>
+							<span class="status-ok">{$_('settings.ai.tier_cloud_consent_ok')}</span>
 							<!-- svelte-ignore node_invalid_placement_ssr -->
 							<button
 								type="button"
@@ -263,7 +261,7 @@
 								}}
 								class="link-btn"
 							>
-								Zurücknehmen
+								{$_('settings.ai.tier_cloud_consent_revoke')}
 							</button>
 						</div>
 					{/if}
@@ -274,12 +272,14 @@
 
 	<!-- Active tier chain summary -->
 	<div class="summary-row">
-		<span class="summary-label">Aktuelle Reihenfolge:</span>
+		<span class="summary-label">{$_('settings.ai.summary_label')}</span>
 		<span class="summary-value">
 			{#if settings.allowedTiers.length === 0}
-				Nur lokal (ohne KI) — die meisten KI-Funktionen sind begrenzt.
+				{$_('settings.ai.summary_local_only')}
 			{:else}
-				{settings.allowedTiers.map((t) => tierLabel(t)).join(' → ')} → Lokal (Fallback)
+				{settings.allowedTiers.map((t) => tierLabel(t)).join(' → ')} → {$_(
+					'settings.ai.summary_chain_local_fallback'
+				)}
 			{/if}
 		</span>
 	</div>
@@ -288,18 +288,15 @@
 	<div class="rows">
 		<div class="row">
 			<div class="row-info">
-				<p class="row-title">Bei Fehler auf „Lokal" zurückfallen</p>
-				<p class="row-desc">
-					Wenn die gewählte KI-Schicht eine Anfrage nicht beantworten kann, versucht Mana es mit der
-					lokalen Variante (sofern verfügbar). Aus: zeigt stattdessen einen Fehler an.
-				</p>
+				<p class="row-title">{$_('settings.ai.fallback_title')}</p>
+				<p class="row-desc">{$_('settings.ai.fallback_description')}</p>
 			</div>
 			<button
 				type="button"
 				class="toggle"
 				class:on={settings.fallbackToRulesOnError}
 				onclick={() => setFallback(!settings.fallbackToRulesOnError)}
-				aria-label="Fallback auf Lokal"
+				aria-label={$_('settings.ai.fallback_aria')}
 			>
 				<span class="toggle-knob"></span>
 			</button>
@@ -307,19 +304,15 @@
 
 		<div class="row">
 			<div class="row-info">
-				<p class="row-title">Quelle bei jedem KI-Resultat anzeigen</p>
-				<p class="row-desc">
-					Zeigt unter jeder KI-generierten Antwort eine kleine Markierung wie „Auf deinem Gerät"
-					oder „via Google Gemini" — damit du immer siehst, wo deine Daten gerade verarbeitet
-					wurden.
-				</p>
+				<p class="row-title">{$_('settings.ai.show_source_title')}</p>
+				<p class="row-desc">{$_('settings.ai.show_source_description')}</p>
 			</div>
 			<button
 				type="button"
 				class="toggle"
 				class:on={settings.showSourceInUi}
 				onclick={() => setShowSource(!settings.showSourceInUi)}
-				aria-label="Quelle anzeigen"
+				aria-label={$_('settings.ai.show_source_aria')}
 			>
 				<span class="toggle-knob"></span>
 			</button>

@@ -9,6 +9,7 @@
   immediately without the user reloading.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { ShieldCheck, Globe, Link as LinkIcon } from '@mana/shared-icons';
 	import { liveQuery } from 'dexie';
 	import SettingsPanel from '../SettingsPanel.svelte';
@@ -62,10 +63,12 @@
 		busyKey = key;
 		try {
 			await setRecordVisibility(rec.collection, rec.id, 'space');
-			toastStore.show?.(`„${rec.title}" ist jetzt privat`);
+			toastStore.show?.($_('settings.privacy.toast_set_private', { values: { title: rec.title } }));
 		} catch (e) {
 			console.error(e);
-			toastStore.show?.(`Konnte „${rec.title}" nicht zurückstufen`);
+			toastStore.show?.(
+				$_('settings.privacy.toast_set_private_failed', { values: { title: rec.title } })
+			);
 		} finally {
 			busyKey = null;
 		}
@@ -77,13 +80,15 @@
 			const { flipped, failed } = await resetAllExposedToSpace();
 			confirmKill = false;
 			if (failed > 0) {
-				toastStore.show?.(`${flipped} Einträge auf privat — ${failed} fehlgeschlagen`);
+				toastStore.show?.(
+					$_('settings.privacy.toast_kill_partial', { values: { flipped, failed } })
+				);
 			} else {
-				toastStore.show?.(`${flipped} Einträge auf privat zurückgesetzt`);
+				toastStore.show?.($_('settings.privacy.toast_kill_done', { values: { flipped } }));
 			}
 		} catch (e) {
 			console.error(e);
-			toastStore.show?.('Kill-Switch fehlgeschlagen');
+			toastStore.show?.($_('settings.privacy.toast_kill_failed'));
 		} finally {
 			killing = false;
 		}
@@ -93,8 +98,8 @@
 <SettingsPanel id="privacy">
 	<SettingsSectionHeader
 		icon={ShieldCheck}
-		title="Privatsphäre-Übersicht"
-		description="Alle Einträge, die du gerade öffentlich zeigst oder per Link teilst — mit ein-Klick-Rückzieher."
+		title={$_('settings.privacy.title')}
+		description={$_('settings.privacy.description')}
 		tone="indigo"
 	/>
 
@@ -103,22 +108,22 @@
 			<Globe size={18} />
 			<div>
 				<span class="summary-count">{publicRecords.length}</span>
-				<span class="summary-label">öffentlich</span>
+				<span class="summary-label">{$_('settings.privacy.summary_public')}</span>
 			</div>
 		</div>
 		<div class="summary-card">
 			<LinkIcon size={18} />
 			<div>
 				<span class="summary-count">{unlistedRecords.length}</span>
-				<span class="summary-label">per Link teilbar</span>
+				<span class="summary-label">{$_('settings.privacy.summary_unlisted')}</span>
 			</div>
 		</div>
 	</div>
 
 	{#if loading}
-		<p class="muted">Lädt…</p>
+		<p class="muted">{$_('settings.privacy.loading')}</p>
 	{:else if exposed.length === 0}
-		<p class="muted empty">Aktuell ist nichts öffentlich oder per Link geteilt — gut gemacht.</p>
+		<p class="muted empty">{$_('settings.privacy.empty')}</p>
 	{:else}
 		<div class="groups">
 			{#each grouped as [module, records] (module)}
@@ -133,19 +138,21 @@
 								<div class="record-meta">
 									<span class="record-title">{rec.title}</span>
 									<span class="record-badge" class:badge-unlisted={rec.visibility === 'unlisted'}>
-										{rec.visibility === 'public' ? 'Öffentlich' : 'Per Link'}
+										{rec.visibility === 'public'
+											? $_('settings.privacy.badge_public')
+											: $_('settings.privacy.badge_unlisted')}
 									</span>
 								</div>
 								<div class="record-actions">
 									{#if rec.openHref}
-										<a class="link" href={rec.openHref}>Öffnen</a>
+										<a class="link" href={rec.openHref}>{$_('settings.privacy.open')}</a>
 									{/if}
 									<button
 										class="btn btn-ghost"
 										disabled={busyKey === `${rec.collection}/${rec.id}`}
 										onclick={() => setPrivate(rec)}
 									>
-										Privat
+										{$_('settings.privacy.set_private')}
 									</button>
 								</div>
 							</li>
@@ -158,21 +165,21 @@
 		<div class="kill-zone">
 			{#if !confirmKill}
 				<button class="btn btn-danger" onclick={() => (confirmKill = true)}>
-					Alle auf privat zurücksetzen
+					{$_('settings.privacy.kill_all')}
 				</button>
 			{:else}
 				<div class="confirm">
 					<p>
-						<strong>{exposed.length}</strong>
-						{exposed.length === 1 ? 'Eintrag' : 'Einträge'} werden auf "Space" zurückgesetzt. Aktive Share-Links
-						werden widerrufen. Fortfahren?
+						{exposed.length === 1
+							? $_('settings.privacy.confirm_one', { values: { count: exposed.length } })
+							: $_('settings.privacy.confirm_other', { values: { count: exposed.length } })}
 					</p>
 					<div class="confirm-actions">
 						<button class="btn" onclick={() => (confirmKill = false)} disabled={killing}>
-							Abbrechen
+							{$_('settings.privacy.cancel')}
 						</button>
 						<button class="btn btn-danger" onclick={killSwitch} disabled={killing}>
-							{killing ? 'Setze zurück…' : 'Ja, alles zurücksetzen'}
+							{killing ? $_('settings.privacy.killing') : $_('settings.privacy.confirm_kill')}
 						</button>
 					</div>
 				</div>

@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { _, locale } from 'svelte-i18n';
+	import { get } from 'svelte/store';
 	import { CloudCheck, Pause, Cloud } from '@mana/shared-icons';
 	import { syncBilling } from '$lib/stores/sync-billing.svelte';
 	import { creditsService, type CreditBalance } from '$lib/api/credits';
@@ -14,17 +16,23 @@
 		yearly: 360,
 	};
 
-	const INTERVAL_LABELS: Record<BillingInterval, string> = {
-		monthly: 'Monatlich',
-		quarterly: 'Quartalsweise',
-		yearly: 'Jährlich',
-	};
+	const intervalLabels = $derived<Record<BillingInterval, string>>({
+		monthly: $_('settings.sync.interval_monthly'),
+		quarterly: $_('settings.sync.interval_quarterly'),
+		yearly: $_('settings.sync.interval_yearly'),
+	});
 
-	const INTERVAL_HINTS: Record<BillingInterval, string> = {
-		monthly: 'jeden Monat abgerechnet · ~1 Credit/Tag',
-		quarterly: 'alle 3 Monate abgerechnet',
-		yearly: 'einmal jährlich abgerechnet',
-	};
+	const intervalShortLabels = $derived<Record<BillingInterval, string>>({
+		monthly: $_('settings.sync.interval_short_monthly'),
+		quarterly: $_('settings.sync.interval_short_quarterly'),
+		yearly: $_('settings.sync.interval_short_yearly'),
+	});
+
+	const intervalHints = $derived<Record<BillingInterval, string>>({
+		monthly: $_('settings.sync.interval_hint_monthly'),
+		quarterly: $_('settings.sync.interval_hint_quarterly'),
+		yearly: $_('settings.sync.interval_hint_yearly'),
+	});
 
 	let balance = $state<CreditBalance | null>(null);
 	let loading = $state(false);
@@ -55,9 +63,9 @@
 		try {
 			await syncBilling.activate(selectedInterval);
 			await loadBalance();
-			toast.success('Cloud Sync aktiviert!');
+			toast.success($_('settings.sync.toast_activated'));
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Aktivierung fehlgeschlagen';
+			error = e instanceof Error ? e.message : $_('settings.sync.err_activation_failed');
 			toast.error(error);
 		} finally {
 			loading = false;
@@ -65,14 +73,14 @@
 	}
 
 	async function handleDeactivate() {
-		if (!confirm('Cloud Sync wirklich deaktivieren? Deine Daten bleiben lokal erhalten.')) return;
+		if (!confirm($_('settings.sync.deactivate_confirm'))) return;
 		loading = true;
 		error = null;
 		try {
 			await syncBilling.deactivate();
-			toast.success('Cloud Sync deaktiviert');
+			toast.success($_('settings.sync.toast_deactivated'));
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Deaktivierung fehlgeschlagen';
+			error = e instanceof Error ? e.message : $_('settings.sync.err_deactivation_failed');
 			toast.error(error);
 		} finally {
 			loading = false;
@@ -85,9 +93,13 @@
 		error = null;
 		try {
 			await syncBilling.changeInterval(selectedInterval);
-			toast.success(`Intervall auf ${INTERVAL_LABELS[selectedInterval]} geändert`);
+			toast.success(
+				$_('settings.sync.toast_interval_changed', {
+					values: { label: intervalLabels[selectedInterval] },
+				})
+			);
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Änderung fehlgeschlagen';
+			error = e instanceof Error ? e.message : $_('settings.sync.err_change_failed');
 			toast.error(error);
 		} finally {
 			loading = false;
@@ -95,11 +107,11 @@
 	}
 
 	function formatCredits(amount: number): string {
-		return amount.toLocaleString('de-DE');
+		return amount.toLocaleString(get(locale) ?? 'de');
 	}
 
 	function formatDate(dateStr: string): string {
-		return new Date(dateStr).toLocaleDateString('de-DE', {
+		return new Date(dateStr).toLocaleDateString(get(locale) ?? 'de', {
 			day: '2-digit',
 			month: '2-digit',
 			year: 'numeric',
@@ -110,8 +122,8 @@
 <SettingsPanel id="cloud-sync">
 	<SettingsSectionHeader
 		icon={Cloud}
-		title="Cloud Sync"
-		description="Synchronisiere deine Daten über alle Geräte"
+		title={$_('settings.sync.title')}
+		description={$_('settings.sync.description')}
 		tone="blue"
 	/>
 
@@ -123,29 +135,31 @@
 		<div class="rows">
 			<div class="row">
 				<div class="row-info">
-					<p class="row-title">Status</p>
+					<p class="row-title">{$_('settings.sync.status_label')}</p>
 					<p class="row-desc">
 						{#if syncBilling.active && syncBilling.nextChargeAt}
-							Nächste Abbuchung am {formatDate(syncBilling.nextChargeAt)}
+							{$_('settings.sync.status_next_charge', {
+								values: { date: formatDate(syncBilling.nextChargeAt) },
+							})}
 						{:else if syncBilling.active}
-							Synchronisiert verschlüsselt über alle Geräte
+							{$_('settings.sync.status_encrypted')}
 						{:else if syncBilling.paused}
-							Credits reichen nicht aus — lade Credits auf um fortzufahren
+							{$_('settings.sync.status_insufficient')}
 						{:else}
-							Deine Daten sind nur lokal auf diesem Gerät gespeichert
+							{$_('settings.sync.status_local_only')}
 						{/if}
 					</p>
 				</div>
 				<span class="badge" class:active={syncBilling.active} class:paused={syncBilling.paused}>
 					{#if syncBilling.active}
 						<CloudCheck size={14} weight="fill" />
-						Aktiv
+						{$_('settings.sync.badge_active')}
 					{:else if syncBilling.paused}
 						<Pause size={14} weight="fill" />
-						Pausiert
+						{$_('settings.sync.badge_paused')}
 					{:else}
 						<Cloud size={14} />
-						Inaktiv
+						{$_('settings.sync.badge_inactive')}
 					{/if}
 				</span>
 			</div>
@@ -153,9 +167,11 @@
 			{#if balance}
 				<div class="row">
 					<div class="row-info">
-						<p class="row-title">Verfügbare Credits</p>
+						<p class="row-title">{$_('settings.sync.credits_available')}</p>
 						<p class="row-desc">
-							<a class="inline-link" href="/?app=credits&tab=packages">Credits aufladen</a>
+							<a class="inline-link" href="/?app=credits&tab=packages"
+								>{$_('settings.sync.credits_topup')}</a
+							>
 						</p>
 					</div>
 					<span class="value">{formatCredits(balance.balance)}</span>
@@ -164,9 +180,14 @@
 
 			<div class="row">
 				<div class="row-info">
-					<p class="row-title">Abrechnungsintervall</p>
+					<p class="row-title">{$_('settings.sync.interval_label')}</p>
 					<p class="row-desc">
-						{SYNC_PRICES[selectedInterval]} Credits · {INTERVAL_HINTS[selectedInterval]}
+						{$_('settings.sync.interval_price_hint', {
+							values: {
+								price: SYNC_PRICES[selectedInterval],
+								hint: intervalHints[selectedInterval],
+							},
+						})}
 					</p>
 				</div>
 				<div class="btn-group">
@@ -176,7 +197,7 @@
 							class:active={selectedInterval === iv}
 							onclick={() => (selectedInterval = iv)}
 						>
-							{iv === 'monthly' ? 'Monat' : iv === 'quarterly' ? 'Quartal' : 'Jahr'}
+							{intervalShortLabels[iv]}
 						</button>
 					{/each}
 				</div>
@@ -191,12 +212,16 @@
 			{#if syncBilling.active}
 				{#if intervalChanged}
 					<button class="btn-secondary" onclick={handleChangeInterval} disabled={loading}>
-						{loading ? 'Wird geändert…' : `Auf ${INTERVAL_LABELS[selectedInterval]} wechseln`}
+						{loading
+							? $_('settings.sync.changing')
+							: $_('settings.sync.change_to', {
+									values: { label: intervalLabels[selectedInterval] },
+								})}
 					</button>
-					<p class="muted-hint">Änderung gilt ab der nächsten Abbuchung</p>
+					<p class="muted-hint">{$_('settings.sync.change_hint')}</p>
 				{/if}
 				<button class="btn-danger" onclick={handleDeactivate} disabled={loading}>
-					{loading ? 'Wird deaktiviert…' : 'Cloud Sync deaktivieren'}
+					{loading ? $_('settings.sync.deactivating') : $_('settings.sync.deactivate')}
 				</button>
 			{:else}
 				<button
@@ -205,23 +230,21 @@
 					disabled={loading || insufficientCredits}
 				>
 					{#if loading}
-						Wird aktiviert…
+						{$_('settings.sync.activating')}
 					{:else}
-						Aktivieren · {SYNC_PRICES[selectedInterval]} Credits
+						{$_('settings.sync.activate', { values: { price: SYNC_PRICES[selectedInterval] } })}
 					{/if}
 				</button>
 				{#if insufficientCredits}
 					<p class="warn-hint">
-						Nicht genügend Credits. <a href="/?app=credits&tab=packages">Aufladen</a>
+						{$_('settings.sync.insufficient_warn_pre')}
+						<a href="/?app=credits&tab=packages">{$_('settings.sync.insufficient_topup')}</a>
 					</p>
 				{/if}
 			{/if}
 		</div>
 
-		<p class="footnote">
-			Cloud Sync synchronisiert deine Daten verschlüsselt über alle Geräte. Lokale Daten bleiben
-			immer erhalten — auch wenn Sync pausiert oder deaktiviert wird.
-		</p>
+		<p class="footnote">{$_('settings.sync.footnote')}</p>
 	{/if}
 </SettingsPanel>
 
