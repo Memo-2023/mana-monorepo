@@ -254,7 +254,6 @@
 	"apps/mana/apps/web/src/routes/(app)/food/+page.svelte": 7,
 	"apps/mana/apps/web/src/routes/(app)/food/add/+page.svelte": 2,
 	"apps/mana/apps/web/src/routes/(app)/food/goals/+page.svelte": 1,
-	"apps/mana/apps/web/src/routes/(app)/gifts/+page.svelte": 15,
 	"apps/mana/apps/web/src/routes/(app)/gifts/redeem/[code]/+page.svelte": 8,
 	"apps/mana/apps/web/src/routes/(app)/gifts/redeem/+page.svelte": 1,
 	"apps/mana/apps/web/src/routes/(app)/guides/+page.svelte": 2,

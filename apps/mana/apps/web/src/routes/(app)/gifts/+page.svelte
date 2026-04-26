@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { _ } from 'svelte-i18n';
+	import { _, locale } from 'svelte-i18n';
+	import { get } from 'svelte/store';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { Card, PageHeader } from '@mana/shared-ui';
@@ -68,12 +69,12 @@
 
 	async function handleCreate() {
 		if (createCredits < 1) {
-			createError = 'Mindestens 1 Credit erforderlich';
+			createError = $_('gifts.page.err_min_credit');
 			return;
 		}
 
 		if (createType === 'personalized' && !createTargetEmail.trim()) {
-			createError = 'E-Mail-Adresse ist für persönliche Geschenke erforderlich';
+			createError = $_('gifts.page.err_email_required');
 			return;
 		}
 
@@ -91,7 +92,7 @@
 
 			const result = await giftsService.createGift(request);
 			createdGift = { code: result.code, url: result.url };
-			toast.success('Geschenk-Code erstellt!');
+			toast.success($_('gifts.page.toast_created'));
 
 			// Reset form
 			createCredits = 50;
@@ -102,7 +103,7 @@
 			// Reload data
 			await loadData();
 		} catch (e) {
-			createError = e instanceof Error ? e.message : 'Erstellen fehlgeschlagen';
+			createError = e instanceof Error ? e.message : $_('gifts.page.err_create');
 			toast.error(createError);
 			console.error('Failed to create gift:', e);
 		} finally {
@@ -111,21 +112,17 @@
 	}
 
 	async function handleCancel(gift: GiftListItem) {
-		if (
-			!confirm(
-				`Möchtest du den Code ${gift.code} wirklich stornieren? Die nicht eingelösten Credits werden erstattet.`
-			)
-		) {
+		if (!confirm($_('gifts.page.confirm_cancel', { values: { code: gift.code } }))) {
 			return;
 		}
 
 		cancellingId = gift.id;
 		try {
 			const result = await giftsService.cancelGift(gift.id);
-			toast.success(`${result.refundedCredits} Credits erstattet`);
+			toast.success($_('gifts.page.toast_refunded', { values: { count: result.refundedCredits } }));
 			await loadData();
 		} catch (e) {
-			toast.error(e instanceof Error ? e.message : 'Stornieren fehlgeschlagen');
+			toast.error(e instanceof Error ? e.message : $_('gifts.page.err_cancel'));
 			console.error('Failed to cancel gift:', e);
 		} finally {
 			cancellingId = null;
@@ -134,15 +131,19 @@
 
 	function copyToClipboard(text: string) {
 		navigator.clipboard.writeText(text);
-		toast.success('In Zwischenablage kopiert');
+		toast.success($_('gifts.page.toast_clipboard'));
+	}
+
+	function activeLocale(): string {
+		return get(locale) ?? 'de';
 	}
 
 	function formatCredits(amount: number): string {
-		return amount.toLocaleString('de-DE');
+		return amount.toLocaleString(activeLocale());
 	}
 
 	function formatDate(dateStr: string): string {
-		return new Date(dateStr).toLocaleDateString('de-DE', {
+		return new Date(dateStr).toLocaleDateString(activeLocale(), {
 			day: '2-digit',
 			month: '2-digit',
 			year: 'numeric',
@@ -152,15 +153,15 @@
 	function getStatusLabel(status: string): string {
 		switch (status) {
 			case 'active':
-				return 'Aktiv';
+				return $_('gifts.page.status_active');
 			case 'depleted':
-				return 'Eingelöst';
+				return $_('gifts.page.status_depleted');
 			case 'expired':
-				return 'Abgelaufen';
+				return $_('gifts.page.status_expired');
 			case 'cancelled':
-				return 'Storniert';
+				return $_('gifts.page.status_cancelled');
 			case 'refunded':
-				return 'Erstattet';
+				return $_('gifts.page.status_refunded');
 			default:
 				return status;
 		}
@@ -184,9 +185,9 @@
 	function getTypeLabel(type: string): string {
 		switch (type) {
 			case 'simple':
-				return 'Einfach';
+				return $_('gifts.page.type_simple_label');
 			case 'personalized':
-				return 'Persönlich';
+				return $_('gifts.page.type_personalized_label');
 			default:
 				return type;
 		}
@@ -195,7 +196,7 @@
 
 <RoutePage appId="gifts">
 	<div>
-		<PageHeader title="Geschenke" description="Verschenke Credits an Freunde" size="lg" />
+		<PageHeader title={$_('gifts.page.title')} description={$_('gifts.page.subtitle')} size="lg" />
 
 		{#if loading}
 			<div class="flex items-center justify-center py-12">
@@ -211,7 +212,7 @@
 						onclick={loadData}
 						class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
 					>
-						Erneut versuchen
+						{$_('gifts.page.action_retry')}
 					</button>
 				</div>
 			</Card>
@@ -223,14 +224,14 @@
 					class="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground hover:bg-primary/90"
 				>
 					<span>🎁</span>
-					Code einlösen
+					{$_('gifts.page.action_redeem')}
 				</a>
 				<button
 					onclick={() => (activeTab = 'create')}
 					class="flex items-center gap-2 rounded-lg bg-surface px-4 py-2 font-medium text-foreground hover:bg-surface-hover border border-border"
 				>
 					<span>✨</span>
-					Geschenk erstellen
+					{$_('gifts.page.action_create_gift')}
 				</button>
 			</div>
 
@@ -242,7 +243,7 @@
 						? 'border-b-2 border-primary text-primary font-medium'
 						: 'text-muted-foreground hover:text-foreground'}"
 				>
-					Erhalten ({receivedGifts.length})
+					{$_('gifts.page.tab_received', { values: { count: receivedGifts.length } })}
 				</button>
 				<button
 					onclick={() => (activeTab = 'created')}
@@ -250,7 +251,7 @@
 						? 'border-b-2 border-primary text-primary font-medium'
 						: 'text-muted-foreground hover:text-foreground'}"
 				>
-					Erstellt ({createdGifts.length})
+					{$_('gifts.page.tab_created', { values: { count: createdGifts.length } })}
 				</button>
 				<button
 					onclick={() => (activeTab = 'create')}
@@ -258,23 +259,23 @@
 						? 'border-b-2 border-primary text-primary font-medium'
 						: 'text-muted-foreground hover:text-foreground'}"
 				>
-					Erstellen
+					{$_('gifts.page.tab_create')}
 				</button>
 			</div>
 
 			<!-- Tab Content -->
 			{#if activeTab === 'received'}
 				<Card>
-					<h3 class="text-lg font-semibold mb-4">Erhaltene Geschenke</h3>
+					<h3 class="text-lg font-semibold mb-4">{$_('gifts.page.section_received')}</h3>
 					{#if receivedGifts.length === 0}
 						<div class="text-center py-8">
 							<span class="text-4xl">🎁</span>
-							<p class="mt-2 text-muted-foreground">Du hast noch keine Geschenke erhalten</p>
+							<p class="mt-2 text-muted-foreground">{$_('gifts.page.empty_received')}</p>
 							<a
 								href="/gifts/redeem"
 								class="mt-4 inline-block rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
 							>
-								Code einlösen
+								{$_('gifts.page.action_redeem')}
 							</a>
 						</div>
 					{:else}
@@ -292,7 +293,11 @@
 										<div>
 											<p class="font-mono font-medium">{gift.code}</p>
 											{#if gift.creatorName}
-												<p class="text-sm text-muted-foreground">Von {gift.creatorName}</p>
+												<p class="text-sm text-muted-foreground">
+													{$_('gifts.page.label_from', {
+														values: { name: gift.creatorName },
+													})}
+												</p>
 											{/if}
 											{#if gift.message}
 												<p class="text-sm italic text-muted-foreground mt-1">"{gift.message}"</p>
@@ -312,16 +317,16 @@
 				</Card>
 			{:else if activeTab === 'created'}
 				<Card>
-					<h3 class="text-lg font-semibold mb-4">Erstellte Geschenk-Codes</h3>
+					<h3 class="text-lg font-semibold mb-4">{$_('gifts.page.section_created')}</h3>
 					{#if createdGifts.length === 0}
 						<div class="text-center py-8">
 							<span class="text-4xl">✨</span>
-							<p class="mt-2 text-muted-foreground">Du hast noch keine Geschenke erstellt</p>
+							<p class="mt-2 text-muted-foreground">{$_('gifts.page.empty_created')}</p>
 							<button
 								onclick={() => (activeTab = 'create')}
 								class="mt-4 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
 							>
-								Geschenk erstellen
+								{$_('gifts.page.action_create_gift')}
 							</button>
 						</div>
 					{:else}
@@ -348,7 +353,7 @@
 											<button
 												onclick={() => copyToClipboard(gift.url)}
 												class="p-2 rounded hover:bg-surface-hover text-muted-foreground hover:text-foreground"
-												title="Link kopieren"
+												title={$_('gifts.page.action_copy_link_title')}
 											>
 												<ClipboardText size={16} />
 											</button>
@@ -357,7 +362,7 @@
 													onclick={() => handleCancel(gift)}
 													disabled={cancellingId === gift.id}
 													class="p-2 rounded hover:bg-red-100 dark:hover:bg-red-900/20 text-muted-foreground hover:text-red-600 disabled:opacity-50"
-													title="Stornieren"
+													title={$_('gifts.page.action_cancel_title')}
 												>
 													{#if cancellingId === gift.id}
 														<svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
@@ -384,20 +389,24 @@
 									</div>
 									<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
 										<div>
-											<p class="text-muted-foreground">Credits</p>
+											<p class="text-muted-foreground">{$_('gifts.page.label_credits')}</p>
 											<p class="font-medium">{formatCredits(gift.totalCredits)}</p>
 										</div>
 										<div>
-											<p class="text-muted-foreground">Eingelöst</p>
-											<p class="font-medium">{gift.redeemed ? 'Ja' : 'Nein'}</p>
+											<p class="text-muted-foreground">{$_('gifts.page.label_redeemed')}</p>
+											<p class="font-medium">
+												{gift.redeemed
+													? $_('gifts.page.label_redeemed_yes')
+													: $_('gifts.page.label_redeemed_no')}
+											</p>
 										</div>
 										<div>
-											<p class="text-muted-foreground">Erstellt</p>
+											<p class="text-muted-foreground">{$_('gifts.page.label_created')}</p>
 											<p class="font-medium">{formatDate(gift.createdAt)}</p>
 										</div>
 										{#if gift.expiresAt}
 											<div>
-												<p class="text-muted-foreground">Gültig bis</p>
+												<p class="text-muted-foreground">{$_('gifts.page.label_valid_until')}</p>
 												<p class="font-medium">{formatDate(gift.expiresAt)}</p>
 											</div>
 										{/if}
@@ -414,11 +423,13 @@
 				<div class="grid gap-6 lg:grid-cols-2">
 					<!-- Create form -->
 					<Card>
-						<h3 class="text-lg font-semibold mb-4">Neues Geschenk erstellen</h3>
+						<h3 class="text-lg font-semibold mb-4">{$_('gifts.page.section_create')}</h3>
 
 						{#if balance}
 							<div class="mb-6 rounded-lg bg-surface p-4 text-center">
-								<p class="text-sm text-muted-foreground">Verfügbare Credits</p>
+								<p class="text-sm text-muted-foreground">
+									{$_('gifts.page.label_available_credits')}
+								</p>
 								<p class="text-2xl font-bold text-primary">
 									{formatCredits(balance.balance + (balance.freeCreditsRemaining ?? 0))}
 								</p>
@@ -428,7 +439,7 @@
 						<div class="space-y-4">
 							<div>
 								<label for="credits" class="block text-sm font-medium text-foreground mb-2">
-									Credits
+									{$_('gifts.page.label_credits_input')}
 								</label>
 								<input
 									id="credits"
@@ -443,7 +454,7 @@
 
 							<div>
 								<label for="type" class="block text-sm font-medium text-foreground mb-2">
-									Art
+									{$_('gifts.page.label_type')}
 								</label>
 								<select
 									id="type"
@@ -451,38 +462,38 @@
 									class="w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
 									disabled={creating}
 								>
-									<option value="simple">Einfach (Code teilen)</option>
-									<option value="personalized">Persönlich (für bestimmte E-Mail)</option>
+									<option value="simple">{$_('gifts.page.type_simple')}</option>
+									<option value="personalized">{$_('gifts.page.type_personalized')}</option>
 								</select>
 							</div>
 
 							{#if createType === 'personalized'}
 								<div>
 									<label for="target-email" class="block text-sm font-medium text-foreground mb-2">
-										E-Mail des Empfängers
+										{$_('gifts.page.label_target_email')}
 									</label>
 									<input
 										id="target-email"
 										type="email"
 										bind:value={createTargetEmail}
-										placeholder="empfaenger@example.com"
+										placeholder={$_('gifts.page.placeholder_target_email')}
 										class="w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
 										disabled={creating}
 									/>
 									<p class="mt-1 text-sm text-muted-foreground">
-										Wird automatisch eingelöst, wenn sich diese Person registriert.
+										{$_('gifts.page.hint_personalized')}
 									</p>
 								</div>
 							{/if}
 
 							<div>
 								<label for="message" class="block text-sm font-medium text-foreground mb-2">
-									Nachricht (optional)
+									{$_('gifts.page.label_message')}
 								</label>
 								<textarea
 									id="message"
 									bind:value={createMessage}
-									placeholder="z.B. Alles Gute zum Geburtstag!"
+									placeholder={$_('gifts.page.placeholder_message')}
 									maxlength="500"
 									rows="3"
 									class="w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary resize-none"
@@ -517,9 +528,9 @@
 											d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
 										></path>
 									</svg>
-									Wird erstellt...
+									{$_('gifts.page.action_creating')}
 								{:else}
-									✨ Geschenk-Code erstellen
+									{$_('gifts.page.action_create')}
 								{/if}
 							</button>
 						</div>
@@ -534,8 +545,8 @@
 								>
 									<span class="text-4xl">🎁</span>
 								</div>
-								<h3 class="text-xl font-bold text-foreground">Geschenk erstellt!</h3>
-								<p class="mt-1 text-muted-foreground">Teile diesen Link mit dem Empfänger</p>
+								<h3 class="text-xl font-bold text-foreground">{$_('gifts.page.created_title')}</h3>
+								<p class="mt-1 text-muted-foreground">{$_('gifts.page.created_subtitle')}</p>
 
 								<div class="mt-6 rounded-lg bg-surface p-4">
 									<p class="font-mono text-2xl font-bold text-primary">{createdGift.code}</p>
@@ -547,13 +558,13 @@
 										onclick={() => copyToClipboard(createdGift!.url)}
 										class="rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground hover:bg-primary/90"
 									>
-										Link kopieren
+										{$_('gifts.page.action_copy_link')}
 									</button>
 									<button
 										onclick={() => copyToClipboard(createdGift!.code)}
 										class="rounded-lg bg-surface px-4 py-2 font-medium text-foreground hover:bg-surface-hover border border-border"
 									>
-										Code kopieren
+										{$_('gifts.page.action_copy_code')}
 									</button>
 								</div>
 
@@ -561,14 +572,14 @@
 									onclick={() => (createdGift = null)}
 									class="mt-6 text-sm text-primary hover:underline"
 								>
-									Weiteres Geschenk erstellen
+									{$_('gifts.page.action_create_another')}
 								</button>
 							</div>
 						</Card>
 					{:else}
 						<!-- Info card -->
 						<Card>
-							<h3 class="text-lg font-semibold mb-4">So funktioniert's</h3>
+							<h3 class="text-lg font-semibold mb-4">{$_('gifts.page.info_title')}</h3>
 							<div class="space-y-4">
 								<div class="flex gap-3">
 									<div
@@ -577,9 +588,9 @@
 										1
 									</div>
 									<div>
-										<p class="font-medium">Credits wählen</p>
+										<p class="font-medium">{$_('gifts.page.info_step1_title')}</p>
 										<p class="text-sm text-muted-foreground">
-											Bestimme, wie viele Credits du verschenken möchtest.
+											{$_('gifts.page.info_step1_body')}
 										</p>
 									</div>
 								</div>
@@ -590,9 +601,9 @@
 										2
 									</div>
 									<div>
-										<p class="font-medium">Code erstellen</p>
+										<p class="font-medium">{$_('gifts.page.info_step2_title')}</p>
 										<p class="text-sm text-muted-foreground">
-											Ein einzigartiger 6-stelliger Code wird generiert.
+											{$_('gifts.page.info_step2_body')}
 										</p>
 									</div>
 								</div>
@@ -603,9 +614,9 @@
 										3
 									</div>
 									<div>
-										<p class="font-medium">Link teilen</p>
+										<p class="font-medium">{$_('gifts.page.info_step3_title')}</p>
 										<p class="text-sm text-muted-foreground">
-											Sende den Link oder Code an den Empfänger.
+											{$_('gifts.page.info_step3_body')}
 										</p>
 									</div>
 								</div>
@@ -616,9 +627,9 @@
 										4
 									</div>
 									<div>
-										<p class="font-medium">Einlösen</p>
+										<p class="font-medium">{$_('gifts.page.info_step4_title')}</p>
 										<p class="text-sm text-muted-foreground">
-											Der Empfänger erhält die Credits auf sein Konto.
+											{$_('gifts.page.info_step4_body')}
 										</p>
 									</div>
 								</div>
@@ -626,8 +637,8 @@
 
 							<div class="mt-6 rounded-lg bg-surface p-4">
 								<p class="text-sm text-muted-foreground">
-									<strong>Hinweis:</strong> Die Credits werden beim Erstellen von deinem Konto abgezogen.
-									Falls der Code nicht eingelöst wird, kannst du ihn stornieren und die Credits zurückerhalten.
+									<strong>{$_('gifts.page.info_note_strong')}</strong>
+									{$_('gifts.page.info_note_body')}
 								</p>
 							</div>
 						</Card>
