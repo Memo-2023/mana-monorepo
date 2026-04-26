@@ -3,6 +3,7 @@
   All fields are always editable. Changes auto-save on blur.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { formatDate } from '$lib/i18n/format';
 	import { db } from '$lib/data/database';
 	import { encryptRecord } from '$lib/data/crypto';
@@ -65,14 +66,14 @@
 <DetailViewShell
 	entity={detail.entity}
 	loading={detail.loading}
-	notFoundLabel="Link nicht gefunden"
+	notFoundLabel={$_('uload.detail_view.not_found')}
 	confirmDelete={detail.confirmDelete}
 	onAskDelete={detail.askDelete}
 	onCancelDelete={detail.cancelDelete}
-	confirmDeleteLabel="Link wirklich löschen?"
+	confirmDeleteLabel={$_('uload.detail_view.confirm_delete')}
 	onConfirmDelete={() =>
 		detail.deleteWithUndo({
-			label: 'Link gelöscht',
+			label: $_('uload.detail_view.deleted_toast'),
 			delete: deleteLink,
 			goBack,
 		})}
@@ -83,12 +84,12 @@
 			bind:value={editTitle}
 			onfocus={detail.focus}
 			onblur={saveField}
-			placeholder="Titel..."
+			placeholder={$_('uload.detail_view.placeholder_title')}
 		/>
 
 		<div class="properties">
 			<div class="prop-row">
-				<span class="prop-label">URL</span>
+				<span class="prop-label">{$_('uload.detail_view.label_url')}</span>
 				<input
 					class="prop-input"
 					bind:value={editOriginalUrl}
@@ -99,25 +100,25 @@
 			</div>
 
 			<div class="prop-row">
-				<span class="prop-label">Kurzcode</span>
+				<span class="prop-label">{$_('uload.detail_view.label_short_code')}</span>
 				<input
 					class="prop-input"
 					bind:value={editCustomCode}
 					onfocus={detail.focus}
 					onblur={saveField}
-					placeholder="custom-code"
+					placeholder={$_('uload.detail_view.placeholder_short_code')}
 				/>
 			</div>
 
 			{#if link.shortCode}
 				<div class="prop-row">
-					<span class="prop-label">Short Code</span>
+					<span class="prop-label">{$_('uload.detail_view.label_short_code_legacy')}</span>
 					<span class="prop-value">{link.shortCode}</span>
 				</div>
 			{/if}
 
 			<div class="prop-row">
-				<span class="prop-label">Aktiv</span>
+				<span class="prop-label">{$_('uload.detail_view.label_active')}</span>
 				<button
 					class="toggle-btn"
 					class:active={editIsActive}
@@ -126,17 +127,17 @@
 						handleActiveToggle();
 					}}
 				>
-					{editIsActive ? 'Ja' : 'Nein'}
+					{editIsActive ? $_('uload.detail_view.yes') : $_('uload.detail_view.no')}
 				</button>
 			</div>
 
 			<div class="prop-row">
-				<span class="prop-label">Klicks</span>
+				<span class="prop-label">{$_('uload.detail_view.label_clicks')}</span>
 				<span class="prop-value">{link.clickCount}</span>
 			</div>
 
 			<div class="prop-row">
-				<span class="prop-label">Ablaufdatum</span>
+				<span class="prop-label">{$_('uload.detail_view.label_expires_at')}</span>
 				<input
 					type="date"
 					class="prop-input"
@@ -148,21 +149,29 @@
 		</div>
 
 		<div class="section">
-			<span class="section-label">Beschreibung</span>
+			<span class="section-label">{$_('uload.detail_view.section_description')}</span>
 			<textarea
 				class="description-input"
 				bind:value={editDescription}
 				onfocus={detail.focus}
 				onblur={saveField}
-				placeholder="Beschreibung hinzufügen..."
+				placeholder={$_('uload.detail_view.placeholder_description')}
 				rows={3}
 			></textarea>
 		</div>
 
 		<div class="meta">
-			<span>Erstellt: {formatDate(new Date(link.createdAt ?? ''))}</span>
+			<span
+				>{$_('uload.detail_view.meta_created', {
+					values: { date: formatDate(new Date(link.createdAt ?? '')) },
+				})}</span
+			>
 			{#if link.updatedAt}
-				<span>Bearbeitet: {formatDate(new Date(link.updatedAt))}</span>
+				<span
+					>{$_('uload.detail_view.meta_updated', {
+						values: { date: formatDate(new Date(link.updatedAt)) },
+					})}</span
+				>
 			{/if}
 		</div>
 	{/snippet}

@@ -76,7 +76,7 @@ export const recipesStore = {
 			>
 		>
 	) {
-		const wrapped = { ...patch } as Record<string, unknown>;
+		const wrapped: Partial<LocalRecipe> = { ...patch };
 		await encryptRecord('recipes', wrapped);
 		await recipeTable.update(id, wrapped);
 	},

@@ -80,7 +80,7 @@ export const wardrobeGarmentsStore = {
 			>
 		>
 	): Promise<void> {
-		const wrapped = { ...patch } as Record<string, unknown>;
+		const wrapped: Partial<LocalWardrobeGarment> = { ...patch };
 		await encryptRecord('wardrobeGarments', wrapped);
 		await wardrobeGarmentsTable.update(id, wrapped);
 	},

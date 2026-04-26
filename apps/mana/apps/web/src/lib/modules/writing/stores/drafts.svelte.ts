@@ -139,7 +139,7 @@ export const draftsStore = {
 	},
 
 	async updateDraft(id: string, patch: UpdateDraftPatch) {
-		const wrapped = { ...patch } as Record<string, unknown>;
+		const wrapped: Partial<LocalDraft> = { ...patch };
 		await encryptRecord('writingDrafts', wrapped);
 		await draftTable.update(id, wrapped);
 	},

@@ -71,7 +71,7 @@ export const wardrobeOutfitsStore = {
 			>
 		>
 	): Promise<void> {
-		const wrapped = { ...patch } as Record<string, unknown>;
+		const wrapped: Partial<LocalWardrobeOutfit> = { ...patch };
 		await encryptRecord('wardrobeOutfits', wrapped);
 		await wardrobeOutfitsTable.update(id, wrapped);
 	},

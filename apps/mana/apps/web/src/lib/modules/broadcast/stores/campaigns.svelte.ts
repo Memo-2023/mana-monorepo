@@ -96,7 +96,7 @@ export const broadcastCampaignsStore = {
 		if (existing.status !== 'draft') {
 			throw new Error('[broadcast] only drafts can be edited; duplicate to revise a sent campaign');
 		}
-		const wrapped = { ...patch } as Record<string, unknown>;
+		const wrapped: Partial<LocalCampaign> = { ...patch };
 		await encryptRecord('broadcastCampaigns', wrapped);
 		await campaignTable.update(id, wrapped);
 	},
@@ -113,7 +113,7 @@ export const broadcastCampaignsStore = {
 		if (existing.status !== 'draft') {
 			throw new Error('[broadcast] only drafts can be edited');
 		}
-		const patch = { content } as Record<string, unknown>;
+		const patch: Partial<LocalCampaign> = { content };
 		await encryptRecord('broadcastCampaigns', patch);
 		await campaignTable.update(id, patch);
 	},
@@ -124,7 +124,7 @@ export const broadcastCampaignsStore = {
 		if (existing.status !== 'draft') {
 			throw new Error('[broadcast] only drafts can be edited');
 		}
-		const patch = { audience } as Record<string, unknown>;
+		const patch: Partial<LocalCampaign> = { audience };
 		await encryptRecord('broadcastCampaigns', patch);
 		await campaignTable.update(id, patch);
 	},

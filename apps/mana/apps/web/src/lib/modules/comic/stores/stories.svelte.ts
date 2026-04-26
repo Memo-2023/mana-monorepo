@@ -161,7 +161,7 @@ export const comicStoriesStore = {
 		const patch = {
 			panelImageIds: nextIds,
 			panelMeta: nextMeta,
-		} as Record<string, unknown>;
+		} as Partial<LocalComicStory>;
 		await encryptRecord('comicStories', patch);
 		await comicStoriesTable.update(storyId, patch);
 		emitDomainEvent('ComicPanelAppended', 'comic', 'comicStories', storyId, {

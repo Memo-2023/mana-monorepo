@@ -64,7 +64,7 @@ export const stylesStore = {
 	},
 
 	async updateStyle(id: string, patch: UpdateStylePatch) {
-		const wrapped = { ...patch } as Record<string, unknown>;
+		const wrapped: Partial<LocalWritingStyle> = { ...patch };
 		await encryptRecord('writingStyles', wrapped);
 		await writingStyleTable.update(id, wrapped);
 	},

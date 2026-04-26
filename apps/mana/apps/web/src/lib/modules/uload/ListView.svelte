@@ -3,6 +3,7 @@
   Short links list with click counts and quick link creation.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { useLiveQueryWithDefault } from '@mana/local-store/svelte';
 	import { db } from '$lib/data/database';
 	import { decryptRecords } from '$lib/data/crypto';
@@ -59,11 +60,11 @@
 		try {
 			const parsed = new URL(fullUrl);
 			if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-				error = 'Ungültige URL';
+				error = $_('uload.list_view.err_invalid_url');
 				return;
 			}
 		} catch {
-			error = 'Ungültige URL';
+			error = $_('uload.list_view.err_invalid_url');
 			return;
 		}
 
@@ -95,11 +96,11 @@
 	}
 </script>
 
-<BaseListView items={sorted} getKey={(l) => l.id} emptyTitle="Keine Links">
+<BaseListView items={sorted} getKey={(l) => l.id} emptyTitle={$_('uload.list_view.empty_title')}>
 	{#snippet header()}
-		<span>{links.length} Links</span>
-		<span>{totalClicks} Klicks</span>
-		<span>{folders.length} Ordner</span>
+		<span>{$_('uload.list_view.header_links', { values: { count: links.length } })}</span>
+		<span>{$_('uload.list_view.header_clicks', { values: { count: totalClicks } })}</span>
+		<span>{$_('uload.list_view.header_folders', { values: { count: folders.length } })}</span>
 	{/snippet}
 
 	{#snippet listHeader()}
@@ -113,7 +114,12 @@
 			>
 				<LinkIcon size={14} class="icon" />
 				<!-- svelte-ignore a11y_autofocus -->
-				<input class="add-input" bind:value={newUrl} placeholder="URL einfügen..." autofocus />
+				<input
+					class="add-input"
+					bind:value={newUrl}
+					placeholder={$_('uload.list_view.add_placeholder')}
+					autofocus
+				/>
 				<button type="submit" class="submit-btn" disabled={!newUrl.trim()}>
 					<Plus size={14} />
 				</button>
@@ -124,7 +130,7 @@
 		{:else}
 			<button class="add-toggle" onclick={() => (showAdd = true)}>
 				<Plus size={14} />
-				<span>Neuer Link</span>
+				<span>{$_('uload.list_view.add_button')}</span>
 			</button>
 		{/if}
 	{/snippet}

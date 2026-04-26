@@ -130,7 +130,7 @@ export const libraryEntriesStore = {
 			>
 		>
 	) {
-		const wrapped = { ...patch } as Record<string, unknown>;
+		const wrapped: Partial<LocalLibraryEntry> = { ...patch };
 		await encryptRecord('libraryEntries', wrapped);
 		await libraryEntryTable.update(id, wrapped);
 		// Keep the share-link snapshot in sync if this entry is unlisted.

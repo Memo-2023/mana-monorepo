@@ -165,7 +165,7 @@ export const meImagesStore = {
 		id: string,
 		patch: Partial<Pick<LocalMeImage, 'label' | 'tags' | 'kind' | 'usage'>>
 	): Promise<void> {
-		const wrapped = { ...patch } as Record<string, unknown>;
+		const wrapped: Partial<LocalMeImage> = { ...patch };
 		await encryptRecord('meImages', wrapped);
 		await meImagesTable.update(id, wrapped);
 	},

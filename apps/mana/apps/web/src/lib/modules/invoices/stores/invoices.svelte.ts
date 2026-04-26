@@ -135,7 +135,7 @@ export const invoicesStore = {
 				'[invoices] only drafts can be edited; void and duplicate to revise a sent invoice'
 			);
 		}
-		const wrapped = { ...patch } as Record<string, unknown>;
+		const wrapped: Partial<LocalInvoice> = { ...patch };
 		await encryptRecord('invoices', wrapped);
 		await invoiceTable.update(id, wrapped);
 	},
@@ -152,7 +152,7 @@ export const invoicesStore = {
 			throw new Error('[invoices] only drafts can be edited');
 		}
 		const totals = computeInvoiceTotals(lines);
-		const patch = { lines, totals } as Record<string, unknown>;
+		const patch: Partial<LocalInvoice> = { lines, totals };
 		// `lines` is in the encryption allowlist; `totals` is not. encryptRecord
 		// only touches allowlisted keys, so a single call is correct for both.
 		await encryptRecord('invoices', patch);
