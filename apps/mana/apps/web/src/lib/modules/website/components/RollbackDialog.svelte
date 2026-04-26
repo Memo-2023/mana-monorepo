@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
+	import { locale } from 'svelte-i18n';
+	import { get } from 'svelte/store';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { sitesStore } from '../stores/sites.svelte';
 	import { fetchSnapshotHistory, PublishError, type SnapshotHistoryEntry } from '../publish';
@@ -21,7 +24,7 @@
 		loadError = null;
 		try {
 			const token = await authStore.getValidToken();
-			if (!token) throw new Error('Nicht angemeldet');
+			if (!token) throw new Error($_('website.rollback_dialog.err_unauth'));
 			entries = await fetchSnapshotHistory(siteId, token);
 		} catch (err) {
 			loadError =
@@ -42,7 +45,7 @@
 	});
 
 	async function onRollback(snapshotId: string) {
-		if (!confirm('Diese Version als aktuell veröffentlicht setzen?')) return;
+		if (!confirm($_('website.rollback_dialog.confirm_rollback'))) return;
 		rollingBackId = snapshotId;
 		actionError = null;
 		try {
@@ -61,7 +64,7 @@
 	}
 
 	function formatDate(iso: string): string {
-		return new Date(iso).toLocaleString('de-DE');
+		return new Date(iso).toLocaleString(get(locale) ?? 'de');
 	}
 </script>
 
@@ -71,25 +74,29 @@
 	onkeydown={(e) => e.key === 'Escape' && onClose()}
 	role="button"
 	tabindex="-1"
-	aria-label="Schließen"
+	aria-label={$_('website.rollback_dialog.close_aria')}
 ></div>
 
 <div class="wb-modal" role="dialog" aria-modal="true" aria-labelledby="wb-rollback-title">
 	<header class="wb-modal__head">
 		<div>
-			<h3 id="wb-rollback-title">Version-History</h3>
-			<p>Wähle eine ältere veröffentlichte Version, um sie wieder live zu stellen.</p>
+			<h3 id="wb-rollback-title">{$_('website.rollback_dialog.heading')}</h3>
+			<p>{$_('website.rollback_dialog.subtitle')}</p>
 		</div>
-		<button class="wb-modal__close" onclick={onClose} aria-label="Schließen">×</button>
+		<button
+			class="wb-modal__close"
+			onclick={onClose}
+			aria-label={$_('website.rollback_dialog.close_aria')}>×</button
+		>
 	</header>
 
 	<div class="wb-modal__body">
 		{#if loadError}
 			<p class="wb-error">{loadError}</p>
 		{:else if entries === null}
-			<p class="wb-empty">Lade…</p>
+			<p class="wb-empty">{$_('website.rollback_dialog.loading')}</p>
 		{:else if entries.length === 0}
-			<p class="wb-empty">Noch keine veröffentlichten Versionen.</p>
+			<p class="wb-empty">{$_('website.rollback_dialog.empty')}</p>
 		{:else}
 			{#if actionError}
 				<p class="wb-error">{actionError}</p>
@@ -103,14 +110,18 @@
 						</div>
 						<div class="wb-row__actions">
 							{#if entry.isCurrent}
-								<span class="wb-pill wb-pill--current">Aktuell live</span>
+								<span class="wb-pill wb-pill--current"
+									>{$_('website.rollback_dialog.badge_current')}</span
+								>
 							{:else}
 								<button
 									class="wb-btn wb-btn--primary"
 									onclick={() => onRollback(entry.id)}
 									disabled={rollingBackId === entry.id || loading}
 								>
-									{rollingBackId === entry.id ? 'Stelle wieder her…' : 'Wiederherstellen'}
+									{rollingBackId === entry.id
+										? $_('website.rollback_dialog.action_restoring')
+										: $_('website.rollback_dialog.action_restore')}
 								</button>
 							{/if}
 						</div>

@@ -4,6 +4,7 @@
 	 * the URL-only fallback from @mana/website-blocks via the custom
 	 * inspector registry (see inspector-overrides.ts).
 	 */
+	import { _ } from 'svelte-i18n';
 	import type { BlockInspectorProps } from '@mana/website-blocks';
 	import type { ImageProps } from '@mana/website-blocks';
 	import { uploadImage, UploadError } from '../upload';
@@ -57,12 +58,12 @@
 		}}
 	>
 		{#if uploading}
-			<span class="wb-dropzone__hint">Lade hoch…</span>
+			<span class="wb-dropzone__hint">{$_('website.image_inspector.uploading')}</span>
 		{:else if block.props.url}
 			<img src={block.props.url} alt={block.props.altText} class="wb-dropzone__preview" />
-			<span class="wb-dropzone__hint">Klicken / ziehen, um zu ersetzen</span>
+			<span class="wb-dropzone__hint">{$_('website.image_inspector.replace_hint')}</span>
 		{:else}
-			<span class="wb-dropzone__hint">Bild hier hinziehen oder klicken</span>
+			<span class="wb-dropzone__hint">{$_('website.image_inspector.drop_hint')}</span>
 		{/if}
 	</div>
 	<input
@@ -78,7 +79,7 @@
 	{/if}
 
 	<label class="wb-field">
-		<span>Oder URL einsetzen</span>
+		<span>{$_('website.image_inspector.label_url')}</span>
 		<input
 			type="url"
 			value={block.props.url}
@@ -88,17 +89,17 @@
 	</label>
 
 	<label class="wb-field">
-		<span>Alt-Text *</span>
+		<span>{$_('website.image_inspector.label_alt')}</span>
 		<input
 			type="text"
 			value={block.props.altText}
 			oninput={(e) => onChange({ altText: e.currentTarget.value })}
-			placeholder="Beschreibung für Screenreader"
+			placeholder={$_('website.image_inspector.placeholder_alt')}
 		/>
 	</label>
 
 	<label class="wb-field">
-		<span>Bildunterschrift</span>
+		<span>{$_('website.image_inspector.label_caption')}</span>
 		<input
 			type="text"
 			value={block.props.caption}
@@ -108,13 +109,13 @@
 
 	<div class="wb-row">
 		<label class="wb-field">
-			<span>Seitenverhältnis</span>
+			<span>{$_('website.image_inspector.label_aspect_ratio')}</span>
 			<select
 				value={block.props.aspectRatio}
 				onchange={(e) =>
 					onChange({ aspectRatio: e.currentTarget.value as ImageProps['aspectRatio'] })}
 			>
-				<option value="auto">Auto</option>
+				<option value="auto">{$_('website.image_inspector.aspect_auto')}</option>
 				<option value="21:9">21:9</option>
 				<option value="16:9">16:9</option>
 				<option value="4:3">4:3</option>
@@ -123,26 +124,26 @@
 		</label>
 
 		<label class="wb-field">
-			<span>Breite</span>
+			<span>{$_('website.image_inspector.label_width')}</span>
 			<select
 				value={block.props.width}
 				onchange={(e) => onChange({ width: e.currentTarget.value as ImageProps['width'] })}
 			>
-				<option value="narrow">Schmal</option>
-				<option value="container">Container</option>
-				<option value="full">Vollbreit</option>
+				<option value="narrow">{$_('website.image_inspector.width_narrow')}</option>
+				<option value="container">{$_('website.image_inspector.width_container')}</option>
+				<option value="full">{$_('website.image_inspector.width_full')}</option>
 			</select>
 		</label>
 	</div>
 
 	<label class="wb-field">
-		<span>Füllung</span>
+		<span>{$_('website.image_inspector.label_fit')}</span>
 		<select
 			value={block.props.fit}
 			onchange={(e) => onChange({ fit: e.currentTarget.value as ImageProps['fit'] })}
 		>
-			<option value="cover">Zuschneiden</option>
-			<option value="contain">Einpassen</option>
+			<option value="cover">{$_('website.image_inspector.fit_cover')}</option>
+			<option value="contain">{$_('website.image_inspector.fit_contain')}</option>
 		</select>
 	</label>
 </div>

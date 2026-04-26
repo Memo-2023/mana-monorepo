@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { formatDate } from '$lib/i18n/format';
 	import { useAllSites } from './queries';
 
@@ -8,12 +9,12 @@
 		const now = Date.now();
 		const then = new Date(iso).getTime();
 		const diffMin = Math.floor((now - then) / 60_000);
-		if (diffMin < 1) return 'gerade eben';
-		if (diffMin < 60) return `vor ${diffMin} Min`;
+		if (diffMin < 1) return $_('website.list_view.relative_just_now');
+		if (diffMin < 60) return $_('website.list_view.relative_minutes', { values: { n: diffMin } });
 		const diffH = Math.floor(diffMin / 60);
-		if (diffH < 24) return `vor ${diffH} Std`;
+		if (diffH < 24) return $_('website.list_view.relative_hours', { values: { n: diffH } });
 		const diffD = Math.floor(diffH / 24);
-		if (diffD < 30) return `vor ${diffD} Tg`;
+		if (diffD < 30) return $_('website.list_view.relative_days', { values: { n: diffD } });
 		return formatDate(new Date(iso));
 	}
 </script>
@@ -21,18 +22,18 @@
 <div class="wb-list">
 	<header class="wb-list__header">
 		<div>
-			<h2>Deine Websites</h2>
+			<h2>{$_('website.list_view.heading')}</h2>
 			<p class="wb-list__hint">
-				Block-Editor, veröffentlichen unter <code>mana.how</code>.
+				{$_('website.list_view.hint_prefix')} <code>mana.how</code>.
 			</p>
 		</div>
-		<a class="wb-list__new" href="/website/new">+ Neue Website</a>
+		<a class="wb-list__new" href="/website/new">{$_('website.list_view.action_new')}</a>
 	</header>
 
 	{#if sites.value.length === 0}
 		<div class="wb-list__empty">
-			<p>Noch keine Website. Wähl ein Template oder starte blank.</p>
-			<a class="wb-list__new" href="/website/new">+ Neue Website</a>
+			<p>{$_('website.list_view.empty_text')}</p>
+			<a class="wb-list__new" href="/website/new">{$_('website.list_view.action_new')}</a>
 		</div>
 	{:else}
 		<div class="wb-list__grid">
@@ -48,7 +49,9 @@
 							class:wb-pill--green={site.publishedVersion}
 							class:wb-pill--amber={!site.publishedVersion}
 						>
-							{site.publishedVersion ? 'Veröffentlicht' : 'Entwurf'}
+							{site.publishedVersion
+								? $_('website.list_view.status_published')
+								: $_('website.list_view.status_draft')}
 						</span>
 						<span class="wb-card__time">{formatRelative(site.updatedAt)}</span>
 					</div>

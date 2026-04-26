@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { getAllBlockSpecs } from '@mana/website-blocks';
 
 	interface Props {
@@ -11,7 +12,7 @@
 </script>
 
 <div class="wb-palette">
-	<p class="wb-palette__label">Block einfügen</p>
+	<p class="wb-palette__label">{$_('website.insert_palette.label')}</p>
 	<div class="wb-palette__grid">
 		{#each specs as spec (spec.type)}
 			<button class="wb-palette__btn" onclick={() => onInsert(spec.type)} title={spec.label}>

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { _ } from 'svelte-i18n';
 	import { pagesStore, InvalidPathError, DuplicatePathError } from '../stores/pages.svelte';
 	import type { WebsitePage } from '../types';
 
@@ -29,7 +30,7 @@
 			const page = await pagesStore.createPage({
 				siteId,
 				path: draftPath,
-				title: draftTitle || 'Ohne Titel',
+				title: draftTitle || $_('website.page_list.default_title'),
 			});
 			showAdd = false;
 			await goto(`/website/${siteId}/edit/${page.id}`);
@@ -44,10 +45,10 @@
 		ev.preventDefault();
 		ev.stopPropagation();
 		if (pages.length <= 1) {
-			alert('Mindestens eine Seite muss bestehen bleiben.');
+			alert($_('website.page_list.alert_min_one'));
 			return;
 		}
-		if (!confirm('Seite wirklich löschen?')) return;
+		if (!confirm($_('website.page_list.confirm_delete'))) return;
 		await pagesStore.deletePage(pageId);
 		// If the active page was deleted, navigate to another one.
 		if (pageId === activePageId) {
@@ -59,8 +60,10 @@
 
 <div class="wb-pages">
 	<div class="wb-pages__header">
-		<p class="wb-pages__label">Seiten</p>
-		<button class="wb-pages__add" onclick={startAdd} title="Neue Seite">+</button>
+		<p class="wb-pages__label">{$_('website.page_list.heading')}</p>
+		<button class="wb-pages__add" onclick={startAdd} title={$_('website.page_list.action_add')}
+			>+</button
+		>
 	</div>
 
 	<ul class="wb-pages__list">
@@ -78,7 +81,7 @@
 					<button
 						class="wb-pages__delete"
 						onclick={(e) => deletePageById(p.id, e)}
-						title="Seite löschen">×</button
+						title={$_('website.page_list.action_delete')}>×</button
 					>
 				</a>
 			</li>
@@ -88,31 +91,35 @@
 	{#if showAdd}
 		<div class="wb-pages__form">
 			<label class="wb-field">
-				<span>Titel</span>
+				<span>{$_('website.page_list.label_title')}</span>
 				<!-- svelte-ignore a11y_autofocus — inline add-page form; modal-style focus is expected -->
 				<input
 					type="text"
 					value={draftTitle}
 					oninput={(e) => (draftTitle = e.currentTarget.value)}
-					placeholder="Über uns"
+					placeholder={$_('website.page_list.placeholder_title')}
 					autofocus
 				/>
 			</label>
 			<label class="wb-field">
-				<span>Pfad</span>
+				<span>{$_('website.page_list.label_path')}</span>
 				<input
 					type="text"
 					value={draftPath}
 					oninput={(e) => (draftPath = e.currentTarget.value.toLowerCase())}
-					placeholder="/ueber-uns"
+					placeholder={$_('website.page_list.placeholder_path')}
 				/>
 			</label>
 			{#if addError}
 				<p class="wb-error">{addError}</p>
 			{/if}
 			<div class="wb-pages__form-actions">
-				<button class="wb-btn wb-btn--ghost" onclick={() => (showAdd = false)}>Abbrechen</button>
-				<button class="wb-btn wb-btn--primary" onclick={submitAdd}>Anlegen</button>
+				<button class="wb-btn wb-btn--ghost" onclick={() => (showAdd = false)}
+					>{$_('website.page_list.action_cancel')}</button
+				>
+				<button class="wb-btn wb-btn--primary" onclick={submitAdd}
+					>{$_('website.page_list.action_create')}</button
+				>
 			</div>
 		</div>
 	{/if}

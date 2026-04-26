@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { _ } from 'svelte-i18n';
 	import { SITE_TEMPLATES, type SiteTemplate } from '../templates';
 	import {
 		sitesStore,
@@ -42,11 +43,11 @@
 	async function submit() {
 		error = null;
 		if (!selected) {
-			error = 'Bitte ein Template auswählen.';
+			error = $_('website.template_picker.err_select_template');
 			return;
 		}
 		if (!draftName.trim() || !isValidSlug(draftSlug)) {
-			error = 'Name und Slug sind erforderlich (2–40 Kleinbuchstaben/Zahlen/Bindestrich).';
+			error = $_('website.template_picker.err_invalid_form');
 			return;
 		}
 		creating = true;
@@ -75,13 +76,10 @@
 <div class="wb-templates">
 	<header class="wb-templates__head">
 		<div>
-			<h2>Neue Website</h2>
-			<p>
-				Such dir einen Startpunkt. Templates enthalten fertige Seiten und Blöcke — du kannst alles
-				später anpassen.
-			</p>
+			<h2>{$_('website.template_picker.heading')}</h2>
+			<p>{$_('website.template_picker.subtitle')}</p>
 		</div>
-		<a class="wb-templates__back" href="/website">← Zurück</a>
+		<a class="wb-templates__back" href="/website">{$_('website.template_picker.action_back')}</a>
 	</header>
 
 	<ul class="wb-templates__grid">
@@ -98,7 +96,15 @@
 					<div class="wb-template__body">
 						<h3>{template.name}</h3>
 						<p>{template.description}</p>
-						<small>{template.pages.length} Seite{template.pages.length === 1 ? '' : 'n'}</small>
+						<small
+							>{template.pages.length === 1
+								? $_('website.template_picker.pages_count_singular', {
+										values: { count: template.pages.length },
+									})
+								: $_('website.template_picker.pages_count_plural', {
+										values: { count: template.pages.length },
+									})}</small
+						>
 					</div>
 				</button>
 			</li>
@@ -107,19 +113,21 @@
 
 	{#if selected}
 		<section class="wb-templates__config" aria-labelledby="wb-config-title">
-			<h3 id="wb-config-title">Mit "{selected.name}" starten</h3>
+			<h3 id="wb-config-title">
+				{$_('website.template_picker.config_title', { values: { name: selected.name } })}
+			</h3>
 			<div class="wb-row">
 				<label class="wb-field">
-					<span>Name</span>
+					<span>{$_('website.template_picker.label_name')}</span>
 					<input
 						type="text"
 						value={draftName}
 						oninput={(e) => onNameInput(e.currentTarget.value)}
-						placeholder="Meine Website"
+						placeholder={$_('website.template_picker.placeholder_name')}
 					/>
 				</label>
 				<label class="wb-field">
-					<span>Slug (URL)</span>
+					<span>{$_('website.template_picker.label_slug')}</span>
 					<div class="wb-slug">
 						<span class="wb-slug__prefix">/s/</span>
 						<input
@@ -137,10 +145,12 @@
 
 			<div class="wb-actions">
 				<button class="wb-btn wb-btn--ghost" onclick={() => (selected = null)} disabled={creating}>
-					Abbrechen
+					{$_('website.template_picker.action_cancel')}
 				</button>
 				<button class="wb-btn wb-btn--primary" onclick={submit} disabled={creating}>
-					{creating ? 'Erstelle…' : `Mit "${selected.name}" starten`}
+					{creating
+						? $_('website.template_picker.action_creating')
+						: $_('website.template_picker.action_create', { values: { name: selected.name } })}
 				</button>
 			</div>
 		</section>

@@ -3,6 +3,7 @@
 	 * App-side gallery inspector with multi-image upload via mana-media.
 	 * Overrides the URL-only fallback from @mana/website-blocks.
 	 */
+	import { _ } from 'svelte-i18n';
 	import type { BlockInspectorProps } from '@mana/website-blocks';
 	import type { GalleryProps, GalleryImage } from '@mana/website-blocks';
 	import { uploadImage, UploadError } from '../upload';
@@ -61,12 +62,12 @@
 
 <div class="wb-inspector">
 	<label class="wb-field">
-		<span>Überschrift</span>
+		<span>{$_('website.gallery_inspector.label_title')}</span>
 		<input
 			type="text"
 			value={block.props.title}
 			oninput={(e) => onChange({ title: e.currentTarget.value })}
-			placeholder="Optional"
+			placeholder={$_('website.gallery_inspector.placeholder_title')}
 		/>
 	</label>
 
@@ -85,9 +86,9 @@
 		}}
 	>
 		{#if uploading}
-			<span>Lade hoch…</span>
+			<span>{$_('website.gallery_inspector.uploading')}</span>
 		{:else}
-			<span>+ Bilder hinzufügen — ziehen oder klicken (mehrere möglich)</span>
+			<span>{$_('website.gallery_inspector.drop_hint')}</span>
 		{/if}
 	</div>
 	<input
@@ -105,17 +106,17 @@
 
 	<div class="wb-row">
 		<label class="wb-field">
-			<span>Layout</span>
+			<span>{$_('website.gallery_inspector.label_layout')}</span>
 			<select
 				value={block.props.layout}
 				onchange={(e) => onChange({ layout: e.currentTarget.value as GalleryProps['layout'] })}
 			>
-				<option value="grid">Grid</option>
-				<option value="masonry">Masonry</option>
+				<option value="grid">{$_('website.gallery_inspector.layout_grid')}</option>
+				<option value="masonry">{$_('website.gallery_inspector.layout_masonry')}</option>
 			</select>
 		</label>
 		<label class="wb-field">
-			<span>Spalten</span>
+			<span>{$_('website.gallery_inspector.label_columns')}</span>
 			<select
 				value={String(block.props.columns)}
 				onchange={(e) =>
@@ -130,14 +131,14 @@
 
 	<div class="wb-row">
 		<label class="wb-field">
-			<span>Abstand</span>
+			<span>{$_('website.gallery_inspector.label_gap')}</span>
 			<select
 				value={block.props.gap}
 				onchange={(e) => onChange({ gap: e.currentTarget.value as GalleryProps['gap'] })}
 			>
-				<option value="sm">Klein</option>
-				<option value="md">Mittel</option>
-				<option value="lg">Groß</option>
+				<option value="sm">{$_('website.gallery_inspector.gap_sm')}</option>
+				<option value="md">{$_('website.gallery_inspector.gap_md')}</option>
+				<option value="lg">{$_('website.gallery_inspector.gap_lg')}</option>
 			</select>
 		</label>
 		<label class="wb-checkbox">
@@ -146,12 +147,16 @@
 				checked={block.props.lightbox}
 				onchange={(e) => onChange({ lightbox: e.currentTarget.checked })}
 			/>
-			<span>Lightbox (Vollbild)</span>
+			<span>{$_('website.gallery_inspector.label_lightbox')}</span>
 		</label>
 	</div>
 
 	<div class="wb-images">
-		<div class="wb-images__head">Bilder ({block.props.images.length})</div>
+		<div class="wb-images__head">
+			{$_('website.gallery_inspector.images_count', {
+				values: { count: block.props.images.length },
+			})}
+		</div>
 		{#each block.props.images as img, i (i)}
 			<div class="wb-image-row">
 				<img src={img.url} alt={img.altText} class="wb-image-row__thumb" />
@@ -160,13 +165,13 @@
 						type="text"
 						value={img.altText}
 						oninput={(e) => updateImage(i, { altText: e.currentTarget.value })}
-						placeholder="Alt-Text"
+						placeholder={$_('website.gallery_inspector.placeholder_alt')}
 					/>
 					<input
 						type="text"
 						value={img.caption}
 						oninput={(e) => updateImage(i, { caption: e.currentTarget.value })}
-						placeholder="Bildunterschrift"
+						placeholder={$_('website.gallery_inspector.placeholder_caption')}
 					/>
 				</div>
 				<div class="wb-image-row__actions">

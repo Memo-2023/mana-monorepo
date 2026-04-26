@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { sitesStore } from '../stores/sites.svelte';
 	import { PublishError } from '../publish';
 	import RollbackDialog from './RollbackDialog.svelte';
@@ -46,7 +47,7 @@
 	}
 
 	async function onUnpublish() {
-		if (!confirm('Website offline nehmen? Besucher sehen dann 404.')) return;
+		if (!confirm($_('website.publish_bar.confirm_unpublish'))) return;
 		unpublishing = true;
 		lastError = null;
 		try {
@@ -64,16 +65,16 @@
 <div class="wb-publishbar">
 	<div class="wb-publishbar__status">
 		{#if site.publishedVersion}
-			<span class="wb-pill wb-pill--green">Live</span>
+			<span class="wb-pill wb-pill--green">{$_('website.publish_bar.badge_live')}</span>
 			<a class="wb-publishbar__link" href={publicUrl} target="_blank" rel="noopener">
 				{publicUrl} ↗
 			</a>
 			{#if hasDraftAhead}
-				<span class="wb-pill wb-pill--amber">Unveröffentlichte Änderungen</span>
+				<span class="wb-pill wb-pill--amber">{$_('website.publish_bar.badge_dirty')}</span>
 			{/if}
 		{:else}
-			<span class="wb-pill wb-pill--gray">Entwurf</span>
-			<span class="wb-publishbar__hint">Noch nicht veröffentlicht</span>
+			<span class="wb-pill wb-pill--gray">{$_('website.publish_bar.badge_draft')}</span>
+			<span class="wb-publishbar__hint">{$_('website.publish_bar.hint_unpublished')}</span>
 		{/if}
 	</div>
 
@@ -82,27 +83,33 @@
 			<button
 				class="wb-btn wb-btn--ghost"
 				onclick={() => (showHistory = true)}
-				title="Versionen einsehen / wiederherstellen"
+				title={$_('website.publish_bar.action_versions_title')}
 			>
-				Versionen
+				{$_('website.publish_bar.action_versions')}
 			</button>
 			<button
 				class="wb-btn wb-btn--ghost"
 				onclick={onUnpublish}
 				disabled={unpublishing || publishing}
 			>
-				{unpublishing ? 'Offline…' : 'Offline nehmen'}
+				{unpublishing
+					? $_('website.publish_bar.action_unpublishing')
+					: $_('website.publish_bar.action_unpublish')}
 			</button>
 			<button
 				class="wb-btn wb-btn--primary"
 				onclick={onPublish}
 				disabled={publishing || !hasDraftAhead}
 			>
-				{publishing ? 'Veröffentliche…' : 'Änderungen veröffentlichen'}
+				{publishing
+					? $_('website.publish_bar.action_publishing')
+					: $_('website.publish_bar.action_publish_changes')}
 			</button>
 		{:else}
 			<button class="wb-btn wb-btn--primary" onclick={onPublish} disabled={publishing}>
-				{publishing ? 'Veröffentliche…' : 'Veröffentlichen'}
+				{publishing
+					? $_('website.publish_bar.action_publishing')
+					: $_('website.publish_bar.action_publish')}
 			</button>
 		{/if}
 	</div>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import {
 		listDomains,
 		addDomain,
@@ -42,7 +43,7 @@
 	async function onAdd() {
 		const host = newHost.trim().toLowerCase();
 		if (!host) {
-			addError = 'Hostname erforderlich';
+			addError = $_('website.domains.err_host_required');
 			return;
 		}
 		adding = true;
@@ -70,7 +71,7 @@
 	}
 
 	async function onRemove(domainId: string, hostname: string) {
-		if (!confirm(`Domain "${hostname}" entfernen?`)) return;
+		if (!confirm($_('website.domains.confirm_remove', { values: { host: hostname } }))) return;
 		await removeDomain(siteId, domainId);
 		await load();
 	}
@@ -82,10 +83,11 @@
 
 <section class="wb-domains" aria-labelledby="wb-domains-title">
 	<header>
-		<h3 id="wb-domains-title">Eigene Domain</h3>
+		<h3 id="wb-domains-title">{$_('website.domains.heading')}</h3>
 		<p class="wb-domains__hint">
-			Verbinde einen eigenen Hostnamen (z.B. <code>meineseite.de</code>) mit dieser Website. Nur für
-			Founder-Tier.
+			{$_('website.domains.hint_prefix')} <code>meineseite.de</code>{$_(
+				'website.domains.hint_suffix'
+			)}
 		</p>
 	</header>
 
@@ -102,12 +104,12 @@
 	>
 		<input
 			type="text"
-			placeholder="z.B. portfolio.deinedomain.de"
+			placeholder={$_('website.domains.placeholder_new')}
 			value={newHost}
 			oninput={(e) => (newHost = e.currentTarget.value)}
 		/>
 		<button class="wb-btn wb-btn--primary" disabled={adding || !newHost.trim()}>
-			{adding ? 'Füge hinzu…' : '+ Domain'}
+			{adding ? $_('website.domains.action_adding') : $_('website.domains.action_add')}
 		</button>
 	</form>
 
@@ -116,9 +118,9 @@
 	{/if}
 
 	{#if domains === null}
-		<p class="wb-domains__empty">Lade…</p>
+		<p class="wb-domains__empty">{$_('website.domains.loading')}</p>
 	{:else if domains.length === 0}
-		<p class="wb-domains__empty">Noch keine eigenen Domains verbunden.</p>
+		<p class="wb-domains__empty">{$_('website.domains.empty')}</p>
 	{:else}
 		<ul class="wb-domains__list">
 			{#each domains as d (d.id)}
@@ -135,13 +137,15 @@
 									onclick={() => onVerify(d.id)}
 									disabled={verifyingId === d.id}
 								>
-									{verifyingId === d.id ? 'Prüfe…' : 'Verify'}
+									{verifyingId === d.id
+										? $_('website.domains.action_verifying')
+										: $_('website.domains.action_verify')}
 								</button>
 							{/if}
 							<button
 								class="wb-btn wb-btn--icon wb-btn--danger"
 								onclick={() => onRemove(d.id, d.hostname)}
-								title="Entfernen">×</button
+								title={$_('website.domains.action_remove_title')}>×</button
 							>
 						</div>
 					</div>
@@ -152,7 +156,7 @@
 
 					{#if d.status !== 'verified'}
 						<div class="wb-domain__dns">
-							<p class="wb-domain__dns-title">DNS konfigurieren:</p>
+							<p class="wb-domain__dns-title">{$_('website.domains.dns_section_title')}</p>
 							<div class="wb-dns-row">
 								<div>
 									<span class="wb-dns-type">CNAME</span>
@@ -160,7 +164,7 @@
 								</div>
 								<button class="wb-dns-val" onclick={() => copyToClipboard(d.dnsTarget)}>
 									{d.dnsTarget}
-									<small>Klick zum Kopieren</small>
+									<small>{$_('website.domains.dns_copy_hint')}</small>
 								</button>
 							</div>
 							<div class="wb-dns-row">
@@ -170,12 +174,11 @@
 								</div>
 								<button class="wb-dns-val" onclick={() => copyToClipboard(d.verificationToken)}>
 									{d.verificationToken}
-									<small>Klick zum Kopieren</small>
+									<small>{$_('website.domains.dns_copy_hint')}</small>
 								</button>
 							</div>
 							<p class="wb-domain__dns-note">
-								DNS-Änderungen brauchen meist 5–30 Minuten, bis sie weltweit propagiert sind. Danach
-								"Verify" klicken.
+								{$_('website.domains.dns_note')}
 							</p>
 						</div>
 					{/if}

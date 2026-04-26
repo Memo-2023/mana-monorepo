@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Component } from 'svelte';
+	import { _ } from 'svelte-i18n';
 	import { getBlockSpec, type Block, type BlockInspectorProps } from '@mana/website-blocks';
 	import { blocksStore, InvalidBlockPropsError } from '../stores/blocks.svelte';
 	import { getEditorHistoryContext } from '../history.svelte';
@@ -57,7 +58,7 @@
 			else await blocksStore.updateBlockProps(block.id, p);
 		} catch (err) {
 			if (err instanceof InvalidBlockPropsError) {
-				lastError = `Validation failed: ${err.message}`;
+				lastError = `${$_('website.block_inspector.err_validation_prefix')} ${err.message}`;
 			} else {
 				lastError = err instanceof Error ? err.message : String(err);
 			}
@@ -65,7 +66,7 @@
 	}
 
 	async function onDelete() {
-		if (!confirm('Diesen Block löschen?')) return;
+		if (!confirm($_('website.block_inspector.confirm_delete'))) return;
 		if (history) await history.deleteBlock(block.id);
 		else await blocksStore.deleteBlock(block.id);
 		onDeleted?.();
@@ -108,8 +109,8 @@
 					class="wb-inspector__action"
 					onclick={onMoveUp}
 					disabled={!canMoveUp}
-					title="Nach oben verschieben"
-					aria-label="Nach oben verschieben"
+					title={$_('website.block_inspector.action_move_up')}
+					aria-label={$_('website.block_inspector.action_move_up')}
 				>
 					↑
 				</button>
@@ -117,16 +118,16 @@
 					class="wb-inspector__action"
 					onclick={onMoveDown}
 					disabled={!canMoveDown}
-					title="Nach unten verschieben"
-					aria-label="Nach unten verschieben"
+					title={$_('website.block_inspector.action_move_down')}
+					aria-label={$_('website.block_inspector.action_move_down')}
 				>
 					↓
 				</button>
 				<button
 					class="wb-inspector__action wb-inspector__action--delete"
 					onclick={onDelete}
-					title="Block löschen"
-					aria-label="Block löschen"
+					title={$_('website.block_inspector.action_delete')}
+					aria-label={$_('website.block_inspector.action_delete')}
 				>
 					×
 				</button>
@@ -145,7 +146,9 @@
 			<p class="wb-inspector__error">{lastError}</p>
 		{/if}
 	{:else}
-		<p class="wb-inspector__empty">Unbekannter Block-Typ: {block.type}</p>
+		<p class="wb-inspector__empty">
+			{$_('website.block_inspector.unknown_type', { values: { type: block.type } })}
+		</p>
 	{/if}
 </div>
 

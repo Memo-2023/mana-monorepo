@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { _ } from 'svelte-i18n';
 	import {
 		useAllSites,
 		useAllPages,
@@ -115,8 +116,10 @@
 			class="wb-toolbar__btn"
 			onclick={() => history.undo()}
 			disabled={!history.canUndo}
-			title={history.undoLabel ? `Rückgängig: ${history.undoLabel}` : 'Rückgängig (⌘Z)'}
-			aria-label="Rückgängig"
+			title={history.undoLabel
+				? $_('website.editor.undo_with_label', { values: { label: history.undoLabel } })
+				: $_('website.editor.undo_default')}
+			aria-label={$_('website.editor.undo_aria')}
 		>
 			↶
 		</button>
@@ -124,8 +127,10 @@
 			class="wb-toolbar__btn"
 			onclick={() => history.redo()}
 			disabled={!history.canRedo}
-			title={history.redoLabel ? `Wiederholen: ${history.redoLabel}` : 'Wiederholen (⌘⇧Z)'}
-			aria-label="Wiederholen"
+			title={history.redoLabel
+				? $_('website.editor.redo_with_label', { values: { label: history.redoLabel } })
+				: $_('website.editor.redo_default')}
+			aria-label={$_('website.editor.redo_aria')}
 		>
 			↷
 		</button>
@@ -135,8 +140,12 @@
 		<main class="wb-editor__center">
 			{#if pageBlocks.length === 0}
 				<div class="wb-editor__empty">
-					<h3>Leere Seite</h3>
-					<p>Öffne den Tab <strong>Einfügen</strong> rechts, um den ersten Block zu setzen.</p>
+					<h3>{$_('website.editor.empty_title')}</h3>
+					<p>
+						{$_('website.editor.empty_hint_prefix')}
+						<strong>{$_('website.editor.empty_hint_strong')}</strong>
+						{$_('website.editor.empty_hint_suffix')}
+					</p>
 				</div>
 			{:else}
 				<div class="wb-editor__preview">
@@ -151,7 +160,7 @@
 		</main>
 
 		<aside class="wb-editor__sidebar">
-			<div class="wb-tabs" role="tablist" aria-label="Editor-Panels">
+			<div class="wb-tabs" role="tablist" aria-label={$_('website.editor.panels_aria')}>
 				<button
 					class="wb-tab"
 					class:wb-tab--active={activeTab === 'pages'}
@@ -159,7 +168,7 @@
 					aria-selected={activeTab === 'pages'}
 					onclick={() => (activeTab = 'pages')}
 				>
-					Seiten
+					{$_('website.editor.tab_pages')}
 				</button>
 				<button
 					class="wb-tab"
@@ -168,7 +177,7 @@
 					aria-selected={activeTab === 'insert'}
 					onclick={() => (activeTab = 'insert')}
 				>
-					Einfügen
+					{$_('website.editor.tab_insert')}
 				</button>
 				<button
 					class="wb-tab"
@@ -177,7 +186,7 @@
 					aria-selected={activeTab === 'block'}
 					onclick={() => (activeTab = 'block')}
 				>
-					Block
+					{$_('website.editor.tab_block')}
 				</button>
 			</div>
 
@@ -194,7 +203,7 @@
 									<button
 										class="wb-editor__settings-btn"
 										onclick={() => (showSettings = true)}
-										title="Website-Einstellungen"
+										title={$_('website.editor.settings_btn_title')}
 									>
 										⚙
 									</button>
@@ -217,7 +226,7 @@
 							/>
 						{:else}
 							<p class="wb-editor__inspector-empty">
-								Wähle einen Block in der Vorschau, um ihn zu bearbeiten.
+								{$_('website.editor.inspector_empty')}
 							</p>
 						{/if}
 					</div>

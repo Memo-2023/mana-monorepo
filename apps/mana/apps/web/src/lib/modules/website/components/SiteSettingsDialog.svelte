@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { PRESET_LABELS, THEME_PRESETS, type ThemePreset } from '@mana/website-blocks/themes';
 	import { sitesStore } from '../stores/sites.svelte';
 	import DomainsSection from './DomainsSection.svelte';
@@ -69,18 +70,22 @@
 	onkeydown={(e) => e.key === 'Escape' && onClose()}
 	role="button"
 	tabindex="-1"
-	aria-label="Schließen"
+	aria-label={$_('website.site_settings.close_aria')}
 ></div>
 
 <div class="wb-modal" role="dialog" aria-modal="true" aria-labelledby="wb-settings-title">
 	<header class="wb-modal__head">
-		<h3 id="wb-settings-title">Website-Einstellungen</h3>
-		<button class="wb-modal__close" onclick={onClose} aria-label="Schließen">×</button>
+		<h3 id="wb-settings-title">{$_('website.site_settings.heading')}</h3>
+		<button
+			class="wb-modal__close"
+			onclick={onClose}
+			aria-label={$_('website.site_settings.close_aria')}>×</button
+		>
 	</header>
 
 	<div class="wb-modal__body">
 		<section class="wb-section">
-			<h4>Theme</h4>
+			<h4>{$_('website.site_settings.section_theme')}</h4>
 			<div class="wb-presets">
 				{#each presets as preset (preset)}
 					{@const tokens = THEME_PRESETS[preset]}
@@ -104,14 +109,14 @@
 
 		<section class="wb-section">
 			<div class="wb-section__head">
-				<h4>Farben überschreiben</h4>
+				<h4>{$_('website.site_settings.section_overrides')}</h4>
 				<button class="wb-btn wb-btn--ghost wb-btn--sm" onclick={resetOverrides}>
-					Auf Preset zurücksetzen
+					{$_('website.site_settings.action_reset_overrides')}
 				</button>
 			</div>
 			<div class="wb-colors">
 				<label class="wb-color">
-					<span>Primär</span>
+					<span>{$_('website.site_settings.label_primary')}</span>
 					<input
 						type="color"
 						value={draftPrimary || previewTokens.primary}
@@ -125,7 +130,7 @@
 					/>
 				</label>
 				<label class="wb-color">
-					<span>Hintergrund</span>
+					<span>{$_('website.site_settings.label_background')}</span>
 					<input
 						type="color"
 						value={draftBackground || previewTokens.background}
@@ -139,7 +144,7 @@
 					/>
 				</label>
 				<label class="wb-color">
-					<span>Text</span>
+					<span>{$_('website.site_settings.label_foreground')}</span>
 					<input
 						type="color"
 						value={draftForeground || previewTokens.foreground}
@@ -156,14 +161,14 @@
 		</section>
 
 		<section class="wb-section">
-			<h4>Footer</h4>
+			<h4>{$_('website.site_settings.section_footer')}</h4>
 			<label class="wb-field">
-				<span>Footer-Text</span>
+				<span>{$_('website.site_settings.label_footer_text')}</span>
 				<input
 					type="text"
 					value={draftFooterText}
 					oninput={(e) => (draftFooterText = e.currentTarget.value)}
-					placeholder="© 2026 — Meine Website"
+					placeholder={$_('website.site_settings.placeholder_footer_text')}
 				/>
 			</label>
 		</section>
@@ -174,9 +179,11 @@
 	</div>
 
 	<footer class="wb-modal__foot">
-		<button class="wb-btn wb-btn--ghost" onclick={onClose} disabled={saving}>Abbrechen</button>
+		<button class="wb-btn wb-btn--ghost" onclick={onClose} disabled={saving}
+			>{$_('website.site_settings.action_cancel')}</button
+		>
 		<button class="wb-btn wb-btn--primary" onclick={save} disabled={saving}>
-			{saving ? 'Speichere…' : 'Speichern'}
+			{saving ? $_('website.site_settings.action_saving') : $_('website.site_settings.action_save')}
 		</button>
 	</footer>
 </div>

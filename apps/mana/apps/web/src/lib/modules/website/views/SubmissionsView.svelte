@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
+	import { locale } from 'svelte-i18n';
+	import { get } from 'svelte/store';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { fetchSubmissions, deleteSubmission, type SubmissionEntry } from '../publish';
 
@@ -17,7 +20,7 @@
 		loadError = null;
 		try {
 			const token = await authStore.getValidToken();
-			if (!token) throw new Error('Nicht angemeldet');
+			if (!token) throw new Error($_('website.submissions.err_unauth'));
 			entries = await fetchSubmissions(siteId, token);
 		} catch (err) {
 			loadError = err instanceof Error ? err.message : String(err);
@@ -33,7 +36,7 @@
 	});
 
 	async function remove(submissionId: string) {
-		if (!confirm('Submission wirklich löschen?')) return;
+		if (!confirm($_('website.submissions.confirm_delete'))) return;
 		const token = await authStore.getValidToken();
 		if (!token) return;
 		await deleteSubmission(siteId, submissionId, token);
@@ -41,29 +44,31 @@
 	}
 
 	function formatDate(iso: string): string {
-		return new Date(iso).toLocaleString('de-DE');
+		return new Date(iso).toLocaleString(get(locale) ?? 'de');
 	}
 </script>
 
 <div class="wb-submissions">
 	<header class="wb-submissions__head">
 		<div>
-			<h2>Eingegangen</h2>
-			<p>Formular-Einsendungen von deiner Website.</p>
+			<h2>{$_('website.submissions.heading')}</h2>
+			<p>{$_('website.submissions.subtitle')}</p>
 		</div>
 		<button class="wb-btn wb-btn--ghost" onclick={load} disabled={loading}>
-			{loading ? 'Lade…' : 'Aktualisieren'}
+			{loading
+				? $_('website.submissions.action_loading')
+				: $_('website.submissions.action_refresh')}
 		</button>
 	</header>
 
 	{#if loadError}
 		<p class="wb-error">{loadError}</p>
 	{:else if entries === null}
-		<div class="wb-submissions__empty">Lade…</div>
+		<div class="wb-submissions__empty">{$_('website.submissions.loading')}</div>
 	{:else if entries.length === 0}
 		<div class="wb-submissions__empty">
-			<p>Noch keine Einsendungen.</p>
-			<small>Sobald jemand ein Formular auf deiner Website ausfüllt, landet es hier.</small>
+			<p>{$_('website.submissions.empty_title')}</p>
+			<small>{$_('website.submissions.empty_hint')}</small>
 		</div>
 	{:else}
 		<ul class="wb-submissions__list">
