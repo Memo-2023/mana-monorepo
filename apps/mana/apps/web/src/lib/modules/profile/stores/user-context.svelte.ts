@@ -3,6 +3,16 @@
  *
  * All encrypted fields are encrypted before write, decrypted on read.
  * The interview progress field is NOT encrypted (structural metadata only).
+ *
+ * Singleton bootstrap (F4 of docs/plans/sync-field-meta-overhaul.md):
+ * the per-user `userContext` row is created server-side by mana-auth at
+ * `/register` time. The first sync pull lands the row before the UI ever
+ * tries to read it. The internal `getOrCreateLocalDoc()` helper below is
+ * a *fallback* — it inserts an empty doc on a brand-new client whose
+ * pull hasn't caught up yet. Any user edits made in that window stamp
+ * `origin: 'user'` via the Dexie hook, and the F2 conflict-gate makes
+ * sure the server's `origin: 'system'` bootstrap row never overwrites
+ * them silently.
  */
 
 import { userContextTable } from '../collections';
@@ -18,7 +28,11 @@ import {
 	type UserContextSocial,
 } from '../types';
 
-async function ensureDoc(): Promise<void> {
+/** Internal fallback: write a fresh empty doc if neither the server
+ *  bootstrap (F4) nor any prior session has populated the singleton
+ *  yet. Mutating store methods call this first so a brand-new client
+ *  that hasn't completed its first pull can still accept edits. */
+async function getOrCreateLocalDoc(): Promise<void> {
 	const existing = await userContextTable.get(USER_CONTEXT_SINGLETON_ID);
 	if (existing) return;
 	const doc = emptyUserContext() as LocalUserContext;
@@ -27,15 +41,13 @@ async function ensureDoc(): Promise<void> {
 }
 
 async function readDecrypted(): Promise<LocalUserContext> {
-	await ensureDoc();
+	await getOrCreateLocalDoc();
 	const local = (await userContextTable.get(USER_CONTEXT_SINGLETON_ID))!;
 	const [decrypted] = await decryptRecords('userContext', [local]);
 	return decrypted;
 }
 
 export const userContextStore = {
-	ensureDoc,
-
 	/** Replace a full section (about, routine, nutrition, leisure, social). */
 	async updateSection<K extends 'about' | 'routine' | 'nutrition' | 'leisure' | 'social'>(
 		section: K,
@@ -49,7 +61,7 @@ export const userContextStore = {
 						? UserContextLeisure
 						: UserContextSocial
 	): Promise<void> {
-		await ensureDoc();
+		await getOrCreateLocalDoc();
 		const current = await readDecrypted();
 		const merged = { ...current[section], ...value };
 		const diff: Partial<LocalUserContext> = {
@@ -63,7 +75,7 @@ export const userContextStore = {
 	 *  When `merge` is true and the value is an array, new items are added
 	 *  to the existing array instead of replacing it (deduped). */
 	async setField(path: string, value: unknown, merge = false): Promise<void> {
-		await ensureDoc();
+		await getOrCreateLocalDoc();
 		const current = await readDecrypted();
 		const [section, field] = path.split('.') as [keyof LocalUserContext, string];
 
@@ -102,7 +114,7 @@ export const userContextStore = {
 
 	/** Replace the interests array. */
 	async setInterests(interests: string[]): Promise<void> {
-		await ensureDoc();
+		await getOrCreateLocalDoc();
 		const diff: Partial<LocalUserContext> = {
 			interests,
 		};
@@ -112,7 +124,7 @@ export const userContextStore = {
 
 	/** Replace the goals array. */
 	async setGoals(goals: string[]): Promise<void> {
-		await ensureDoc();
+		await getOrCreateLocalDoc();
 		const diff: Partial<LocalUserContext> = {
 			goals,
 		};
@@ -122,7 +134,7 @@ export const userContextStore = {
 
 	/** Set freeform markdown content. */
 	async setFreeform(content: string): Promise<void> {
-		await ensureDoc();
+		await getOrCreateLocalDoc();
 		const diff: Partial<LocalUserContext> = {
 			freeform: content,
 		};
@@ -140,7 +152,7 @@ export const userContextStore = {
 
 	/** Mark a question as answered in the interview progress. */
 	async markAnswered(questionId: string): Promise<void> {
-		await ensureDoc();
+		await getOrCreateLocalDoc();
 		const current = await readDecrypted();
 		const interview = { ...current.interview };
 		if (!interview.answeredIds.includes(questionId)) {
@@ -156,7 +168,7 @@ export const userContextStore = {
 
 	/** Mark a question as skipped. */
 	async markSkipped(questionId: string): Promise<void> {
-		await ensureDoc();
+		await getOrCreateLocalDoc();
 		const current = await readDecrypted();
 		const interview = { ...current.interview };
 		if (!interview.skippedIds.includes(questionId)) {

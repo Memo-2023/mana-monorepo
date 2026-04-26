@@ -46,7 +46,6 @@
 	const VOICE_INPUT_TYPES: QuestionInputType[] = ['text', 'textarea', 'tags'];
 
 	onMount(() => {
-		void userContextStore.ensureDoc();
 		if (initialVoiceLevel) {
 			voiceLevel = initialVoiceLevel;
 		}

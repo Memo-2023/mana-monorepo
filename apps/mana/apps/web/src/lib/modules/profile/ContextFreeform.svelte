@@ -32,9 +32,7 @@
 	let saveTimer: ReturnType<typeof setTimeout> | null = null;
 	let savedTimer: ReturnType<typeof setTimeout> | null = null;
 
-	onMount(() => {
-		void userContextStore.ensureDoc();
-	});
+	onMount(() => {});
 
 	$effect(() => {
 		if (!ctx) return;

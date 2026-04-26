@@ -24,9 +24,7 @@
 	let editValue = $state<string | string[]>('');
 	let tagInput = $state('');
 
-	onMount(() => {
-		void userContextStore.ensureDoc();
-	});
+	onMount(() => {});
 
 	function startEdit(field: string, current: unknown) {
 		editingField = field;
