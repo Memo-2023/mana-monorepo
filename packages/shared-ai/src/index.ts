@@ -38,7 +38,7 @@ export {
 } from './actor';
 
 export type { FieldMeta, FieldOrigin } from './field-meta';
-export { makeFieldMeta, isUserOriginatedField } from './field-meta';
+export { makeFieldMeta, isUserOriginatedField, originFromActor } from './field-meta';
 
 export type {
 	IterationPhase,

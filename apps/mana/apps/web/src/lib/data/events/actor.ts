@@ -51,6 +51,7 @@ export {
 	isFromMissionRunner,
 	makeFieldMeta,
 	isUserOriginatedField,
+	originFromActor,
 } from '@mana/shared-ai';
 
 /**

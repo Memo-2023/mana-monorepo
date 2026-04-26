@@ -287,7 +287,22 @@ function valuesEqual(a: unknown, b: unknown): boolean {
 	}
 }
 
-export async function applyServerChanges(appId: string, changes: unknown[]): Promise<void> {
+/** Options for {@link applyServerChanges}.
+ *
+ * `isInitialHydration` flips off conflict-detection entirely — used when
+ * the calling pull/push knows the local client has never seen this app's
+ * data before (cursor is empty), so any "newer server value over local"
+ * is by definition initial-fill, not a lost edit. Belt-and-suspenders
+ * with the per-field `origin === 'user'` gate inside the inner loop. */
+export interface ApplyServerChangesOptions {
+	isInitialHydration?: boolean;
+}
+
+export async function applyServerChanges(
+	appId: string,
+	changes: unknown[],
+	options: ApplyServerChangesOptions = {}
+): Promise<void> {
 	// Reject malformed entries up-front so a single bad row from the server
 	// can never write garbage into IndexedDB. Drops are logged once and the
 	// good entries proceed — partial degradation beats a hard crash on a
@@ -402,16 +417,20 @@ export async function applyServerChanges(appId: string, changes: unknown[]): Pro
 										if (key === 'id' || key === FIELD_META_KEY) continue;
 										const localFieldTime = localMeta[key]?.at ?? localUpdatedAt;
 										if (recordTime >= localFieldTime) {
-											// Conflict signal: server STRICTLY wins (>) and the local
+											// Conflict signal: server STRICTLY wins (>), the local
 											// field had a non-empty value that differs from the new
-											// one. Equal-time ties don't fire because there's no
-											// edit to lose. F2 will additionally gate this on
-											// localMeta[key].origin === 'user'.
+											// one, AND the local write was a real user edit (not a
+											// server-replay / system / migration / agent write).
+											// Initial-hydration pulls bypass the conflict surface
+											// entirely — by definition no edit can be lost when
+											// the table has never been seen locally before.
 											const localValue = (existing as Record<string, unknown>)[key];
 											if (
+												!options.isInitialHydration &&
 												recordTime > localFieldTime &&
 												localValue != null &&
-												!valuesEqual(localValue, val)
+												!valuesEqual(localValue, val) &&
+												localMeta[key]?.origin === 'user'
 											) {
 												notifyConflict({
 													tableName,
@@ -464,13 +483,16 @@ export async function applyServerChanges(appId: string, changes: unknown[]): Pro
 										const localFieldTime = localMeta[key]?.at ?? localUpdatedAt;
 										if (serverTime >= localFieldTime) {
 											// Same conflict criteria as the insert-as-update path:
-											// strictly newer + non-empty local + actually different.
-											// F2 will additionally gate on localMeta[key].origin === 'user'.
+											// strictly newer + non-empty local + actually different
+											// + local write came from a real user edit. Initial
+											// hydration suppresses the surface entirely.
 											const localValue = (existing as Record<string, unknown>)[key];
 											if (
+												!options.isInitialHydration &&
 												serverTime > localFieldTime &&
 												localValue != null &&
-												!valuesEqual(localValue, fc.value)
+												!valuesEqual(localValue, fc.value) &&
+												localMeta[key]?.origin === 'user'
 											) {
 												notifyConflict({
 													tableName,
@@ -777,6 +799,12 @@ export function createUnifiedSync(
 
 			// Build changeset in backend protocol format
 			const changeset = buildChangeset(pending, clientId, oldestCursor);
+			// First contact with this app's data: cursor empty means the
+			// server is about to send everything-since-epoch. No local edit
+			// can be lost in that batch by definition — flip on the
+			// hydration mode so applyServerChanges suppresses any conflict
+			// notifications for this round.
+			const isInitialHydration = !oldestCursor;
 
 			const res = await fetchWithRetry(
 				`${serverUrl}/sync/${appId}`,
@@ -802,7 +830,7 @@ export function createUnifiedSync(
 
 			// Apply server changes from the response
 			if (data.serverChanges?.length > 0) {
-				await applyServerChanges(appId, data.serverChanges);
+				await applyServerChanges(appId, data.serverChanges, { isInitialHydration });
 			}
 
 			// Update sync cursor
@@ -881,6 +909,12 @@ export function createUnifiedSync(
 				const syncName = toSyncName(tableName);
 				let cursor = await getSyncCursor(appId, tableName);
 				let hasMore = true;
+				// Hydration applies to the first page of an empty-cursor
+				// pull. Subsequent pages carry a real cursor (set after the
+				// first response lands) so they fall back to normal
+				// conflict-detection — by then any user edits made during
+				// pagination are real edits worth surfacing.
+				let isInitialHydration = !cursor;
 
 				// Paginated pull: continue fetching until server signals no more data
 				while (hasMore) {
@@ -906,11 +940,12 @@ export function createUnifiedSync(
 
 					if (data.serverChanges && data.serverChanges.length > 0) {
 						totalApplied += data.serverChanges.length;
-						await applyServerChanges(appId, data.serverChanges);
+						await applyServerChanges(appId, data.serverChanges, { isInitialHydration });
 					}
 
 					if (data.syncedUntil) {
 						cursor = data.syncedUntil;
+						isInitialHydration = false;
 					} else {
 						break;
 					}

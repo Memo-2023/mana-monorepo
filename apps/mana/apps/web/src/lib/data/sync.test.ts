@@ -515,5 +515,152 @@ describe('applyServerChanges (Dexie integration)', () => {
 			// Tied — LWW lets server win silently (no edit-loss to surface)
 			expect(conflicts).toHaveLength(0);
 		});
+
+		// ─── F2: Origin-gated conflict detection ─────────────────
+
+		it('does NOT fire on a sequential server-replay burst (history-replay)', async () => {
+			// Reproduces the original bug: a fresh client pulls history of
+			// 10 distinct server changes for the same record across N
+			// pseudo-sessions. None of them is a local user edit; all
+			// applyServerChanges writes are stamped origin='server-replay'.
+			// No conflict toast must fire — the surface is reserved for
+			// user edits that lose to a later server overwrite.
+			const conflicts = await captureConflicts(async () => {
+				// Initial insert (server-replay).
+				await applyServerChanges('todo', [
+					{
+						table: 'tasks',
+						id: 'task-replay-burst',
+						op: 'insert',
+						data: {
+							id: 'task-replay-burst',
+							title: 'gen-0',
+							priority: 'low',
+							isCompleted: false,
+							order: 0,
+							updatedAt: '2026-04-01T00:00:00Z',
+						},
+					},
+				]);
+				// 10 follow-up updates with monotonically increasing timestamps.
+				for (let i = 1; i <= 10; i++) {
+					const ts = `2026-04-01T00:0${i}:00Z`;
+					await applyServerChanges('todo', [
+						{
+							table: 'tasks',
+							id: 'task-replay-burst',
+							op: 'update',
+							fields: { title: { value: `gen-${i}`, at: ts } },
+						},
+					]);
+				}
+			});
+
+			expect(conflicts).toHaveLength(0);
+		});
+
+		it('does NOT fire when the local write came from an AI agent (origin=agent)', async () => {
+			const { runAs } = await import('./events/actor');
+			const { makeAgentActor } = await import('@mana/shared-ai');
+
+			const agent = makeAgentActor({
+				agentId: 'agent-test',
+				displayName: 'Test-Agent',
+				missionId: 'mission-1',
+				iterationId: 'iter-1',
+				rationale: 'unit-test',
+			});
+
+			// Seed locally under the agent actor — the creating-hook
+			// stamps origin='agent' for every field.
+			runAs(agent, () => {
+				void db.table('tasks').add({
+					id: 'task-agent-write',
+					title: 'agent-typed value',
+					priority: 'low',
+					isCompleted: false,
+					order: 0,
+				});
+			});
+			// Wait for the (synchronous) Dexie put to drain.
+			await db.table('tasks').get('task-agent-write');
+
+			const conflicts = await captureConflicts(async () => {
+				await applyServerChanges('todo', [
+					{
+						table: 'tasks',
+						id: 'task-agent-write',
+						op: 'update',
+						fields: {
+							title: { value: 'their version', at: '2099-01-01T00:00:00Z' },
+						},
+					},
+				]);
+			});
+
+			// Agent writes are visible in the proposal/mission UI, not the
+			// conflict toast — server overwriting them is silent.
+			expect(conflicts).toHaveLength(0);
+		});
+
+		it('does NOT fire when isInitialHydration is set (belt-and-suspenders)', async () => {
+			// Even with a real local user edit present, the hydration mode
+			// suppresses the entire conflict surface for the round.
+			await db.table('tasks').add({
+				id: 'task-hydration',
+				title: 'my draft',
+				priority: 'low',
+				isCompleted: false,
+				order: 0,
+			});
+
+			const conflicts = await captureConflicts(async () => {
+				await applyServerChanges(
+					'todo',
+					[
+						{
+							table: 'tasks',
+							id: 'task-hydration',
+							op: 'update',
+							fields: {
+								title: { value: 'server overwrite', at: '2099-01-01T00:00:00Z' },
+							},
+						},
+					],
+					{ isInitialHydration: true }
+				);
+			});
+
+			expect(conflicts).toHaveLength(0);
+		});
+
+		it('fires for a real user edit getting overwritten (origin=user)', async () => {
+			// Belt: the existing "fires when..." test at the top of the
+			// suite already covers this — restated here so the F2 block
+			// reads as a complete spec for the gating rules.
+			await db.table('tasks').add({
+				id: 'task-real-conflict',
+				title: 'I typed this',
+				priority: 'low',
+				isCompleted: false,
+				order: 0,
+			});
+
+			const conflicts = await captureConflicts(async () => {
+				await applyServerChanges('todo', [
+					{
+						table: 'tasks',
+						id: 'task-real-conflict',
+						op: 'update',
+						fields: {
+							title: { value: 'somebody else', at: '2099-01-01T00:00:00Z' },
+						},
+					},
+				]);
+			});
+
+			expect(conflicts).toHaveLength(1);
+			expect(conflicts[0].field).toBe('title');
+		});
 	});
 });

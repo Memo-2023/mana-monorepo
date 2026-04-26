@@ -24,6 +24,7 @@
 
 import { authStore } from '$lib/stores/auth.svelte';
 import { meImagesTable } from '../collections';
+import { makeSystemActor, runAsAsync, SYSTEM_MIGRATION } from '$lib/data/events/actor';
 
 export async function repairSilentTwinAvatarRows(): Promise<void> {
 	const user = authStore.user;
@@ -60,14 +61,22 @@ export async function repairSilentTwinAvatarRows(): Promise<void> {
 	victims.sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''));
 	const nowIso = new Date().toISOString();
 
-	await meImagesTable.db.transaction('rw', meImagesTable, async () => {
-		for (let i = 0; i < victims.length; i++) {
-			const row = victims[i];
-			await meImagesTable.update(row.id, {
-				primaryFor: i === 0 ? 'face-ref' : null,
-				updatedAt: nowIso,
-			});
-		}
+	// Run the rewrite under a migration-system actor so the Dexie
+	// updating-hook stamps `origin: 'migration'` on every touched field.
+	// Conflict-detection later treats these writes as pipeline-internal —
+	// a fresh client pulling the same updates from another device must
+	// NOT see "another session overwrote your edit" toasts.
+	const migrationActor = makeSystemActor(SYSTEM_MIGRATION, 'Repair: silent-twin');
+	await runAsAsync(migrationActor, async () => {
+		await meImagesTable.db.transaction('rw', meImagesTable, async () => {
+			for (let i = 0; i < victims.length; i++) {
+				const row = victims[i];
+				await meImagesTable.update(row.id, {
+					primaryFor: i === 0 ? 'face-ref' : null,
+					updatedAt: nowIso,
+				});
+			}
+		});
 	});
 
 	try {

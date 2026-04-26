@@ -23,6 +23,7 @@
  */
 
 import type { Actor } from './actor';
+import { SYSTEM_MIGRATION } from './actor';
 
 /**
  * Pipeline that produced a given field value, from the perspective of
@@ -66,4 +67,24 @@ export function makeFieldMeta(at: string, actor: Actor, origin: FieldOrigin): Fi
  *  the conflict toast. */
 export function isUserOriginatedField(meta: FieldMeta | undefined): boolean {
 	return meta?.origin === 'user';
+}
+
+/**
+ * Map an actor onto the pipeline-origin we stamp at the Dexie hook.
+ *
+ * Rules:
+ *   - `kind: 'user'`   → `'user'`
+ *   - `kind: 'ai'`     → `'agent'`
+ *   - `kind: 'system'` with `principalId === SYSTEM_MIGRATION` → `'migration'`
+ *   - any other system source                                  → `'system'`
+ *
+ * Server-replay is set explicitly by `applyServerChanges`, never derived
+ * here — the local hook only sees writes the local code initiated.
+ */
+export function originFromActor(actor: Actor): FieldOrigin {
+	if (actor.kind === 'ai') return 'agent';
+	if (actor.kind === 'system') {
+		return actor.principalId === SYSTEM_MIGRATION ? 'migration' : 'system';
+	}
+	return 'user';
 }

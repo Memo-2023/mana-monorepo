@@ -145,8 +145,8 @@ _Wird befüllt während der Ausführung._
 
 | Phase | Commit | Notiz |
 | --- | --- | --- |
-| F1 | _staged, uncommitted_ | Web + mana-sync (Go) + mana-ai + apps/api/mcp + tests + DB schema reset. Type-checks grün, mana-sync Go-Tests grün, mana-ai Bun-Tests grün (61 pass). DB truncated + recreated mit `field_meta` JSONB + `origin` TEXT. Browser-IndexedDB-Wipe + Smoke-Test stehen aus (User-Action). |
-| F2 | _pending_ | |
+| F1 | `7766ea502` | Web + mana-sync (Go) + mana-ai + apps/api/mcp + tests + DB schema reset. **Note: Commit-Titel `docs(plans): mark llm-fallback-aliases SHIPPED` ist irreführend — Multi-Terminal-Race hat F1 in einem fremden Commit zusammengeführt. Code ist trotzdem korrekt drin (27 F1 Files + Plan).** Tests grün, DB migriert. |
+| F2 | _staged, uncommitted_ | Origin-Gate aktiviert. `originFromActor()` in shared-ai/field-meta.ts maps actor.kind → 'user'/'agent'/'system'/'migration'. Hooks nutzen es. Repair-Migrations (repair-silent-twin, legacy-avatar) wrappen ihre Writes in `runAsAsync(systemMigrationActor, ...)`. `applyServerChanges` bekommt `ApplyServerChangesOptions.isInitialHydration` Parameter, beide Caller (push-response + pull) setzen ihn aus dem Cursor-State. Conflict-Trigger feuert nur noch wenn `localMeta[k]?.origin === 'user' && !options.isInitialHydration`. **29 Tests grün** inkl. 4 neuer (replay-burst no-conflict, agent-origin no-conflict, hydration no-conflict, user-edit fires-conflict). |
 | F3 | _pending_ | |
 | F4 | _pending_ | |
 | F5 | _pending_ | |

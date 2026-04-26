@@ -20,8 +20,8 @@ import { fire as fireTrigger } from '$lib/triggers/registry';
 import { checkInlineSuggestion } from '$lib/triggers/inline-suggest';
 import { getEffectiveUserId, GUEST_USER_ID } from './current-user';
 import { getEffectiveSpaceId } from './scope/active-space.svelte';
-import { getCurrentActor, makeFieldMeta } from './events/actor';
-import type { Actor, FieldMeta, FieldOrigin } from './events/actor';
+import { getCurrentActor, makeFieldMeta, originFromActor } from './events/actor';
+import type { Actor, FieldMeta } from './events/actor';
 import { isQuotaError, notifyQuotaExceeded } from './quota-detect';
 import {
 	SYNC_APP_MAP,
@@ -1501,9 +1501,12 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 			// `at` drives field-LWW ordering, `actor` carries attribution forward
 			// across renames, `origin` distinguishes user edits from system /
 			// migration / agent / server-replay writes for conflict-detection.
-			// F1 hardcodes `origin: 'user'` here — F2 will derive it from the
-			// active actor.kind so AI-runner writes land as `'agent'` etc.
-			const origin: FieldOrigin = 'user';
+			// `origin` is derived from `actor.kind`:
+			//   user → 'user'
+			//   ai → 'agent' (mission-runner / tool executor)
+			//   system + SYSTEM_MIGRATION → 'migration' (Dexie upgrades, repair routines)
+			//   any other system source → 'system' (projection, rule, stream, …)
+			const origin = originFromActor(actor);
 			const fieldMeta: Record<string, FieldMeta> = {};
 			for (const key of Object.keys(obj)) {
 				if (isInternalKey(key)) continue;
@@ -1542,7 +1545,7 @@ for (const [appId, tables] of Object.entries(SYNC_APP_MAP)) {
 			if (_applyingTables.has(tableName)) return undefined;
 			const now = new Date().toISOString();
 			const actor: Actor = getCurrentActor();
-			const origin: FieldOrigin = 'user';
+			const origin = originFromActor(actor);
 			const fields: Record<string, { value: unknown; at: string }> = {};
 
 			// userId is immutable after creation. Silently strip any attempt to

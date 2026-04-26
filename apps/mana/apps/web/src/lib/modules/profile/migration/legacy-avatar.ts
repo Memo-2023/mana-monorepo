@@ -25,6 +25,7 @@ import { authStore } from '$lib/stores/auth.svelte';
 import { profileService } from '$lib/api/profile';
 import { meImagesTable } from '../collections';
 import { meImagesStore } from '../stores/me-images.svelte';
+import { makeSystemActor, runAsAsync, SYSTEM_MIGRATION } from '$lib/data/events/actor';
 
 export async function migrateLegacyAvatarIfNeeded(): Promise<void> {
 	const user = authStore.user;
@@ -63,28 +64,40 @@ export async function migrateLegacyAvatarIfNeeded(): Promise<void> {
 		return;
 	}
 
-	await meImagesStore.createMeImage({
-		kind: 'face',
-		// Sentinel mediaId: not a real mana-media reference. The generate-
-		// with-reference path (M3) gates on MediaClient.list({app:'me'}),
-		// so this id will naturally bounce if ever used for generation.
-		mediaId: `legacy-avatar:${user.id}`,
-		storagePath: profile.image,
-		publicUrl: profile.image,
-		thumbnailUrl: profile.image,
-		width: 0,
-		height: 0,
-		label: 'Bisheriges Profilbild',
-		usage: { aiReference: false, showInProfile: true },
-		primaryFor: 'avatar',
-		// Legacy avatar is the user's global SSO identity (Better Auth
-		// `users.image`) — it belongs explicitly in the *personal* space,
-		// regardless of which space the user happens to be in when the
-		// migration fires. Use the `_personal:<uid>` sentinel that
-		// reconcileSentinels() rewrites to the real personal-space id on
-		// the next active-space bootstrap (same pattern v28 used for the
-		// blanket data-table migration).
-		spaceId: `_personal:${user.id}`,
+	// Pin the narrowed `profile.image` to a const so the type stays
+	// `string` across the runAsAsync closure (control-flow narrowing
+	// doesn't survive nested callbacks).
+	const imageUrl = profile.image;
+
+	// Run the seed insert under a migration-system actor so the Dexie
+	// creating-hook stamps `origin: 'migration'` on every field —
+	// conflict-detection ignores this row when the same migration fires
+	// later on a different device.
+	const migrationActor = makeSystemActor(SYSTEM_MIGRATION, 'Migration: legacy avatar');
+	await runAsAsync(migrationActor, async () => {
+		await meImagesStore.createMeImage({
+			kind: 'face',
+			// Sentinel mediaId: not a real mana-media reference. The generate-
+			// with-reference path (M3) gates on MediaClient.list({app:'me'}),
+			// so this id will naturally bounce if ever used for generation.
+			mediaId: `legacy-avatar:${user.id}`,
+			storagePath: imageUrl,
+			publicUrl: imageUrl,
+			thumbnailUrl: imageUrl,
+			width: 0,
+			height: 0,
+			label: 'Bisheriges Profilbild',
+			usage: { aiReference: false, showInProfile: true },
+			primaryFor: 'avatar',
+			// Legacy avatar is the user's global SSO identity (Better Auth
+			// `users.image`) — it belongs explicitly in the *personal* space,
+			// regardless of which space the user happens to be in when the
+			// migration fires. Use the `_personal:<uid>` sentinel that
+			// reconcileSentinels() rewrites to the real personal-space id on
+			// the next active-space bootstrap (same pattern v28 used for the
+			// blanket data-table migration).
+			spaceId: `_personal:${user.id}`,
+		});
 	});
 
 	try {
