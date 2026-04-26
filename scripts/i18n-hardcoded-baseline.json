@@ -43,7 +43,6 @@
 	"apps/mana/apps/web/src/lib/modules/admin/tabs/SystemTab.svelte": 8,
 	"apps/mana/apps/web/src/lib/modules/admin/tabs/UserDataTab.svelte": 9,
 	"apps/mana/apps/web/src/lib/modules/admin/tabs/UsersTab.svelte": 3,
-	"apps/mana/apps/web/src/lib/modules/ai-agents/ListView.svelte": 23,
 	"apps/mana/apps/web/src/lib/modules/ai-health/ListView.svelte": 2,
 	"apps/mana/apps/web/src/lib/modules/ai-insights/ListView.svelte": 4,
 	"apps/mana/apps/web/src/lib/modules/ai-missions/ListView.svelte": 22,

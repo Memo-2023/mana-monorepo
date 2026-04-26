@@ -17,6 +17,7 @@
   handle the common "let the agent touch todo but not calendar" case.
 -->
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { ArrowLeft, Plus, Pause, Play, Archive, Trash, Sparkle, Flag } from '@mana/shared-icons';
 	import { goto } from '$app/navigation';
 	import { useAgents } from '$lib/data/ai/agents/queries';
@@ -72,7 +73,7 @@
 			mode = 'detail';
 		} catch (err) {
 			if (err instanceof DuplicateAgentNameError) {
-				formError = `Agent-Name „${err.name}" ist bereits vergeben.`;
+				formError = $_('ai-agents.list_view.err_duplicate_name', { values: { name: err.name } });
 			} else {
 				formError = err instanceof Error ? err.message : String(err);
 			}
@@ -128,7 +129,7 @@
 			});
 		} catch (err) {
 			if (err instanceof DuplicateAgentNameError) {
-				saveError = `Agent-Name „${err.name}" ist bereits vergeben.`;
+				saveError = $_('ai-agents.list_view.err_duplicate_name', { values: { name: err.name } });
 			} else {
 				saveError = err instanceof Error ? err.message : String(err);
 			}
@@ -144,58 +145,64 @@
 	);
 
 	function describeMissionState(m: Mission): string {
-		return { active: 'aktiv', paused: 'pausiert', done: 'fertig', archived: 'archiviert' }[m.state];
+		return $_('ai-agents.list_view.mission_state_' + m.state);
 	}
 
 	// ── Policy editor ───────────────────────────────────────
 	const POLICY_MODULES = ['todo', 'calendar', 'notes', 'kontext', 'finance', 'drink', 'food'];
 	const POLICY_CHOICES: PolicyDecision[] = ['auto', 'propose', 'deny'];
-	const POLICY_LABEL: Record<PolicyDecision, string> = {
-		auto: 'Automatisch',
-		propose: 'Vorschlag',
-		deny: 'Verboten',
-	};
+	function policyLabel(c: PolicyDecision): string {
+		return $_('ai-agents.list_view.policy_label_' + c);
+	}
 	let policyAdvanced = $state(false);
 
 	/**
 	 * Generate a natural-language summary of the current policy.
-	 * Reads the agent's policy and produces a short German sentence.
+	 * Reads the agent's policy and produces a short i18n'd sentence.
 	 */
 	function describePolicyNatural(policy: AiPolicy): string {
 		const parts: string[] = [];
-		const autoTools: string[] = [];
-		const proposeTools: string[] = [];
 		const denyTools: string[] = [];
 
 		for (const [name, decision] of Object.entries(policy.tools)) {
-			if (decision === 'auto') autoTools.push(name);
-			else if (decision === 'deny') denyTools.push(name);
+			if (decision === 'deny') denyTools.push(name);
 		}
 
 		// Module overrides
 		const moduleOverrides = Object.entries(policy.defaultsByModule ?? {});
 		for (const [mod, decision] of moduleOverrides) {
-			if (decision === 'auto') parts.push(`${mod}: automatisch`);
-			else if (decision === 'deny') parts.push(`${mod}: gesperrt`);
+			if (decision === 'auto')
+				parts.push(
+					$_('ai-agents.list_view.policy_natural_module_auto', { values: { module: mod } })
+				);
+			else if (decision === 'deny')
+				parts.push(
+					$_('ai-agents.list_view.policy_natural_module_deny', { values: { module: mod } })
+				);
 		}
 
 		const defaultLabel =
 			policy.defaultForAi === 'auto'
-				? 'automatisch'
+				? $_('ai-agents.list_view.policy_natural_default_auto')
 				: policy.defaultForAi === 'deny'
-					? 'gesperrt'
-					: 'Vorschlag';
+					? $_('ai-agents.list_view.policy_natural_default_deny')
+					: $_('ai-agents.list_view.policy_natural_default_propose');
 
 		const lines: string[] = [];
 		if (denyTools.length > 0) {
+			const tools = denyTools.slice(0, 5).join(', ');
 			lines.push(
-				`Gesperrt: ${denyTools.slice(0, 5).join(', ')}${denyTools.length > 5 ? ' …' : ''}`
+				denyTools.length > 5
+					? $_('ai-agents.list_view.policy_natural_blocked_more', { values: { tools } })
+					: $_('ai-agents.list_view.policy_natural_blocked', { values: { tools } })
 			);
 		}
 		if (parts.length > 0) {
 			lines.push(parts.join(' · '));
 		}
-		lines.push(`Alles andere: ${defaultLabel}`);
+		lines.push(
+			$_('ai-agents.list_view.policy_natural_otherwise', { values: { default: defaultLabel } })
+		);
 		return lines.join('\n');
 	}
 
@@ -237,15 +244,15 @@
 	}
 
 	// ── Templates ───────────────────────────────────────────
-	const TEMPLATES: Array<{ key: string; label: string; policy: AiPolicy }> = [
+	const TEMPLATES = $derived<Array<{ key: string; label: string; policy: AiPolicy }>>([
 		{
 			key: 'standard',
-			label: 'Standard (Vorschlag für alles)',
+			label: $_('ai-agents.list_view.template_standard_label'),
 			policy: DEFAULT_AI_POLICY,
 		},
 		{
 			key: 'cautious',
-			label: 'Vorsichtig (alles Vorschlag, Schreiben verboten)',
+			label: $_('ai-agents.list_view.template_cautious_label'),
 			policy: {
 				...DEFAULT_AI_POLICY,
 				tools: Object.fromEntries(
@@ -259,13 +266,13 @@
 		},
 		{
 			key: 'aggressive',
-			label: 'Aggressiv (gleichartige Schreibvorgänge automatisch)',
+			label: $_('ai-agents.list_view.template_aggressive_label'),
 			policy: {
 				...DEFAULT_AI_POLICY,
 				defaultsByModule: { drink: 'auto', food: 'auto' },
 			},
 		},
-	];
+	]);
 
 	async function applyTemplate(agent: Agent, key: string) {
 		const t = TEMPLATES.find((x) => x.key === key);
@@ -280,7 +287,8 @@
 	}
 
 	async function handleDelete(agent: Agent) {
-		if (!confirm(`Agent „${agent.name}" löschen? Missionen laufen orphan weiter.`)) return;
+		if (!confirm($_('ai-agents.list_view.confirm_delete', { values: { name: agent.name } })))
+			return;
 		await deleteAgent(agent.id);
 		mode = 'list';
 		selectedId = null;
@@ -292,10 +300,10 @@
 	<div class="pane">
 		<header class="bar">
 			<button type="button" class="primary" onclick={() => goto('/agents/templates')}>
-				<Sparkle size={14} /><span>Aus Template</span>
+				<Sparkle size={14} /><span>{$_('ai-agents.list_view.action_from_template')}</span>
 			</button>
 			<button type="button" class="secondary" onclick={() => (mode = 'create')}>
-				<Plus size={14} /><span>Eigener Agent</span>
+				<Plus size={14} /><span>{$_('ai-agents.list_view.action_custom_agent')}</span>
 			</button>
 		</header>
 
@@ -303,10 +311,9 @@
 			<button type="button" class="promo" onclick={() => goto('/agents/templates')}>
 				<span class="promo-icon"><Sparkle size={16} weight="fill" /></span>
 				<span class="promo-body">
-					<strong>Starte mit einem Template</strong>
+					<strong>{$_('ai-agents.list_view.promo_title')}</strong>
 					<span class="promo-sub">
-						Recherche · Kontext · Today — vorgefertigte Agenten mit passender Scene und
-						Starter-Mission.
+						{$_('ai-agents.list_view.promo_sub')}
 					</span>
 				</span>
 			</button>
@@ -314,8 +321,7 @@
 
 		{#if agents.value.length === 0}
 			<p class="empty">
-				Noch keine Agenten. Ein Default-Agent „Mana" wird beim ersten Login automatisch angelegt;
-				für weitere persona-basierte Agenten klicke auf „Aus Template" oder „Eigener Agent".
+				{$_('ai-agents.list_view.empty_text')}
 			</p>
 		{:else}
 			<ul class="m-list">
@@ -339,33 +345,43 @@
 {:else if mode === 'create'}
 	<form class="create" onsubmit={(e) => (e.preventDefault(), handleCreate())}>
 		<button type="button" class="back-btn" onclick={() => (mode = 'list')}>
-			<ArrowLeft size={14} /><span>Abbrechen</span>
+			<ArrowLeft size={14} /><span>{$_('ai-agents.list_view.action_cancel')}</span>
 		</button>
 		<label>
-			<span class="lbl">Name</span>
-			<input bind:value={formName} placeholder="z.B. Travel Planner" required />
+			<span class="lbl">{$_('ai-agents.list_view.label_name')}</span>
+			<input
+				bind:value={formName}
+				placeholder={$_('ai-agents.list_view.placeholder_name')}
+				required
+			/>
 		</label>
 		<label>
-			<span class="lbl">Avatar (Emoji)</span>
+			<span class="lbl">{$_('ai-agents.list_view.label_avatar')}</span>
 			<input bind:value={formAvatar} maxlength="4" />
 		</label>
 		<label>
-			<span class="lbl">Rolle / Aufgabe</span>
-			<input bind:value={formRole} placeholder="Was macht dieser Agent für dich?" required />
+			<span class="lbl">{$_('ai-agents.list_view.label_role')}</span>
+			<input
+				bind:value={formRole}
+				placeholder={$_('ai-agents.list_view.placeholder_role')}
+				required
+			/>
 		</label>
 		{#if formError}
 			<p class="form-error">{formError}</p>
 		{/if}
 		<div class="form-actions">
 			<button type="submit" class="primary" disabled={creating}>
-				{creating ? 'Erstelle…' : 'Agent anlegen'}
+				{creating
+					? $_('ai-agents.list_view.action_creating')
+					: $_('ai-agents.list_view.action_create')}
 			</button>
 		</div>
 	</form>
 {:else if selected}
 	<div class="detail">
 		<button type="button" class="back-btn" onclick={() => (mode = 'list')}>
-			<ArrowLeft size={14} /><span>Liste</span>
+			<ArrowLeft size={14} /><span>{$_('ai-agents.list_view.action_back_list')}</span>
 		</button>
 		<h2 class="detail-title">
 			<span class="avatar">{selected.avatar ?? '🤖'}</span>
@@ -375,16 +391,16 @@
 		<div class="detail-actions">
 			{#if selected.state === 'active'}
 				<button type="button" onclick={() => pauseAgent(selected.id)}>
-					<Pause size={12} /><span>Pause</span>
+					<Pause size={12} /><span>{$_('ai-agents.list_view.action_pause')}</span>
 				</button>
 			{:else if selected.state === 'paused'}
 				<button type="button" onclick={() => resumeAgent(selected.id)}>
-					<Play size={12} /><span>Fortsetzen</span>
+					<Play size={12} /><span>{$_('ai-agents.list_view.action_resume')}</span>
 				</button>
 			{/if}
 			{#if selected.state !== 'archived'}
 				<button type="button" onclick={() => archiveAgent(selected.id)}>
-					<Archive size={12} /><span>Archivieren</span>
+					<Archive size={12} /><span>{$_('ai-agents.list_view.action_archive')}</span>
 				</button>
 			{/if}
 			<button type="button" class="danger" onclick={() => handleDelete(selected)}>
@@ -393,77 +409,76 @@
 		</div>
 
 		<section class="block">
-			<h3>Profil</h3>
+			<h3>{$_('ai-agents.list_view.section_profile')}</h3>
 			<label>
-				<span class="lbl">Name</span>
+				<span class="lbl">{$_('ai-agents.list_view.label_name')}</span>
 				<input bind:value={editName} />
 			</label>
 			<label>
-				<span class="lbl">Avatar (Emoji)</span>
+				<span class="lbl">{$_('ai-agents.list_view.label_avatar')}</span>
 				<input bind:value={editAvatar} maxlength="4" />
 			</label>
 			<label>
-				<span class="lbl">Rolle</span>
+				<span class="lbl">{$_('ai-agents.list_view.label_role')}</span>
 				<input bind:value={editRole} />
 			</label>
 		</section>
 
 		<section class="block">
-			<h3>Verhalten</h3>
+			<h3>{$_('ai-agents.list_view.section_behavior')}</h3>
 			<label>
-				<span class="lbl">System-Anweisung (verschlüsselt)</span>
+				<span class="lbl">{$_('ai-agents.list_view.label_system_prompt')}</span>
 				<textarea
 					bind:value={editSystemPrompt}
 					rows="3"
-					placeholder="Prepends auf jeden Planner-Prompt dieses Agents."
+					placeholder={$_('ai-agents.list_view.placeholder_system_prompt')}
 				></textarea>
 			</label>
 			<label>
-				<span class="lbl">Gedächtnis (verschlüsselt)</span>
+				<span class="lbl">{$_('ai-agents.list_view.label_memory')}</span>
 				<textarea
 					bind:value={editMemory}
 					rows="5"
-					placeholder="Was der Agent dauerhaft über dich wissen soll."
+					placeholder={$_('ai-agents.list_view.placeholder_memory')}
 				></textarea>
 			</label>
 		</section>
 
 		<section class="block">
-			<h3>Bereiche (Tag-Scope)</h3>
-			<p class="hint">Der Agent sieht nur Records mit diesen Tags. Leer = alles sichtbar.</p>
+			<h3>{$_('ai-agents.list_view.section_scope')}</h3>
+			<p class="hint">{$_('ai-agents.list_view.hint_scope')}</p>
 			<TagSelector
 				tags={allTags.value}
 				selectedTags={allTags.value.filter((t) => editScopeTagIds.includes(t.id))}
 				onTagsChange={(tags) => {
 					editScopeTagIds = tags.map((t) => t.id);
 				}}
-				placeholder="Bereiche wählen…"
-				addTagLabel="Bereich hinzufügen"
+				placeholder={$_('ai-agents.list_view.placeholder_scope')}
+				addTagLabel={$_('ai-agents.list_view.action_add_scope')}
 			/>
 		</section>
 
 		<section class="block">
-			<h3>Grenzen</h3>
+			<h3>{$_('ai-agents.list_view.section_limits')}</h3>
 			<label class="inline-field">
-				<span class="lbl">Parallele Missionen</span>
+				<span class="lbl">{$_('ai-agents.list_view.label_max_concurrent')}</span>
 				<input type="number" min="1" max="10" bind:value={editMaxConcurrent} />
 			</label>
 			<label class="inline-field">
-				<span class="lbl">Token-Budget / Tag</span>
+				<span class="lbl">{$_('ai-agents.list_view.label_max_tokens')}</span>
 				<input
 					type="number"
 					min="0"
 					bind:value={editMaxTokensPerDay}
-					placeholder="leer = unbegrenzt"
+					placeholder={$_('ai-agents.list_view.placeholder_max_tokens')}
 				/>
 			</label>
 		</section>
 
 		<section class="block">
-			<h3>Writing</h3>
+			<h3>{$_('ai-agents.list_view.section_writing')}</h3>
 			<p class="hint">
-				Default-Schreibstil, den der Agent beim Anlegen eines Drafts nutzt, wenn keiner explizit
-				übergeben wird.
+				{$_('ai-agents.list_view.hint_writing')}
 			</p>
 			<StylePicker
 				value={editDefaultWritingStyleId}
@@ -476,15 +491,18 @@
 				<span class="form-error">{saveError}</span>
 			{/if}
 			<button type="button" class="primary" disabled={saving} onclick={() => handleSave(selected)}>
-				{saving ? 'Speichere…' : 'Speichern'}
+				{saving ? $_('ai-agents.list_view.action_saving') : $_('ai-agents.list_view.action_save')}
 			</button>
 		</div>
 
 		<!-- ── Missions for this Agent ──────────────────── -->
 		<section class="block">
-			<h3><Flag size={12} /> Missions ({agentMissions.length})</h3>
+			<h3>
+				<Flag size={12} />
+				{$_('ai-agents.list_view.section_missions', { values: { count: agentMissions.length } })}
+			</h3>
 			{#if agentMissions.length === 0}
-				<p class="hint">Dieser Agent hat noch keine Missions.</p>
+				<p class="hint">{$_('ai-agents.list_view.hint_no_missions')}</p>
 			{:else}
 				<ul class="mission-list">
 					{#each agentMissions as m (m.id)}
@@ -501,13 +519,17 @@
 				class="secondary mission-new-btn"
 				onclick={() => goto(`/agents/templates`)}
 			>
-				<Plus size={12} /><span>Neue Mission für {selected.name}</span>
+				<Plus size={12} /><span
+					>{$_('ai-agents.list_view.action_new_mission', {
+						values: { name: selected.name },
+					})}</span
+				>
 			</button>
 		</section>
 
 		<!-- ── Policy ─────────────────────────────────── -->
 		<section class="block">
-			<h3>Policy</h3>
+			<h3>{$_('ai-agents.list_view.section_policy')}</h3>
 
 			<!-- Natural language summary -->
 			<pre class="policy-natural">{describePolicyNatural(selected.policy)}</pre>
@@ -534,12 +556,14 @@
 				class="toggle-advanced"
 				onclick={() => (policyAdvanced = !policyAdvanced)}
 			>
-				{policyAdvanced ? '▾ Erweitert ausblenden' : '▸ Erweitert anzeigen'}
+				{policyAdvanced
+					? $_('ai-agents.list_view.toggle_advanced_hide')
+					: $_('ai-agents.list_view.toggle_advanced_show')}
 			</button>
 
 			{#if policyAdvanced}
 				<div class="policy-row">
-					<span class="lbl">Global-Default</span>
+					<span class="lbl">{$_('ai-agents.list_view.label_global_default')}</span>
 					<div class="radio-group">
 						{#each POLICY_CHOICES as c}
 							<label class="radio">
@@ -550,7 +574,7 @@
 									checked={selected.policy.defaultForAi === c}
 									onchange={() => setDefaultForAi(selected, c)}
 								/>
-								<span>{POLICY_LABEL[c]}</span>
+								<span>{policyLabel(c)}</span>
 							</label>
 						{/each}
 					</div>
@@ -559,8 +583,8 @@
 				<table class="policy-table">
 					<thead>
 						<tr>
-							<th>Modul</th>
-							<th>Entscheidung</th>
+							<th>{$_('ai-agents.list_view.th_module')}</th>
+							<th>{$_('ai-agents.list_view.th_decision')}</th>
 							<th></th>
 						</tr>
 					</thead>
@@ -578,9 +602,9 @@
 											else setModuleDefault(selected, mod, v as PolicyDecision);
 										}}
 									>
-										<option value="">Global-Default</option>
+										<option value="">{$_('ai-agents.list_view.option_global_default')}</option>
 										{#each POLICY_CHOICES as c}
-											<option value={c}>{POLICY_LABEL[c]}</option>
+											<option value={c}>{policyLabel(c)}</option>
 										{/each}
 									</select>
 								</td>

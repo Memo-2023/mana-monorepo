@@ -3,6 +3,7 @@
 	"apps/mana/apps/web/src/lib/components/dashboard/widgets/TransactionsWidget.svelte": 1,
 	"apps/mana/apps/web/src/lib/components/OfflineIndicator.svelte": 3,
 	"apps/mana/apps/web/src/lib/components/PwaUpdatePrompt.svelte": 3,
+	"apps/mana/apps/web/src/lib/modules/ai-agents/ListView.svelte": 2,
 	"apps/mana/apps/web/src/lib/modules/credits/ListView.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/invoices/components/StatusBadge.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/invoices/constants.ts": 1,
