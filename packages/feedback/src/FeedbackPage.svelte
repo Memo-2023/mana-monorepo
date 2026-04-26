@@ -57,7 +57,7 @@
 		try {
 			const [myResult, publicResult] = await Promise.all([
 				feedbackService.getMyFeedback(),
-				feedbackService.getPublicFeedback({ sort: 'votes' }),
+				feedbackService.getPublicFeedback({ sort: 'score' }),
 			]);
 			myFeedback = myResult.items;
 			publicFeedback = publicResult.items;
@@ -83,9 +83,9 @@
 		}
 	}
 
-	async function handleVote(feedbackId: string, hasVoted: boolean) {
+	async function handleVote(feedbackId: string, _hasVoted: boolean) {
 		try {
-			await feedbackService.toggleVote(feedbackId, hasVoted);
+			await feedbackService.toggleVote(feedbackId);
 			await loadFeedback();
 		} catch (error) {
 			console.error('[FeedbackPage] Error voting:', error);

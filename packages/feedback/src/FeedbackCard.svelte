@@ -20,7 +20,7 @@
 	}: Props = $props();
 
 	function handleVote() {
-		onVote(feedback.id, feedback.userHasVoted);
+		onVote(feedback.id, feedback.userHasVoted ?? false);
 	}
 
 	function formatDate(dateString: string): string {
@@ -37,7 +37,7 @@
 	<div class="feedback-card__vote">
 		<VoteButton
 			count={feedback.voteCount}
-			hasVoted={feedback.userHasVoted}
+			hasVoted={feedback.userHasVoted ?? false}
 			onToggle={handleVote}
 			disabled={votingDisabled || !feedback.isPublic}
 		/>

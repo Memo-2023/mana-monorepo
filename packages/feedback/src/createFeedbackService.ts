@@ -1,20 +1,9 @@
 /**
- * Feedback Service Factory
+ * Feedback Service Factory — Public-Community Hub client.
  *
- * Creates a feedback service instance configured for a specific app.
- * Handles feedback submission, retrieval, and voting.
- *
- * @example
- * ```ts
- * import { createFeedbackService } from '@mana/feedback';
- * import { authStore } from '$lib/stores/auth.svelte';
- *
- * export const feedbackService = createFeedbackService({
- *   apiUrl: 'https://auth.mana.how',
- *   appId: 'chat',
- *   getAuthToken: async () => authStore.getToken(),
- * });
- * ```
+ * One factory builds the auth-required service used by logged-in users
+ * (submit, react, manage own items). The companion `createPublicFeedbackService`
+ * (in createPublicFeedbackService.ts) is for SSR / unauthenticated reads.
  */
 
 import type {
@@ -22,28 +11,30 @@ import type {
 	FeedbackQueryParams,
 	FeedbackResponse,
 	FeedbackListResponse,
+	PublicFeedListResponse,
+	PublicItemResponse,
+	ReactionResponse,
+	AdminPatchInput,
+	ReactInput,
 	VoteResponse,
 } from './api';
 import type { FeedbackServiceConfig } from './types';
+import type { PublicFeedbackItem, ReactionEmoji } from './feedback';
 
-/**
- * Create a feedback service instance
- */
 export function createFeedbackService(config: FeedbackServiceConfig) {
-	const { apiUrl, appId, getAuthToken, feedbackEndpoint = '/api/v1/feedback' } = config;
+	const {
+		apiUrl,
+		appId,
+		getAuthToken,
+		feedbackEndpoint = '/api/v1/feedback',
+		publicEndpoint = '/api/v1/public/feedback',
+	} = config;
 
-	// Normalize API URL (remove trailing slash)
 	const baseUrl = apiUrl.replace(/\/$/, '');
 
-	/**
-	 * Helper to make authenticated requests
-	 */
 	async function fetchWithAuth<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
 		const token = await getAuthToken();
-
-		if (!token) {
-			throw new Error('Not authenticated');
-		}
+		if (!token) throw new Error('Not authenticated');
 
 		const response = await fetch(`${baseUrl}${endpoint}`, {
 			...options,
@@ -63,9 +54,28 @@ export function createFeedbackService(config: FeedbackServiceConfig) {
 		return response.json();
 	}
 
-	/**
-	 * Submit new feedback
-	 */
+	async function fetchPublic<T>(endpoint: string): Promise<T> {
+		const response = await fetch(`${baseUrl}${endpoint}`);
+		if (!response.ok) {
+			throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+		}
+		return response.json();
+	}
+
+	function feedQueryString(query?: FeedbackQueryParams): string {
+		const params = new URLSearchParams();
+		params.set('appId', query?.appId ?? appId);
+		if (query?.moduleContext) params.set('moduleContext', query.moduleContext);
+		if (query?.status) params.set('status', query.status);
+		if (query?.category) params.set('category', query.category);
+		if (query?.sort) params.set('sort', query.sort);
+		if (query?.limit) params.set('limit', String(query.limit));
+		if (query?.offset) params.set('offset', String(query.offset));
+		return params.toString();
+	}
+
+	// ── Submission ──────────────────────────────────────────────────
+
 	async function createFeedback(input: CreateFeedbackInput): Promise<FeedbackResponse> {
 		return fetchWithAuth<FeedbackResponse>(feedbackEndpoint, {
 			method: 'POST',
@@ -73,74 +83,109 @@ export function createFeedbackService(config: FeedbackServiceConfig) {
 		});
 	}
 
-	/**
-	 * Get public community feedback
-	 */
-	async function getPublicFeedback(query?: FeedbackQueryParams): Promise<FeedbackListResponse> {
-		const params = new URLSearchParams();
+	// ── Reads (auth-required) ──────────────────────────────────────
 
-		// Always filter by current app
-		params.set('appId', appId);
-
-		if (query?.status) params.set('status', query.status);
-		if (query?.category) params.set('category', query.category);
-		if (query?.sort) params.set('sort', query.sort);
-		if (query?.limit) params.set('limit', String(query.limit));
-		if (query?.offset) params.set('offset', String(query.offset));
-
-		return fetchWithAuth<FeedbackListResponse>(`${feedbackEndpoint}/public?${params}`);
+	/** Auth-enriched public feed: each item carries `myReactions[]`. */
+	async function getPublicFeed(query?: FeedbackQueryParams): Promise<PublicFeedbackItem[]> {
+		const qs = feedQueryString(query);
+		const res = await fetchWithAuth<PublicFeedListResponse>(`${feedbackEndpoint}/public?${qs}`);
+		return res.items;
 	}
 
-	/**
-	 * Get user's own feedback
-	 */
 	async function getMyFeedback(): Promise<FeedbackListResponse> {
-		const params = new URLSearchParams();
-		params.set('appId', appId);
-
-		return fetchWithAuth<FeedbackListResponse>(`${feedbackEndpoint}/my?${params}`);
+		return fetchWithAuth<FeedbackListResponse>(`${feedbackEndpoint}/me`);
 	}
 
-	/**
-	 * Vote on a feedback item
-	 */
-	async function vote(feedbackId: string): Promise<VoteResponse> {
-		return fetchWithAuth<VoteResponse>(`${feedbackEndpoint}/${feedbackId}/vote`, {
+	async function getReplies(feedbackId: string): Promise<PublicFeedbackItem[]> {
+		return fetchWithAuth<PublicFeedbackItem[]>(`${feedbackEndpoint}/${feedbackId}/replies`);
+	}
+
+	// ── Reads (anonymous, no auth) ─────────────────────────────────
+
+	async function getPublicFeedAnonymous(
+		query?: FeedbackQueryParams
+	): Promise<PublicFeedbackItem[]> {
+		const qs = feedQueryString(query);
+		const res = await fetchPublic<PublicFeedListResponse>(`${publicEndpoint}/feed?${qs}`);
+		return res.items;
+	}
+
+	async function getPublicItemAnonymous(id: string): Promise<PublicItemResponse> {
+		return fetchPublic<PublicItemResponse>(`${publicEndpoint}/${id}`);
+	}
+
+	// ── Reactions ──────────────────────────────────────────────────
+
+	async function toggleReaction(
+		feedbackId: string,
+		emoji: ReactionEmoji
+	): Promise<ReactionResponse> {
+		return fetchWithAuth<ReactionResponse>(`${feedbackEndpoint}/${feedbackId}/react`, {
 			method: 'POST',
+			body: JSON.stringify({ emoji } satisfies ReactInput),
 		});
 	}
 
-	/**
-	 * Remove vote from a feedback item
-	 */
-	async function unvote(feedbackId: string): Promise<VoteResponse> {
-		return fetchWithAuth<VoteResponse>(`${feedbackEndpoint}/${feedbackId}/vote`, {
+	// ── Mutations ──────────────────────────────────────────────────
+
+	async function deleteFeedback(feedbackId: string): Promise<{ success: boolean }> {
+		return fetchWithAuth<{ success: boolean }>(`${feedbackEndpoint}/${feedbackId}`, {
 			method: 'DELETE',
 		});
 	}
 
-	/**
-	 * Toggle vote on a feedback item
-	 */
-	async function toggleVote(feedbackId: string, currentlyVoted: boolean): Promise<VoteResponse> {
-		if (currentlyVoted) {
-			return unvote(feedbackId);
-		} else {
-			return vote(feedbackId);
-		}
+	// ── Admin ──────────────────────────────────────────────────────
+
+	async function adminListAll(query?: FeedbackQueryParams): Promise<FeedbackListResponse> {
+		const qs = feedQueryString(query);
+		return fetchWithAuth<FeedbackListResponse>(`${feedbackEndpoint}/admin?${qs}`);
+	}
+
+	async function adminPatch(feedbackId: string, patch: AdminPatchInput): Promise<FeedbackResponse> {
+		return fetchWithAuth<FeedbackResponse>(`${feedbackEndpoint}/admin/${feedbackId}`, {
+			method: 'PATCH',
+			body: JSON.stringify(patch),
+		});
+	}
+
+	// ── Legacy (back-compat shims) ─────────────────────────────────
+	// Older callers still use vote/unvote — translate to 👍-reaction toggles.
+
+	async function vote(feedbackId: string): Promise<VoteResponse> {
+		const res = await toggleReaction(feedbackId, '👍');
+		return {
+			success: true,
+			newVoteCount: res.reactions['👍'] ?? 0,
+			userHasVoted: res.userHasReacted,
+		};
+	}
+	const unvote = vote; // toggle, semantically idempotent for legacy callers
+	async function toggleVote(feedbackId: string): Promise<VoteResponse> {
+		return vote(feedbackId);
+	}
+
+	async function getPublicFeedback(query?: FeedbackQueryParams): Promise<FeedbackListResponse> {
+		const items = await getPublicFeed(query);
+		return { items: items as unknown as FeedbackListResponse['items'] };
 	}
 
 	return {
 		createFeedback,
-		getPublicFeedback,
+		getPublicFeed,
+		getPublicFeedAnonymous,
+		getPublicItemAnonymous,
 		getMyFeedback,
+		getReplies,
+		toggleReaction,
+		deleteFeedback,
+		adminListAll,
+		adminPatch,
+		// Legacy (deprecated):
+		getPublicFeedback,
 		vote,
 		unvote,
 		toggleVote,
 	};
 }
 
-/**
- * Type for the feedback service instance
- */
 export type FeedbackService = ReturnType<typeof createFeedbackService>;

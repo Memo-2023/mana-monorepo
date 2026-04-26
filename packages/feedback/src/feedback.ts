@@ -24,6 +24,50 @@ export type FeedbackStatus =
 	| 'completed'
 	| 'declined';
 
+/**
+ * Whitelisted reaction emojis — must mirror REACTION_WEIGHTS in
+ * services/mana-analytics/src/services/feedback.ts. Server rejects
+ * any emoji not in this list.
+ */
+export const REACTION_EMOJIS = ['👍', '❤️', '🚀', '🤔', '🎉'] as const;
+export type ReactionEmoji = (typeof REACTION_EMOJIS)[number];
+
+export const REACTION_LABELS: Record<ReactionEmoji, string> = {
+	'👍': 'Will ich auch',
+	'❤️': 'Liebe ich',
+	'🚀': 'Ship it',
+	'🤔': 'Macht mich nachdenklich',
+	'🎉': 'Feier',
+};
+
+/**
+ * Anonymized feedback item as it appears in the public community feed.
+ * Never contains userId or other identifying fields — only the
+ * persistent display_name pseudonym ("Wachsame Eule #4528").
+ */
+export interface PublicFeedbackItem {
+	id: string;
+	appId: string;
+	title: string | null;
+	feedbackText: string;
+	category: FeedbackCategory;
+	status: FeedbackStatus;
+	moduleContext: string | null;
+	parentId: string | null;
+	displayName: string;
+	reactions: Partial<Record<string, number>>;
+	score: number;
+	adminResponse: string | null;
+	createdAt: string;
+	updatedAt: string;
+	/** Auth-only: which emojis the requesting user has reacted with. */
+	myReactions?: string[];
+}
+
+/**
+ * Authenticated, full feedback record (own submissions / admin views).
+ * Includes the user-private fields the public feed redacts.
+ */
 export interface Feedback {
 	id: string;
 	userId: string;
@@ -35,19 +79,19 @@ export interface Feedback {
 	isPublic: boolean;
 	adminResponse?: string;
 	voteCount: number;
-	userHasVoted: boolean;
+	displayHash?: string;
+	displayName?: string;
+	moduleContext?: string;
+	parentId?: string;
+	reactions?: Partial<Record<string, number>>;
+	score?: number;
 	deviceInfo?: Record<string, unknown>;
 	createdAt: string;
 	updatedAt: string;
 	publishedAt?: string;
 	completedAt?: string;
-}
-
-export interface FeedbackVote {
-	id: string;
-	feedbackId: string;
-	userId: string;
-	createdAt: string;
+	// Legacy / derived for older UI surfaces:
+	userHasVoted?: boolean;
 }
 
 export const FEEDBACK_CATEGORY_LABELS: Record<FeedbackCategory, string> = {
