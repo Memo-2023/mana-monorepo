@@ -110,10 +110,12 @@ sein kann (statt nur Sentinel zu stempeln), entfällt die
 3. ✅ **Schicht A Etappe 1** — `43bef2b24` (Helper + 16 explicit stamps, soft phase)
 4. ✅ **Schicht A — final** — `a6c5397d1` (smart hook stempelt aktive Space-UUID statt Sentinel; 16 explicit stamps reverted weil redundant)
 5. ✅ **Schicht D-hard + Cleanup** — `fa71269fc` (v50 löscht legacy non-deterministic Home rows, transitional check aus Seeder raus, post-reconcile dedup aus +layout raus)
+6. ✅ **Polish-Pass 2026-04-26** — `e930a66ff` (v48 dedup-Logik inline, dedup-Helper-Modul + 220 Test-Zeilen gelöscht; `seedWorkbenchHomeOn → Promise<void>`; comment-vocab bereinigt) + `8c5f064b0` (direkter Smart-Hook-Test in `data/space-stamping.test.ts` + Per-Space-Seeds-Pattern in `apps/mana/CLAUDE.md` dokumentiert)
 
 Endzustand: **eine** Stelle entscheidet über Tenancy-Stamping (der
 Hook), **deterministische IDs** garantieren Idempotenz, **kein
-transitional code** mehr, **kein post-reconcile fallback** mehr —
+transitional code** mehr, **kein post-reconcile fallback** mehr,
+**kein Dead-Code-Helper** mehr, **direkter Test** für den Hook —
 exakt das was "saubere Lösung ohne legacy reste" verlangt.
 
 ## Erfolgskriterien
