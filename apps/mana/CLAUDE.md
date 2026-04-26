@@ -194,6 +194,35 @@ Each workbench scene can carry `scopeTagIds` — a per-scene tag filter that mod
 
 `ScopeEmptyState` renders a subdued "Bereichsfilter verbergen alles" message plus a one-click "Bereich zurücksetzen" button that calls `workbenchScenesStore.setSceneScopeTags(activeSceneId, undefined)`. `SceneAppBar` already shows a Funnel badge on scoped scene pills; the module doesn't need to duplicate that signal. Plan: [`docs/plans/scene-scope-empty-state.md`](../../docs/plans/scene-scope-empty-state.md).
 
+## Per-Space Seeds
+
+When a module needs to pre-populate something the first time a Space is activated (e.g. a default workbench layout), register a seeder rather than rolling your own boot-time check. The active-space layer fires every registered seeder on each `setActiveSpace` and isolates errors per-seeder.
+
+```typescript
+// apps/web/src/lib/data/seeds/my-module.ts
+import { db } from '../database';
+import { registerSpaceSeed } from '../scope/per-space-seeds';
+
+registerSpaceSeed('my-module-default', async (spaceId) => {
+  const id = `seed-default-${spaceId}`;          // deterministic id
+  if (await db.table('myTable').get(id)) return; // idempotent
+  await db.table('myTable').add({ id, spaceId, /* default fields */ });
+});
+```
+
+Then add a side-effect import to `data/seeds/index.ts` so the seeder lands in the registry before the first `loadActiveSpace` call:
+
+```typescript
+import './my-module';
+```
+
+Two non-negotiables that make this reliable:
+
+1. **Deterministic id** (`seed-default-${spaceId}`, `seed-home-${spaceId}`, …) — Dexie's PK uniqueness + a `get`-then-`add` guard make duplicates structurally impossible regardless of boot timing.
+2. **`spaceId` set explicitly on the seed row** when seeding into a Space that isn't the currently-active one. The creating-hook auto-stamps `getEffectiveSpaceId()` for missing-spaceId writes, but seeders are typically called with a target spaceId argument and shouldn't lean on that.
+
+Reference implementation: [`data/seeds/workbench-home.ts`](apps/web/src/lib/data/seeds/workbench-home.ts). Background + design rationale: [`docs/plans/workbench-seeding-cleanup.md`](../../docs/plans/workbench-seeding-cleanup.md).
+
 ## AI Workbench
 
 The companion is a **second actor** that works alongside the human in every module. Full pipeline live end-to-end:
