@@ -119,7 +119,6 @@
 	"apps/mana/apps/web/src/lib/modules/core/widgets/RecentContactsWidget.svelte": 2,
 	"apps/mana/apps/web/src/lib/modules/core/widgets/TasksTodayWidget.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/core/widgets/UpcomingEventsWidget.svelte": 1,
-	"apps/mana/apps/web/src/lib/modules/credits/ListView.svelte": 25,
 	"apps/mana/apps/web/src/lib/modules/dreams/ListView.svelte": 12,
 	"apps/mana/apps/web/src/lib/modules/dreams/views/SymbolDetailView.svelte": 8,
 	"apps/mana/apps/web/src/lib/modules/drink/ListView.svelte": 5,

@@ -9,7 +9,8 @@
   in the URL for us to read here.
 -->
 <script lang="ts">
-	import { _ } from 'svelte-i18n';
+	import { _, locale } from 'svelte-i18n';
+	import { get } from 'svelte/store';
 	import { onMount } from 'svelte';
 	import { Card } from '@mana/shared-ui';
 	import { Check } from '@mana/shared-icons';
@@ -92,34 +93,35 @@
 		return Object.fromEntries(Object.entries(groups).sort(([a], [b]) => a.localeCompare(b)));
 	});
 
-	const APP_LABELS: Record<string, string> = {
-		calendar: 'Kalender',
-		chat: 'Chat',
-		contacts: 'Kontakte',
-		context: 'Context',
-		general: 'Allgemein',
-		cards: 'Cards',
-		food: 'Food',
-		picture: 'Picture',
-		plants: 'Plants',
-		presi: 'Presi',
-		questions: 'Questions',
-		skilltree: 'SkillTree',
-		todo: 'Todo',
-		traces: 'Traces',
-		quotes: 'Quotes',
+	const APP_KEY_MAP: Record<string, string> = {
+		calendar: 'app_calendar',
+		chat: 'app_chat',
+		contacts: 'app_contacts',
+		context: 'app_context',
+		general: 'app_general',
+		cards: 'app_cards',
+		food: 'app_food',
+		picture: 'app_picture',
+		plants: 'app_plants',
+		presi: 'app_presi',
+		questions: 'app_questions',
+		skilltree: 'app_skilltree',
+		todo: 'app_todo',
+		traces: 'app_traces',
+		quotes: 'app_quotes',
 	};
 
 	function getAppLabel(app: string): string {
-		return APP_LABELS[app] ?? app.charAt(0).toUpperCase() + app.slice(1);
+		const key = APP_KEY_MAP[app];
+		return key ? $_('credits.list_view.' + key) : app.charAt(0).toUpperCase() + app.slice(1);
 	}
 
 	function getCategoryLabel(category: CreditCategory): string {
 		switch (category) {
 			case CreditCategory.AI:
-				return 'KI-Features';
+				return $_('credits.list_view.category_ai');
 			case CreditCategory.PREMIUM:
-				return 'Premium';
+				return $_('credits.list_view.category_premium');
 			default:
 				return category;
 		}
@@ -138,10 +140,10 @@
 		const canceled = params.get('canceled');
 
 		if (success === 'true') {
-			toast.success('Credits erfolgreich gekauft!');
+			toast.success($_('credits.list_view.toast_purchase_success'));
 			history.replaceState({}, '', '/');
 		} else if (canceled === 'true') {
-			toast.error('Kauf wurde abgebrochen');
+			toast.error($_('credits.list_view.toast_purchase_canceled'));
 			history.replaceState({}, '', '/');
 		}
 
@@ -189,16 +191,20 @@
 	}
 
 	// ── Credit helpers ─────────────────────────────────────
+	function activeLocale(): string {
+		return get(locale) ?? 'de';
+	}
+
 	function formatCredits(amount: number): string {
-		return amount.toLocaleString('de-DE');
+		return amount.toLocaleString(activeLocale());
 	}
 
 	function formatPrice(cents: number): string {
-		return (cents / 100).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
+		return (cents / 100).toLocaleString(activeLocale(), { style: 'currency', currency: 'EUR' });
 	}
 
 	function formatDate(dateStr: string): string {
-		return new Date(dateStr).toLocaleDateString('de-DE', {
+		return new Date(dateStr).toLocaleDateString(activeLocale(), {
 			day: '2-digit',
 			month: '2-digit',
 			year: 'numeric',
@@ -208,7 +214,7 @@
 	}
 
 	function formatDateShort(dateStr: string): string {
-		return new Date(dateStr).toLocaleDateString('de-DE', {
+		return new Date(dateStr).toLocaleDateString(activeLocale(), {
 			day: '2-digit',
 			month: '2-digit',
 			year: 'numeric',
@@ -250,7 +256,7 @@
 			const result = await creditsService.initiatePurchase(pkg.id);
 			window.location.href = result.checkoutUrl;
 		} catch (e) {
-			toast.error(e instanceof Error ? e.message : 'Fehler beim Erstellen der Checkout-Session');
+			toast.error(e instanceof Error ? e.message : $_('credits.list_view.err_checkout_session'));
 		} finally {
 			processingPackageId = null;
 		}
@@ -258,13 +264,18 @@
 
 	// ── Subscription helpers ───────────────────────────────
 	function getStatusLabel(status: string): string {
-		const map: Record<string, string> = {
-			active: 'Aktiv',
-			canceled: 'Gekündigt',
-			past_due: 'Überfällig',
-			trialing: 'Testphase',
-		};
-		return map[status] || status;
+		switch (status) {
+			case 'active':
+				return $_('credits.list_view.status_active');
+			case 'canceled':
+				return $_('credits.list_view.status_canceled');
+			case 'past_due':
+				return $_('credits.list_view.status_past_due');
+			case 'trialing':
+				return $_('credits.list_view.status_trialing');
+			default:
+				return status;
+		}
 	}
 
 	function getSavingsPercent(monthly: number, yearly: number): number {
@@ -281,7 +292,7 @@
 			const { url } = await subscriptionsService.createCheckout(plan.id, billingInterval);
 			window.location.href = url;
 		} catch (e) {
-			toast.error(e instanceof Error ? e.message : 'Fehler beim Checkout');
+			toast.error(e instanceof Error ? e.message : $_('credits.list_view.err_checkout'));
 		} finally {
 			processingPlanId = null;
 		}
@@ -293,21 +304,21 @@
 			const { url } = await subscriptionsService.openPortal();
 			window.location.href = url;
 		} catch (e) {
-			toast.error(e instanceof Error ? e.message : 'Fehler beim Billing-Portal');
+			toast.error(e instanceof Error ? e.message : $_('credits.list_view.err_portal'));
 		} finally {
 			openingPortal = false;
 		}
 	}
 
 	async function handleCancelSub() {
-		if (!confirm('Möchtest du dein Abonnement wirklich kündigen?')) return;
+		if (!confirm($_('credits.list_view.confirm_cancel_sub'))) return;
 		cancelingSub = true;
 		try {
 			await subscriptionsService.cancelSubscription();
-			toast.success('Abo erfolgreich gekündigt');
+			toast.success($_('credits.list_view.toast_sub_canceled'));
 			await loadData();
 		} catch (e) {
-			toast.error(e instanceof Error ? e.message : 'Fehler beim Kündigen');
+			toast.error(e instanceof Error ? e.message : $_('credits.list_view.err_cancel_sub'));
 		} finally {
 			cancelingSub = false;
 		}
@@ -317,10 +328,10 @@
 		reactivatingSub = true;
 		try {
 			await subscriptionsService.reactivateSubscription();
-			toast.success('Abo erfolgreich reaktiviert');
+			toast.success($_('credits.list_view.toast_sub_reactivated'));
 			await loadData();
 		} catch (e) {
-			toast.error(e instanceof Error ? e.message : 'Fehler beim Reaktivieren');
+			toast.error(e instanceof Error ? e.message : $_('credits.list_view.err_reactivate_sub'));
 		} finally {
 			reactivatingSub = false;
 		}
@@ -334,29 +345,31 @@
 		<Card>
 			<div class="text-center py-8">
 				<p class="text-error mb-4">{error}</p>
-				<button onclick={loadData} class="btn btn-primary">Erneut versuchen</button>
+				<button onclick={loadData} class="btn btn-primary"
+					>{$_('credits.list_view.action_retry')}</button
+				>
 			</div>
 		</Card>
 	{:else}
 		<!-- Balance Overview -->
 		<div class="balance-grid">
 			<div class="balance-card">
-				<p class="balance-label">Verfügbar</p>
+				<p class="balance-label">{$_('credits.list_view.balance_available')}</p>
 				<p class="balance-value primary">{formatCredits(balance?.balance ?? 0)}</p>
 			</div>
 			<div class="balance-card">
-				<p class="balance-label">Erhalten</p>
+				<p class="balance-label">{$_('credits.list_view.balance_earned')}</p>
 				<p class="balance-value">{formatCredits(balance?.totalEarned ?? 0)}</p>
 			</div>
 			<div class="balance-card">
-				<p class="balance-label">Verbraucht</p>
+				<p class="balance-label">{$_('credits.list_view.balance_spent')}</p>
 				<p class="balance-value">{formatCredits(balance?.totalSpent ?? 0)}</p>
 			</div>
 		</div>
 
 		<!-- Tabs -->
 		<div class="tab-bar">
-			{#each [{ key: 'overview', label: 'Übersicht' }, { key: 'subscriptions', label: 'Abo' }, { key: 'transactions', label: 'Verlauf' }, { key: 'packages', label: 'Kaufen' }, { key: 'costs', label: 'Kosten' }] as tab}
+			{#each [{ key: 'overview', label: $_('credits.list_view.tab_overview') }, { key: 'subscriptions', label: $_('credits.list_view.tab_subscriptions') }, { key: 'transactions', label: $_('credits.list_view.tab_transactions') }, { key: 'packages', label: $_('credits.list_view.tab_packages') }, { key: 'costs', label: $_('credits.list_view.tab_costs') }] as tab}
 				<button
 					onclick={() => (activeTab = tab.key as typeof activeTab)}
 					class="tab-btn"
@@ -371,9 +384,9 @@
 		{#if activeTab === 'overview'}
 			<div class="overview-grid">
 				<Card>
-					<h3 class="card-title">Letzte Transaktionen</h3>
+					<h3 class="card-title">{$_('credits.list_view.section_recent_transactions')}</h3>
 					{#if transactions.length === 0}
-						<p class="empty-hint">Noch keine Transaktionen</p>
+						<p class="empty-hint">{$_('credits.list_view.empty_transactions')}</p>
 					{:else}
 						<div class="tx-list">
 							{#each transactions.slice(0, 5) as tx}
@@ -392,15 +405,15 @@
 							{/each}
 						</div>
 						<button onclick={() => (activeTab = 'transactions')} class="link-btn">
-							Alle anzeigen →
+							{$_('credits.list_view.action_show_all')}
 						</button>
 					{/if}
 				</Card>
 
 				<Card>
-					<h3 class="card-title">Credits kaufen</h3>
+					<h3 class="card-title">{$_('credits.list_view.section_buy_credits')}</h3>
 					{#if packages.length === 0}
-						<p class="empty-hint">Keine Pakete verfügbar</p>
+						<p class="empty-hint">{$_('credits.list_view.empty_packages')}</p>
 					{:else}
 						<div class="quick-buy">
 							{#each packages.slice(0, 3) as pkg}
@@ -411,14 +424,18 @@
 								>
 									<div>
 										<p class="pkg-name">{pkg.name}</p>
-										<p class="pkg-credits">{formatCredits(pkg.credits)} Credits</p>
+										<p class="pkg-credits">
+											{$_('credits.list_view.pkg_credits', {
+												values: { count: formatCredits(pkg.credits) },
+											})}
+										</p>
 									</div>
 									<span class="pkg-price">{formatPrice(pkg.priceEuroCents)}</span>
 								</button>
 							{/each}
 						</div>
 						<button onclick={() => (activeTab = 'packages')} class="link-btn">
-							Alle Pakete →
+							{$_('credits.list_view.action_all_packages')}
 						</button>
 					{/if}
 				</Card>
@@ -434,7 +451,9 @@
 					<div class="status-header">
 						<div>
 							<div class="status-title-row">
-								<span class="sub-plan-name">{plan?.name || 'Aktueller Plan'}</span>
+								<span class="sub-plan-name"
+									>{plan?.name || $_('credits.list_view.plan_current_fallback')}</span
+								>
 								<span
 									class="status-badge"
 									class:active={sub.status === 'active'}
@@ -444,36 +463,47 @@
 								</span>
 							</div>
 							<span class="sub-mana">
-								{plan?.monthlyCredits.toLocaleString('de-DE')} Mana / Monat
+								{$_('credits.list_view.sub_mana_per_month', {
+									values: { credits: plan?.monthlyCredits.toLocaleString(activeLocale()) ?? '' },
+								})}
 							</span>
 						</div>
 						<button class="portal-btn" disabled={openingPortal} onclick={handleOpenPortal}>
-							{openingPortal ? '...' : 'Zahlungsmethode'}
+							{openingPortal ? '...' : $_('credits.list_view.action_payment_method')}
 						</button>
 					</div>
 					<div class="status-details">
 						<div class="detail">
-							<span class="detail-label">Zeitraum</span>
-							<span>{sub.billingInterval === 'year' ? 'Jährlich' : 'Monatlich'}</span>
+							<span class="detail-label">{$_('credits.list_view.detail_billing')}</span>
+							<span
+								>{sub.billingInterval === 'year'
+									? $_('credits.list_view.interval_year_long')
+									: $_('credits.list_view.interval_month_long')}</span
+							>
 						</div>
 						<div class="detail">
-							<span class="detail-label">Periode</span>
+							<span class="detail-label">{$_('credits.list_view.detail_period')}</span>
 							<span>
-								{formatDateShort(sub.currentPeriodStart)} – {formatDateShort(sub.currentPeriodEnd)}
+								{$_('credits.list_view.detail_period_value', {
+									values: {
+										start: formatDateShort(sub.currentPeriodStart),
+										end: formatDateShort(sub.currentPeriodEnd),
+									},
+								})}
 							</span>
 						</div>
 						<div class="detail">
 							{#if sub.cancelAtPeriodEnd}
-								<span class="detail-label">Endet am</span>
+								<span class="detail-label">{$_('credits.list_view.detail_ends')}</span>
 								<span class="text-warn">{formatDateShort(sub.currentPeriodEnd)}</span>
 								<button class="link-btn" disabled={reactivatingSub} onclick={handleReactivateSub}>
-									{reactivatingSub ? '...' : 'Reaktivieren'}
+									{reactivatingSub ? '...' : $_('credits.list_view.action_reactivate')}
 								</button>
 							{:else}
-								<span class="detail-label">Verlängert am</span>
+								<span class="detail-label">{$_('credits.list_view.detail_renews')}</span>
 								<span>{formatDateShort(sub.currentPeriodEnd)}</span>
 								<button class="link-btn danger" disabled={cancelingSub} onclick={handleCancelSub}>
-									{cancelingSub ? '...' : 'Kündigen'}
+									{cancelingSub ? '...' : $_('credits.list_view.action_cancel')}
 								</button>
 							{/if}
 						</div>
@@ -482,10 +512,10 @@
 			{:else}
 				<div class="status-card">
 					<div class="status-title-row">
-						<span class="sub-plan-name">Free Plan</span>
-						<span class="status-badge active">Aktuell</span>
+						<span class="sub-plan-name">{$_('credits.list_view.plan_free')}</span>
+						<span class="status-badge active">{$_('credits.list_view.badge_current')}</span>
 					</div>
-					<span class="sub-mana">150 Mana / Monat</span>
+					<span class="sub-mana">{$_('credits.list_view.plan_free_mana')}</span>
 				</div>
 			{/if}
 
@@ -494,14 +524,16 @@
 				<button
 					class="interval-btn"
 					class:selected={billingInterval === 'month'}
-					onclick={() => (billingInterval = 'month')}>Monatlich</button
+					onclick={() => (billingInterval = 'month')}
+					>{$_('credits.list_view.toggle_monthly')}</button
 				>
 				<button
 					class="interval-btn"
 					class:selected={billingInterval === 'year'}
 					onclick={() => (billingInterval = 'year')}
 				>
-					Jährlich <span class="save-tag">–17%</span>
+					{$_('credits.list_view.toggle_yearly')}
+					<span class="save-tag">{$_('credits.list_view.toggle_save_tag')}</span>
 				</button>
 			</div>
 
@@ -520,10 +552,14 @@
 						<div class="plan-info">
 							<span class="plan-row-name">
 								{plan.name}
-								{#if isCurrent}<span class="current-tag">Dein Plan</span>{/if}
+								{#if isCurrent}<span class="current-tag"
+										>{$_('credits.list_view.plan_your_tag')}</span
+									>{/if}
 							</span>
 							<span class="plan-row-mana"
-								>{plan.monthlyCredits.toLocaleString('de-DE')} Mana / Monat</span
+								>{$_('credits.list_view.sub_mana_per_month', {
+									values: { credits: plan.monthlyCredits.toLocaleString(activeLocale()) },
+								})}</span
 							>
 							{#if plan.features?.length}
 								<span class="plan-features-preview">
@@ -533,11 +569,13 @@
 						</div>
 						<div class="plan-price-col">
 							{#if plan.isDefault}
-								<span class="plan-price-free">Kostenlos</span>
+								<span class="plan-price-free">{$_('credits.list_view.plan_free_label')}</span>
 							{:else}
 								<span class="plan-price-amount">{formatPrice(price)}</span>
 								<span class="plan-price-period"
-									>/ {billingInterval === 'year' ? 'Jahr' : 'Monat'}</span
+									>/ {billingInterval === 'year'
+										? $_('credits.list_view.period_year')
+										: $_('credits.list_view.period_month')}</span
 								>
 							{/if}
 						</div>
@@ -548,7 +586,11 @@
 			<!-- Invoices -->
 			{#if invoices.length > 0}
 				<details class="invoices-details">
-					<summary class="invoices-summary">Rechnungen ({invoices.length})</summary>
+					<summary class="invoices-summary"
+						>{$_('credits.list_view.invoices_summary', {
+							values: { count: invoices.length },
+						})}</summary
+					>
 					<div class="invoices-list">
 						{#each invoices as inv}
 							<div class="invoice-row">
@@ -559,14 +601,16 @@
 								<div class="invoice-right">
 									<span class="invoice-amount">{formatPrice(inv.amountPaidEuroCents)}</span>
 									<span class="invoice-status" class:paid={inv.status === 'paid'}>
-										{inv.status === 'paid' ? 'Bezahlt' : inv.status}
+										{inv.status === 'paid'
+											? $_('credits.list_view.invoice_status_paid')
+											: inv.status}
 									</span>
 									{#if inv.invoicePdfUrl}
 										<a
 											href={inv.invoicePdfUrl}
 											target="_blank"
 											rel="noopener noreferrer"
-											class="pdf-link">PDF</a
+											class="pdf-link">{$_('credits.list_view.invoice_pdf')}</a
 										>
 									{/if}
 								</div>
@@ -579,20 +623,20 @@
 			<!-- ── Tab: Transaktionen ───────────────────────── -->
 		{:else if activeTab === 'transactions'}
 			<Card>
-				<h3 class="card-title">Transaktionsverlauf</h3>
+				<h3 class="card-title">{$_('credits.list_view.section_tx_history')}</h3>
 				{#if transactions.length === 0}
-					<p class="empty-hint">Noch keine Transaktionen vorhanden.</p>
+					<p class="empty-hint">{$_('credits.list_view.empty_tx_history')}</p>
 				{:else}
 					<div class="table-wrap">
 						<table class="tx-table">
 							<thead>
 								<tr>
-									<th>Typ</th>
-									<th>Beschreibung</th>
-									<th>App</th>
-									<th class="text-right">Betrag</th>
-									<th class="text-right">Kontostand</th>
-									<th>Datum</th>
+									<th>{$_('credits.list_view.th_type')}</th>
+									<th>{$_('credits.list_view.th_description')}</th>
+									<th>{$_('credits.list_view.th_app')}</th>
+									<th class="text-right">{$_('credits.list_view.th_amount')}</th>
+									<th class="text-right">{$_('credits.list_view.th_balance')}</th>
+									<th>{$_('credits.list_view.th_date')}</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -625,14 +669,16 @@
 								<p class="pkg-card-desc">{pkg.description}</p>
 							{/if}
 							<p class="pkg-card-credits">{formatCredits(pkg.credits)}</p>
-							<p class="pkg-card-unit">Credits</p>
+							<p class="pkg-card-unit">{$_('credits.list_view.pkg_card_unit')}</p>
 							<p class="pkg-card-price">{formatPrice(pkg.priceEuroCents)}</p>
 							<button
 								onclick={() => handleBuyPackage(pkg)}
 								disabled={processingPackageId === pkg.id}
 								class="btn btn-primary pkg-buy-btn"
 							>
-								{processingPackageId === pkg.id ? 'Wird geladen...' : 'Kaufen'}
+								{processingPackageId === pkg.id
+									? $_('credits.list_view.pkg_card_loading')
+									: $_('credits.list_view.pkg_card_buy')}
 							</button>
 						</div>
 					</Card>
@@ -640,14 +686,14 @@
 			</div>
 			{#if packages.length === 0}
 				<Card>
-					<p class="empty-hint">Aktuell sind keine Credit-Pakete verfügbar.</p>
+					<p class="empty-hint">{$_('credits.list_view.empty_packages_long')}</p>
 				</Card>
 			{/if}
 
 			<!-- ── Tab: Kosten ──────────────────────────────── -->
 		{:else if activeTab === 'costs'}
 			<div class="cost-filters">
-				{#each [{ key: 'all', label: 'Alle' }, { key: 'ai', label: 'KI-Features' }, { key: 'premium', label: 'Premium' }] as filter}
+				{#each [{ key: 'all', label: $_('credits.list_view.filter_all') }, { key: 'ai', label: $_('credits.list_view.filter_ai') }, { key: 'premium', label: $_('credits.list_view.filter_premium') }] as filter}
 					<button
 						onclick={() => (costFilter = filter.key as typeof costFilter)}
 						class="filter-chip"
@@ -660,9 +706,10 @@
 
 			<div class="info-banner">
 				<p>
-					Lesen, Bearbeiten, Löschen und Organisieren von Einträgen ist immer <strong
-						>kostenlos</strong
-					>. Credits werden nur für die unten aufgeführten Aktionen verbraucht.
+					{$_('credits.list_view.info_banner_prefix')}
+					<strong>{$_('credits.list_view.info_banner_strong')}</strong>{$_(
+						'credits.list_view.info_banner_suffix'
+					)}
 				</p>
 			</div>
 
@@ -685,7 +732,7 @@
 											class:free={op.cost === 0}
 											class:low={op.cost > 0 && op.cost < 1}
 										>
-											{op.cost === 0 ? 'Kostenlos' : op.formattedCost}
+											{op.cost === 0 ? $_('credits.list_view.cost_free') : op.formattedCost}
 										</span>
 									</div>
 								</div>
@@ -696,7 +743,7 @@
 
 				{#if Object.keys(groups).length === 0}
 					<Card>
-						<p class="empty-hint">Keine Operationen in dieser Kategorie.</p>
+						<p class="empty-hint">{$_('credits.list_view.empty_filtered_costs')}</p>
 					</Card>
 				{/if}
 			</div>
