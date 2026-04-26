@@ -12,13 +12,11 @@
   the same way picture/ListView does.
 -->
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { CheckCircle, SpinnerGap, UserCircle } from '@mana/shared-icons';
 	import { useImageByPrimary } from '$lib/modules/profile/queries';
 	import MeImageUploadZone from '$lib/modules/profile/components/MeImageUploadZone.svelte';
 	import { ingestMeImageFile } from '$lib/modules/profile/api/me-images';
-	import { repairSilentTwinAvatarRows } from '$lib/modules/profile/migration/repair-silent-twin';
 	import GridView from './views/GridView.svelte';
 	import OutfitsView from './views/OutfitsView.svelte';
 
@@ -89,18 +87,6 @@
 		uploadPhase = 'idle';
 		uploadedPreviewUrl = null;
 	}
-
-	// Repair rows that the M2.5 silent-twin bug left with
-	// primaryFor='avatar' instead of 'face-ref'. Idempotent + guarded
-	// by a localStorage flag. Runs here (not only in MeImagesView) so
-	// a user who uploaded a face photo via the wardrobe banner under
-	// the buggy code gets their row flipped to the correct slot on
-	// the next mount, without having to visit /profile/me-images.
-	onMount(() => {
-		repairSilentTwinAvatarRows().catch((err) => {
-			console.error('[wardrobe] silent-twin repair failed', err);
-		});
-	});
 </script>
 
 <div class="wardrobe-root">
