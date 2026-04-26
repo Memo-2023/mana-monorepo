@@ -20,7 +20,11 @@
 import { kontextDocTable } from '../collections';
 import { encryptRecord, decryptRecords } from '$lib/data/crypto';
 import { scopedTable } from '$lib/data/scope/scoped-db';
+import { makeSystemActor, SYSTEM_BOOTSTRAP } from '@mana/shared-ai';
+import { runAsAsync } from '$lib/data/events/actor';
 import type { LocalKontextDoc } from '../types';
+
+const BOOTSTRAP_ACTOR = makeSystemActor(SYSTEM_BOOTSTRAP);
 
 async function findForActiveSpace(): Promise<LocalKontextDoc | undefined> {
 	const rows = await scopedTable<LocalKontextDoc, string>('kontextDoc').toArray();
@@ -28,11 +32,13 @@ async function findForActiveSpace(): Promise<LocalKontextDoc | undefined> {
 }
 
 /**
- * Fallback path for the rare race where a write happens before the
- * server-bootstrap row has reached the client. Materialises the row
- * locally so `setContent` / `appendContent` always have something to
- * update. The server-bootstrapped row will arrive on the next pull and
- * field-LWW collapses any concurrent writes.
+ * Race-window fallback for the narrow window between "server bootstrap
+ * provisioned the row in mana_sync" and "first pull landed it in
+ * IndexedDB". Without this, `setContent` / `appendContent` would hit
+ * `update(missing-id, diff)` — a Dexie no-op that silently swallows the
+ * write. Insert is stamped `origin: 'system'` (via SYSTEM_BOOTSTRAP)
+ * so the server's bootstrap pull won't fight with it. Subsequent
+ * `setContent` writes stamp `origin: 'user'` as usual.
  */
 async function getOrCreateLocalDoc(): Promise<LocalKontextDoc> {
 	const existing = await findForActiveSpace();
@@ -42,7 +48,9 @@ async function getOrCreateLocalDoc(): Promise<LocalKontextDoc> {
 		content: '',
 	};
 	await encryptRecord('kontextDoc', newLocal);
-	await kontextDocTable.add(newLocal);
+	await runAsAsync(BOOTSTRAP_ACTOR, async () => {
+		await kontextDocTable.add(newLocal);
+	});
 	// Reload — the creating-hook stamped spaceId/authorId/actor fields.
 	const created = await kontextDocTable.get(newLocal.id);
 	if (!created) throw new Error('Failed to create kontextDoc');

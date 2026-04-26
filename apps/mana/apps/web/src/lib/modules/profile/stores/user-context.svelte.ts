@@ -6,17 +6,31 @@
  *
  * Singleton bootstrap (F4 of docs/plans/sync-field-meta-overhaul.md):
  * the per-user `userContext` row is created server-side by mana-auth at
- * `/register` time. The first sync pull lands the row before the UI ever
- * tries to read it. The internal `getOrCreateLocalDoc()` helper below is
- * a *fallback* — it inserts an empty doc on a brand-new client whose
- * pull hasn't caught up yet. Any user edits made in that window stamp
- * `origin: 'user'` via the Dexie hook, and the F2 conflict-gate makes
- * sure the server's `origin: 'system'` bootstrap row never overwrites
- * them silently.
+ * `/register` time AND reconciled on every boot via
+ * `POST /api/v1/me/bootstrap-singletons` (Punkt 3 follow-up). The first
+ * sync pull lands the row before the UI ever tries to read it.
+ *
+ * The internal `getOrCreateLocalDoc()` helper below stays as a fallback
+ * for the narrow race window between "endpoint provisioned the row in
+ * mana_sync" and "first pull landed the row in IndexedDB". Without it,
+ * a write that lands inside that window would hit `update(SINGLETON_ID,
+ * diff)` against a missing key — a Dexie no-op that silently swallows
+ * the user's edit. Killing the fallback was on the post-overhaul audit
+ * list (Punkt 4) but kept here because the silent-loss failure mode is
+ * worse than the cosmetic "client also writes the bootstrap row".
+ *
+ * The fallback insert is wrapped in `runAsAsync(makeSystemActor(
+ * SYSTEM_BOOTSTRAP))` so the Dexie hook stamps `origin: 'system'`
+ * (mirroring the server bootstrap), not `origin: 'user'`. When the
+ * server's pull arrives later both rows carry the same origin and the
+ * conflict-gate stays quiet. The user's subsequent writes stamp
+ * `origin: 'user'` for the changed fields as usual.
  */
 
 import { userContextTable } from '../collections';
 import { encryptRecord, decryptRecords } from '$lib/data/crypto';
+import { makeSystemActor, SYSTEM_BOOTSTRAP } from '@mana/shared-ai';
+import { runAsAsync } from '$lib/data/events/actor';
 import {
 	USER_CONTEXT_SINGLETON_ID,
 	emptyUserContext,
@@ -28,16 +42,20 @@ import {
 	type UserContextSocial,
 } from '../types';
 
-/** Internal fallback: write a fresh empty doc if neither the server
- *  bootstrap (F4) nor any prior session has populated the singleton
- *  yet. Mutating store methods call this first so a brand-new client
- *  that hasn't completed its first pull can still accept edits. */
+const BOOTSTRAP_ACTOR = makeSystemActor(SYSTEM_BOOTSTRAP);
+
+/** Race-window fallback: write a fresh empty doc if neither the server
+ *  bootstrap (F4 + Punkt 3 endpoint) nor any prior session has landed
+ *  the singleton yet. The insert is stamped `origin: 'system'` so the
+ *  server's eventual bootstrap pull won't fight with it. */
 async function getOrCreateLocalDoc(): Promise<void> {
 	const existing = await userContextTable.get(USER_CONTEXT_SINGLETON_ID);
 	if (existing) return;
 	const doc = emptyUserContext() as LocalUserContext;
 	await encryptRecord('userContext', doc);
-	await userContextTable.add(doc);
+	await runAsAsync(BOOTSTRAP_ACTOR, async () => {
+		await userContextTable.add(doc);
+	});
 }
 
 async function readDecrypted(): Promise<LocalUserContext> {

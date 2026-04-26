@@ -33,13 +33,23 @@ export const SYSTEM_RULE = 'system:rule';
 export const SYSTEM_MIGRATION = 'system:migration';
 export const SYSTEM_STREAM = 'system:stream';
 export const SYSTEM_MISSION_RUNNER = 'system:mission-runner';
+/**
+ * Client-side singleton bootstrap. Stamped on the rare race-window
+ * `getOrCreateLocalDoc()` insert in `userContextStore` / `kontextStore`
+ * — a structural twin of mana-auth's server-side bootstrap (which uses
+ * the `'system:bootstrap'` principalId on the wire). Maps to
+ * `origin='system'` via `originFromActor`, so the conflict-gate exempts
+ * it from the user-write codepath.
+ */
+export const SYSTEM_BOOTSTRAP = 'system:bootstrap';
 
 export type SystemSource =
 	| typeof SYSTEM_PROJECTION
 	| typeof SYSTEM_RULE
 	| typeof SYSTEM_MIGRATION
 	| typeof SYSTEM_STREAM
-	| typeof SYSTEM_MISSION_RUNNER;
+	| typeof SYSTEM_MISSION_RUNNER
+	| typeof SYSTEM_BOOTSTRAP;
 
 /** Legacy sentinels for records that pre-date the identity-aware actor
  *  shape. Read-path normalization maps missing fields to these. */
@@ -141,6 +151,8 @@ function defaultSystemDisplayName(source: SystemSource): string {
 			return 'Event-Stream';
 		case SYSTEM_MISSION_RUNNER:
 			return 'Mission-Runner';
+		case SYSTEM_BOOTSTRAP:
+			return 'Bootstrap';
 	}
 }
 
