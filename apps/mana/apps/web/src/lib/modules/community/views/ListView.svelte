@@ -20,8 +20,10 @@
 	let props: Props = $props();
 
 	let categoryFilter = $state<FeedbackCategory | ''>('');
+	// svelte-ignore state_referenced_locally
 	let modulePill = $state(props.moduleContext ?? '');
 
+	// svelte-ignore state_referenced_locally
 	let feed = useCommunityFeed({ moduleContext: props.moduleContext, limit: 50 });
 
 	function applyFilters() {

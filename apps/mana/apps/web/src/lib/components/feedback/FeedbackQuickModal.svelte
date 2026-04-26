@@ -28,6 +28,7 @@
 	let defaultCategory = $derived<FeedbackCategory>(props.defaultCategory ?? 'feature');
 
 	let text = $state('');
+	// svelte-ignore state_referenced_locally
 	let category = $state<FeedbackCategory>(props.defaultCategory ?? 'feature');
 	let isPublic = $state(true);
 	let saving = $state(false);

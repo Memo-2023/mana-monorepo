@@ -16,6 +16,7 @@
 
 	let props: Props = $props();
 
+	// svelte-ignore state_referenced_locally
 	let view = useCommunityItem(props.id);
 
 	let replyText = $state('');
