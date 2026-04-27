@@ -81,6 +81,21 @@
 		"goalsSaved": "Objetivos guardados",
 		"favoriteAdded": "Añadido a favoritos"
 	},
+	"home": {
+		"page_title_html": "Food - Mana",
+		"heading_today": "Hoy",
+		"action_history": "Historial",
+		"action_meal": "Comida",
+		"section_today_meals": "Comidas de hoy",
+		"entries_count": "{n} entradas",
+		"empty_no_meals": "Sin comidas",
+		"empty_hint": "Registra tu primera comida.",
+		"action_add_meal": "Añadir comida",
+		"macro_protein": "{n}g proteína",
+		"macro_carbs": "{n}g carbs",
+		"macro_fat": "{n}g grasa",
+		"link_goals": "Objetivos"
+	},
 	"detail": {
 		"page_title_html": "{description} - Food - Mana",
 		"untitled_fallback": "Comida",

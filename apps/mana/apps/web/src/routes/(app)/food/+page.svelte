@@ -9,6 +9,8 @@
 	import type { MealWithNutrition, NutritionProgress } from '$lib/modules/food/types';
 	import { Plus, Clock, Fire } from '@mana/shared-icons';
 	import { RoutePage } from '$lib/components/shell';
+	import { _, locale } from 'svelte-i18n';
+	import { get } from 'svelte/store';
 
 	const allMeals = useAllMeals();
 	const allGoals = useAllGoals();
@@ -25,7 +27,7 @@
 	}
 
 	function formatTime(dateString: string): string {
-		return new Date(dateString).toLocaleTimeString('de-DE', {
+		return new Date(dateString).toLocaleTimeString(get(locale) ?? 'de', {
 			hour: '2-digit',
 			minute: '2-digit',
 		});
@@ -40,7 +42,7 @@
 </script>
 
 <svelte:head>
-	<title>Food - Mana</title>
+	<title>{$_('food.home.page_title_html')}</title>
 </svelte:head>
 
 <RoutePage appId="food">
@@ -48,9 +50,11 @@
 		<!-- Header -->
 		<div class="flex items-center justify-between">
 			<div>
-				<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">Heute</h1>
+				<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">
+					{$_('food.home.heading_today')}
+				</h1>
 				<p class="text-sm text-[hsl(var(--color-muted-foreground))]">
-					{new Date().toLocaleDateString('de-DE', {
+					{new Date().toLocaleDateString(get(locale) ?? 'de', {
 						weekday: 'long',
 						day: 'numeric',
 						month: 'long',
@@ -62,14 +66,14 @@
 					href="/food/history"
 					class="rounded-lg border border-[hsl(var(--color-border))] px-4 py-2 text-sm font-medium text-[hsl(var(--color-foreground))] transition-colors hover:bg-[hsl(var(--color-muted))]"
 				>
-					Verlauf
+					{$_('food.home.action_history')}
 				</a>
 				<a
 					href="/food/add"
 					class="flex items-center gap-2 rounded-lg bg-[hsl(var(--color-primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--color-primary-foreground))] transition-colors hover:opacity-90"
 				>
 					<Plus size={16} />
-					Mahlzeit
+					{$_('food.home.action_meal')}
 				</a>
 			</div>
 		</div>
@@ -85,7 +89,8 @@
 						class="h-2 w-2 rounded-full"
 						style="background-color: {NUTRIENT_INFO.calories.color}"
 					></div>
-					<span class="text-xs font-medium text-[hsl(var(--color-muted-foreground))]">Kalorien</span
+					<span class="text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
+						>{$_('food.nutrition.calories')}</span
 					>
 				</div>
 				<p class="mt-2 text-2xl font-bold text-[hsl(var(--color-foreground))]">
@@ -113,7 +118,9 @@
 						class="h-2 w-2 rounded-full"
 						style="background-color: {NUTRIENT_INFO.protein.color}"
 					></div>
-					<span class="text-xs font-medium text-[hsl(var(--color-muted-foreground))]">Protein</span>
+					<span class="text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
+						>{$_('food.nutrition.protein')}</span
+					>
 				</div>
 				<p class="mt-2 text-2xl font-bold text-[hsl(var(--color-foreground))]">
 					{progress.protein.current}g
@@ -141,7 +148,7 @@
 						style="background-color: {NUTRIENT_INFO.carbohydrates.color}"
 					></div>
 					<span class="text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
-						>Kohlenhydrate</span
+						>{$_('food.nutrition.carbs')}</span
 					>
 				</div>
 				<p class="mt-2 text-2xl font-bold text-[hsl(var(--color-foreground))]">
@@ -169,7 +176,9 @@
 						class="h-2 w-2 rounded-full"
 						style="background-color: {NUTRIENT_INFO.fat.color}"
 					></div>
-					<span class="text-xs font-medium text-[hsl(var(--color-muted-foreground))]">Fett</span>
+					<span class="text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
+						>{$_('food.nutrition.fat')}</span
+					>
 				</div>
 				<p class="mt-2 text-2xl font-bold text-[hsl(var(--color-foreground))]">
 					{progress.fat.current}g
@@ -192,10 +201,10 @@
 		<div>
 			<div class="mb-3 flex items-center justify-between">
 				<h2 class="text-lg font-semibold text-[hsl(var(--color-foreground))]">
-					Heutige Mahlzeiten
+					{$_('food.home.section_today_meals')}
 				</h2>
 				<span class="text-sm text-[hsl(var(--color-muted-foreground))]">
-					{todaysMeals.length} Eintraege
+					{$_('food.home.entries_count', { values: { n: todaysMeals.length } })}
 				</span>
 			</div>
 
@@ -205,16 +214,16 @@
 				>
 					<span class="mb-4 text-5xl">🍽️</span>
 					<h3 class="mb-2 text-lg font-semibold text-[hsl(var(--color-foreground))]">
-						Noch keine Mahlzeiten
+						{$_('food.home.empty_no_meals')}
 					</h3>
 					<p class="mb-4 text-sm text-[hsl(var(--color-muted-foreground))]">
-						Trage deine erste Mahlzeit ein.
+						{$_('food.home.empty_hint')}
 					</p>
 					<a
 						href="/food/add"
 						class="rounded-lg bg-[hsl(var(--color-primary))] px-6 py-2.5 text-sm font-medium text-[hsl(var(--color-primary-foreground))]"
 					>
-						Mahlzeit hinzufuegen
+						{$_('food.home.action_add_meal')}
 					</a>
 				</div>
 			{:else}
@@ -256,9 +265,21 @@
 											class="mt-2 flex flex-wrap gap-3 text-xs text-[hsl(var(--color-muted-foreground))]"
 										>
 											<span>{meal.nutrition.calories} kcal</span>
-											<span>{meal.nutrition.protein}g Protein</span>
-											<span>{meal.nutrition.carbohydrates}g Carbs</span>
-											<span>{meal.nutrition.fat}g Fett</span>
+											<span
+												>{$_('food.home.macro_protein', {
+													values: { n: meal.nutrition.protein },
+												})}</span
+											>
+											<span
+												>{$_('food.home.macro_carbs', {
+													values: { n: meal.nutrition.carbohydrates },
+												})}</span
+											>
+											<span
+												>{$_('food.home.macro_fat', {
+													values: { n: meal.nutrition.fat },
+												})}</span
+											>
 										</div>
 									{/if}
 								</div>
@@ -285,14 +306,18 @@
 				class="flex-1 rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 text-center transition-colors hover:border-[hsl(var(--color-primary)/0.3)]"
 			>
 				<span class="text-2xl">🎯</span>
-				<p class="mt-1 text-sm font-medium text-[hsl(var(--color-foreground))]">Ziele</p>
+				<p class="mt-1 text-sm font-medium text-[hsl(var(--color-foreground))]">
+					{$_('food.home.link_goals')}
+				</p>
 			</a>
 			<a
 				href="/food/history"
 				class="flex-1 rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4 text-center transition-colors hover:border-[hsl(var(--color-primary)/0.3)]"
 			>
 				<span class="text-2xl">📊</span>
-				<p class="mt-1 text-sm font-medium text-[hsl(var(--color-foreground))]">Verlauf</p>
+				<p class="mt-1 text-sm font-medium text-[hsl(var(--color-foreground))]">
+					{$_('food.home.action_history')}
+				</p>
 			</a>
 		</div>
 	</div>
