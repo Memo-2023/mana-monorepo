@@ -1,0 +1,19 @@
+{
+	"page": {
+		"title": "Finance",
+		"page_title_html": "Finance - Mana",
+		"loading": "Caricamento…",
+		"summary_income": "Entrate",
+		"summary_expenses": "Uscite",
+		"summary_balance": "Saldo",
+		"section_by_category": "Uscite per categoria",
+		"section_transactions": "Transazioni",
+		"action_cancel": "Annulla",
+		"action_add_transaction": "+ Aggiungi transazione",
+		"type_expense": "Uscita",
+		"type_income": "Entrata",
+		"placeholder_amount": "0,00",
+		"placeholder_description": "Descrizione…",
+		"action_submit": "Aggiungi"
+	}
+}

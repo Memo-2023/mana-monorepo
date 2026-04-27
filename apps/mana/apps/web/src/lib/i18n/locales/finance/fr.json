@@ -1,0 +1,19 @@
+{
+	"page": {
+		"title": "Finance",
+		"page_title_html": "Finance - Mana",
+		"loading": "Chargement…",
+		"summary_income": "Revenus",
+		"summary_expenses": "Dépenses",
+		"summary_balance": "Solde",
+		"section_by_category": "Dépenses par catégorie",
+		"section_transactions": "Transactions",
+		"action_cancel": "Annuler",
+		"action_add_transaction": "+ Ajouter une transaction",
+		"type_expense": "Dépense",
+		"type_income": "Revenu",
+		"placeholder_amount": "0,00",
+		"placeholder_description": "Description…",
+		"action_submit": "Ajouter"
+	}
+}

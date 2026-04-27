@@ -1,0 +1,19 @@
+{
+	"page": {
+		"title": "Finance",
+		"page_title_html": "Finance - Mana",
+		"loading": "Loading…",
+		"summary_income": "Income",
+		"summary_expenses": "Expenses",
+		"summary_balance": "Balance",
+		"section_by_category": "Expenses by category",
+		"section_transactions": "Transactions",
+		"action_cancel": "Cancel",
+		"action_add_transaction": "+ Add transaction",
+		"type_expense": "Expense",
+		"type_income": "Income",
+		"placeholder_amount": "0.00",
+		"placeholder_description": "Description…",
+		"action_submit": "Add"
+	}
+}
