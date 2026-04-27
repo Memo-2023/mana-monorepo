@@ -7,6 +7,7 @@
 	import { notesStore } from '$lib/modules/notes/stores/notes.svelte';
 	import { NOTE_COLORS } from '$lib/modules/notes/types';
 	import { RoutePage } from '$lib/components/shell';
+	import { _ } from 'svelte-i18n';
 
 	const allNotes$: Observable<Note[]> = getContext('notes');
 
@@ -35,7 +36,7 @@
 		e.preventDefault();
 		if (!newTitle.trim() && !newContent.trim()) return;
 		const note = await notesStore.createNote({
-			title: newTitle.trim() || 'Unbenannt',
+			title: newTitle.trim() || $_('notes.page.untitled'),
 			content: newContent,
 			color: newColor,
 		});
@@ -48,16 +49,18 @@
 </script>
 
 <svelte:head>
-	<title>Notes - Mana</title>
+	<title>{$_('notes.page.page_title_html')}</title>
 </svelte:head>
 
 <RoutePage appId="notes">
 	<div class="notes-page">
 		<header class="notes-header">
 			<div>
-				<h1 class="notes-title">Notes</h1>
+				<h1 class="notes-title">{$_('notes.page.title')}</h1>
 				{#if isLoaded}
-					<div class="notes-stats">{notes.length} Notizen</div>
+					<div class="notes-stats">
+						{$_('notes.page.stats_count', { values: { n: notes.length } })}
+					</div>
 				{/if}
 			</div>
 		</header>
@@ -67,10 +70,12 @@
 			<input
 				class="search-input"
 				type="text"
-				placeholder="Notizen durchsuchen..."
+				placeholder={$_('notes.page.search_placeholder')}
 				bind:value={searchQuery}
 			/>
-			<button class="add-btn" onclick={() => (showCreate = !showCreate)}>+ Neue Notiz</button>
+			<button class="add-btn" onclick={() => (showCreate = !showCreate)}
+				>{$_('notes.page.action_new')}</button
+			>
 		</div>
 
 		<!-- Create Form -->
@@ -80,13 +85,13 @@
 				<input
 					class="create-title"
 					type="text"
-					placeholder="Titel..."
+					placeholder={$_('notes.page.placeholder_title')}
 					bind:value={newTitle}
 					autofocus
 				/>
 				<textarea
 					class="create-content"
-					placeholder="Schreibe etwas..."
+					placeholder={$_('notes.page.placeholder_content')}
 					bind:value={newContent}
 					rows="4"
 				></textarea>
@@ -106,9 +111,9 @@
 					</div>
 					<div class="create-actions">
 						<button type="button" class="btn-cancel" onclick={() => (showCreate = false)}
-							>Abbrechen</button
+							>{$_('notes.page.action_cancel')}</button
 						>
-						<button type="submit" class="btn-save">Erstellen</button>
+						<button type="submit" class="btn-save">{$_('notes.page.action_create')}</button>
 					</div>
 				</div>
 			</form>
@@ -118,7 +123,7 @@
 			<!-- Pinned -->
 			{#if pinnedNotes.length > 0}
 				<section class="section">
-					<h2 class="section-label">Angepinnt</h2>
+					<h2 class="section-label">{$_('notes.page.section_pinned')}</h2>
 					<div class="notes-grid">
 						{#each pinnedNotes as note (note.id)}
 							<a
@@ -126,7 +131,7 @@
 								class="note-card"
 								style:border-top-color={note.color ?? 'transparent'}
 							>
-								<div class="card-title">{note.title || 'Unbenannt'}</div>
+								<div class="card-title">{note.title || $_('notes.page.untitled')}</div>
 								<div class="card-preview">{getPreview(note.content, 120)}</div>
 								<div class="card-meta">{formatRelativeTime(note.updatedAt)}</div>
 							</a>
@@ -139,7 +144,7 @@
 			{#if unpinnedNotes.length > 0}
 				<section class="section">
 					{#if pinnedNotes.length > 0}
-						<h2 class="section-label">Weitere</h2>
+						<h2 class="section-label">{$_('notes.page.section_others')}</h2>
 					{/if}
 					<div class="notes-grid">
 						{#each unpinnedNotes as note (note.id)}
@@ -148,7 +153,7 @@
 								class="note-card"
 								style:border-top-color={note.color ?? 'transparent'}
 							>
-								<div class="card-title">{note.title || 'Unbenannt'}</div>
+								<div class="card-title">{note.title || $_('notes.page.untitled')}</div>
 								<div class="card-preview">{getPreview(note.content, 120)}</div>
 								<div class="card-meta">{formatRelativeTime(note.updatedAt)}</div>
 							</a>
@@ -159,12 +164,14 @@
 
 			{#if notes.length === 0 && !showCreate}
 				<div class="empty">
-					<p>Noch keine Notizen.</p>
-					<button class="add-btn" onclick={() => (showCreate = true)}>Erste Notiz erstellen</button>
+					<p>{$_('notes.page.empty_no_notes')}</p>
+					<button class="add-btn" onclick={() => (showCreate = true)}
+						>{$_('notes.page.empty_action')}</button
+					>
 				</div>
 			{/if}
 		{:else}
-			<div class="loading">Laden...</div>
+			<div class="loading">{$_('notes.page.loading')}</div>
 		{/if}
 	</div>
 </RoutePage>

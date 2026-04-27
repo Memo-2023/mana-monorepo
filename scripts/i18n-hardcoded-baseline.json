@@ -270,7 +270,6 @@
 	"apps/mana/apps/web/src/routes/(app)/news/saved/+page.svelte": 1,
 	"apps/mana/apps/web/src/routes/(app)/news/sources/+page.svelte": 1,
 	"apps/mana/apps/web/src/routes/(app)/notes/[id]/+page.svelte": 5,
-	"apps/mana/apps/web/src/routes/(app)/notes/+page.svelte": 8,
 	"apps/mana/apps/web/src/routes/(app)/observatory/+page.svelte": 6,
 	"apps/mana/apps/web/src/routes/(app)/onboarding/+layout.svelte": 3,
 	"apps/mana/apps/web/src/routes/(app)/onboarding/look/+page.svelte": 6,
