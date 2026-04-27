@@ -11,6 +11,7 @@
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
 	import { useItemContextMenu } from '$lib/data/item-context-menu.svelte';
 	import { Trash, Star, EnvelopeOpen, Archive } from '@mana/shared-icons';
+	import { _ } from 'svelte-i18n';
 
 	let showCompose = $state(false);
 	let selectedThreadId = $state<string | null>(null);
@@ -73,26 +74,30 @@
 			? [
 					{
 						id: 'read',
-						label: ctxMenu.state.target.isRead ? 'Als ungelesen' : 'Als gelesen',
+						label: ctxMenu.state.target.isRead
+							? $_('mail.list_view.ctx_mark_unread')
+							: $_('mail.list_view.ctx_mark_read'),
 						icon: EnvelopeOpen,
 						action: () => {},
 					},
 					{
 						id: 'star',
-						label: ctxMenu.state.target.isFlagged ? 'Stern entfernen' : 'Markieren',
+						label: ctxMenu.state.target.isFlagged
+							? $_('mail.list_view.ctx_unstar')
+							: $_('mail.list_view.ctx_star'),
 						icon: Star,
 						action: () => {},
 					},
 					{
 						id: 'archive',
-						label: 'Archivieren',
+						label: $_('mail.list_view.ctx_archive'),
 						icon: Archive,
 						action: () => {},
 					},
 					{ id: 'div', label: '', type: 'divider' as const },
 					{
 						id: 'delete',
-						label: 'Löschen',
+						label: $_('mail.list_view.ctx_delete'),
 						icon: Trash,
 						variant: 'danger' as const,
 						action: () => {},
@@ -105,7 +110,9 @@
 <div class="mail-view">
 	<!-- Mailbox Sidebar -->
 	<div class="mailbox-sidebar">
-		<button class="compose-btn" onclick={() => (showCompose = true)}>Neue Mail</button>
+		<button class="compose-btn" onclick={() => (showCompose = true)}
+			>{$_('mail.list_view.action_compose')}</button
+		>
 		<div class="mailbox-list">
 			{#each mailStore.mailboxes as mb (mb.id)}
 				<!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -127,16 +134,18 @@
 	<!-- Thread List -->
 	<div class="thread-list">
 		{#if mailStore.loading && mailStore.threads.length === 0}
-			<div class="loading">Lade Mails...</div>
+			<div class="loading">{$_('mail.list_view.loading')}</div>
 		{:else if mailStore.error}
 			<div class="error-state">
 				<p>{mailStore.error}</p>
-				<button class="retry-btn" onclick={() => mailStore.loadThreads()}>Erneut versuchen</button>
+				<button class="retry-btn" onclick={() => mailStore.loadThreads()}
+					>{$_('mail.list_view.action_retry')}</button
+				>
 			</div>
 		{:else if mailStore.threads.length === 0}
 			<div class="empty">
-				<p>Keine Mails</p>
-				<p class="empty-hint">Dein Postfach ist leer.</p>
+				<p>{$_('mail.list_view.empty_title')}</p>
+				<p class="empty-hint">{$_('mail.list_view.empty_hint')}</p>
 			</div>
 		{:else}
 			{#each mailStore.threads as thread (thread.id)}
@@ -176,37 +185,37 @@
 				onsubmit={handleSend}
 				onkeydown={(e) => e.key === 'Escape' && (showCompose = false)}
 			>
-				<div class="compose-header">Neue Nachricht</div>
+				<div class="compose-header">{$_('mail.list_view.compose_heading')}</div>
 				<!-- svelte-ignore a11y_autofocus -->
 				<input
 					class="compose-input"
 					type="email"
-					placeholder="An"
+					placeholder={$_('mail.list_view.placeholder_to')}
 					bind:value={composeTo}
 					autofocus
 				/>
 				<input
 					class="compose-input"
 					type="text"
-					placeholder="Betreff"
+					placeholder={$_('mail.list_view.placeholder_subject')}
 					bind:value={composeSubject}
 				/>
 				<textarea
 					class="compose-body"
-					placeholder="Nachricht schreiben..."
+					placeholder={$_('mail.list_view.placeholder_body')}
 					bind:value={composeBody}
 					rows="8"
 				></textarea>
 				<div class="compose-actions">
 					<button type="button" class="btn-cancel" onclick={() => (showCompose = false)}
-						>Abbrechen</button
+						>{$_('mail.list_view.action_cancel')}</button
 					>
 					<button
 						type="submit"
 						class="btn-send"
 						disabled={sending || !composeTo.trim() || !composeSubject.trim()}
 					>
-						{sending ? 'Wird gesendet...' : 'Senden'}
+						{sending ? $_('mail.list_view.action_sending') : $_('mail.list_view.action_send')}
 					</button>
 				</div>
 			</form>
@@ -217,12 +226,17 @@
 					<div class="message-card">
 						<div class="message-header">
 							<span class="message-from"
-								>{msg.from?.[0]?.name || msg.from?.[0]?.email || 'Unbekannt'}</span
+								>{msg.from?.[0]?.name ||
+									msg.from?.[0]?.email ||
+									$_('mail.list_view.sender_unknown')}</span
 							>
 							<span class="message-date">{formatDate(msg.date)}</span>
 						</div>
 						{#if msg.to}
-							<div class="message-to">An: {msg.to.map((t) => t.name || t.email).join(', ')}</div>
+							<div class="message-to">
+								{$_('mail.list_view.thread_to_prefix')}
+								{msg.to.map((t) => t.name || t.email).join(', ')}
+							</div>
 						{/if}
 						<div class="message-body">
 							{#if msg.bodyHtml}
@@ -236,7 +250,7 @@
 			</div>
 		{:else}
 			<div class="empty-detail">
-				<p>Wähle eine Nachricht aus</p>
+				<p>{$_('mail.list_view.empty_detail')}</p>
 			</div>
 		{/if}
 	</div>

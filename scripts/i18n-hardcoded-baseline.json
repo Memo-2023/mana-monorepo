@@ -127,7 +127,6 @@
 	"apps/mana/apps/web/src/lib/modules/library/components/ProgressControls.svelte": 3,
 	"apps/mana/apps/web/src/lib/modules/library/ListView.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/library/views/GridView.svelte": 2,
-	"apps/mana/apps/web/src/lib/modules/mail/ListView.svelte": 8,
 	"apps/mana/apps/web/src/lib/modules/meditate/components/SessionPlayer.svelte": 3,
 	"apps/mana/apps/web/src/lib/modules/meditate/components/StatsOverview.svelte": 3,
 	"apps/mana/apps/web/src/lib/modules/meditate/ListView.svelte": 1,
