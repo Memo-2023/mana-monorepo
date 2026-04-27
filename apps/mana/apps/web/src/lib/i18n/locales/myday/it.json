@@ -1,0 +1,14 @@
+{
+	"list_view": {
+		"section_tasks": "Attività",
+		"alert_overdue": "{n} in ritardo",
+		"empty_no_tasks": "Nessuna attività oggi",
+		"section_events": "Eventi",
+		"empty_no_events": "Nessun evento",
+		"section_water": "Acqua",
+		"coffee_count": "{n}× caffè",
+		"section_nutrition": "Alimentazione",
+		"meals_count": "{n} pasti",
+		"section_streaks": "Serie"
+	}
+}

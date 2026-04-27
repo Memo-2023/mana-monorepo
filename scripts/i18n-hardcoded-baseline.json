@@ -137,7 +137,6 @@
 	"apps/mana/apps/web/src/lib/modules/moodlit/components/mood/CreateMoodDialog.svelte": 3,
 	"apps/mana/apps/web/src/lib/modules/music/ListView.svelte": 3,
 	"apps/mana/apps/web/src/lib/modules/music/views/DetailView.svelte": 6,
-	"apps/mana/apps/web/src/lib/modules/myday/ListView.svelte": 7,
 	"apps/mana/apps/web/src/lib/modules/news-research/ListView.svelte": 3,
 	"apps/mana/apps/web/src/lib/modules/news/widgets/NewsUnreadWidget.svelte": 2,
 	"apps/mana/apps/web/src/lib/modules/notes/ListView.svelte": 4,

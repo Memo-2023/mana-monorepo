@@ -6,6 +6,7 @@
 	import { useDaySnapshot } from '$lib/data/projections/day-snapshot';
 	import { useStreaks } from '$lib/data/projections/streaks';
 	import { CheckCircle, CalendarBlank, Drop, ForkKnife, MapPin, Fire } from '@mana/shared-icons';
+	import { _ } from 'svelte-i18n';
 
 	const day = useDaySnapshot();
 	const streaks = useStreaks();
@@ -16,19 +17,21 @@
 	<div class="section">
 		<div class="section-header">
 			<CheckCircle size={18} weight="bold" />
-			<span>Tasks</span>
+			<span>{$_('myday.list_view.section_tasks')}</span>
 			<span class="badge"
 				>{day.value.tasks.completed}/{day.value.tasks.total + day.value.tasks.completed}</span
 			>
 		</div>
 		{#if day.value.tasks.overdue > 0}
-			<div class="alert">{day.value.tasks.overdue} ueberfaellig</div>
+			<div class="alert">
+				{$_('myday.list_view.alert_overdue', { values: { n: day.value.tasks.overdue } })}
+			</div>
 		{/if}
 		{#each day.value.tasks.dueToday.slice(0, 5) as t}
 			<div class="item">• {t.title}</div>
 		{/each}
 		{#if day.value.tasks.dueToday.length === 0 && day.value.tasks.total === 0}
-			<div class="empty">Keine Tasks heute</div>
+			<div class="empty">{$_('myday.list_view.empty_no_tasks')}</div>
 		{/if}
 	</div>
 
@@ -36,7 +39,7 @@
 	<div class="section">
 		<div class="section-header">
 			<CalendarBlank size={18} weight="bold" />
-			<span>Termine</span>
+			<span>{$_('myday.list_view.section_events')}</span>
 			<span class="badge">{day.value.events.total}</span>
 		</div>
 		{#each day.value.events.upcoming.slice(0, 4) as e}
@@ -46,7 +49,7 @@
 			</div>
 		{/each}
 		{#if day.value.events.total === 0}
-			<div class="empty">Keine Termine</div>
+			<div class="empty">{$_('myday.list_view.empty_no_events')}</div>
 		{/if}
 	</div>
 
@@ -54,7 +57,7 @@
 	<div class="section">
 		<div class="section-header">
 			<Drop size={18} weight="bold" />
-			<span>Wasser</span>
+			<span>{$_('myday.list_view.section_water')}</span>
 			<span class="badge">{day.value.drinks.water.percent}%</span>
 		</div>
 		<div class="progress-bar">
@@ -65,7 +68,9 @@
 		</div>
 		<div class="stat">{day.value.drinks.water.ml} / {day.value.drinks.water.goal} ml</div>
 		{#if day.value.drinks.coffee.count > 0}
-			<div class="stat-secondary">{day.value.drinks.coffee.count}x Kaffee</div>
+			<div class="stat-secondary">
+				{$_('myday.list_view.coffee_count', { values: { n: day.value.drinks.coffee.count } })}
+			</div>
 		{/if}
 	</div>
 
@@ -73,8 +78,10 @@
 	<div class="section">
 		<div class="section-header">
 			<ForkKnife size={18} weight="bold" />
-			<span>Ernaehrung</span>
-			<span class="badge">{day.value.nutrition.meals} Mahlz.</span>
+			<span>{$_('myday.list_view.section_nutrition')}</span>
+			<span class="badge"
+				>{$_('myday.list_view.meals_count', { values: { n: day.value.nutrition.meals } })}</span
+			>
 		</div>
 		<div class="progress-bar">
 			<div
@@ -92,7 +99,7 @@
 		<div class="section">
 			<div class="section-header">
 				<Fire size={18} weight="bold" />
-				<span>Streaks</span>
+				<span>{$_('myday.list_view.section_streaks')}</span>
 			</div>
 			{#each streaks.value as s}
 				<div class="streak-row">

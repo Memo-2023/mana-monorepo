@@ -1,0 +1,14 @@
+{
+	"list_view": {
+		"section_tasks": "Tasks",
+		"alert_overdue": "{n} überfällig",
+		"empty_no_tasks": "Keine Tasks heute",
+		"section_events": "Termine",
+		"empty_no_events": "Keine Termine",
+		"section_water": "Wasser",
+		"coffee_count": "{n}× Kaffee",
+		"section_nutrition": "Ernährung",
+		"meals_count": "{n} Mahlz.",
+		"section_streaks": "Streaks"
+	}
+}
