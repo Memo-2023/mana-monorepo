@@ -12,7 +12,8 @@
 		useAllDreamSymbols,
 	} from '../queries';
 	import { dreamsStore } from '../stores/dreams.svelte';
-	import { MOOD_COLORS, MOOD_LABELS, type Dream, type DreamMood } from '../types';
+	import { MOOD_COLORS, type Dream, type DreamMood } from '../types';
+	import { _ } from 'svelte-i18n';
 
 	let {
 		symbolId,
@@ -107,7 +108,7 @@
 	async function handleDelete() {
 		if (!symbol) return;
 		const ok = confirm(
-			`Symbol "${symbol.name}" wirklich löschen? Es wird aus allen Träumen entfernt.`
+			$_('dreams.symbol_detail.confirm_delete', { values: { name: symbol.name } })
 		);
 		if (!ok) return;
 		await dreamsStore.deleteSymbol(symbol.id);
@@ -119,7 +120,9 @@
 		const target = symbols.find((s) => s.id === mergeTargetId);
 		if (!target) return;
 		const ok = confirm(
-			`"${symbol.name}" in "${target.name}" zusammenführen? Alle Träume werden umgeschrieben.`
+			$_('dreams.symbol_detail.confirm_merge', {
+				values: { source: symbol.name, target: target.name },
+			})
 		);
 		if (!ok) return;
 		await dreamsStore.mergeSymbols(symbol.id, mergeTargetId);
@@ -139,45 +142,54 @@
 	}
 
 	function moodLabel(mood: string): string {
-		if (mood in MOOD_LABELS) return MOOD_LABELS[mood as DreamMood];
-		return 'Unbekannt';
+		const valid: DreamMood[] = ['angenehm', 'neutral', 'unangenehm', 'albtraum'];
+		if (valid.includes(mood as DreamMood)) return $_('dreams.moods.' + mood);
+		return $_('dreams.symbol_detail.mood_unknown');
 	}
 </script>
 
 <div class="detail-view">
 	<div class="header">
-		<button class="back-btn" onclick={onBack}>← Symbole</button>
+		<button class="back-btn" onclick={onBack}>{$_('dreams.symbol_detail.back')}</button>
 		<div class="header-actions">
 			{#if savedHint}
-				<span class="saved-hint">Gespeichert</span>
+				<span class="saved-hint">{$_('dreams.symbol_detail.saved')}</span>
 			{/if}
 			{#if symbol && mergeCandidates.length > 0}
-				<button class="meta-btn" onclick={() => (mergeOpen = !mergeOpen)}>Zusammenführen…</button>
+				<button class="meta-btn" onclick={() => (mergeOpen = !mergeOpen)}
+					>{$_('dreams.symbol_detail.action_merge')}</button
+				>
 			{/if}
 			{#if symbol}
-				<button class="del-btn" onclick={handleDelete}>Löschen</button>
+				<button class="del-btn" onclick={handleDelete}
+					>{$_('dreams.symbol_detail.action_delete')}</button
+				>
 			{/if}
 		</div>
 	</div>
 
 	{#if mergeOpen && symbol}
 		<div class="merge-panel">
-			<span class="merge-label">"{symbol.name}" zusammenführen mit:</span>
+			<span class="merge-label"
+				>{$_('dreams.symbol_detail.merge_label', { values: { name: symbol.name } })}</span
+			>
 			<select class="merge-select" bind:value={mergeTargetId}>
-				<option value="">– Symbol wählen –</option>
+				<option value="">{$_('dreams.symbol_detail.merge_select_default')}</option>
 				{#each mergeCandidates as c}
 					<option value={c.id}>{c.name} ({c.count})</option>
 				{/each}
 			</select>
-			<button class="merge-confirm" disabled={!mergeTargetId} onclick={handleMerge}>OK</button>
+			<button class="merge-confirm" disabled={!mergeTargetId} onclick={handleMerge}
+				>{$_('dreams.symbol_detail.merge_confirm')}</button
+			>
 			<button class="merge-cancel" onclick={() => ((mergeOpen = false), (mergeTargetId = ''))}
-				>Abbrechen</button
+				>{$_('dreams.symbol_detail.merge_cancel')}</button
 			>
 		</div>
 	{/if}
 
 	{#if !symbol}
-		<p class="empty">Symbol nicht gefunden.</p>
+		<p class="empty">{$_('dreams.symbol_detail.empty_not_found')}</p>
 	{:else}
 		<!-- Editable header -->
 		<div class="sym-header">
@@ -185,10 +197,15 @@
 				class="name-input"
 				type="text"
 				bind:value={editName}
-				placeholder="Symbolname"
+				placeholder={$_('dreams.symbol_detail.name_placeholder')}
 				style="color: {editColor}"
 			/>
-			<span class="count-badge">{symbol.count} {symbol.count === 1 ? 'Traum' : 'Träume'}</span>
+			<span class="count-badge"
+				>{symbol.count}
+				{symbol.count === 1
+					? $_('dreams.symbol_detail.count_singular')
+					: $_('dreams.symbol_detail.count_plural')}</span
+			>
 		</div>
 
 		<!-- Color picker -->
@@ -199,18 +216,18 @@
 					class:active={editColor === color}
 					style="background: {color}"
 					onclick={() => (editColor = color)}
-					aria-label={`Farbe ${color}`}
+					aria-label={$_('dreams.symbol_detail.color_aria', { values: { color } })}
 				></button>
 			{/each}
 		</div>
 
 		<!-- Meaning -->
 		<div class="section">
-			<span class="section-label">Meine Bedeutung</span>
+			<span class="section-label">{$_('dreams.symbol_detail.label_meaning')}</span>
 			<textarea
 				class="meaning-input"
 				bind:value={editMeaning}
-				placeholder="Was bedeutet dieses Symbol für dich? (optional)"
+				placeholder={$_('dreams.symbol_detail.meaning_placeholder')}
 				rows="3"
 			></textarea>
 		</div>
@@ -218,7 +235,7 @@
 		<!-- Mood distribution -->
 		{#if moodDist.length > 0}
 			<div class="section">
-				<span class="section-label">Stimmungs-Verteilung</span>
+				<span class="section-label">{$_('dreams.symbol_detail.label_mood_dist')}</span>
 				<div class="bars">
 					{#each moodDist as m}
 						<div class="bar-row">
@@ -239,13 +256,13 @@
 		<!-- Co-occurring -->
 		{#if cooccurring.length > 0}
 			<div class="section">
-				<span class="section-label">Häufig zusammen mit</span>
+				<span class="section-label">{$_('dreams.symbol_detail.label_cooccurring')}</span>
 				<div class="cooc-row">
 					{#each cooccurring as c}
 						<button
 							class="cooc-chip"
 							onclick={() => navigateToCooccurring(c.name)}
-							title={`Zu "${c.name}" wechseln`}
+							title={$_('dreams.symbol_detail.cooccurring_title', { values: { name: c.name } })}
 						>
 							{c.name} <span class="cooc-count">{c.count}</span>
 						</button>
@@ -257,7 +274,7 @@
 		<!-- Dream list -->
 		{#if dreamsWithSymbol.length > 0}
 			<div class="section">
-				<span class="section-label">Träume mit diesem Symbol</span>
+				<span class="section-label">{$_('dreams.symbol_detail.label_dream_list')}</span>
 				<div class="dream-refs">
 					{#each dreamsWithSymbol as d (d.id)}
 						<button class="dream-ref" onclick={() => onOpenDream?.(d)} disabled={!onOpenDream}>
@@ -267,7 +284,7 @@
 								<span class="ref-dot empty"></span>
 							{/if}
 							<div class="ref-content">
-								<span class="ref-title">{d.title || 'Traum ohne Titel'}</span>
+								<span class="ref-title">{d.title || $_('dreams.list_view.untitled')}</span>
 								<span class="ref-date">{formatDreamDate(d.dreamDate)}</span>
 							</div>
 						</button>
