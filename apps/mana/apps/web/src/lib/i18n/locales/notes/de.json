@@ -1,0 +1,19 @@
+{
+	"page": {
+		"page_title_html": "Notes - Mana",
+		"title": "Notes",
+		"stats_count": "{n} Notizen",
+		"search_placeholder": "Notizen durchsuchen...",
+		"action_new": "+ Neue Notiz",
+		"placeholder_title": "Titel...",
+		"placeholder_content": "Schreibe etwas...",
+		"action_cancel": "Abbrechen",
+		"action_create": "Erstellen",
+		"section_pinned": "Angepinnt",
+		"section_others": "Weitere",
+		"untitled": "Unbenannt",
+		"empty_no_notes": "Noch keine Notizen.",
+		"empty_action": "Erste Notiz erstellen",
+		"loading": "Laden..."
+	}
+}

@@ -1,0 +1,19 @@
+{
+	"page": {
+		"page_title_html": "Notes - Mana",
+		"title": "Notes",
+		"stats_count": "{n} notas",
+		"search_placeholder": "Buscar notas…",
+		"action_new": "+ Nueva nota",
+		"placeholder_title": "Título…",
+		"placeholder_content": "Escribe algo…",
+		"action_cancel": "Cancelar",
+		"action_create": "Crear",
+		"section_pinned": "Fijadas",
+		"section_others": "Otras",
+		"untitled": "Sin título",
+		"empty_no_notes": "Aún no hay notas.",
+		"empty_action": "Crea tu primera nota",
+		"loading": "Cargando…"
+	}
+}
