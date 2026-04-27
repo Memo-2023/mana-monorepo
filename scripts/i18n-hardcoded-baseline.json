@@ -221,7 +221,6 @@
 	"apps/mana/apps/web/src/routes/(app)/comic/new/+page.svelte": 1,
 	"apps/mana/apps/web/src/routes/(app)/companion/+page.svelte": 2,
 	"apps/mana/apps/web/src/routes/(app)/contacts/[id]/+page.svelte": 7,
-	"apps/mana/apps/web/src/routes/(app)/contacts/+page.svelte": 7,
 	"apps/mana/apps/web/src/routes/(app)/context/documents/[id]/+page.svelte": 3,
 	"apps/mana/apps/web/src/routes/(app)/context/documents/+page.svelte": 5,
 	"apps/mana/apps/web/src/routes/(app)/context/spaces/[id]/+page.svelte": 3,

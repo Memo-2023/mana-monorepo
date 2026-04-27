@@ -63,16 +63,16 @@
 		{ id: 'favorites', minimized: false },
 	]);
 
-	const PAGE_META: Record<string, { title: string; color: string }> = {
-		'my-profile': { title: 'Mein Profil', color: '#8B5CF6' },
-		all: { title: 'Alle Kontakte', color: '#3B82F6' },
-		favorites: { title: 'Favoriten', color: '#F59E0B' },
-		'birthday-soon': { title: 'Bald Geburtstag', color: '#EC4899' },
-		'has-email': { title: 'Mit E-Mail', color: '#6366F1' },
-		'has-phone': { title: 'Mit Telefon', color: '#22C55E' },
-		'with-company': { title: 'Mit Unternehmen', color: '#8B5CF6' },
-		'with-address': { title: 'Mit Adresse', color: '#F97316' },
-		recent: { title: 'Kürzlich hinzugefügt', color: '#6B7280' },
+	const PAGE_META: Record<string, { titleKey: string; color: string }> = {
+		'my-profile': { titleKey: 'contacts.page.page_my_profile', color: '#8B5CF6' },
+		all: { titleKey: 'contacts.page.page_all', color: '#3B82F6' },
+		favorites: { titleKey: 'contacts.page.page_favorites', color: '#F59E0B' },
+		'birthday-soon': { titleKey: 'contacts.page.page_birthday_soon', color: '#EC4899' },
+		'has-email': { titleKey: 'contacts.page.page_has_email', color: '#6366F1' },
+		'has-phone': { titleKey: 'contacts.page.page_has_phone', color: '#22C55E' },
+		'with-company': { titleKey: 'contacts.page.page_with_company', color: '#8B5CF6' },
+		'with-address': { titleKey: 'contacts.page.page_with_address', color: '#F97316' },
+		recent: { titleKey: 'contacts.page.page_recent', color: '#6B7280' },
 	};
 
 	let carouselPages = $derived<CarouselPage[]>(
@@ -83,7 +83,7 @@
 				minimized: p.minimized,
 				maximized: p.maximized,
 				widthPx: p.widthPx ?? DEFAULT_WIDTH,
-				title: meta?.title ?? p.id,
+				title: meta?.titleKey ? $_(meta.titleKey) : p.id,
 				color: meta?.color ?? '#6B7280',
 			};
 		})
@@ -126,16 +126,18 @@
 </script>
 
 <svelte:head>
-	<title>Kontakte - Mana</title>
+	<title>{$_('contacts.page.page_title_html')}</title>
 </svelte:head>
 
 <div class="contacts-board">
 	<!-- Header -->
 	<header class="contacts-header">
 		<div>
-			<h1 class="contacts-title">Kontakte</h1>
+			<h1 class="contacts-title">{$_('contacts.page.title')}</h1>
 			<p class="contacts-stats">
-				{allContacts.filter((c) => !c.isArchived).length} Kontakte
+				{$_('contacts.page.stats_count', {
+					values: { n: allContacts.filter((c) => !c.isArchived).length },
+				})}
 			</p>
 		</div>
 		<div class="header-actions">
@@ -144,7 +146,7 @@
 				<MagnifyingGlass size={16} class="search-icon" />
 				<input
 					type="text"
-					placeholder="Suchen..."
+					placeholder={$_('contacts.page.placeholder_search')}
 					value={contactsFilterStore.searchQuery}
 					oninput={(e) => contactsFilterStore.setSearchQuery(e.currentTarget.value)}
 					class="search-input"
@@ -157,7 +159,7 @@
 			</div>
 			<button class="new-btn" onclick={() => contactModalStore.open()}>
 				<Plus size={16} />
-				Neu
+				{$_('contacts.page.action_new')}
 			</button>
 		</div>
 	</header>
@@ -171,7 +173,7 @@
 		onMaximize={handleMaximizePage}
 		onRemove={handleRemovePage}
 		onTogglePicker={() => (showPicker = !showPicker)}
-		addLabel="Seite hinzufügen"
+		addLabel={$_('contacts.page.page_picker_add_label')}
 	>
 		{#snippet page(p)}
 			<ContactPage
@@ -218,7 +220,7 @@
 				class="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card px-5 py-3"
 			>
 				<h2 class="text-lg font-bold text-foreground">
-					{isEditing ? 'Kontakt bearbeiten' : 'Neuer Kontakt'}
+					{isEditing ? $_('contacts.page.modal_edit_title') : $_('contacts.page.modal_new_title')}
 				</h2>
 				<button
 					onclick={() => contactModalStore.close()}
@@ -259,20 +261,20 @@
 			>
 				<div class="contact-section">
 					<div class="section-icon-row">
-						<span class="section-label">Name</span>
+						<span class="section-label">{$_('contacts.page.section_name')}</span>
 					</div>
 					<div class="grid grid-cols-2 gap-2">
 						<input
 							name="firstName"
 							type="text"
-							placeholder="Vorname"
+							placeholder={$_('contacts.page.placeholder_first_name')}
 							value={contactModalStore.prefillData?.firstName ?? ''}
 							class="contact-input"
 						/>
 						<input
 							name="lastName"
 							type="text"
-							placeholder="Nachname"
+							placeholder={$_('contacts.page.placeholder_last_name')}
 							value={contactModalStore.prefillData?.lastName ?? ''}
 							class="contact-input"
 						/>
@@ -280,20 +282,27 @@
 				</div>
 
 				<div class="contact-section">
-					<div class="section-icon-row"><span class="section-label">Kontakt</span></div>
+					<div class="section-icon-row">
+						<span class="section-label">{$_('contacts.page.section_contact')}</span>
+					</div>
 					<input
 						name="email"
 						type="email"
-						placeholder="E-Mail"
+						placeholder={$_('contacts.page.placeholder_email')}
 						value={contactModalStore.prefillData?.email ?? ''}
 						class="contact-input"
 					/>
 					<div class="grid grid-cols-2 gap-2">
-						<input name="mobile" type="tel" placeholder="Mobil" class="contact-input" />
+						<input
+							name="mobile"
+							type="tel"
+							placeholder={$_('contacts.page.placeholder_mobile')}
+							class="contact-input"
+						/>
 						<input
 							name="phone"
 							type="tel"
-							placeholder="Telefon"
+							placeholder={$_('contacts.page.placeholder_phone')}
 							value={contactModalStore.prefillData?.phone ?? ''}
 							class="contact-input"
 						/>
@@ -301,57 +310,110 @@
 				</div>
 
 				<div class="contact-section">
-					<div class="section-icon-row"><span class="section-label">Arbeit</span></div>
+					<div class="section-icon-row">
+						<span class="section-label">{$_('contacts.page.section_work')}</span>
+					</div>
 					<input
 						name="company"
 						type="text"
-						placeholder="Unternehmen"
+						placeholder={$_('contacts.page.placeholder_company')}
 						value={contactModalStore.prefillData?.company ?? ''}
 						class="contact-input"
 					/>
-					<input name="jobTitle" type="text" placeholder="Position" class="contact-input" />
-					<input name="website" type="url" placeholder="Website" class="contact-input" />
+					<input
+						name="jobTitle"
+						type="text"
+						placeholder={$_('contacts.page.placeholder_job_title')}
+						class="contact-input"
+					/>
+					<input
+						name="website"
+						type="url"
+						placeholder={$_('contacts.page.placeholder_website')}
+						class="contact-input"
+					/>
 				</div>
 
 				<div class="contact-section">
-					<div class="section-icon-row"><span class="section-label">Adresse</span></div>
+					<div class="section-icon-row">
+						<span class="section-label">{$_('contacts.page.section_address')}</span>
+					</div>
 					<input
 						name="street"
 						type="text"
-						placeholder="Straße & Hausnummer"
+						placeholder={$_('contacts.page.placeholder_street')}
 						class="contact-input"
 					/>
 					<div class="grid grid-cols-[5rem_1fr] gap-2">
-						<input name="postalCode" type="text" placeholder="PLZ" class="contact-input" />
-						<input name="city" type="text" placeholder="Stadt" class="contact-input" />
+						<input
+							name="postalCode"
+							type="text"
+							placeholder={$_('contacts.page.placeholder_postal_code')}
+							class="contact-input"
+						/>
+						<input
+							name="city"
+							type="text"
+							placeholder={$_('contacts.page.placeholder_city')}
+							class="contact-input"
+						/>
 					</div>
-					<input name="country" type="text" placeholder="Land" class="contact-input" />
+					<input
+						name="country"
+						type="text"
+						placeholder={$_('contacts.page.placeholder_country')}
+						class="contact-input"
+					/>
 				</div>
 
 				<div class="contact-section">
-					<div class="section-icon-row"><span class="section-label">🎂 Geburtstag</span></div>
+					<div class="section-icon-row">
+						<span class="section-label">{$_('contacts.page.section_birthday')}</span>
+					</div>
 					<input name="birthday" type="date" class="contact-input" />
 				</div>
 
 				<div class="contact-section">
-					<div class="section-icon-row"><span class="section-label">Notizen</span></div>
+					<div class="section-icon-row">
+						<span class="section-label">{$_('contacts.page.section_notes')}</span>
+					</div>
 					<textarea
 						name="notes"
 						rows="3"
-						placeholder="Notizen zum Kontakt..."
+						placeholder={$_('contacts.page.placeholder_notes')}
 						class="contact-input resize-none"
 					></textarea>
 				</div>
 
 				<details class="contact-section">
 					<summary class="section-icon-row cursor-pointer select-none">
-						<span class="section-label">🔗 Social Media</span>
+						<span class="section-label">{$_('contacts.page.section_social')}</span>
 					</summary>
 					<div class="mt-2 space-y-2">
-						<input name="linkedin" type="url" placeholder="LinkedIn URL" class="contact-input" />
-						<input name="twitter" type="text" placeholder="Twitter / X" class="contact-input" />
-						<input name="instagram" type="text" placeholder="Instagram" class="contact-input" />
-						<input name="github" type="text" placeholder="GitHub" class="contact-input" />
+						<input
+							name="linkedin"
+							type="url"
+							placeholder={$_('contacts.page.placeholder_linkedin')}
+							class="contact-input"
+						/>
+						<input
+							name="twitter"
+							type="text"
+							placeholder={$_('contacts.page.placeholder_twitter')}
+							class="contact-input"
+						/>
+						<input
+							name="instagram"
+							type="text"
+							placeholder={$_('contacts.page.placeholder_instagram')}
+							class="contact-input"
+						/>
+						<input
+							name="github"
+							type="text"
+							placeholder={$_('contacts.page.placeholder_github')}
+							class="contact-input"
+						/>
 					</div>
 				</details>
 
@@ -361,13 +423,13 @@
 						onclick={() => contactModalStore.close()}
 						class="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
 					>
-						Abbrechen
+						{$_('contacts.page.action_cancel')}
 					</button>
 					<button
 						type="submit"
 						class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
 					>
-						Speichern
+						{$_('contacts.page.action_save')}
 					</button>
 				</div>
 			</form>
