@@ -14,6 +14,7 @@
 	import { Trash } from '@mana/shared-icons';
 	import { generateSuggestions, dismissSuggestion, isSuggestionDismissed } from '$lib/triggers';
 	import type { AutomationSuggestion } from '$lib/triggers';
+	import { _ } from 'svelte-i18n';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
@@ -147,7 +148,10 @@
 		const src = SOURCE_OPTIONS.find(
 			(s) => s.app === a.sourceApp && s.collection === a.sourceCollection
 		);
-		const opLabel = a.sourceOp === 'insert' ? 'erstellt' : 'geaendert';
+		const opLabel =
+			a.sourceOp === 'insert'
+				? $_('automations.list_view.detail_inserted')
+				: $_('automations.list_view.detail_updated');
 		return src ? `${src.collectionLabel} ${opLabel}` : `${a.sourceCollection} ${opLabel}`;
 	}
 
@@ -177,7 +181,7 @@
 	<!-- Suggestions -->
 	{#if suggestions.length > 0}
 		<div class="section">
-			<span class="section-label">Vorschlaege</span>
+			<span class="section-label">{$_('automations.list_view.section_suggestions')}</span>
 			{#each suggestions as sug (sug.id)}
 				<div class="sug-card">
 					<div class="sug-left">
@@ -188,8 +192,12 @@
 						<span class="sug-desc">{sug.description}</span>
 					</div>
 					<div class="sug-actions">
-						<button class="btn-sm primary" onclick={() => acceptSuggestion(sug)}>Aktivieren</button>
-						<button class="btn-sm ghost" onclick={() => handleDismiss(sug.id)}>Nein</button>
+						<button class="btn-sm primary" onclick={() => acceptSuggestion(sug)}
+							>{$_('automations.list_view.action_activate')}</button
+						>
+						<button class="btn-sm ghost" onclick={() => handleDismiss(sug.id)}
+							>{$_('automations.list_view.action_dismiss')}</button
+						>
 					</div>
 				</div>
 			{/each}
@@ -199,9 +207,11 @@
 	<!-- Active Automations -->
 	<div class="section">
 		<div class="section-header">
-			<span class="section-label">Aktive Regeln</span>
+			<span class="section-label">{$_('automations.list_view.section_active')}</span>
 			{#if !showCreate}
-				<button class="btn-sm outline" onclick={() => (showCreate = true)}>+ Neu</button>
+				<button class="btn-sm outline" onclick={() => (showCreate = true)}
+					>{$_('automations.list_view.action_new')}</button
+				>
 			{/if}
 		</div>
 
@@ -210,15 +220,15 @@
 				<input
 					class="form-input full"
 					type="text"
-					placeholder="Name (optional)"
+					placeholder={$_('automations.list_view.placeholder_name')}
 					bind:value={newName}
 				/>
 
 				<div class="form-step">
-					<span class="step-badge when">WENN</span>
+					<span class="step-badge when">{$_('automations.list_view.step_when')}</span>
 					<div class="step-fields">
 						<select class="form-select" bind:value={newSourceKey}>
-							<option value="">Quelle waehlen...</option>
+							<option value="">{$_('automations.list_view.placeholder_source')}</option>
 							{#each SOURCE_OPTIONS as src}
 								<option value="{src.app}.{src.collection}"
 									>{src.appLabel} — {src.collectionLabel}</option
@@ -227,8 +237,8 @@
 						</select>
 						{#if selectedSource}
 							<select class="form-select narrow" bind:value={newSourceOp}>
-								<option value="insert">erstellt wird</option>
-								<option value="update">geaendert wird</option>
+								<option value="insert">{$_('automations.list_view.option_when_inserted')}</option>
+								<option value="update">{$_('automations.list_view.option_when_updated')}</option>
 							</select>
 						{/if}
 					</div>
@@ -236,10 +246,10 @@
 
 				{#if selectedSource}
 					<div class="form-step">
-						<span class="step-badge filter">FILTER</span>
+						<span class="step-badge filter">{$_('automations.list_view.step_filter')}</span>
 						<div class="step-fields">
 							<select class="form-select" bind:value={newConditionField}>
-								<option value="">Kein Filter</option>
+								<option value="">{$_('automations.list_view.option_no_filter')}</option>
 								{#each selectedSource.fields as field}
 									<option value={field}>{field}</option>
 								{/each}
@@ -253,7 +263,7 @@
 								<input
 									class="form-input"
 									type="text"
-									placeholder="Wert..."
+									placeholder={$_('automations.list_view.placeholder_value')}
 									bind:value={newConditionValue}
 								/>
 							{/if}
@@ -262,10 +272,10 @@
 				{/if}
 
 				<div class="form-step">
-					<span class="step-badge then">DANN</span>
+					<span class="step-badge then">{$_('automations.list_view.step_then')}</span>
 					<div class="step-fields">
 						<select class="form-select" bind:value={newActionKey}>
-							<option value="">Aktion waehlen...</option>
+							<option value="">{$_('automations.list_view.placeholder_action')}</option>
 							{#each ACTION_OPTIONS as act}
 								<option value="{act.app}.{act.action}">{act.appLabel} — {act.actionLabel}</option>
 							{/each}
@@ -283,7 +293,7 @@
 											};
 										}}
 									>
-										<option value="">Habit waehlen...</option>
+										<option value="">{$_('automations.list_view.placeholder_habit')}</option>
 										{#each habits as h}
 											<option value={h.id}>{h.title}</option>
 										{/each}
@@ -308,9 +318,11 @@
 				</div>
 
 				<div class="form-footer">
-					<button type="button" class="btn-sm ghost" onclick={resetForm}>Abbrechen</button>
+					<button type="button" class="btn-sm ghost" onclick={resetForm}
+						>{$_('automations.list_view.action_cancel')}</button
+					>
 					<button type="submit" class="btn-sm primary" disabled={!selectedSource || !selectedAction}
-						>Erstellen</button
+						>{$_('automations.list_view.action_create')}</button
 					>
 				</div>
 			</form>
@@ -324,7 +336,9 @@
 						class="toggle"
 						class:on={auto.enabled}
 						onclick={() => automationsStore.toggle(auto.id)}
-						title={auto.enabled ? 'Deaktivieren' : 'Aktivieren'}
+						title={auto.enabled
+							? $_('automations.list_view.toggle_disable')
+							: $_('automations.list_view.toggle_enable')}
 					>
 						<span class="toggle-track"><span class="toggle-thumb"></span></span>
 					</button>
@@ -332,7 +346,7 @@
 					<button
 						class="icon-btn danger"
 						onclick={() => automationsStore.remove(auto.id)}
-						title="Loeschen"
+						title={$_('automations.list_view.action_delete')}
 					>
 						<Trash size={12} />
 					</button>
@@ -342,7 +356,7 @@
 					<span class="flow-detail">{sourceDetail(auto)}</span>
 					{#if conditionLabel(auto)}
 						<span class="flow-arrow">&#8594;</span>
-						<span class="flow-chip filter">wenn</span>
+						<span class="flow-chip filter">{$_('automations.list_view.flow_when')}</span>
 						<span class="flow-detail">{conditionLabel(auto)}</span>
 					{/if}
 					<span class="flow-arrow">&#8594;</span>
@@ -354,10 +368,10 @@
 
 		{#if automations.length === 0 && !showCreate}
 			<div class="empty">
-				<p class="empty-title">Keine Automations</p>
-				<p class="empty-hint">Verbinde Module mit Regeln: "Wenn X passiert, mache Y"</p>
+				<p class="empty-title">{$_('automations.list_view.empty_title')}</p>
+				<p class="empty-hint">{$_('automations.list_view.empty_hint')}</p>
 				<button class="btn-sm primary" onclick={() => (showCreate = true)}
-					>Erste Automation erstellen</button
+					>{$_('automations.list_view.empty_action')}</button
 				>
 			</div>
 		{/if}
