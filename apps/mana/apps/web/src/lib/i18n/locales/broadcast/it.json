@@ -1,4 +1,32 @@
 {
+	"statuses": {
+		"draft": "Bozza",
+		"scheduled": "Pianificata",
+		"sending": "Invio in corso",
+		"sent": "Inviata",
+		"cancelled": "Annullata"
+	},
+	"detail_view": {
+		"sent_at": "Inviata {date}",
+		"scheduled_for": "Pianificata per {date}",
+		"action_duplicate": "Duplica",
+		"action_cancel": "Annulla",
+		"action_overview": "Torna alla panoramica",
+		"stat_sent": "Inviate",
+		"stat_sent_sub": "su {n}",
+		"stat_opened": "Aperte",
+		"stat_opened_sub": "{n} aperture",
+		"stat_clicked": "Cliccate",
+		"stat_clicked_sub": "{n} click",
+		"stat_bounced": "Respinte",
+		"stat_unsubscribed": "Disiscritti",
+		"poll_live": "Aggiornamento live…",
+		"poll_last_update": "Ultimo aggiornamento: {time}",
+		"poll_error_prefix": "Recupero stats non riuscito",
+		"poll_error_inline": "Recupero stats non riuscito: {error}",
+		"section_preview": "Come appariva la campagna",
+		"confirm_cancel_scheduled": "Annullare la campagna pianificata?"
+	},
 	"compose_view": {
 		"default_name": "Nuova campagna",
 		"name_placeholder": "Nome della campagna",

@@ -1,4 +1,32 @@
 {
+	"statuses": {
+		"draft": "Draft",
+		"scheduled": "Scheduled",
+		"sending": "Sending",
+		"sent": "Sent",
+		"cancelled": "Cancelled"
+	},
+	"detail_view": {
+		"sent_at": "Sent {date}",
+		"scheduled_for": "Scheduled for {date}",
+		"action_duplicate": "Duplicate",
+		"action_cancel": "Cancel",
+		"action_overview": "Back to overview",
+		"stat_sent": "Sent",
+		"stat_sent_sub": "of {n}",
+		"stat_opened": "Opened",
+		"stat_opened_sub": "{n} opens",
+		"stat_clicked": "Clicked",
+		"stat_clicked_sub": "{n} clicks",
+		"stat_bounced": "Bounced",
+		"stat_unsubscribed": "Unsubscribed",
+		"poll_live": "Live update…",
+		"poll_last_update": "Last update: {time}",
+		"poll_error_prefix": "Stats fetch failed",
+		"poll_error_inline": "Stats fetch failed: {error}",
+		"section_preview": "What the campaign looked like",
+		"confirm_cancel_scheduled": "Cancel scheduled campaign?"
+	},
 	"compose_view": {
 		"default_name": "New campaign",
 		"name_placeholder": "Campaign name",

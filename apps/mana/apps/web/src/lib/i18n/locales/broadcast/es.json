@@ -1,4 +1,32 @@
 {
+	"statuses": {
+		"draft": "Borrador",
+		"scheduled": "Programada",
+		"sending": "Enviando",
+		"sent": "Enviada",
+		"cancelled": "Cancelada"
+	},
+	"detail_view": {
+		"sent_at": "Enviada {date}",
+		"scheduled_for": "Programada para {date}",
+		"action_duplicate": "Duplicar",
+		"action_cancel": "Cancelar",
+		"action_overview": "Volver a la vista general",
+		"stat_sent": "Enviados",
+		"stat_sent_sub": "de {n}",
+		"stat_opened": "Abiertos",
+		"stat_opened_sub": "{n} aperturas",
+		"stat_clicked": "Clicados",
+		"stat_clicked_sub": "{n} clics",
+		"stat_bounced": "Rebotados",
+		"stat_unsubscribed": "Cancelaron suscripción",
+		"poll_live": "Actualización en vivo…",
+		"poll_last_update": "Última actualización: {time}",
+		"poll_error_prefix": "Error al obtener stats",
+		"poll_error_inline": "Error al obtener stats: {error}",
+		"section_preview": "Cómo se veía la campaña",
+		"confirm_cancel_scheduled": "¿Cancelar la campaña programada?"
+	},
 	"compose_view": {
 		"default_name": "Nueva campaña",
 		"name_placeholder": "Nombre de la campaña",

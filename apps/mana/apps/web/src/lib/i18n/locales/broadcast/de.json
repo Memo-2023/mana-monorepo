@@ -1,4 +1,32 @@
 {
+	"statuses": {
+		"draft": "Entwurf",
+		"scheduled": "Geplant",
+		"sending": "Versand läuft",
+		"sent": "Versendet",
+		"cancelled": "Abgebrochen"
+	},
+	"detail_view": {
+		"sent_at": "Versendet {date}",
+		"scheduled_for": "Geplant für {date}",
+		"action_duplicate": "Duplizieren",
+		"action_cancel": "Abbrechen",
+		"action_overview": "Zur Übersicht",
+		"stat_sent": "Versendet",
+		"stat_sent_sub": "von {n}",
+		"stat_opened": "Geöffnet",
+		"stat_opened_sub": "{n} Öffnungen",
+		"stat_clicked": "Geklickt",
+		"stat_clicked_sub": "{n} Klicks",
+		"stat_bounced": "Bounced",
+		"stat_unsubscribed": "Abgemeldet",
+		"poll_live": "Live-Update …",
+		"poll_last_update": "Letzte Aktualisierung: {time}",
+		"poll_error_prefix": "Stats-Fetch fehlgeschlagen",
+		"poll_error_inline": "Stats-Fetch fehlgeschlagen: {error}",
+		"section_preview": "Wie die Kampagne aussah",
+		"confirm_cancel_scheduled": "Geplante Kampagne abbrechen?"
+	},
 	"compose_view": {
 		"default_name": "Neue Kampagne",
 		"name_placeholder": "Kampagnen-Name",

@@ -1,4 +1,32 @@
 {
+	"statuses": {
+		"draft": "Brouillon",
+		"scheduled": "Planifiée",
+		"sending": "Envoi en cours",
+		"sent": "Envoyée",
+		"cancelled": "Annulée"
+	},
+	"detail_view": {
+		"sent_at": "Envoyée {date}",
+		"scheduled_for": "Planifiée pour {date}",
+		"action_duplicate": "Dupliquer",
+		"action_cancel": "Annuler",
+		"action_overview": "Retour à la vue d'ensemble",
+		"stat_sent": "Envoyés",
+		"stat_sent_sub": "sur {n}",
+		"stat_opened": "Ouverts",
+		"stat_opened_sub": "{n} ouvertures",
+		"stat_clicked": "Cliqués",
+		"stat_clicked_sub": "{n} clics",
+		"stat_bounced": "Rebondis",
+		"stat_unsubscribed": "Désabonnés",
+		"poll_live": "Mise à jour en direct…",
+		"poll_last_update": "Dernière mise à jour : {time}",
+		"poll_error_prefix": "Échec de la récupération des stats",
+		"poll_error_inline": "Échec de la récupération des stats : {error}",
+		"section_preview": "À quoi ressemblait la campagne",
+		"confirm_cancel_scheduled": "Annuler la campagne planifiée ?"
+	},
 	"compose_view": {
 		"default_name": "Nouvelle campagne",
 		"name_placeholder": "Nom de la campagne",
