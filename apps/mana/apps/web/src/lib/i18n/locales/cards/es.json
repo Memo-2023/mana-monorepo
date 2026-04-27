@@ -63,5 +63,20 @@
 		"empty_title": "Aún no hay sesiones de estudio.",
 		"empty_hint": "¡Crea un mazo y empieza a estudiar!",
 		"deck_cards": "{n} tarjetas"
+	},
+	"detail": {
+		"not_found": "Mazo no encontrado",
+		"confirm_delete": "¿Eliminar realmente este mazo?",
+		"toast_deleted": "Mazo eliminado",
+		"placeholder_name": "Nombre del mazo...",
+		"name_fallback": "Sin título",
+		"prop_color": "Color",
+		"prop_visibility": "Visibilidad",
+		"prop_cards": "Tarjetas",
+		"prop_last_studied": "Último estudio",
+		"section_description": "Descripción",
+		"placeholder_description": "Añadir una descripción...",
+		"meta_created": "Creado: {date}",
+		"meta_updated": "Editado: {date}"
 	}
 }

@@ -63,5 +63,20 @@
 		"empty_title": "Noch keine Lernsitzungen.",
 		"empty_hint": "Erstelle ein Deck und beginne zu lernen!",
 		"deck_cards": "{n} Karten"
+	},
+	"detail": {
+		"not_found": "Deck nicht gefunden",
+		"confirm_delete": "Deck wirklich löschen?",
+		"toast_deleted": "Deck gelöscht",
+		"placeholder_name": "Deck-Name...",
+		"name_fallback": "Unbenannt",
+		"prop_color": "Farbe",
+		"prop_visibility": "Sichtbarkeit",
+		"prop_cards": "Karten",
+		"prop_last_studied": "Zuletzt gelernt",
+		"section_description": "Beschreibung",
+		"placeholder_description": "Beschreibung hinzufügen...",
+		"meta_created": "Erstellt: {date}",
+		"meta_updated": "Bearbeitet: {date}"
 	}
 }

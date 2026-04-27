@@ -63,5 +63,20 @@
 		"empty_title": "Pas encore de sessions d'étude.",
 		"empty_hint": "Crée un paquet et commence à étudier !",
 		"deck_cards": "{n} cartes"
+	},
+	"detail": {
+		"not_found": "Paquet introuvable",
+		"confirm_delete": "Vraiment supprimer ce paquet ?",
+		"toast_deleted": "Paquet supprimé",
+		"placeholder_name": "Nom du paquet...",
+		"name_fallback": "Sans titre",
+		"prop_color": "Couleur",
+		"prop_visibility": "Visibilité",
+		"prop_cards": "Cartes",
+		"prop_last_studied": "Dernière révision",
+		"section_description": "Description",
+		"placeholder_description": "Ajouter une description...",
+		"meta_created": "Créé : {date}",
+		"meta_updated": "Modifié : {date}"
 	}
 }

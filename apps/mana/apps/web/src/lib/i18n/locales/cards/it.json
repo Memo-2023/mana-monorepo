@@ -63,5 +63,20 @@
 		"empty_title": "Ancora nessuna sessione di studio.",
 		"empty_hint": "Crea un mazzo e inizia a studiare!",
 		"deck_cards": "{n} carte"
+	},
+	"detail": {
+		"not_found": "Mazzo non trovato",
+		"confirm_delete": "Eliminare davvero questo mazzo?",
+		"toast_deleted": "Mazzo eliminato",
+		"placeholder_name": "Nome del mazzo...",
+		"name_fallback": "Senza titolo",
+		"prop_color": "Colore",
+		"prop_visibility": "Visibilità",
+		"prop_cards": "Carte",
+		"prop_last_studied": "Ultimo studio",
+		"section_description": "Descrizione",
+		"placeholder_description": "Aggiungi una descrizione...",
+		"meta_created": "Creato: {date}",
+		"meta_updated": "Modificato: {date}"
 	}
 }

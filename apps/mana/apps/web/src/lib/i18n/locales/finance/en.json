@@ -15,5 +15,8 @@
 		"placeholder_amount": "0.00",
 		"placeholder_description": "Description…",
 		"action_submit": "Add"
+	},
+	"list_view": {
+		"empty_no_tx": "No transactions this month yet."
 	}
 }

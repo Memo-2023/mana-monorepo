@@ -63,5 +63,20 @@
 		"empty_title": "No study sessions yet.",
 		"empty_hint": "Create a deck and start studying!",
 		"deck_cards": "{n} cards"
+	},
+	"detail": {
+		"not_found": "Deck not found",
+		"confirm_delete": "Really delete this deck?",
+		"toast_deleted": "Deck deleted",
+		"placeholder_name": "Deck name...",
+		"name_fallback": "Untitled",
+		"prop_color": "Color",
+		"prop_visibility": "Visibility",
+		"prop_cards": "Cards",
+		"prop_last_studied": "Last studied",
+		"section_description": "Description",
+		"placeholder_description": "Add a description...",
+		"meta_created": "Created: {date}",
+		"meta_updated": "Edited: {date}"
 	}
 }

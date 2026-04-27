@@ -1,0 +1,19 @@
+{
+	"list_view": {
+		"cta_question": "Wie geht es dir?",
+		"cta_count": "{n}/{target} Check-ins heute",
+		"section_today": "Heute",
+		"stat_avg_7": "Ø 7 Tage",
+		"stat_avg_30": "Ø 30 Tage",
+		"stat_streak": "Streak",
+		"section_week": "Diese Woche",
+		"section_valence": "Stimmungsbilanz",
+		"valence_positive": "{n}% positiv",
+		"valence_negative": "{n}% negativ",
+		"section_distribution": "Häufigste Emotionen",
+		"section_weekday_pattern": "Wochentag-Muster",
+		"section_activities": "Aktivitäten & Stimmung",
+		"insight_avg": "Ø {n}",
+		"insight_count": "({n}×)"
+	}
+}

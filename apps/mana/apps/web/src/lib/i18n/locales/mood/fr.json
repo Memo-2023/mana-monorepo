@@ -1,0 +1,19 @@
+{
+	"list_view": {
+		"cta_question": "Comment vas-tu ?",
+		"cta_count": "{n}/{target} check-ins aujourd'hui",
+		"section_today": "Aujourd'hui",
+		"stat_avg_7": "Ø 7 jours",
+		"stat_avg_30": "Ø 30 jours",
+		"stat_streak": "Série",
+		"section_week": "Cette semaine",
+		"section_valence": "Bilan humeur",
+		"valence_positive": "{n}% positif",
+		"valence_negative": "{n}% négatif",
+		"section_distribution": "Émotions les plus fréquentes",
+		"section_weekday_pattern": "Tendance par jour",
+		"section_activities": "Activités & humeur",
+		"insight_avg": "Ø {n}",
+		"insight_count": "({n}×)"
+	}
+}

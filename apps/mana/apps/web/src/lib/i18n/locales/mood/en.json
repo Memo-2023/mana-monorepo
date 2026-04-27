@@ -1,0 +1,19 @@
+{
+	"list_view": {
+		"cta_question": "How are you doing?",
+		"cta_count": "{n}/{target} check-ins today",
+		"section_today": "Today",
+		"stat_avg_7": "Ø 7 days",
+		"stat_avg_30": "Ø 30 days",
+		"stat_streak": "Streak",
+		"section_week": "This week",
+		"section_valence": "Mood balance",
+		"valence_positive": "{n}% positive",
+		"valence_negative": "{n}% negative",
+		"section_distribution": "Top emotions",
+		"section_weekday_pattern": "Weekday pattern",
+		"section_activities": "Activities & mood",
+		"insight_avg": "Ø {n}",
+		"insight_count": "({n}×)"
+	}
+}

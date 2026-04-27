@@ -15,5 +15,8 @@
 		"placeholder_amount": "0,00",
 		"placeholder_description": "Descripción…",
 		"action_submit": "Añadir"
+	},
+	"list_view": {
+		"empty_no_tx": "Aún no hay transacciones este mes."
 	}
 }

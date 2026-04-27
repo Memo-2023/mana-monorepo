@@ -1,0 +1,19 @@
+{
+	"list_view": {
+		"cta_question": "¿Cómo estás?",
+		"cta_count": "{n}/{target} check-ins hoy",
+		"section_today": "Hoy",
+		"stat_avg_7": "Ø 7 días",
+		"stat_avg_30": "Ø 30 días",
+		"stat_streak": "Racha",
+		"section_week": "Esta semana",
+		"section_valence": "Balance de ánimo",
+		"valence_positive": "{n}% positivo",
+		"valence_negative": "{n}% negativo",
+		"section_distribution": "Emociones principales",
+		"section_weekday_pattern": "Patrón por día",
+		"section_activities": "Actividades y ánimo",
+		"insight_avg": "Ø {n}",
+		"insight_count": "({n}×)"
+	}
+}
