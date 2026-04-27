@@ -89,6 +89,7 @@
 		"layoutFocus": "Enfoque"
 	},
 	"detailView": {
+		"labelVisibility": "Visibilidad",
 		"notFound": "Tarea no encontrada",
 		"confirmDelete": "¿Eliminar realmente la tarea?",
 		"toastDeleted": "Tarea eliminada",

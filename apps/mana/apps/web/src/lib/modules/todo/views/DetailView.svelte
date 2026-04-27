@@ -20,6 +20,7 @@
 	import LinkedItems from '$lib/components/links/LinkedItems.svelte';
 	import { toastStore } from '@mana/shared-ui/toast';
 	import { removeTagIdWithUndo } from '$lib/data/tag-mutations';
+	import { _ } from 'svelte-i18n';
 
 	let { navigate, params, goBack }: ViewProps = $props();
 	let taskId = $derived(params.taskId as string);
@@ -84,7 +85,7 @@
 	async function saveField() {
 		detail.blur();
 		await tasksStore.updateTask(taskId, {
-			title: editTitle.trim() || detail.entity?.title || 'Untitled',
+			title: editTitle.trim() || detail.entity?.title || $_('todo.detailView.untitledFallback'),
 			description: editDescription.trim() || undefined,
 			dueDate: editDueDate ? new Date(editDueDate).toISOString() : null,
 			priority: editPriority,
@@ -139,16 +140,16 @@
 		const id = taskId;
 		await tasksStore.deleteTask(id);
 		goBack();
-		toastStore.undo('Aufgabe gelöscht', () => {
+		toastStore.undo($_('todo.detailView.toastDeleted'), () => {
 			db.table('tasks').update(id, { deletedAt: undefined });
 		});
 	}
 
-	const priorityLabels: Record<TaskPriority, string> = {
-		low: 'Niedrig',
-		medium: 'Mittel',
-		high: 'Hoch',
-		urgent: 'Dringend',
+	const priorityKeys: Record<TaskPriority, string> = {
+		low: 'todo.priorityLow',
+		medium: 'todo.priorityMedium',
+		high: 'todo.priorityHigh',
+		urgent: 'todo.priorityUrgent',
 	};
 
 	const priorityColors: Record<TaskPriority, string> = {
@@ -162,11 +163,11 @@
 <DetailViewShell
 	entity={detail.entity}
 	loading={detail.loading}
-	notFoundLabel="Aufgabe nicht gefunden"
+	notFoundLabel={$_('todo.detailView.notFound')}
 	confirmDelete={detail.confirmDelete}
 	onAskDelete={detail.askDelete}
 	onCancelDelete={detail.cancelDelete}
-	confirmDeleteLabel="Aufgabe wirklich löschen?"
+	confirmDeleteLabel={$_('todo.detailView.confirmDelete')}
 	onConfirmDelete={deleteTask}
 >
 	{#snippet body(task)}
@@ -182,18 +183,18 @@
 				bind:value={editTitle}
 				onfocus={detail.focus}
 				onblur={saveField}
-				placeholder="Titel..."
+				placeholder={$_('todo.detailView.placeholderTitle')}
 			/>
 		</div>
 
 		<div class="properties">
 			<div class="prop-row">
-				<span class="prop-label">Sichtbarkeit</span>
+				<span class="prop-label">{$_('todo.detailView.labelVisibility')}</span>
 				<VisibilityPicker level={task.visibility ?? 'private'} onChange={handleVisibilityChange} />
 			</div>
 
 			<div class="prop-row">
-				<span class="prop-label">Priorität</span>
+				<span class="prop-label">{$_('todo.priority')}</span>
 				<select
 					class="prop-select"
 					bind:value={editPriority}
@@ -201,13 +202,13 @@
 					style="color: {priorityColors[editPriority]}"
 				>
 					{#each ['low', 'medium', 'high', 'urgent'] as const as p}
-						<option value={p}>{priorityLabels[p]}</option>
+						<option value={p}>{$_(priorityKeys[p])}</option>
 					{/each}
 				</select>
 			</div>
 
 			<div class="prop-row">
-				<span class="prop-label">Fällig</span>
+				<span class="prop-label">{$_('todo.dueDate')}</span>
 				<input
 					type="date"
 					class="prop-input"
@@ -219,13 +220,17 @@
 
 			{#if task.estimatedDuration}
 				<div class="prop-row">
-					<span class="prop-label">Dauer</span>
-					<span class="prop-value">{Math.round(task.estimatedDuration / 60)} Min.</span>
+					<span class="prop-label">{$_('todo.duration')}</span>
+					<span class="prop-value"
+						>{$_('todo.detailView.durationMin', {
+							values: { n: Math.round(task.estimatedDuration / 60) },
+						})}</span
+					>
 				</div>
 			{/if}
 
 			<div class="prop-row">
-				<span class="prop-label">Kalender</span>
+				<span class="prop-label">{$_('todo.detailView.labelCalendar')}</span>
 				{#if isScheduled}
 					<div class="schedule-fields">
 						<input
@@ -245,7 +250,7 @@
 						<button
 							class="unschedule-btn"
 							onclick={toggleSchedule}
-							aria-label="Vom Kalender entfernen"
+							aria-label={$_('todo.detailView.unscheduleAria')}
 						>
 							<X size={12} />
 						</button>
@@ -254,7 +259,7 @@
 					<div class="schedule-options">
 						<button class="schedule-btn" onclick={toggleSchedule}>
 							<CalendarBlank size={14} />
-							Planen
+							{$_('todo.detailView.labelSchedule')}
 						</button>
 						<SlotSuggestions
 							minDurationMinutes={task.estimatedDuration
@@ -274,7 +279,7 @@
 
 		{#if taskTags.length > 0}
 			<div class="section">
-				<span class="section-label">Tags</span>
+				<span class="section-label">{$_('todo.tags')}</span>
 				<div class="tags-list">
 					{#each taskTags as tag (tag.id)}
 						<button
@@ -294,13 +299,13 @@
 		<LinkedItems recordRef={{ app: 'todo', collection: 'tasks', id: taskId }} {navigate} />
 
 		<div class="section">
-			<span class="section-label">Beschreibung</span>
+			<span class="section-label">{$_('todo.description')}</span>
 			<textarea
 				class="description-input"
 				bind:value={editDescription}
 				onfocus={detail.focus}
 				onblur={saveField}
-				placeholder="Beschreibung hinzufügen..."
+				placeholder={$_('todo.detailView.placeholderDescription')}
 				rows={3}
 			></textarea>
 		</div>
@@ -308,7 +313,12 @@
 		{#if task.subtasks && task.subtasks.length > 0}
 			<div class="section">
 				<span class="section-label">
-					Unteraufgaben ({task.subtasks.filter((s) => s.isCompleted).length}/{task.subtasks.length})
+					{$_('todo.detailView.sectionSubtasks', {
+						values: {
+							done: task.subtasks.filter((s) => s.isCompleted).length,
+							total: task.subtasks.length,
+						},
+					})}
 				</span>
 				<div class="subtask-list">
 					{#each task.subtasks as subtask (subtask.id)}
@@ -326,9 +336,17 @@
 		{/if}
 
 		<div class="meta">
-			<span>Erstellt: {formatDate(new Date(task.createdAt ?? ''))}</span>
+			<span
+				>{$_('todo.detailView.metaCreated', {
+					values: { date: formatDate(new Date(task.createdAt ?? '')) },
+				})}</span
+			>
 			{#if task.updatedAt}
-				<span>Bearbeitet: {formatDate(new Date(task.updatedAt))}</span>
+				<span
+					>{$_('todo.detailView.metaUpdated', {
+						values: { date: formatDate(new Date(task.updatedAt)) },
+					})}</span
+				>
 			{/if}
 		</div>
 	{/snippet}

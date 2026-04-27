@@ -89,6 +89,7 @@
 		"layoutFocus": "Fokus"
 	},
 	"detailView": {
+		"labelVisibility": "Sichtbarkeit",
 		"notFound": "Aufgabe nicht gefunden",
 		"confirmDelete": "Aufgabe wirklich löschen?",
 		"toastDeleted": "Aufgabe gelöscht",

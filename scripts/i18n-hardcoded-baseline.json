@@ -191,7 +191,6 @@
 	"apps/mana/apps/web/src/lib/modules/todo/components/pages/TodoPage.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/todo/components/SyncIndicator.svelte": 4,
 	"apps/mana/apps/web/src/lib/modules/todo/ListView.svelte": 1,
-	"apps/mana/apps/web/src/lib/modules/todo/views/DetailView.svelte": 8,
 	"apps/mana/apps/web/src/lib/modules/wetter/components/CurrentConditions.svelte": 2,
 	"apps/mana/apps/web/src/lib/modules/wetter/components/HourlyForecast.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/wetter/components/LocationPicker.svelte": 5,

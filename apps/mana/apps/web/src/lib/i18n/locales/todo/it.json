@@ -89,6 +89,7 @@
 		"layoutFocus": "Focus"
 	},
 	"detailView": {
+		"labelVisibility": "Visibilità",
 		"notFound": "Attività non trovata",
 		"confirmDelete": "Eliminare davvero l'attività?",
 		"toastDeleted": "Attività eliminata",

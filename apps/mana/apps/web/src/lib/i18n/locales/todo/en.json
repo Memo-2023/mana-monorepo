@@ -89,6 +89,7 @@
 		"layoutFocus": "Focus"
 	},
 	"detailView": {
+		"labelVisibility": "Visibility",
 		"notFound": "Task not found",
 		"confirmDelete": "Really delete task?",
 		"toastDeleted": "Task deleted",

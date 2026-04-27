@@ -89,6 +89,7 @@
 		"layoutFocus": "Focus"
 	},
 	"detailView": {
+		"labelVisibility": "Visibilité",
 		"notFound": "Tâche introuvable",
 		"confirmDelete": "Vraiment supprimer la tâche ?",
 		"toastDeleted": "Tâche supprimée",
