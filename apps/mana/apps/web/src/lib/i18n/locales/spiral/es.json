@@ -1,0 +1,31 @@
+{
+	"list_view": {
+		"section_visualization": "Visualización",
+		"label_zoom": "Zoom",
+		"label_grid": "Cuadrícula",
+		"empty_no_data": "Sin datos. Haz clic en «Recopilar datos» para generar tu espiral.",
+		"section_stats": "Estadísticas",
+		"stat_image_size": "Tamaño de imagen",
+		"stat_events": "Eventos",
+		"stat_pixels_used": "Píxeles usados",
+		"stat_compression": "Compresión",
+		"stat_current_ring": "Anillo actual",
+		"stat_ring_value": "Anillo {n}",
+		"stat_apps_active": "Apps activas",
+		"last_collected": "Última recopilación: {when}",
+		"section_apps": "Apps",
+		"empty_no_app_data": "Aún no se han recopilado datos de apps.",
+		"events_count": "{n} eventos",
+		"section_palette": "Paleta de colores (3 bits)",
+		"section_actions": "Acciones",
+		"action_collecting": "Recopilando…",
+		"action_collect": "Recopilar datos",
+		"action_download_png": "Descargar PNG",
+		"action_import_png": "Importar PNG",
+		"action_reset": "Restablecer",
+		"info_heading": "Mana Spiral",
+		"info_body": "Mana Spiral recopila datos de actividad de todas tus apps y los codifica como píxeles de colores en un patrón en espiral. Cada píxel almacena 3 bits (8 colores). La imagen crece desde el centro hacia fuera — cuanto más uses las apps, más grande se vuelve tu espiral. Expórtala como PNG o úsala como fondo de pantalla.",
+		"import_failed": "Importación fallida: {error}",
+		"confirm_clear": "¿Eliminar todos los datos de espiral?"
+	}
+}

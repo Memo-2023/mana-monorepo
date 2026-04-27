@@ -1,0 +1,31 @@
+{
+	"list_view": {
+		"section_visualization": "Visualizzazione",
+		"label_zoom": "Zoom",
+		"label_grid": "Griglia",
+		"empty_no_data": "Nessun dato. Clicca «Raccogli dati» per generare la tua spirale.",
+		"section_stats": "Statistiche",
+		"stat_image_size": "Dimensione immagine",
+		"stat_events": "Eventi",
+		"stat_pixels_used": "Pixel utilizzati",
+		"stat_compression": "Compressione",
+		"stat_current_ring": "Anello attuale",
+		"stat_ring_value": "Anello {n}",
+		"stat_apps_active": "App attive",
+		"last_collected": "Ultima raccolta: {when}",
+		"section_apps": "App",
+		"empty_no_app_data": "Nessun dato app raccolto.",
+		"events_count": "{n} eventi",
+		"section_palette": "Palette colori (3 bit)",
+		"section_actions": "Azioni",
+		"action_collecting": "Raccolta…",
+		"action_collect": "Raccogli dati",
+		"action_download_png": "Scarica PNG",
+		"action_import_png": "Importa PNG",
+		"action_reset": "Ripristina",
+		"info_heading": "Mana Spiral",
+		"info_body": "La Mana Spiral raccoglie i dati di attività di tutte le tue app e li codifica come pixel colorati in un motivo a spirale. Ogni pixel memorizza 3 bit (8 colori). L'immagine cresce dal centro verso l'esterno — più usi le app, più grande diventa la tua spirale. Esportala come PNG o usala come sfondo.",
+		"import_failed": "Importazione non riuscita: {error}",
+		"confirm_clear": "Eliminare tutti i dati della spirale?"
+	}
+}
