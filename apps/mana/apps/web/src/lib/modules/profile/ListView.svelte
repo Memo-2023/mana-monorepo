@@ -17,6 +17,7 @@
 	import ContextFreeform from './ContextFreeform.svelte';
 	import { useUserContext } from './queries';
 	import { getProgress } from './questions';
+	import { _ } from 'svelte-i18n';
 
 	type Tab = 'overview' | 'interview' | 'freeform' | 'account';
 	type InterviewStartMode = 'text' | 'voice' | 'conversation';
@@ -44,11 +45,11 @@
 		}
 	});
 
-	const TABS: { key: Tab; label: string }[] = [
-		{ key: 'overview', label: 'Übersicht' },
-		{ key: 'interview', label: 'Interview' },
-		{ key: 'freeform', label: 'Freitext' },
-		{ key: 'account', label: 'Konto' },
+	const TABS: { key: Tab; labelKey: string }[] = [
+		{ key: 'overview', labelKey: 'profile.hub.tab_overview' },
+		{ key: 'interview', labelKey: 'profile.hub.tab_interview' },
+		{ key: 'freeform', labelKey: 'profile.hub.tab_freeform' },
+		{ key: 'account', labelKey: 'profile.hub.tab_account' },
 	];
 
 	function startInterview(mode: InterviewStartMode) {
@@ -58,15 +59,15 @@
 
 	function handleProfileUpdate(user: ApiUserProfile) {
 		apiProfile = user;
-		toast.success('Profil erfolgreich aktualisiert');
+		toast.success($_('profile.profile_updated'));
 	}
 
 	function handlePasswordChange() {
-		toast.success('Passwort erfolgreich geändert');
+		toast.success($_('profile.password_changed'));
 	}
 
 	async function handleAccountDeleted() {
-		toast.info('Konto wird gelöscht...');
+		toast.info($_('profile.hub.toast_account_deleting'));
 		await authStore.signOut();
 		goto('/login');
 	}
@@ -89,7 +90,7 @@
 						if (tab.key !== 'interview') interviewStartMode = null;
 					}}
 				>
-					{tab.label}
+					{$_(tab.labelKey)}
 				</button>
 			{/each}
 		</nav>
@@ -102,12 +103,14 @@
 				<!-- Interview start hero -->
 				<div class="interview-hero">
 					<div class="hero-header">
-						<h3 class="hero-title">Interview starten</h3>
+						<h3 class="hero-title">{$_('profile.hub.hero_title')}</h3>
 						<p class="hero-subtitle">
 							{#if progress.percent > 0}
-								{progress.answered} von {progress.total} Fragen beantwortet — mach weiter!
+								{$_('profile.hub.hero_subtitle_progress', {
+									values: { answered: progress.answered, total: progress.total },
+								})}
 							{:else}
-								Erzähl Mana mehr über dich, damit die App besser zu dir passt.
+								{$_('profile.hub.hero_subtitle_initial')}
 							{/if}
 						</p>
 						{#if progress.percent > 0}
@@ -133,8 +136,8 @@
 								</svg>
 							</span>
 							<span class="hero-option-text">
-								<strong>Per Text</strong>
-								<span>Fragen lesen und tippen</span>
+								<strong>{$_('profile.hub.option_text_title')}</strong>
+								<span>{$_('profile.hub.option_text_hint')}</span>
 							</span>
 						</button>
 						<button class="hero-option voice" onclick={() => startInterview('voice')}>
@@ -156,8 +159,8 @@
 								</svg>
 							</span>
 							<span class="hero-option-text">
-								<strong>Per Sprache</strong>
-								<span>Fragen hören und sprechen</span>
+								<strong>{$_('profile.hub.option_voice_title')}</strong>
+								<span>{$_('profile.hub.option_voice_hint')}</span>
 							</span>
 						</button>
 						<button class="hero-option conversation" onclick={() => startInterview('conversation')}>
@@ -176,8 +179,8 @@
 								</svg>
 							</span>
 							<span class="hero-option-text">
-								<strong>Als Gespräch</strong>
-								<span>Fließend — Antworten werden automatisch gespeichert</span>
+								<strong>{$_('profile.hub.option_conversation_title')}</strong>
+								<span>{$_('profile.hub.option_conversation_hint')}</span>
 							</span>
 						</button>
 					</div>
@@ -197,7 +200,11 @@
 					<div class="account-card">
 						<div class="account-header">
 							{#if apiProfile?.image}
-								<img src={apiProfile.image} alt="Avatar" class="account-avatar" />
+								<img
+									src={apiProfile.image}
+									alt={$_('profile.hub.avatar_alt')}
+									class="account-avatar"
+								/>
 							{:else}
 								<div class="account-avatar-placeholder">
 									{(apiProfile?.name ?? 'U').slice(0, 2).toUpperCase()}
@@ -212,16 +219,14 @@
 
 					<div class="account-actions">
 						<button class="account-btn" onclick={() => goto('/profile/me-images')}>
-							Meine Bilder
-							<span class="account-btn-hint">
-								Gesichts- und Ganzkörperbilder für KI-Bildgenerierung
-							</span>
+							{$_('profile.hub.action_my_images')}
+							<span class="account-btn-hint">{$_('profile.hub.action_my_images_hint')}</span>
 						</button>
 						<button class="account-btn" onclick={() => (showEditModal = true)}>
-							Profil bearbeiten
+							{$_('profile.edit')}
 						</button>
 						<button class="account-btn" onclick={() => (showPasswordModal = true)}>
-							Passwort ändern
+							{$_('profile.change_password')}
 						</button>
 						<button
 							class="account-btn"
@@ -230,10 +235,10 @@
 								goto('/login');
 							}}
 						>
-							Abmelden
+							{$_('profile.logout')}
 						</button>
 						<button class="account-btn danger" onclick={() => (showDeleteModal = true)}>
-							Konto löschen
+							{$_('profile.delete_account')}
 						</button>
 					</div>
 				</div>

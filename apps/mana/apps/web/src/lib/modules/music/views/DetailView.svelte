@@ -10,6 +10,7 @@
 	import { Heart } from '@mana/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalSong } from '../types';
+	import { _ } from 'svelte-i18n';
 
 	let { params, goBack }: ViewProps = $props();
 	let songId = $derived(params.songId as string);
@@ -38,7 +39,7 @@
 	async function saveField() {
 		detail.blur();
 		await libraryStore.updateMetadata(songId, {
-			title: editTitle.trim() || detail.entity?.title || 'Ohne Titel',
+			title: editTitle.trim() || detail.entity?.title || $_('music.detail.title_fallback'),
 			artist: editArtist.trim() || undefined,
 			album: editAlbum.trim() || undefined,
 			genre: editGenre.trim() || undefined,
@@ -62,14 +63,14 @@
 <DetailViewShell
 	entity={detail.entity}
 	loading={detail.loading}
-	notFoundLabel="Song nicht gefunden"
+	notFoundLabel={$_('music.detail.not_found')}
 	confirmDelete={detail.confirmDelete}
 	onAskDelete={detail.askDelete}
 	onCancelDelete={detail.cancelDelete}
-	confirmDeleteLabel="Song wirklich löschen?"
+	confirmDeleteLabel={$_('music.detail.confirm_delete')}
 	onConfirmDelete={() =>
 		detail.deleteWithUndo({
-			label: 'Song gelöscht',
+			label: $_('music.detail.toast_deleted'),
 			delete: () => libraryStore.delete(songId),
 			goBack,
 		})}
@@ -81,7 +82,7 @@
 				bind:value={editTitle}
 				onfocus={detail.focus}
 				onblur={saveField}
-				placeholder="Titel..."
+				placeholder={$_('music.detail.placeholder_title')}
 			/>
 			<button class="fav-btn" class:active={song.favorite} onclick={toggleFavorite}>
 				<Heart size={18} weight={song.favorite ? 'fill' : 'regular'} />
@@ -90,18 +91,18 @@
 
 		<div class="properties">
 			<div class="prop-row">
-				<span class="prop-label">Künstler</span>
+				<span class="prop-label">{$_('music.detail.prop_artist')}</span>
 				<input
 					class="prop-input"
 					bind:value={editArtist}
 					onfocus={detail.focus}
 					onblur={saveField}
-					placeholder="Unbekannt"
+					placeholder={$_('music.detail.prop_artist_placeholder')}
 				/>
 			</div>
 
 			<div class="prop-row">
-				<span class="prop-label">Album</span>
+				<span class="prop-label">{$_('music.detail.prop_album')}</span>
 				<input
 					class="prop-input"
 					bind:value={editAlbum}
@@ -112,7 +113,7 @@
 			</div>
 
 			<div class="prop-row">
-				<span class="prop-label">Genre</span>
+				<span class="prop-label">{$_('music.detail.prop_genre')}</span>
 				<input
 					class="prop-input"
 					bind:value={editGenre}
@@ -123,7 +124,7 @@
 			</div>
 
 			<div class="prop-row">
-				<span class="prop-label">Jahr</span>
+				<span class="prop-label">{$_('music.detail.prop_year')}</span>
 				<input
 					type="number"
 					class="prop-input"
@@ -135,7 +136,7 @@
 			</div>
 
 			<div class="prop-row">
-				<span class="prop-label">BPM</span>
+				<span class="prop-label">{$_('music.detail.prop_bpm')}</span>
 				<input
 					type="number"
 					class="prop-input"
@@ -147,23 +148,35 @@
 			</div>
 
 			<div class="prop-row">
-				<span class="prop-label">Dauer</span>
+				<span class="prop-label">{$_('music.detail.prop_duration')}</span>
 				<span class="prop-value">{formatDuration(song.duration)}</span>
 			</div>
 
 			<div class="prop-row">
-				<span class="prop-label">Wiedergaben</span>
+				<span class="prop-label">{$_('music.detail.prop_play_count')}</span>
 				<span class="prop-value">{song.playCount}</span>
 			</div>
 		</div>
 
 		<div class="meta">
-			<span>Erstellt: {formatDate(new Date(song.createdAt ?? ''))}</span>
+			<span
+				>{$_('music.detail.meta_created', {
+					values: { date: formatDate(new Date(song.createdAt ?? '')) },
+				})}</span
+			>
 			{#if song.updatedAt}
-				<span>Bearbeitet: {formatDate(new Date(song.updatedAt))}</span>
+				<span
+					>{$_('music.detail.meta_updated', {
+						values: { date: formatDate(new Date(song.updatedAt)) },
+					})}</span
+				>
 			{/if}
 			{#if song.lastPlayedAt}
-				<span>Zuletzt gehört: {formatDate(new Date(song.lastPlayedAt))}</span>
+				<span
+					>{$_('music.detail.meta_last_played', {
+						values: { date: formatDate(new Date(song.lastPlayedAt)) },
+					})}</span
+				>
 			{/if}
 		</div>
 	{/snippet}
