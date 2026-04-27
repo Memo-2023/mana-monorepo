@@ -49,13 +49,6 @@
 	let newNote = $state('');
 
 	const statuses: ItemStatus[] = ['owned', 'lent', 'stored', 'for_sale', 'disposed'];
-	const statusLabels: Record<ItemStatus, string> = {
-		owned: 'Besitzt',
-		lent: 'Verliehen',
-		stored: 'Eingelagert',
-		for_sale: 'Zu verkaufen',
-		disposed: 'Entsorgt',
-	};
 
 	function startEditing() {
 		if (!item) return;
@@ -90,7 +83,7 @@
 	}
 
 	async function deleteItem() {
-		if (!item || !confirm('Item endgultig loschen?')) return;
+		if (!item || !confirm($_('inventory.detail.confirm_delete'))) return;
 		await itemsStore.delete(item.id);
 		goto(collection ? `/inventory/collections/${collection.id}` : '/inventory');
 	}
@@ -100,14 +93,22 @@
 </script>
 
 <svelte:head>
-	<title>{item?.name || 'Item'} - Inventar - Mana</title>
+	<title
+		>{$_('inventory.detail.page_title_html', {
+			values: { name: item?.name || $_('inventory.detail.page_title_fallback') },
+		})}</title
+	>
 </svelte:head>
 
-<RoutePage appId="inventory" backHref="/inventory" title="Objekt">
+<RoutePage appId="inventory" backHref="/inventory" title={$_('inventory.detail.route_title')}>
 	{#if !item}
 		<div class="text-center py-16">
-			<p class="text-[hsl(var(--color-muted-foreground))]">Item nicht gefunden</p>
-			<a href="/inventory" class="mt-4 text-[hsl(var(--color-primary))]">Zuruck</a>
+			<p class="text-[hsl(var(--color-muted-foreground))]">
+				{$_('inventory.detail.empty_not_found')}
+			</p>
+			<a href="/inventory" class="mt-4 text-[hsl(var(--color-primary))]"
+				>{$_('inventory.detail.empty_back')}</a
+			>
 		</div>
 	{:else}
 		<div class="mx-auto max-w-2xl space-y-6">
@@ -154,7 +155,7 @@
 						<button
 							onclick={deleteItem}
 							class="rounded-lg border border-red-300 px-3 py-1.5 text-sm text-red-500 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-900/20"
-							>Loschen</button
+							>{$_('inventory.detail.action_delete')}</button
 						>
 					{/if}
 				</div>
@@ -165,10 +166,15 @@
 				<div
 					class="space-y-4 rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-5"
 				>
-					<input type="text" bind:value={editName} placeholder="Name" class={inputClass} />
+					<input
+						type="text"
+						bind:value={editName}
+						placeholder={$_('inventory.detail.placeholder_name')}
+						class={inputClass}
+					/>
 					<textarea
 						bind:value={editDescription}
-						placeholder="Beschreibung"
+						placeholder={$_('inventory.detail.placeholder_description')}
 						rows="2"
 						class={inputClass}
 					></textarea>
@@ -178,17 +184,17 @@
 							<label
 								for="inventory-status"
 								class="mb-1 block text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
-								>Status</label
+								>{$_('inventory.detail.label_status')}</label
 							>
 							<select id="inventory-status" bind:value={editStatus} class={inputClass}>
-								{#each statuses as s}<option value={s}>{statusLabels[s]}</option>{/each}
+								{#each statuses as s}<option value={s}>{$_('inventory.status.' + s)}</option>{/each}
 							</select>
 						</div>
 						<div>
 							<label
 								for="inventory-quantity"
 								class="mb-1 block text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
-								>Menge</label
+								>{$_('inventory.detail.label_quantity')}</label
 							>
 							<input
 								id="inventory-quantity"
@@ -203,10 +209,10 @@
 								<label
 									for="inventory-location"
 									class="mb-1 block text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
-									>Standort</label
+									>{$_('inventory.detail.label_location')}</label
 								>
 								<select id="inventory-location" bind:value={editLocationId} class={inputClass}>
-									<option value={undefined}>-- Kein Standort --</option>
+									<option value={undefined}>{$_('inventory.detail.option_no_location')}</option>
 									{#each locationsCtx.value as loc}
 										<option value={loc.id}>{loc.path ? `${loc.path}/` : ''}{loc.name}</option>
 									{/each}
@@ -218,10 +224,10 @@
 								<label
 									for="inventory-category"
 									class="mb-1 block text-xs font-medium text-[hsl(var(--color-muted-foreground))]"
-									>Kategorie</label
+									>{$_('inventory.detail.label_category')}</label
 								>
 								<select id="inventory-category" bind:value={editCategoryId} class={inputClass}>
-									<option value={undefined}>-- Keine Kategorie --</option>
+									<option value={undefined}>{$_('inventory.detail.option_no_category')}</option>
 									{#each categoriesCtx.value as cat}
 										<option value={cat.id}>{cat.name}</option>
 									{/each}
@@ -233,7 +239,7 @@
 					{#if collection}
 						<div>
 							<h3 class="mb-2 text-sm font-semibold text-[hsl(var(--color-foreground))]">
-								Eigene Felder
+								{$_('inventory.detail.section_custom_fields')}
 							</h3>
 							<div class="grid gap-3 sm:grid-cols-2">
 								{#each collection.schema.fields.sort((a, b) => a.order - b.order) as field}
@@ -294,7 +300,7 @@
 							class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
 						>
 							<h3 class="mb-3 text-sm font-semibold text-[hsl(var(--color-foreground))]">
-								Details
+								{$_('inventory.detail.section_details')}
 							</h3>
 							<div class="grid gap-2 sm:grid-cols-2">
 								{#each collection.schema.fields.sort((a, b) => a.order - b.order) as field}
@@ -314,7 +320,7 @@
 						class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-4"
 					>
 						<h3 class="mb-3 text-sm font-semibold text-[hsl(var(--color-foreground))]">
-							Notizen ({item.notes.length})
+							{$_('inventory.detail.section_notes_count', { values: { n: item.notes.length } })}
 						</h3>
 						<div class="space-y-2">
 							{#each item.notes as note (note.id)}
@@ -339,7 +345,7 @@
 							<input
 								type="text"
 								bind:value={newNote}
-								placeholder="Notiz hinzufugen..."
+								placeholder={$_('inventory.detail.placeholder_new_note')}
 								class="flex-1 rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))]"
 								onkeydown={(e) => e.key === 'Enter' && addNote()}
 							/>

@@ -17,6 +17,8 @@
 	import { SPACE_TYPE_LABELS } from '@mana/shared-branding';
 	import { isSpaceType, type SpaceType } from '@mana/shared-types';
 	import { loadActiveSpace, authFetch, writeActiveSpaceHint } from '$lib/data/scope';
+	import { _, locale } from 'svelte-i18n';
+	import { get } from 'svelte/store';
 
 	interface InvitationPayload {
 		id: string;
@@ -45,7 +47,7 @@
 
 	async function loadInvitation() {
 		if (!invitationId) {
-			loadError = 'Kein Einladungs-Code in der URL';
+			loadError = $_('invitations.accept.error_no_invitation_id');
 			loading = false;
 			return;
 		}
@@ -56,7 +58,9 @@
 				`/api/auth/organization/get-invitation?id=${encodeURIComponent(invitationId)}`
 			);
 			if (!res.ok) {
-				throw new Error(`Einladung nicht gefunden (${res.status})`);
+				throw new Error(
+					$_('invitations.accept.error_not_found', { values: { status: res.status } })
+				);
 			}
 			invitation = (await res.json()) as InvitationPayload;
 		} catch (err) {
@@ -124,44 +128,50 @@
 <div class="page">
 	<div class="card">
 		{#if loading}
-			<p class="state">Lade Einladung …</p>
+			<p class="state">{$_('invitations.accept.loading')}</p>
 		{:else if loadError}
-			<h1>Einladung nicht abrufbar</h1>
+			<h1>{$_('invitations.accept.unavailable_title')}</h1>
 			<p class="error">{loadError}</p>
-			<p class="hint">Der Link ist möglicherweise abgelaufen oder schon benutzt.</p>
+			<p class="hint">{$_('invitations.accept.unavailable_hint')}</p>
 		{:else if invitation}
 			{#if invitation.status === 'accepted'}
-				<h1>Schon angenommen</h1>
-				<p class="hint">Diese Einladung ist bereits angenommen worden.</p>
-				<a href="/" class="btn primary">Zur App</a>
+				<h1>{$_('invitations.accept.already_accepted_title')}</h1>
+				<p class="hint">{$_('invitations.accept.already_accepted_hint')}</p>
+				<a href="/" class="btn primary">{$_('invitations.accept.to_app')}</a>
 			{:else if invitation.status === 'rejected' || invitation.status === 'canceled'}
-				<h1>Einladung abgelaufen</h1>
-				<p class="hint">Diese Einladung ist nicht mehr gültig.</p>
+				<h1>{$_('invitations.accept.expired_title')}</h1>
+				<p class="hint">{$_('invitations.accept.expired_hint')}</p>
 			{:else}
-				<p class="eyebrow">Einladung</p>
+				<p class="eyebrow">{$_('invitations.accept.eyebrow')}</p>
 				<h1>
-					{invitation.inviterEmail ?? 'Jemand'} lädt dich in
-					<strong>{invitation.organizationName ?? 'einen Space'}</strong> ein
+					{@html $_('invitations.accept.heading_invite_html', {
+						values: {
+							inviter: invitation.inviterEmail ?? $_('invitations.accept.inviter_fallback'),
+							space: invitation.organizationName ?? $_('invitations.accept.space_fallback'),
+						},
+					})}
 				</h1>
 				<p class="subtitle">
-					<span class="type-chip" data-type={spaceType}>{SPACE_TYPE_LABELS.de[spaceType]}</span>
-					<span>Rolle: {invitation.role}</span>
+					<span class="type-chip" data-type={spaceType}
+						>{(get(locale) ?? 'de').startsWith('de')
+							? SPACE_TYPE_LABELS.de[spaceType]
+							: SPACE_TYPE_LABELS.en[spaceType]}</span
+					>
+					<span>{$_('invitations.accept.role_label', { values: { role: invitation.role } })}</span>
 				</p>
-				<p class="hint">
-					Nach Annahme kannst du in diesem Space mitarbeiten — sehen, was andere schreiben, und
-					selbst Einträge anlegen. Deine persönlichen Daten bleiben in deinem Personal-Space,
-					getrennt.
-				</p>
+				<p class="hint">{$_('invitations.accept.explainer')}</p>
 				{#if actionError}<p class="error">{actionError}</p>{/if}
 				<div class="actions">
-					<button class="btn secondary" onclick={decline} disabled={submitting}>Ablehnen</button>
+					<button class="btn secondary" onclick={decline} disabled={submitting}
+						>{$_('invitations.accept.action_decline')}</button
+					>
 					<button class="btn primary" onclick={accept} disabled={submitting}>
 						{#if submitting}
-							Bearbeite …
+							{$_('invitations.accept.action_processing')}
 						{:else if !authStore.isAuthenticated}
-							Einloggen & annehmen
+							{$_('invitations.accept.action_login_accept')}
 						{:else}
-							Annehmen
+							{$_('invitations.accept.action_accept')}
 						{/if}
 					</button>
 				</div>

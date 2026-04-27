@@ -6,9 +6,11 @@
 		filterByStatus,
 		searchQuestions,
 	} from '$lib/modules/questions/queries';
-	import type { QuestionStatus, ResearchDepth } from '$lib/modules/questions/types';
+	import type { QuestionStatus } from '$lib/modules/questions/types';
 	import { MagnifyingGlass, Clock, CheckCircle, CircleNotch, Archive } from '@mana/shared-icons';
 	import { RoutePage } from '$lib/components/shell';
+	import { _, locale } from 'svelte-i18n';
+	import { get } from 'svelte/store';
 
 	const allQuestions = useAllQuestions();
 	const allCollections = useAllCollections();
@@ -38,23 +40,17 @@
 		archived: { icon: Archive, color: 'text-muted-foreground' },
 	};
 
-	const depthLabels: Record<ResearchDepth, string> = {
-		quick: 'Quick',
-		standard: 'Standard',
-		deep: 'Deep',
-	};
-
 	function formatDate(dateString: string): string {
 		const date = new Date(dateString);
 		const now = new Date();
 		const diff = now.getTime() - date.getTime();
 		const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-		if (days === 0) return 'Heute';
-		if (days === 1) return 'Gestern';
-		if (days < 7) return `Vor ${days} Tagen`;
+		if (days === 0) return $_('questions.home.date_today');
+		if (days === 1) return $_('questions.home.date_yesterday');
+		if (days < 7) return $_('questions.home.date_days_ago', { values: { n: days } });
 
-		return date.toLocaleDateString('de-DE', {
+		return date.toLocaleDateString(get(locale) ?? 'de', {
 			month: 'short',
 			day: 'numeric',
 			year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
@@ -63,7 +59,7 @@
 </script>
 
 <svelte:head>
-	<title>Fragen - Mana</title>
+	<title>{$_('questions.home.page_title_html')}</title>
 </svelte:head>
 
 <RoutePage appId="questions">
@@ -72,10 +68,12 @@
 		<div class="flex items-center justify-between">
 			<div>
 				<h1 class="text-2xl font-bold text-[hsl(var(--color-foreground))]">
-					{selectedCollection ? selectedCollection.name : 'Alle Fragen'}
+					{selectedCollection ? selectedCollection.name : $_('questions.home.heading_all')}
 				</h1>
 				<p class="mt-1 text-sm text-[hsl(var(--color-muted-foreground))]">
-					{filteredQuestions.length} Frage{filteredQuestions.length !== 1 ? 'n' : ''}
+					{filteredQuestions.length === 1
+						? $_('questions.home.count_one', { values: { n: filteredQuestions.length } })
+						: $_('questions.home.count_other', { values: { n: filteredQuestions.length } })}
 				</p>
 			</div>
 			<div class="flex gap-2">
@@ -83,13 +81,13 @@
 					href="/questions/collections"
 					class="rounded-lg border border-[hsl(var(--color-border))] px-4 py-2 text-sm font-medium text-[hsl(var(--color-foreground))] transition-colors hover:bg-[hsl(var(--color-muted))]"
 				>
-					Sammlungen
+					{$_('questions.home.action_collections')}
 				</a>
 				<a
 					href="/questions/new"
 					class="rounded-lg bg-[hsl(var(--color-primary))] px-4 py-2 text-sm font-medium text-[hsl(var(--color-primary-foreground))] transition-colors hover:opacity-90"
 				>
-					Neue Frage
+					{$_('questions.home.action_new')}
 				</a>
 			</div>
 		</div>
@@ -103,7 +101,7 @@
 				<input
 					type="text"
 					bind:value={searchQuery}
-					placeholder="Fragen durchsuchen..."
+					placeholder={$_('questions.home.placeholder_search')}
 					class="w-full rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] py-2 pl-10 pr-4 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 				/>
 			</div>
@@ -112,11 +110,11 @@
 				bind:value={statusFilter}
 				class="rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 			>
-				<option value="">Alle Status</option>
-				<option value="open">Offen</option>
-				<option value="researching">Recherche</option>
-				<option value="answered">Beantwortet</option>
-				<option value="archived">Archiviert</option>
+				<option value="">{$_('questions.home.filter_all_status')}</option>
+				<option value="open">{$_('questions.home.filter_open')}</option>
+				<option value="researching">{$_('questions.home.filter_researching')}</option>
+				<option value="answered">{$_('questions.home.filter_answered')}</option>
+				<option value="archived">{$_('questions.home.filter_archived')}</option>
 			</select>
 
 			{#if collections.length > 0}
@@ -124,7 +122,7 @@
 					bind:value={selectedCollectionId}
 					class="rounded-lg border border-[hsl(var(--color-border))] bg-[hsl(var(--color-input))] px-3 py-2 text-sm text-[hsl(var(--color-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--color-primary))]"
 				>
-					<option value={null}>Alle Sammlungen</option>
+					<option value={null}>{$_('questions.home.filter_all_collections')}</option>
 					{#each collections as collection}
 						<option value={collection.id}>{collection.name}</option>
 					{/each}
@@ -138,15 +136,17 @@
 				class="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[hsl(var(--color-border))] py-16"
 			>
 				<span class="mb-4 text-5xl">🔍</span>
-				<h2 class="mb-2 text-lg font-semibold text-[hsl(var(--color-foreground))]">Keine Fragen</h2>
+				<h2 class="mb-2 text-lg font-semibold text-[hsl(var(--color-foreground))]">
+					{$_('questions.home.empty_title')}
+				</h2>
 				<p class="mb-6 text-sm text-[hsl(var(--color-muted-foreground))]">
-					Stelle deine erste Frage und lass die KI recherchieren.
+					{$_('questions.home.empty_hint')}
 				</p>
 				<a
 					href="/questions/new"
 					class="rounded-lg bg-[hsl(var(--color-primary))] px-6 py-2.5 text-sm font-medium text-[hsl(var(--color-primary-foreground))]"
 				>
-					Neue Frage
+					{$_('questions.home.empty_action')}
 				</a>
 			</div>
 		{:else}
@@ -200,7 +200,7 @@
 									<span
 										class="rounded-full bg-[hsl(var(--color-muted))] px-2 py-0.5 text-xs text-[hsl(var(--color-muted-foreground))]"
 									>
-										{depthLabels[question.researchDepth]}
+										{$_('questions.home.depth_' + question.researchDepth)}
 									</span>
 
 									<span class="text-xs text-[hsl(var(--color-muted-foreground))]">
