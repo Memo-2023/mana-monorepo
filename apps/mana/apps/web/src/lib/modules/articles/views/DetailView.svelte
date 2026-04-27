@@ -17,6 +17,7 @@
 	import { articleTagOps, useAllTags } from '../stores/tags.svelte';
 	import ReaderView from '../components/ReaderView.svelte';
 	import HighlightLayer from '../components/HighlightLayer.svelte';
+	import { _ } from 'svelte-i18n';
 
 	interface Props {
 		id: string;
@@ -80,7 +81,7 @@
 
 	async function deleteArticle() {
 		if (!article) return;
-		if (!confirm('Artikel wirklich löschen?')) return;
+		if (!confirm($_('articles.detail_view.confirm_delete'))) return;
 		await articlesStore.deleteArticle(article.id);
 		goto('/articles');
 	}
@@ -102,17 +103,21 @@
 </script>
 
 <svelte:head>
-	<title>{article?.title ?? 'Artikel'} — Mana</title>
+	<title
+		>{$_('articles.detail_view.page_title_html', {
+			values: { title: article?.title ?? $_('articles.detail_view.untitled_fallback') },
+		})}</title
+	>
 </svelte:head>
 
 <div class="detail-shell detail-{theme}" bind:this={shell}>
 	{#if article$.loading}
-		<p class="placeholder">Lädt…</p>
+		<p class="placeholder">{$_('articles.detail_view.loading')}</p>
 	{:else if !article}
 		<div class="placeholder">
-			<p>Artikel nicht gefunden.</p>
+			<p>{$_('articles.detail_view.not_found')}</p>
 			<button type="button" class="topbtn" onclick={() => goto('/articles')}>
-				Zurück zur Liste
+				{$_('articles.detail_view.back_to_list')}
 			</button>
 		</div>
 	{:else}
@@ -121,16 +126,24 @@
 			<div class="meta-row">
 				{#if article.siteName}<span>{article.siteName}</span>{/if}
 				{#if article.author}<span>· {article.author}</span>{/if}
-				{#if article.readingTimeMinutes}<span>· {article.readingTimeMinutes} min</span>{/if}
-				{#if article.wordCount}<span>· {article.wordCount} Wörter</span>{/if}
+				{#if article.readingTimeMinutes}<span
+						>·
+						{$_('articles.detail_view.meta_reading_minutes', {
+							values: { n: article.readingTimeMinutes },
+						})}</span
+					>{/if}
+				{#if article.wordCount}<span
+						>·
+						{$_('articles.detail_view.meta_word_count', { values: { n: article.wordCount } })}</span
+					>{/if}
 			</div>
 			<div class="tags-row">
 				<TagField
 					tags={allTags$.value}
 					selectedIds={tagIds$.value}
 					onChange={onTagsChange}
-					addLabel="Tag"
-					placeholder="Tag suchen oder erstellen…"
+					addLabel={$_('articles.detail_view.tag_add_label')}
+					placeholder={$_('articles.detail_view.tag_placeholder')}
 				/>
 			</div>
 		</div>
@@ -153,14 +166,14 @@
 			htmlVersion={article.htmlContent}
 		/>
 
-		<footer class="floating-bar" aria-label="Lese-Werkzeuge">
+		<footer class="floating-bar" aria-label={$_('articles.detail_view.toolbar_aria')}>
 			<div class="bar-group nav-group">
 				<button
 					type="button"
 					class="bar-btn"
 					onclick={() => goto('/articles')}
-					aria-label="Zurück zur Liste"
-					data-tip="Zurück zur Leseliste"
+					aria-label={$_('articles.detail_view.back_aria')}
+					data-tip={$_('articles.detail_view.back_tip')}
 				>
 					←
 				</button>
@@ -173,8 +186,8 @@
 					type="button"
 					class="bar-btn"
 					onclick={() => (fontSize = Math.max(0.85, fontSize - 0.075))}
-					aria-label="Schrift kleiner"
-					data-tip="Schrift kleiner"
+					aria-label={$_('articles.detail_view.font_smaller_aria')}
+					data-tip={$_('articles.detail_view.font_smaller_tip')}
 				>
 					A−
 				</button>
@@ -182,8 +195,8 @@
 					type="button"
 					class="bar-btn"
 					onclick={() => (fontSize = Math.min(1.35, fontSize + 0.075))}
-					aria-label="Schrift größer"
-					data-tip="Schrift größer"
+					aria-label={$_('articles.detail_view.font_larger_aria')}
+					data-tip={$_('articles.detail_view.font_larger_tip')}
 				>
 					A+
 				</button>
@@ -192,42 +205,42 @@
 					class="bar-btn"
 					class:active={fontFamily === 'serif'}
 					onclick={() => (fontFamily = 'serif')}
-					data-tip="Serif-Schrift"
+					data-tip={$_('articles.detail_view.font_serif_tip')}
 				>
-					Serif
+					{$_('articles.detail_view.font_serif_label')}
 				</button>
 				<button
 					type="button"
 					class="bar-btn"
 					class:active={fontFamily === 'sans'}
 					onclick={() => (fontFamily = 'sans')}
-					data-tip="Sans-Serif-Schrift"
+					data-tip={$_('articles.detail_view.font_sans_tip')}
 				>
-					Sans
+					{$_('articles.detail_view.font_sans_label')}
 				</button>
 				<button
 					type="button"
 					class="bar-btn swatch swatch-light"
 					class:active={theme === 'light'}
 					onclick={() => (theme = 'light')}
-					aria-label="Heller Modus"
-					data-tip="Heller Modus"
+					aria-label={$_('articles.detail_view.theme_light_aria')}
+					data-tip={$_('articles.detail_view.theme_light_tip')}
 				></button>
 				<button
 					type="button"
 					class="bar-btn swatch swatch-sepia"
 					class:active={theme === 'sepia'}
 					onclick={() => (theme = 'sepia')}
-					aria-label="Sepia-Modus"
-					data-tip="Sepia-Modus"
+					aria-label={$_('articles.detail_view.theme_sepia_aria')}
+					data-tip={$_('articles.detail_view.theme_sepia_tip')}
 				></button>
 				<button
 					type="button"
 					class="bar-btn swatch swatch-dark"
 					class:active={theme === 'dark'}
 					onclick={() => (theme = 'dark')}
-					aria-label="Dunkler Modus"
-					data-tip="Dunkler Modus"
+					aria-label={$_('articles.detail_view.theme_dark_aria')}
+					data-tip={$_('articles.detail_view.theme_dark_tip')}
 				></button>
 			</div>
 
@@ -240,11 +253,11 @@
 					class:active={article.status === 'finished'}
 					onclick={toggleRead}
 					aria-label={article.status === 'finished'
-						? 'Als ungelesen markieren'
-						: 'Als gelesen markieren'}
+						? $_('articles.detail_view.mark_unread_label')
+						: $_('articles.detail_view.mark_read_label')}
 					data-tip={article.status === 'finished'
-						? 'Als ungelesen markieren'
-						: 'Als gelesen markieren'}
+						? $_('articles.detail_view.mark_unread_label')
+						: $_('articles.detail_view.mark_read_label')}
 				>
 					{article.status === 'finished' ? '✓' : '○'}
 				</button>
@@ -253,8 +266,12 @@
 					class="bar-btn"
 					class:active={article.isFavorite}
 					onclick={toggleFavorite}
-					aria-label={article.isFavorite ? 'Favorit entfernen' : 'Als Favorit markieren'}
-					data-tip={article.isFavorite ? 'Favorit entfernen' : 'Als Favorit markieren'}
+					aria-label={article.isFavorite
+						? $_('articles.detail_view.fav_remove')
+						: $_('articles.detail_view.fav_mark')}
+					data-tip={article.isFavorite
+						? $_('articles.detail_view.fav_remove')
+						: $_('articles.detail_view.fav_mark')}
 				>
 					{article.isFavorite ? '★' : '☆'}
 				</button>
@@ -262,8 +279,8 @@
 					type="button"
 					class="bar-btn"
 					onclick={archive}
-					aria-label="Artikel archivieren"
-					data-tip="Artikel archivieren"
+					aria-label={$_('articles.detail_view.archive_label')}
+					data-tip={$_('articles.detail_view.archive_label')}
 				>
 					⤓
 				</button>
@@ -272,8 +289,8 @@
 					href={article.originalUrl}
 					target="_blank"
 					rel="noopener noreferrer"
-					aria-label="Original-Seite öffnen"
-					data-tip="Original-Seite öffnen"
+					aria-label={$_('articles.detail_view.open_original')}
+					data-tip={$_('articles.detail_view.open_original')}
 				>
 					↗
 				</a>
@@ -281,8 +298,8 @@
 					type="button"
 					class="bar-btn danger"
 					onclick={deleteArticle}
-					aria-label="Artikel löschen"
-					data-tip="Artikel löschen"
+					aria-label={$_('articles.detail_view.delete_label')}
+					data-tip={$_('articles.detail_view.delete_label')}
 				>
 					🗑
 				</button>
