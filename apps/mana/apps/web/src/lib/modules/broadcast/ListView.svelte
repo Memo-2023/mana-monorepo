@@ -5,8 +5,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { useAllCampaigns, computeStats, searchCampaigns, formatRate } from './queries';
-	import { STATUS_LABELS, STATUS_COLORS } from './constants';
+	import { STATUS_COLORS } from './constants';
 	import type { CampaignStatus } from './types';
+	import { _ } from 'svelte-i18n';
 
 	const campaigns$ = useAllCampaigns();
 	const campaigns = $derived(campaigns$.value ?? []);
@@ -37,44 +38,48 @@
 <div class="broadcast-shell">
 	<header class="head">
 		<div>
-			<h1>Broadcasts</h1>
-			<p class="subtitle">Newsletter und Kampagnen an deine Kontakte</p>
+			<h1>{$_('broadcast.list_view.title')}</h1>
+			<p class="subtitle">{$_('broadcast.list_view.subtitle')}</p>
 		</div>
 		<div class="head-actions">
 			<button
 				class="btn-icon"
 				type="button"
-				title="Einstellungen"
-				aria-label="Einstellungen"
+				title={$_('broadcast.list_view.action_settings')}
+				aria-label={$_('broadcast.list_view.action_settings')}
 				onclick={() => goto('/broadcasts/settings')}
 			>
 				⚙
 			</button>
-			<button class="btn-primary" type="button" onclick={onNewCampaign}> + Neue Kampagne </button>
+			<button class="btn-primary" type="button" onclick={onNewCampaign}>
+				{$_('broadcast.list_view.action_new')}
+			</button>
 		</div>
 	</header>
 
 	{#if campaigns.length > 0}
 		<section class="stats">
 			<div class="stat">
-				<div class="stat-label">Versendet {currentYear}</div>
+				<div class="stat-label">
+					{$_('broadcast.list_view.stat_sent_year', { values: { year: currentYear } })}
+				</div>
 				<div class="stat-value">{stats.sentThisYear}</div>
-				<div class="stat-sub">Kampagnen</div>
+				<div class="stat-sub">{$_('broadcast.list_view.stat_campaigns')}</div>
 			</div>
 			<div class="stat">
-				<div class="stat-label">Ø Öffnungsrate</div>
+				<div class="stat-label">{$_('broadcast.list_view.stat_avg_open')}</div>
 				<div class="stat-value">{formatRate(stats.avgOpenRate)}</div>
-				<div class="stat-sub">über alle Kampagnen</div>
+				<div class="stat-sub">{$_('broadcast.list_view.stat_over_all')}</div>
 			</div>
 			<div class="stat">
-				<div class="stat-label">Ø Klickrate</div>
+				<div class="stat-label">{$_('broadcast.list_view.stat_avg_click')}</div>
 				<div class="stat-value">{formatRate(stats.avgClickRate)}</div>
-				<div class="stat-sub">über alle Kampagnen</div>
+				<div class="stat-sub">{$_('broadcast.list_view.stat_over_all')}</div>
 			</div>
 			<div class="stat">
-				<div class="stat-label">Entwürfe</div>
+				<div class="stat-label">{$_('broadcast.list_view.stat_drafts')}</div>
 				<div class="stat-value">{stats.totalByStatus.draft}</div>
-				<div class="stat-sub">in Arbeit</div>
+				<div class="stat-sub">{$_('broadcast.list_view.stat_drafts_sub')}</div>
 			</div>
 		</section>
 
@@ -85,7 +90,7 @@
 					class:active={activeStatus === 'all'}
 					onclick={() => (activeStatus = 'all')}
 				>
-					Alle <span class="count">{campaigns.length}</span>
+					{$_('broadcast.list_view.chip_all')} <span class="count">{campaigns.length}</span>
 				</button>
 				{#each ['draft', 'scheduled', 'sending', 'sent', 'cancelled'] as status (status)}
 					<button
@@ -93,7 +98,7 @@
 						class:active={activeStatus === status}
 						onclick={() => (activeStatus = status as CampaignStatus)}
 					>
-						{STATUS_LABELS[status as CampaignStatus].de}
+						{$_('broadcast.statuses.' + status)}
 						<span class="count">{stats.totalByStatus[status as CampaignStatus]}</span>
 					</button>
 				{/each}
@@ -101,7 +106,7 @@
 			<input
 				class="search"
 				type="search"
-				placeholder="Suchen (Name oder Betreff)"
+				placeholder={$_('broadcast.list_view.search_placeholder')}
 				bind:value={searchQuery}
 			/>
 		</section>
@@ -110,16 +115,17 @@
 	{#if campaigns.length === 0}
 		<div class="empty">
 			<div class="empty-icon">📣</div>
-			<h2>Noch keine Kampagnen</h2>
+			<h2>{$_('broadcast.list_view.empty_heading')}</h2>
 			<p>
-				Verschicke deinen ersten Newsletter — mit Rich-Text-Editor, Tracking und DSGVO-konformem
-				Abmelden.
+				{$_('broadcast.list_view.empty_body')}
 			</p>
-			<button class="btn-primary" onclick={onNewCampaign}>Erste Kampagne</button>
+			<button class="btn-primary" onclick={onNewCampaign}
+				>{$_('broadcast.list_view.empty_action')}</button
+			>
 		</div>
 	{:else if filtered.length === 0}
 		<div class="empty">
-			<p>Keine Kampagnen gefunden.</p>
+			<p>{$_('broadcast.list_view.empty_no_match')}</p>
 		</div>
 	{:else}
 		<ul class="list" role="list">
@@ -137,10 +143,12 @@
 							{/if}
 						</span>
 						<span class="recipient-count">
-							{campaign.audience?.estimatedCount ?? 0} Empfänger
+							{$_('broadcast.list_view.row_recipients', {
+								values: { n: campaign.audience?.estimatedCount ?? 0 },
+							})}
 						</span>
 						{#if campaign.status === 'sent' && openRate !== null}
-							<span class="open-rate" title="Öffnungsrate">
+							<span class="open-rate" title={$_('broadcast.list_view.row_open_rate_title')}>
 								{formatRate(openRate)} 👀
 							</span>
 						{:else}
@@ -148,7 +156,7 @@
 						{/if}
 						<span class="status" style="--dot: {STATUS_COLORS[campaign.status]}">
 							<span class="dot"></span>
-							{STATUS_LABELS[campaign.status].de}
+							{$_('broadcast.statuses.' + campaign.status)}
 						</span>
 					</button>
 				</li>
