@@ -34,6 +34,7 @@
 		getImagesByTags,
 	} from './queries';
 	import type { Image, LocalImage } from './types';
+	import { _ } from 'svelte-i18n';
 
 	const MEDIA_URL = import.meta.env.PUBLIC_MANA_MEDIA_URL || 'http://localhost:3015';
 
@@ -240,7 +241,7 @@
 	{#if dragActive}
 		<div class="drop-overlay">
 			<UploadSimple size={40} weight="bold" />
-			<span>Bilder ablegen</span>
+			<span>{$_('picture.list_view.drop_overlay')}</span>
 		</div>
 	{/if}
 
@@ -250,15 +251,19 @@
 			type="button"
 			class="action-btn action-btn-upload"
 			onclick={() => fileInput?.click()}
-			title="Bilder hochladen"
+			title={$_('picture.list_view.action_upload_title')}
 		>
 			<UploadSimple size={14} />
-			<span class="action-label">Upload</span>
+			<span class="action-label">{$_('picture.list_view.action_upload')}</span>
 		</button>
 
-		<a href="/picture/generate" class="action-btn action-btn-primary" title="Neues Bild generieren">
+		<a
+			href="/picture/generate"
+			class="action-btn action-btn-primary"
+			title={$_('picture.list_view.action_generate_title')}
+		>
 			<Plus size={14} />
-			<span class="action-label">Generieren</span>
+			<span class="action-label">{$_('picture.list_view.action_generate')}</span>
 		</a>
 
 		<button
@@ -266,10 +271,10 @@
 			onclick={() => imagesStore.toggleFavoritesFilter()}
 			class="action-btn"
 			class:action-btn-active={imagesStore.showFavoritesOnly}
-			title="Nur Favoriten anzeigen"
+			title={$_('picture.list_view.action_favorites_title')}
 		>
 			<Heart size={12} weight={imagesStore.showFavoritesOnly ? 'fill' : 'regular'} />
-			<span class="action-label">Favoriten</span>
+			<span class="action-label">{$_('picture.list_view.action_favorites')}</span>
 			{#if favoriteCount > 0}<span class="action-count">{favoriteCount}</span>{/if}
 		</button>
 
@@ -281,7 +286,7 @@
 				onclick={() => pictureViewStore.setViewMode('single')}
 				class="view-btn"
 				class:active={pictureViewStore.viewMode === 'single'}
-				title="Liste"
+				title={$_('picture.list_view.view_list_title')}
 			>
 				<Rows size={12} />
 			</button>
@@ -289,7 +294,7 @@
 				onclick={() => pictureViewStore.setViewMode('grid3')}
 				class="view-btn"
 				class:active={pictureViewStore.viewMode === 'grid3'}
-				title="Mittel"
+				title={$_('picture.list_view.view_medium_title')}
 			>
 				<GridFour size={12} />
 			</button>
@@ -297,7 +302,7 @@
 				onclick={() => pictureViewStore.setViewMode('grid5')}
 				class="view-btn"
 				class:active={pictureViewStore.viewMode === 'grid5'}
-				title="Klein"
+				title={$_('picture.list_view.view_small_title')}
 			>
 				<SquaresFour size={12} />
 			</button>
@@ -314,7 +319,7 @@
 			<input
 				type="text"
 				bind:value={searchQuery}
-				placeholder="Prompts durchsuchen…"
+				placeholder={$_('picture.list_view.placeholder_search')}
 				class="w-full rounded-md border border-border bg-background py-1 pl-8 pr-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
 			/>
 		</div>
@@ -359,14 +364,19 @@
 		{#if filteredImages.length === 0}
 			<div class="empty-state">
 				<SquaresFour size={48} weight="thin" class="text-muted-foreground/30" />
-				<h3>{allImages.length === 0 ? 'Noch keine Bilder' : 'Keine Ergebnisse'}</h3>
+				<h3>
+					{allImages.length === 0
+						? $_('picture.list_view.empty_no_images')
+						: $_('picture.list_view.empty_no_results')}
+				</h3>
 				<p>
 					{allImages.length === 0
-						? 'Generiere dein erstes Bild mit KI oder lade welche hoch'
-						: 'Passe deine Filter an'}
+						? $_('picture.list_view.empty_hint_no_images')
+						: $_('picture.list_view.empty_hint_no_results')}
 				</p>
 				{#if allImages.length === 0}
-					<a href="/picture/generate" class="empty-cta">Erstes Bild generieren</a>
+					<a href="/picture/generate" class="empty-cta">{$_('picture.list_view.empty_cta_first')}</a
+					>
 				{/if}
 			</div>
 		{:else}
@@ -409,7 +419,9 @@
 					weight={selectedImage.isFavorite ? 'fill' : 'regular'}
 					class={selectedImage.isFavorite ? 'text-red-500' : 'text-muted-foreground'}
 				/>
-				{selectedImage.isFavorite ? 'Entfernen' : 'Favorit'}
+				{selectedImage.isFavorite
+					? $_('picture.list_view.action_unfavorite')
+					: $_('picture.list_view.action_favorite')}
 			</button>
 			<button
 				type="button"
@@ -417,7 +429,7 @@
 				class="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm font-medium transition-colors hover:bg-muted"
 			>
 				<Archive size={14} class="text-muted-foreground" />
-				Archivieren
+				{$_('picture.list_view.action_archive')}
 			</button>
 		{/if}
 	{/snippet}

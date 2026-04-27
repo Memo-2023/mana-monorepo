@@ -19,8 +19,9 @@
 	import { toastStore } from '@mana/shared-ui/toast';
 	import { DynamicIcon } from '@mana/shared-ui/atoms';
 	import { IconPicker } from '@mana/shared-ui/molecules';
-	import { PencilSimple, Trash, Pause, Play } from '@mana/shared-icons';
+	import { Trash, Pause, Play } from '@mana/shared-icons';
 	import VoiceCaptureBar from '$lib/components/voice/VoiceCaptureBar.svelte';
+	import { _ } from 'svelte-i18n';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
@@ -70,10 +71,12 @@
 	async function handleVoiceComplete(blob: Blob, durationMs: number) {
 		const result = await habitsStore.logFromVoice(blob, durationMs, 'de');
 		if (!result) {
-			toastStore.error('Routine nicht erkannt. Versuche den Namen direkt zu sagen, z.B. "Kaffee".');
+			toastStore.error($_('habits.list_view.voice_error_unrecognized'));
 			return;
 		}
-		toastStore.success(`${result.habitTitle} geloggt`);
+		toastStore.success(
+			$_('habits.list_view.voice_logged', { values: { title: result.habitTitle } })
+		);
 		// Reuse the existing pulse animation by finding the matching habit id
 		const matched = habits.find((h) => h.title === result.habitTitle);
 		if (matched) {
@@ -103,7 +106,7 @@
 			? [
 					{
 						id: 'log',
-						label: 'Loggen',
+						label: $_('habits.list_view.ctx_log'),
 						icon: Play,
 						action: () => {
 							const target = ctxMenu.state.target;
@@ -112,7 +115,9 @@
 					},
 					{
 						id: 'archive',
-						label: ctxMenu.state.target.isArchived ? 'Aktivieren' : 'Archivieren',
+						label: ctxMenu.state.target.isArchived
+							? $_('habits.list_view.ctx_activate')
+							: $_('habits.list_view.ctx_archive'),
 						icon: ctxMenu.state.target.isArchived ? Play : Pause,
 						action: () => {
 							const target = ctxMenu.state.target;
@@ -125,7 +130,7 @@
 					{ id: 'div', label: '', type: 'divider' as const },
 					{
 						id: 'delete',
-						label: 'Löschen',
+						label: $_('habits.list_view.ctx_delete'),
 						icon: Trash,
 						variant: 'danger' as const,
 						action: () => {
@@ -152,9 +157,9 @@
 <div class="habits-list-view">
 	<!-- Voice quick-log -->
 	<VoiceCaptureBar
-		idleLabel="Routine sprechen"
+		idleLabel={$_('habits.list_view.voice_idle_label')}
 		feature="habits-voice-log"
-		reason="Routinen-Logs werden in deinem persönlichen Kalender gespeichert. Dafür brauchst du ein Mana-Konto."
+		reason={$_('habits.list_view.voice_reason')}
 		onComplete={handleVoiceComplete}
 	/>
 
@@ -185,7 +190,7 @@
 		{#if !showCreate}
 			<button class="tally-item add-btn" onclick={() => (showCreate = true)}>
 				<span class="add-icon">+</span>
-				<span class="tally-name">Neu</span>
+				<span class="tally-name">{$_('habits.list_view.action_new')}</span>
 			</button>
 		{/if}
 	</div>
@@ -207,7 +212,7 @@
 				<input
 					class="create-input"
 					type="text"
-					placeholder="Routinen-Name..."
+					placeholder={$_('habits.list_view.placeholder_name')}
 					bind:value={newTitle}
 					autofocus
 				/>
@@ -243,9 +248,11 @@
 					onclick={() => {
 						showCreate = false;
 						showIconPicker = false;
-					}}>Abbrechen</button
+					}}>{$_('habits.list_view.action_cancel')}</button
 				>
-				<button type="submit" class="btn-create" disabled={!newTitle.trim()}>Erstellen</button>
+				<button type="submit" class="btn-create" disabled={!newTitle.trim()}
+					>{$_('habits.list_view.action_create')}</button
+				>
 			</div>
 		</form>
 	{/if}
@@ -253,7 +260,7 @@
 	<!-- Recent Logs -->
 	{#if todayLogs.length > 0}
 		<div class="recent-logs">
-			<div class="recent-label">Heute</div>
+			<div class="recent-label">{$_('habits.list_view.section_today')}</div>
 			{#each todayLogs as log (log.id)}
 				{@const habit = habitMap.get(log.habitId)}
 				{#if habit}
@@ -279,9 +286,9 @@
 
 	{#if activeHabits.length === 0 && !showCreate}
 		<div class="empty">
-			<p>Noch keine Routinen angelegt.</p>
+			<p>{$_('habits.list_view.empty_title')}</p>
 			<button class="empty-add-btn" onclick={() => (showCreate = true)}
-				>Erste Routine erstellen</button
+				>{$_('habits.list_view.empty_action')}</button
 			>
 		</div>
 	{/if}

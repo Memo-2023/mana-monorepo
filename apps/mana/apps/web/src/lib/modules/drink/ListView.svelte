@@ -25,6 +25,7 @@
 	import { DynamicIcon } from '@mana/shared-ui/atoms';
 	import { IconPicker } from '@mana/shared-ui/molecules';
 	import { Trash, Pause, Play } from '@mana/shared-icons';
+	import { _ } from 'svelte-i18n';
 
 	let entries$ = useAllDrinkEntries();
 	let presets$ = useAllDrinkPresets();
@@ -84,7 +85,9 @@
 			? [
 					{
 						id: 'archive',
-						label: ctxMenuPreset.state.target.isArchived ? 'Aktivieren' : 'Archivieren',
+						label: ctxMenuPreset.state.target.isArchived
+							? $_('drink.list_view.ctx_activate')
+							: $_('drink.list_view.ctx_archive'),
 						icon: ctxMenuPreset.state.target.isArchived ? Play : Pause,
 						action: () => {
 							const target = ctxMenuPreset.state.target;
@@ -94,7 +97,7 @@
 					{ id: 'div', label: '', type: 'divider' as const },
 					{
 						id: 'delete',
-						label: 'Löschen',
+						label: $_('drink.list_view.ctx_delete'),
 						icon: Trash,
 						variant: 'danger' as const,
 						action: () => {
@@ -112,7 +115,7 @@
 			? [
 					{
 						id: 'delete',
-						label: 'Löschen',
+						label: $_('drink.list_view.ctx_delete'),
 						icon: Trash,
 						variant: 'danger' as const,
 						action: () => {
@@ -171,7 +174,7 @@
 	<!-- Daily Progress -->
 	<div class="progress-section">
 		<div class="progress-header">
-			<span class="progress-label">Heute</span>
+			<span class="progress-label">{$_('drink.list_view.section_today')}</span>
 			<span class="progress-value" class:goal-reached={goalReached}>
 				{formatMl(todayTotalMl)}
 				<span class="progress-goal">/ {formatMl(DEFAULT_DAILY_GOAL_ML)}</span>
@@ -206,7 +209,7 @@
 		{#if !showCreate}
 			<button class="preset-item add-btn" onclick={() => (showCreate = true)}>
 				<span class="add-icon">+</span>
-				<span class="preset-name">Neu</span>
+				<span class="preset-name">{$_('drink.list_view.action_new')}</span>
 			</button>
 		{/if}
 	</div>
@@ -228,7 +231,7 @@
 				<input
 					class="create-input"
 					type="text"
-					placeholder="Name (z.B. Espresso)..."
+					placeholder={$_('drink.list_view.placeholder_name')}
 					bind:value={newName}
 					autofocus
 				/>
@@ -271,9 +274,11 @@
 					onclick={() => {
 						showCreate = false;
 						showIconPicker = false;
-					}}>Abbrechen</button
+					}}>{$_('drink.list_view.action_cancel')}</button
 				>
-				<button type="submit" class="btn-create" disabled={!newName.trim()}>Erstellen</button>
+				<button type="submit" class="btn-create" disabled={!newName.trim()}
+					>{$_('drink.list_view.action_create')}</button
+				>
 			</div>
 		</form>
 	{/if}
@@ -281,7 +286,7 @@
 	<!-- Today's Log -->
 	{#if todayEntries.length > 0}
 		<div class="today-log">
-			<div class="log-label">Verlauf</div>
+			<div class="log-label">{$_('drink.list_view.section_log')}</div>
 			{#each todayEntries as entry (entry.id)}
 				{#if editingId === entry.id}
 					<!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -328,9 +333,9 @@
 
 	{#if activePresets.length === 0 && !showCreate}
 		<div class="empty">
-			<p>Noch keine Getränke-Presets.</p>
+			<p>{$_('drink.list_view.empty_title')}</p>
 			<button class="empty-add-btn" onclick={() => (showCreate = true)}
-				>Erstes Getränk anlegen</button
+				>{$_('drink.list_view.empty_action')}</button
 			>
 		</div>
 	{/if}
