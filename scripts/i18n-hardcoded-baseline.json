@@ -321,7 +321,6 @@
 	"apps/mana/apps/web/src/routes/(app)/tags/+page.svelte": 3,
 	"apps/mana/apps/web/src/routes/(app)/teams/+page.svelte": 2,
 	"apps/mana/apps/web/src/routes/(app)/timeline/+page.svelte": 1,
-	"apps/mana/apps/web/src/routes/(app)/timeline/analytics/+page.svelte": 11,
 	"apps/mana/apps/web/src/routes/(app)/times/clients/[id]/+page.svelte": 2,
 	"apps/mana/apps/web/src/routes/(app)/times/clock/+page.svelte": 1,
 	"apps/mana/apps/web/src/routes/(app)/times/projects/[id]/+page.svelte": 3,

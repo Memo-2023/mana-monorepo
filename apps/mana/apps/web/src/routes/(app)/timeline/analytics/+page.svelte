@@ -22,6 +22,7 @@
 	import { Clock, TrendUp, Fire, Target } from '@mana/shared-icons';
 	import { format, subDays } from 'date-fns';
 	import { RoutePage } from '$lib/components/shell';
+	import { _ } from 'svelte-i18n';
 
 	let periodDays = $state(7);
 
@@ -57,8 +58,6 @@
 		return `${h}h ${m}m`;
 	}
 
-	const dayLabels = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
-
 	// Max daily seconds for bar scaling
 	let maxDailySeconds = $derived(Math.max(1, ...daily.map((d) => d.totalSeconds)));
 </script>
@@ -66,7 +65,7 @@
 <RoutePage appId="timeline" backHref="/timeline">
 	<div class="analytics-page">
 		<header class="analytics-header">
-			<h1 class="header-title">Zeitanalyse</h1>
+			<h1 class="header-title">{$_('timeline.analytics.page_title')}</h1>
 			<div class="period-selector">
 				{#each [7, 14, 30] as days}
 					<button
@@ -74,7 +73,7 @@
 						class:active={periodDays === days}
 						onclick={() => (periodDays = days)}
 					>
-						{days}T
+						{$_('timeline.analytics.period_days_short', { values: { n: days } })}
 					</button>
 				{/each}
 			</div>
@@ -87,37 +86,37 @@
 					<Clock size={20} class="stat-icon" />
 					<div class="stat-content">
 						<span class="stat-value">{totalHours}h</span>
-						<span class="stat-label">Gesamt</span>
+						<span class="stat-label">{$_('timeline.analytics.stat_total')}</span>
 					</div>
 				</div>
 				<div class="stat-card">
 					<Fire size={20} class="stat-icon" />
 					<div class="stat-content">
 						<span class="stat-value">{streak}</span>
-						<span class="stat-label">Tage Streak</span>
+						<span class="stat-label">{$_('timeline.analytics.stat_streak')}</span>
 					</div>
 				</div>
 				<div class="stat-card">
 					<Target size={20} class="stat-icon" />
 					<div class="stat-content">
 						<span class="stat-value">{adherence.adherencePercent}%</span>
-						<span class="stat-label">Plan-Treue</span>
+						<span class="stat-label">{$_('timeline.analytics.stat_adherence')}</span>
 					</div>
 				</div>
 				<div class="stat-card">
 					<TrendUp size={20} class="stat-icon" />
 					<div class="stat-content">
 						<span class="stat-value">{periodBlocks.length}</span>
-						<span class="stat-label">Einträge</span>
+						<span class="stat-label">{$_('timeline.analytics.stat_entries')}</span>
 					</div>
 				</div>
 			</div>
 
 			<!-- Type breakdown (donut-like horizontal bars) -->
 			<div class="card">
-				<h2 class="card-title">Zeitverteilung</h2>
+				<h2 class="card-title">{$_('timeline.analytics.section_breakdown')}</h2>
 				{#if typeBreakdown.length === 0}
-					<p class="empty-text">Keine Daten im Zeitraum</p>
+					<p class="empty-text">{$_('timeline.analytics.empty_no_data')}</p>
 				{:else}
 					<div class="breakdown-list">
 						{#each typeBreakdown as item}
@@ -142,7 +141,7 @@
 
 			<!-- Daily bars -->
 			<div class="card">
-				<h2 class="card-title">Tagesverteilung</h2>
+				<h2 class="card-title">{$_('timeline.analytics.section_daily')}</h2>
 				<div class="daily-chart">
 					{#each daily as day}
 						{@const barHeight =
@@ -165,7 +164,7 @@
 
 			<!-- Habit heatmap -->
 			<div class="card">
-				<h2 class="card-title">Habit-Aktivität (90 Tage)</h2>
+				<h2 class="card-title">{$_('timeline.analytics.section_heatmap')}</h2>
 				<div class="heatmap">
 					{#each heatmap as cell}
 						<div
@@ -175,7 +174,9 @@
 							class:intensity-2={cell.intensity === 2}
 							class:intensity-3={cell.intensity === 3}
 							class:intensity-4={cell.intensity === 4}
-							title="{cell.date}: {cell.count} Habits"
+							title={$_('timeline.analytics.heatmap_cell_title', {
+								values: { date: cell.date, count: cell.count },
+							})}
 						></div>
 					{/each}
 				</div>
@@ -184,24 +185,24 @@
 			<!-- Plan adherence -->
 			{#if adherence.totalScheduled > 0}
 				<div class="card">
-					<h2 class="card-title">Plan vs Realität</h2>
+					<h2 class="card-title">{$_('timeline.analytics.section_plan_vs_reality')}</h2>
 					<div class="adherence-stats">
 						<div class="adherence-item">
 							<span class="adherence-value">{adherence.totalScheduled}</span>
-							<span class="adherence-label">Geplant</span>
+							<span class="adherence-label">{$_('timeline.analytics.adherence_scheduled')}</span>
 						</div>
 						<div class="adherence-item">
 							<span class="adherence-value">{adherence.totalCompleted}</span>
-							<span class="adherence-label">Erledigt</span>
+							<span class="adherence-label">{$_('timeline.analytics.adherence_completed')}</span>
 						</div>
 						<div class="adherence-item">
 							<span class="adherence-value">{adherence.adherencePercent}%</span>
-							<span class="adherence-label">Treue</span>
+							<span class="adherence-label">{$_('timeline.analytics.adherence_percent')}</span>
 						</div>
 						{#if adherence.averageDelayMinutes > 0}
 							<div class="adherence-item">
 								<span class="adherence-value">{adherence.averageDelayMinutes}m</span>
-								<span class="adherence-label">Ø Abweichung</span>
+								<span class="adherence-label">{$_('timeline.analytics.adherence_avg_delay')}</span>
 							</div>
 						{/if}
 					</div>
