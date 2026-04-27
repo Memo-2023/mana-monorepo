@@ -1,0 +1,25 @@
+{
+	"list_view": {
+		"action_compose": "New mail",
+		"loading": "Loading mails…",
+		"action_retry": "Try again",
+		"empty_title": "No mails",
+		"empty_hint": "Your inbox is empty.",
+		"compose_heading": "New message",
+		"placeholder_to": "To",
+		"placeholder_subject": "Subject",
+		"placeholder_body": "Write your message…",
+		"action_cancel": "Cancel",
+		"action_send": "Send",
+		"action_sending": "Sending…",
+		"sender_unknown": "Unknown",
+		"thread_to_prefix": "To:",
+		"empty_detail": "Select a message",
+		"ctx_mark_unread": "Mark unread",
+		"ctx_mark_read": "Mark read",
+		"ctx_unstar": "Remove star",
+		"ctx_star": "Star",
+		"ctx_archive": "Archive",
+		"ctx_delete": "Delete"
+	}
+}

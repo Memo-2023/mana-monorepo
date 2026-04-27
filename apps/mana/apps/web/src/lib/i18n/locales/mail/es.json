@@ -1,0 +1,25 @@
+{
+	"list_view": {
+		"action_compose": "Nuevo correo",
+		"loading": "Cargando correos…",
+		"action_retry": "Reintentar",
+		"empty_title": "Sin correos",
+		"empty_hint": "Tu bandeja está vacía.",
+		"compose_heading": "Nuevo mensaje",
+		"placeholder_to": "Para",
+		"placeholder_subject": "Asunto",
+		"placeholder_body": "Escribe tu mensaje…",
+		"action_cancel": "Cancelar",
+		"action_send": "Enviar",
+		"action_sending": "Enviando…",
+		"sender_unknown": "Desconocido",
+		"thread_to_prefix": "Para:",
+		"empty_detail": "Selecciona un mensaje",
+		"ctx_mark_unread": "Marcar no leído",
+		"ctx_mark_read": "Marcar leído",
+		"ctx_unstar": "Quitar estrella",
+		"ctx_star": "Marcar",
+		"ctx_archive": "Archivar",
+		"ctx_delete": "Eliminar"
+	}
+}

@@ -1,0 +1,25 @@
+{
+	"list_view": {
+		"action_compose": "Nouveau mail",
+		"loading": "Chargement des mails…",
+		"action_retry": "Réessayer",
+		"empty_title": "Aucun mail",
+		"empty_hint": "Ta boîte de réception est vide.",
+		"compose_heading": "Nouveau message",
+		"placeholder_to": "À",
+		"placeholder_subject": "Objet",
+		"placeholder_body": "Écris ton message…",
+		"action_cancel": "Annuler",
+		"action_send": "Envoyer",
+		"action_sending": "Envoi…",
+		"sender_unknown": "Inconnu",
+		"thread_to_prefix": "À :",
+		"empty_detail": "Sélectionne un message",
+		"ctx_mark_unread": "Marquer non lu",
+		"ctx_mark_read": "Marquer lu",
+		"ctx_unstar": "Retirer l'étoile",
+		"ctx_star": "Marquer",
+		"ctx_archive": "Archiver",
+		"ctx_delete": "Supprimer"
+	}
+}

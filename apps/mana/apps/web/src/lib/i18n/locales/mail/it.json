@@ -1,0 +1,25 @@
+{
+	"list_view": {
+		"action_compose": "Nuova mail",
+		"loading": "Caricamento mail…",
+		"action_retry": "Riprova",
+		"empty_title": "Nessuna mail",
+		"empty_hint": "La tua casella è vuota.",
+		"compose_heading": "Nuovo messaggio",
+		"placeholder_to": "A",
+		"placeholder_subject": "Oggetto",
+		"placeholder_body": "Scrivi il messaggio…",
+		"action_cancel": "Annulla",
+		"action_send": "Invia",
+		"action_sending": "Invio…",
+		"sender_unknown": "Sconosciuto",
+		"thread_to_prefix": "A:",
+		"empty_detail": "Seleziona un messaggio",
+		"ctx_mark_unread": "Segna non letto",
+		"ctx_mark_read": "Segna letto",
+		"ctx_unstar": "Rimuovi stella",
+		"ctx_star": "Segna con stella",
+		"ctx_archive": "Archivia",
+		"ctx_delete": "Elimina"
+	}
+}

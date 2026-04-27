@@ -1,0 +1,25 @@
+{
+	"list_view": {
+		"action_compose": "Neue Mail",
+		"loading": "Lade Mails...",
+		"action_retry": "Erneut versuchen",
+		"empty_title": "Keine Mails",
+		"empty_hint": "Dein Postfach ist leer.",
+		"compose_heading": "Neue Nachricht",
+		"placeholder_to": "An",
+		"placeholder_subject": "Betreff",
+		"placeholder_body": "Nachricht schreiben...",
+		"action_cancel": "Abbrechen",
+		"action_send": "Senden",
+		"action_sending": "Wird gesendet...",
+		"sender_unknown": "Unbekannt",
+		"thread_to_prefix": "An:",
+		"empty_detail": "Wähle eine Nachricht aus",
+		"ctx_mark_unread": "Als ungelesen",
+		"ctx_mark_read": "Als gelesen",
+		"ctx_unstar": "Stern entfernen",
+		"ctx_star": "Markieren",
+		"ctx_archive": "Archivieren",
+		"ctx_delete": "Löschen"
+	}
+}
