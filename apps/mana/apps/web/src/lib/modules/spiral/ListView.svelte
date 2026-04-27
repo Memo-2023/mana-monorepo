@@ -11,6 +11,7 @@
 	import SpiralCanvas from './components/SpiralCanvas.svelte';
 	import { manaSpiralStore } from './index';
 	import { collectAppSnapshots } from './index';
+	import { _ } from 'svelte-i18n';
 
 	const colorsArray: ColorDefinition[] = Object.values(COLORS);
 
@@ -50,13 +51,13 @@
 		if (!file) return;
 		const result = await manaSpiralStore.importFromPng(file);
 		if (!result.success) {
-			alert(`Import fehlgeschlagen: ${result.error}`);
+			alert($_('spiral.list_view.import_failed', { values: { error: result.error ?? '' } }));
 		}
 		input.value = '';
 	}
 
 	function handleClear() {
-		if (confirm('Alle Spiral-Daten löschen?')) {
+		if (confirm($_('spiral.list_view.confirm_clear'))) {
 			manaSpiralStore.clear();
 		}
 	}
@@ -71,16 +72,16 @@
 		<!-- Visualization -->
 		<section class="section viz-section">
 			<div class="viz-header">
-				<h2>Visualisierung</h2>
+				<h2>{$_('spiral.list_view.section_visualization')}</h2>
 				<div class="viz-controls">
 					<label class="control">
-						<span>Zoom</span>
+						<span>{$_('spiral.list_view.label_zoom')}</span>
 						<input type="range" min="4" max="20" bind:value={scale} />
 						<span class="mono">{scale}x</span>
 					</label>
 					<label class="control">
 						<input type="checkbox" bind:checked={showGrid} />
-						<span>Grid</span>
+						<span>{$_('spiral.list_view.label_grid')}</span>
 					</label>
 				</div>
 			</div>
@@ -96,7 +97,7 @@
 					/>
 				{:else}
 					<div class="empty-state">
-						<p>Keine Daten. Klicke "Daten sammeln" um deine Spirale zu generieren.</p>
+						<p>{$_('spiral.list_view.empty_no_data')}</p>
 					</div>
 				{/if}
 			</div>
@@ -111,39 +112,45 @@
 		<!-- Stats -->
 		{#if manaSpiralStore.stats}
 			<section class="section">
-				<h2 class="section-title">Statistiken</h2>
+				<h2 class="section-title">{$_('spiral.list_view.section_stats')}</h2>
 				<div class="stats-grid">
 					<div class="stat">
 						<span class="stat-value">
 							{manaSpiralStore.stats.imageSize}x{manaSpiralStore.stats.imageSize}
 						</span>
-						<span class="stat-label">Bildgrösse</span>
+						<span class="stat-label">{$_('spiral.list_view.stat_image_size')}</span>
 					</div>
 					<div class="stat">
 						<span class="stat-value">{manaSpiralStore.stats.activeRecords}</span>
-						<span class="stat-label">Events</span>
+						<span class="stat-label">{$_('spiral.list_view.stat_events')}</span>
 					</div>
 					<div class="stat">
 						<span class="stat-value">{manaSpiralStore.stats.usedPixels}</span>
-						<span class="stat-label">Pixel belegt</span>
+						<span class="stat-label">{$_('spiral.list_view.stat_pixels_used')}</span>
 					</div>
 					<div class="stat highlight">
 						<span class="stat-value">{manaSpiralStore.stats.compressionRatio}%</span>
-						<span class="stat-label">Kompression</span>
+						<span class="stat-label">{$_('spiral.list_view.stat_compression')}</span>
 					</div>
 					<div class="stat">
-						<span class="stat-value">Ring {manaSpiralStore.stats.currentRing}</span>
-						<span class="stat-label">Aktueller Ring</span>
+						<span class="stat-value"
+							>{$_('spiral.list_view.stat_ring_value', {
+								values: { n: manaSpiralStore.stats.currentRing },
+							})}</span
+						>
+						<span class="stat-label">{$_('spiral.list_view.stat_current_ring')}</span>
 					</div>
 					<div class="stat">
 						<span class="stat-value">{manaSpiralStore.snapshots.length}</span>
-						<span class="stat-label">Apps aktiv</span>
+						<span class="stat-label">{$_('spiral.list_view.stat_apps_active')}</span>
 					</div>
 				</div>
 
 				{#if manaSpiralStore.lastCollectedAt}
 					<p class="collected-at">
-						Zuletzt gesammelt: {formatTime(manaSpiralStore.lastCollectedAt)}
+						{$_('spiral.list_view.last_collected', {
+							values: { when: formatTime(manaSpiralStore.lastCollectedAt) },
+						})}
 					</p>
 				{/if}
 			</section>
@@ -152,14 +159,14 @@
 		<!-- App Breakdown -->
 		<section class="section">
 			<h2 class="section-title">
-				Apps
+				{$_('spiral.list_view.section_apps')}
 				{#if manaSpiralStore.snapshots.length > 0}
 					<span class="badge">{manaSpiralStore.snapshots.length}</span>
 				{/if}
 			</h2>
 
 			{#if manaSpiralStore.snapshots.length === 0}
-				<p class="empty-hint">Noch keine App-Daten gesammelt.</p>
+				<p class="empty-hint">{$_('spiral.list_view.empty_no_app_data')}</p>
 			{:else}
 				<div class="app-list">
 					{#each manaSpiralStore.snapshots as snap}
@@ -182,7 +189,11 @@
 							</div>
 							<div class="app-details">
 								<span class="app-label">{snap.label}</span>
-								<span class="app-events mono">{appRecords.length} Events</span>
+								<span class="app-events mono"
+									>{$_('spiral.list_view.events_count', {
+										values: { n: appRecords.length },
+									})}</span
+								>
 							</div>
 						</div>
 					{/each}
@@ -192,7 +203,7 @@
 
 		<!-- Color Legend -->
 		<section class="section">
-			<h2 class="section-title">Farbpalette (3-Bit)</h2>
+			<h2 class="section-title">{$_('spiral.list_view.section_palette')}</h2>
 			<div class="color-legend">
 				{#each colorsArray as color}
 					<div class="color-item">
@@ -209,35 +220,36 @@
 
 		<!-- Actions -->
 		<section class="section">
-			<h2 class="section-title">Aktionen</h2>
+			<h2 class="section-title">{$_('spiral.list_view.section_actions')}</h2>
 			<div class="actions">
 				<button class="btn btn-primary" onclick={handleCollect} disabled={isCollecting}>
-					{isCollecting ? 'Sammle...' : 'Daten sammeln'}
+					{isCollecting
+						? $_('spiral.list_view.action_collecting')
+						: $_('spiral.list_view.action_collect')}
 				</button>
 				<button
 					class="btn"
 					onclick={handleDownload}
 					disabled={!manaSpiralStore.stats || manaSpiralStore.stats.totalRecords === 0}
 				>
-					PNG herunterladen
+					{$_('spiral.list_view.action_download_png')}
 				</button>
-				<button class="btn" onclick={handleImportClick}>PNG importieren</button>
+				<button class="btn" onclick={handleImportClick}
+					>{$_('spiral.list_view.action_import_png')}</button
+				>
 				<button
 					class="btn btn-danger"
 					onclick={handleClear}
 					disabled={!manaSpiralStore.stats || manaSpiralStore.stats.totalRecords === 0}
 				>
-					Zurücksetzen
+					{$_('spiral.list_view.action_reset')}
 				</button>
 			</div>
 
 			<div class="info-box">
-				<h4>Mana Spiral</h4>
+				<h4>{$_('spiral.list_view.info_heading')}</h4>
 				<p>
-					Die Mana Spiral sammelt Aktivitätsdaten aus allen deinen Apps und kodiert sie als farbige
-					Pixel in einem Spiralmuster. Jeder Pixel speichert 3 Bit (8 Farben). Das Bild wächst von
-					der Mitte nach aussen — je mehr du die Apps nutzt, desto grösser wird deine Spirale.
-					Exportiere sie als PNG oder nutze sie als Wallpaper.
+					{$_('spiral.list_view.info_body')}
 				</p>
 			</div>
 		</section>

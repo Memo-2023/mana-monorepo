@@ -187,7 +187,6 @@
 	"apps/mana/apps/web/src/lib/modules/sleep/components/MorningLog.svelte": 5,
 	"apps/mana/apps/web/src/lib/modules/sleep/ListView.svelte": 8,
 	"apps/mana/apps/web/src/lib/modules/spaces/ListView.svelte": 6,
-	"apps/mana/apps/web/src/lib/modules/spiral/ListView.svelte": 12,
 	"apps/mana/apps/web/src/lib/modules/storage/ListView.svelte": 2,
 	"apps/mana/apps/web/src/lib/modules/storage/views/DetailView.svelte": 4,
 	"apps/mana/apps/web/src/lib/modules/themes/ListView.svelte": 3,
