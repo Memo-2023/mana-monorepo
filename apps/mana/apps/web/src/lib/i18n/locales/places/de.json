@@ -1,0 +1,36 @@
+{
+	"categories": {
+		"home": "Zuhause",
+		"work": "Arbeit",
+		"food": "Essen",
+		"shopping": "Einkauf",
+		"transit": "Transit",
+		"leisure": "Freizeit",
+		"other": "Sonstiges"
+	},
+	"detail_view": {
+		"not_found": "Ort nicht gefunden",
+		"confirm_delete": "Ort wirklich löschen?",
+		"untitled": "Unbenannt",
+		"name_placeholder": "Name",
+		"map_title": "Kartenvorschau",
+		"label_visibility": "Sichtbarkeit",
+		"label_share_link": "Link",
+		"label_category": "Kategorie",
+		"label_address": "Adresse",
+		"placeholder_address": "Adresse eingeben...",
+		"placeholder_address_search": "Adresse suchen...",
+		"label_coordinates": "Koordinaten",
+		"placeholder_lat": "Lat",
+		"placeholder_lng": "Lng",
+		"resolve_address_title": "Adresse aus Koordinaten ermitteln",
+		"label_description": "Beschreibung",
+		"placeholder_description": "Notizen zum Ort...",
+		"section_tags": "Tags",
+		"section_recent_visits": "Letzte Besuche",
+		"meta_visits": "Besuche: {n}",
+		"meta_last_visit": "Letzter Besuch: {date}",
+		"meta_created": "Erstellt: {date}",
+		"meta_updated": "Bearbeitet: {date}"
+	}
+}

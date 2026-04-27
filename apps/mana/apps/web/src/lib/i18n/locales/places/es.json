@@ -1,0 +1,36 @@
+{
+	"categories": {
+		"home": "Casa",
+		"work": "Trabajo",
+		"food": "Comida",
+		"shopping": "Compras",
+		"transit": "Tránsito",
+		"leisure": "Ocio",
+		"other": "Otro"
+	},
+	"detail_view": {
+		"not_found": "Lugar no encontrado",
+		"confirm_delete": "¿Eliminar realmente el lugar?",
+		"untitled": "Sin título",
+		"name_placeholder": "Nombre",
+		"map_title": "Vista previa del mapa",
+		"label_visibility": "Visibilidad",
+		"label_share_link": "Enlace",
+		"label_category": "Categoría",
+		"label_address": "Dirección",
+		"placeholder_address": "Introduce una dirección…",
+		"placeholder_address_search": "Buscar dirección…",
+		"label_coordinates": "Coordenadas",
+		"placeholder_lat": "Lat",
+		"placeholder_lng": "Lng",
+		"resolve_address_title": "Obtener dirección desde coordenadas",
+		"label_description": "Descripción",
+		"placeholder_description": "Notas sobre este lugar…",
+		"section_tags": "Etiquetas",
+		"section_recent_visits": "Últimas visitas",
+		"meta_visits": "Visitas: {n}",
+		"meta_last_visit": "Última visita: {date}",
+		"meta_created": "Creado: {date}",
+		"meta_updated": "Editado: {date}"
+	}
+}
