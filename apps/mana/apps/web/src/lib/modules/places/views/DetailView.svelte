@@ -26,6 +26,8 @@
 	import { useAllTags, getTagsByIds } from '@mana/shared-stores';
 	import LinkedItems from '$lib/components/links/LinkedItems.svelte';
 	import { removeTagIdWithUndo } from '$lib/data/tag-mutations';
+	import { _, locale } from 'svelte-i18n';
+	import { get } from 'svelte/store';
 
 	let { navigate, params, goBack }: ViewProps = $props();
 	let placeId = $derived(params.placeId as string);
@@ -66,14 +68,14 @@
 
 	let placeTags = $derived(getTagsByIds(allTags, detail.entity?.tagIds ?? []));
 
-	const CATEGORIES: { value: PlaceCategory; label: string }[] = [
-		{ value: 'home', label: 'Zuhause' },
-		{ value: 'work', label: 'Arbeit' },
-		{ value: 'food', label: 'Essen' },
-		{ value: 'shopping', label: 'Einkauf' },
-		{ value: 'transit', label: 'Transit' },
-		{ value: 'leisure', label: 'Freizeit' },
-		{ value: 'other', label: 'Sonstiges' },
+	const CATEGORY_VALUES: PlaceCategory[] = [
+		'home',
+		'work',
+		'food',
+		'shopping',
+		'transit',
+		'leisure',
+		'other',
 	];
 
 	// --- Reverse geocoding (coords → address) ---
@@ -145,7 +147,7 @@
 		const lat = parseFloat(editLatitude);
 		const lng = parseFloat(editLongitude);
 		await placesStore.updatePlace(placeId, {
-			name: editName.trim() || 'Unbenannt',
+			name: editName.trim() || $_('places.detail_view.untitled'),
 			description: editDescription.trim() || null,
 			address: editAddress.trim() || null,
 			category: editCategory,
@@ -192,7 +194,7 @@
 	}
 
 	function formatDate(iso: string): string {
-		return new Date(iso).toLocaleDateString('de', {
+		return new Date(iso).toLocaleDateString(get(locale) ?? 'de', {
 			day: '2-digit',
 			month: '2-digit',
 			year: '2-digit',
@@ -214,11 +216,11 @@
 <DetailViewShell
 	entity={detail.entity}
 	loading={detail.loading}
-	notFoundLabel="Ort nicht gefunden"
+	notFoundLabel={$_('places.detail_view.not_found')}
 	confirmDelete={detail.confirmDelete}
 	onAskDelete={detail.askDelete}
 	onCancelDelete={detail.cancelDelete}
-	confirmDeleteLabel="Ort wirklich löschen?"
+	confirmDeleteLabel={$_('places.detail_view.confirm_delete')}
 	onConfirmDelete={deletePlace}
 >
 	{#snippet body(place)}
@@ -232,7 +234,7 @@
 					bind:value={editName}
 					onfocus={detail.focus}
 					onblur={saveField}
-					placeholder="Name"
+					placeholder={$_('places.detail_view.name_placeholder')}
 				/>
 			</div>
 			<button class="fav-btn" class:active={place.isFavorite} onclick={toggleFavorite}>
@@ -243,7 +245,7 @@
 		{#if mapUrl}
 			<div class="map-container">
 				<iframe
-					title="Kartenvorschau"
+					title={$_('places.detail_view.map_title')}
 					src={mapUrl}
 					width="100%"
 					height="160"
@@ -255,13 +257,13 @@
 
 		<div class="fields">
 			<div class="field-row">
-				<span class="field-label">Sichtbarkeit</span>
+				<span class="field-label">{$_('places.detail_view.label_visibility')}</span>
 				<VisibilityPicker level={place.visibility ?? 'private'} onChange={handleVisibilityChange} />
 			</div>
 
 			{#if place.visibility === 'unlisted' && place.unlistedToken && shareUrl}
 				<div class="field-row field-row--share">
-					<span class="field-label">Link</span>
+					<span class="field-label">{$_('places.detail_view.label_share_link')}</span>
 					<SharedLinkControls
 						token={place.unlistedToken}
 						url={shareUrl}
@@ -274,22 +276,22 @@
 			{/if}
 
 			<div class="field-row">
-				<span class="field-label">Kategorie</span>
+				<span class="field-label">{$_('places.detail_view.label_category')}</span>
 				<select class="field-select" value={editCategory} onchange={onCategoryChange}>
-					{#each CATEGORIES as cat}
-						<option value={cat.value}>{cat.label}</option>
+					{#each CATEGORY_VALUES as v}
+						<option value={v}>{$_('places.categories.' + v)}</option>
 					{/each}
 				</select>
 			</div>
 
 			<div class="field-row">
-				<span class="field-label">Adresse</span>
+				<span class="field-label">{$_('places.detail_view.label_address')}</span>
 				<input
 					class="field-input"
 					bind:value={editAddress}
 					onfocus={detail.focus}
 					onblur={saveField}
-					placeholder="Adresse eingeben..."
+					placeholder={$_('places.detail_view.placeholder_address')}
 				/>
 			</div>
 
@@ -302,7 +304,7 @@
 						<input
 							class="address-search-input"
 							type="text"
-							placeholder="Adresse suchen..."
+							placeholder={$_('places.detail_view.placeholder_address_search')}
 							bind:value={addressSearch}
 							oninput={onAddressSearchInput}
 							onblur={onAddressSearchBlur}
@@ -325,14 +327,14 @@
 			</div>
 
 			<div class="field-row">
-				<span class="field-label">Koordinaten</span>
+				<span class="field-label">{$_('places.detail_view.label_coordinates')}</span>
 				<div class="coords-row">
 					<input
 						class="field-input small"
 						bind:value={editLatitude}
 						onfocus={detail.focus}
 						onblur={saveField}
-						placeholder="Lat"
+						placeholder={$_('places.detail_view.placeholder_lat')}
 						type="number"
 						step="any"
 					/>
@@ -341,7 +343,7 @@
 						bind:value={editLongitude}
 						onfocus={detail.focus}
 						onblur={saveField}
-						placeholder="Lng"
+						placeholder={$_('places.detail_view.placeholder_lng')}
 						type="number"
 						step="any"
 					/>
@@ -349,7 +351,7 @@
 						class="resolve-btn"
 						onclick={resolveAddress}
 						disabled={isResolving}
-						title="Adresse aus Koordinaten ermitteln"
+						title={$_('places.detail_view.resolve_address_title')}
 					>
 						<ArrowsClockwise size={14} class={isResolving ? 'spinning' : ''} />
 					</button>
@@ -357,13 +359,13 @@
 			</div>
 
 			<div class="field-row">
-				<span class="field-label">Beschreibung</span>
+				<span class="field-label">{$_('places.detail_view.label_description')}</span>
 				<textarea
 					class="description-input"
 					bind:value={editDescription}
 					onfocus={detail.focus}
 					onblur={saveField}
-					placeholder="Notizen zum Ort..."
+					placeholder={$_('places.detail_view.placeholder_description')}
 					rows={2}
 				></textarea>
 			</div>
@@ -371,7 +373,7 @@
 
 		{#if placeTags.length > 0}
 			<div class="section">
-				<span class="section-label">Tags</span>
+				<span class="section-label">{$_('places.detail_view.section_tags')}</span>
 				<div class="tags-list">
 					{#each placeTags as tag (tag.id)}
 						<button
@@ -392,7 +394,7 @@
 
 		{#if logs.length > 0}
 			<div class="section">
-				<span class="section-label">Letzte Besuche</span>
+				<span class="section-label">{$_('places.detail_view.section_recent_visits')}</span>
 				<div class="log-list">
 					{#each logs as log (log.id)}
 						<div class="log-row">
@@ -408,16 +410,28 @@
 
 		<div class="meta">
 			{#if (place.visitCount ?? 0) > 0}
-				<span>Besuche: {place.visitCount}</span>
+				<span>{$_('places.detail_view.meta_visits', { values: { n: place.visitCount } })}</span>
 			{/if}
 			{#if place.lastVisitedAt}
-				<span>Letzter Besuch: {formatDate(place.lastVisitedAt)}</span>
+				<span
+					>{$_('places.detail_view.meta_last_visit', {
+						values: { date: formatDate(place.lastVisitedAt) },
+					})}</span
+				>
 			{/if}
 			{#if place.createdAt}
-				<span>Erstellt: {new Date(place.createdAt).toLocaleDateString('de')}</span>
+				<span
+					>{$_('places.detail_view.meta_created', {
+						values: { date: new Date(place.createdAt).toLocaleDateString(get(locale) ?? 'de') },
+					})}</span
+				>
 			{/if}
 			{#if place.updatedAt}
-				<span>Bearbeitet: {new Date(place.updatedAt).toLocaleDateString('de')}</span>
+				<span
+					>{$_('places.detail_view.meta_updated', {
+						values: { date: new Date(place.updatedAt).toLocaleDateString(get(locale) ?? 'de') },
+					})}</span
+				>
 			{/if}
 		</div>
 	{/snippet}

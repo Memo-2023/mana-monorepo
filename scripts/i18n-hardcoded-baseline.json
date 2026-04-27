@@ -148,7 +148,6 @@
 	"apps/mana/apps/web/src/lib/modules/picture/components/ReferenceImagePicker.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/picture/ListView.svelte": 5,
 	"apps/mana/apps/web/src/lib/modules/places/ListView.svelte": 2,
-	"apps/mana/apps/web/src/lib/modules/places/views/DetailView.svelte": 8,
 	"apps/mana/apps/web/src/lib/modules/plants/views/DetailView.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/playground/ListView.svelte": 2,
 	"apps/mana/apps/web/src/lib/modules/presi/ListView.svelte": 1,
