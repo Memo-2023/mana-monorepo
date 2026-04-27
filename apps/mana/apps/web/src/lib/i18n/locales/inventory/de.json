@@ -144,5 +144,26 @@
 	"error": {
 		"notFound": "Seite nicht gefunden",
 		"backToHome": "Zurück zur Startseite"
+	},
+	"detail": {
+		"page_title_html": "{name} - Inventar - Mana",
+		"page_title_fallback": "Item",
+		"route_title": "Objekt",
+		"empty_not_found": "Item nicht gefunden",
+		"empty_back": "Zurück",
+		"action_delete": "Löschen",
+		"confirm_delete": "Item endgültig löschen?",
+		"placeholder_name": "Name",
+		"placeholder_description": "Beschreibung",
+		"label_status": "Status",
+		"label_quantity": "Menge",
+		"label_location": "Standort",
+		"label_category": "Kategorie",
+		"option_no_location": "-- Kein Standort --",
+		"option_no_category": "-- Keine Kategorie --",
+		"section_custom_fields": "Eigene Felder",
+		"section_details": "Details",
+		"section_notes_count": "Notizen ({n})",
+		"placeholder_new_note": "Notiz hinzufügen..."
 	}
 }

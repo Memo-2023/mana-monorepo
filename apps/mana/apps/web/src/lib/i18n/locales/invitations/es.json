@@ -1,0 +1,24 @@
+{
+	"accept": {
+		"loading": "Cargando invitación …",
+		"unavailable_title": "Invitación no disponible",
+		"unavailable_hint": "Es posible que el enlace haya expirado o ya se haya usado.",
+		"already_accepted_title": "Ya aceptada",
+		"already_accepted_hint": "Esta invitación ya ha sido aceptada.",
+		"to_app": "Ir a la app",
+		"expired_title": "Invitación caducada",
+		"expired_hint": "Esta invitación ya no es válida.",
+		"eyebrow": "Invitación",
+		"heading_invite_html": "{inviter} te invita a <strong>{space}</strong>",
+		"inviter_fallback": "Alguien",
+		"space_fallback": "un espacio",
+		"role_label": "Rol: {role}",
+		"explainer": "Tras aceptar, podrás colaborar en este espacio — ver lo que otros escriben y crear entradas tú mismo. Tus datos personales permanecen separados en tu espacio personal.",
+		"action_decline": "Rechazar",
+		"action_processing": "Procesando …",
+		"action_login_accept": "Iniciar sesión y aceptar",
+		"action_accept": "Aceptar",
+		"error_no_invitation_id": "No hay código de invitación en la URL",
+		"error_not_found": "Invitación no encontrada ({status})"
+	}
+}

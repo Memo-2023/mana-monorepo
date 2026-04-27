@@ -1,0 +1,24 @@
+{
+	"accept": {
+		"loading": "Lade Einladung …",
+		"unavailable_title": "Einladung nicht abrufbar",
+		"unavailable_hint": "Der Link ist möglicherweise abgelaufen oder schon benutzt.",
+		"already_accepted_title": "Schon angenommen",
+		"already_accepted_hint": "Diese Einladung ist bereits angenommen worden.",
+		"to_app": "Zur App",
+		"expired_title": "Einladung abgelaufen",
+		"expired_hint": "Diese Einladung ist nicht mehr gültig.",
+		"eyebrow": "Einladung",
+		"heading_invite_html": "{inviter} lädt dich in <strong>{space}</strong> ein",
+		"inviter_fallback": "Jemand",
+		"space_fallback": "einen Space",
+		"role_label": "Rolle: {role}",
+		"explainer": "Nach Annahme kannst du in diesem Space mitarbeiten — sehen, was andere schreiben, und selbst Einträge anlegen. Deine persönlichen Daten bleiben in deinem Personal-Space, getrennt.",
+		"action_decline": "Ablehnen",
+		"action_processing": "Bearbeite …",
+		"action_login_accept": "Einloggen & annehmen",
+		"action_accept": "Annehmen",
+		"error_no_invitation_id": "Kein Einladungs-Code in der URL",
+		"error_not_found": "Einladung nicht gefunden ({status})"
+	}
+}

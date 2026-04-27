@@ -144,5 +144,26 @@
 	"error": {
 		"notFound": "Pagina non trovata",
 		"backToHome": "Torna alla home"
+	},
+	"detail": {
+		"page_title_html": "{name} - Inventario - Mana",
+		"page_title_fallback": "Articolo",
+		"route_title": "Oggetto",
+		"empty_not_found": "Articolo non trovato",
+		"empty_back": "Indietro",
+		"action_delete": "Elimina",
+		"confirm_delete": "Eliminare definitivamente questo articolo?",
+		"placeholder_name": "Nome",
+		"placeholder_description": "Descrizione",
+		"label_status": "Stato",
+		"label_quantity": "Quantità",
+		"label_location": "Posizione",
+		"label_category": "Categoria",
+		"option_no_location": "-- Nessuna posizione --",
+		"option_no_category": "-- Nessuna categoria --",
+		"section_custom_fields": "Campi personalizzati",
+		"section_details": "Dettagli",
+		"section_notes_count": "Note ({n})",
+		"placeholder_new_note": "Aggiungi una nota..."
 	}
 }

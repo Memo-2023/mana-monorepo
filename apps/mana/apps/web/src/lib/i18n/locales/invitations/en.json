@@ -1,0 +1,24 @@
+{
+	"accept": {
+		"loading": "Loading invitation …",
+		"unavailable_title": "Invitation unavailable",
+		"unavailable_hint": "The link may have expired or already been used.",
+		"already_accepted_title": "Already accepted",
+		"already_accepted_hint": "This invitation has already been accepted.",
+		"to_app": "Go to app",
+		"expired_title": "Invitation expired",
+		"expired_hint": "This invitation is no longer valid.",
+		"eyebrow": "Invitation",
+		"heading_invite_html": "{inviter} is inviting you to <strong>{space}</strong>",
+		"inviter_fallback": "Someone",
+		"space_fallback": "a space",
+		"role_label": "Role: {role}",
+		"explainer": "Once accepted, you can collaborate in this space — see what others write and add entries yourself. Your personal data stays separately in your personal space.",
+		"action_decline": "Decline",
+		"action_processing": "Processing …",
+		"action_login_accept": "Sign in & accept",
+		"action_accept": "Accept",
+		"error_no_invitation_id": "No invitation code in the URL",
+		"error_not_found": "Invitation not found ({status})"
+	}
+}

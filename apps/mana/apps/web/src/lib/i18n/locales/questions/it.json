@@ -92,5 +92,29 @@
 		"questionDeleted": "Domanda eliminata",
 		"researchStarted": "Ricerca avviata",
 		"answerAccepted": "Risposta accettata"
+	},
+	"home": {
+		"page_title_html": "Domande - Mana",
+		"heading_all": "Tutte le domande",
+		"count_one": "{n} domanda",
+		"count_other": "{n} domande",
+		"action_collections": "Raccolte",
+		"action_new": "Nuova domanda",
+		"placeholder_search": "Cerca domande...",
+		"filter_all_status": "Tutti gli stati",
+		"filter_open": "Aperta",
+		"filter_researching": "In ricerca",
+		"filter_answered": "Risposta",
+		"filter_archived": "Archiviata",
+		"filter_all_collections": "Tutte le raccolte",
+		"empty_title": "Nessuna domanda",
+		"empty_hint": "Fai la tua prima domanda e lascia che l'IA la cerchi.",
+		"empty_action": "Nuova domanda",
+		"depth_quick": "Rapida",
+		"depth_standard": "Standard",
+		"depth_deep": "Approfondita",
+		"date_today": "Oggi",
+		"date_yesterday": "Ieri",
+		"date_days_ago": "{n} giorni fa"
 	}
 }

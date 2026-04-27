@@ -144,5 +144,26 @@
 	"error": {
 		"notFound": "Page not found",
 		"backToHome": "Back to home"
+	},
+	"detail": {
+		"page_title_html": "{name} - Inventory - Mana",
+		"page_title_fallback": "Item",
+		"route_title": "Item",
+		"empty_not_found": "Item not found",
+		"empty_back": "Back",
+		"action_delete": "Delete",
+		"confirm_delete": "Permanently delete this item?",
+		"placeholder_name": "Name",
+		"placeholder_description": "Description",
+		"label_status": "Status",
+		"label_quantity": "Quantity",
+		"label_location": "Location",
+		"label_category": "Category",
+		"option_no_location": "-- No location --",
+		"option_no_category": "-- No category --",
+		"section_custom_fields": "Custom fields",
+		"section_details": "Details",
+		"section_notes_count": "Notes ({n})",
+		"placeholder_new_note": "Add a note..."
 	}
 }

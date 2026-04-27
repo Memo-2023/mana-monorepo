@@ -144,5 +144,26 @@
 	"error": {
 		"notFound": "Page introuvable",
 		"backToHome": "Retour à l'accueil"
+	},
+	"detail": {
+		"page_title_html": "{name} - Inventaire - Mana",
+		"page_title_fallback": "Article",
+		"route_title": "Objet",
+		"empty_not_found": "Article introuvable",
+		"empty_back": "Retour",
+		"action_delete": "Supprimer",
+		"confirm_delete": "Supprimer définitivement cet article ?",
+		"placeholder_name": "Nom",
+		"placeholder_description": "Description",
+		"label_status": "Statut",
+		"label_quantity": "Quantité",
+		"label_location": "Emplacement",
+		"label_category": "Catégorie",
+		"option_no_location": "-- Aucun emplacement --",
+		"option_no_category": "-- Aucune catégorie --",
+		"section_custom_fields": "Champs personnalisés",
+		"section_details": "Détails",
+		"section_notes_count": "Notes ({n})",
+		"placeholder_new_note": "Ajouter une note..."
 	}
 }
