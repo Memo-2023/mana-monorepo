@@ -11,6 +11,8 @@
 	import { fetchDecryptAudit, type AuditRow } from '$lib/data/ai/audit/queries';
 	import { isMissionGrantsEnabled } from '$lib/api/config';
 	import type { DomainEvent } from '$lib/data/events/types';
+	import { _, locale } from 'svelte-i18n';
+	import { get } from 'svelte/store';
 
 	let moduleFilter = $state<string | null>(null);
 	let missionFilter = $state<string | null>(null);
@@ -54,10 +56,16 @@
 		return title ? `${e.type} · ${title}` : e.type;
 	}
 	function formatTime(iso: string) {
-		return new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+		return new Date(iso).toLocaleTimeString(get(locale) ?? 'de', {
+			hour: '2-digit',
+			minute: '2-digit',
+		});
 	}
 	function formatDate(iso: string) {
-		return new Date(iso).toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
+		return new Date(iso).toLocaleDateString(get(locale) ?? 'de', {
+			day: 'numeric',
+			month: 'short',
+		});
 	}
 
 	// ── Tab switcher: timeline ↔ decrypt audit ─────────────
@@ -92,7 +100,7 @@
 	});
 
 	function formatAuditTs(iso: string): string {
-		return new Date(iso).toLocaleString('de-DE', {
+		return new Date(iso).toLocaleString(get(locale) ?? 'de', {
 			day: '2-digit',
 			month: '2-digit',
 			hour: '2-digit',
@@ -102,17 +110,27 @@
 
 	let revertingKey = $state<string | null>(null);
 	async function handleRevert(key: string, missionId: string, iterationId: string) {
-		if (!confirm('Alle AI-Writes dieser Iteration zurücknehmen?')) return;
+		if (!confirm($_('ai-workbench.list_view.confirm_revert'))) return;
 		revertingKey = key;
 		try {
 			const stats = await revertIteration(missionId, iterationId);
-			const parts = [`${stats.reverted} zurückgenommen`];
-			if (stats.skippedUnsupported > 0) parts.push(`${stats.skippedUnsupported} nicht unterstützt`);
-			if (stats.failed > 0) parts.push(`${stats.failed} fehlgeschlagen`);
+			const parts = [
+				$_('ai-workbench.list_view.revert_summary_done', { values: { n: stats.reverted } }),
+			];
+			if (stats.skippedUnsupported > 0)
+				parts.push(
+					$_('ai-workbench.list_view.revert_summary_unsupported', {
+						values: { n: stats.skippedUnsupported },
+					})
+				);
+			if (stats.failed > 0)
+				parts.push(
+					$_('ai-workbench.list_view.revert_summary_failed', { values: { n: stats.failed } })
+				);
 			alert(parts.join(' · '));
 		} catch (err) {
 			console.error(err);
-			alert('Revert fehlgeschlagen — siehe Console.');
+			alert($_('ai-workbench.list_view.revert_alert_failed'));
 		} finally {
 			revertingKey = null;
 		}
@@ -129,7 +147,7 @@
 			aria-selected={tab === 'timeline'}
 			onclick={() => (tab = 'timeline')}
 		>
-			Timeline
+			{$_('ai-workbench.list_view.tab_timeline')}
 		</button>
 		{#if grantsEnabled}
 			<button
@@ -140,7 +158,7 @@
 				aria-selected={tab === 'audit'}
 				onclick={() => (tab = 'audit')}
 			>
-				Datenzugriff
+				{$_('ai-workbench.list_view.tab_audit')}
 			</button>
 		{/if}
 	</div>
@@ -148,9 +166,9 @@
 	<div class="filters">
 		{#if tab === 'timeline'}
 			<label>
-				<span class="lbl">Modul</span>
+				<span class="lbl">{$_('ai-workbench.list_view.label_module')}</span>
 				<select bind:value={moduleFilter}>
-					<option value={null}>alle</option>
+					<option value={null}>{$_('ai-workbench.list_view.option_all')}</option>
 					{#each allModules as m}
 						<option value={m}>{m}</option>
 					{/each}
@@ -158,26 +176,26 @@
 			</label>
 		{/if}
 		<label>
-			<span class="lbl">Mission</span>
+			<span class="lbl">{$_('ai-workbench.list_view.label_mission')}</span>
 			<select bind:value={missionFilter}>
-				<option value={null}>alle</option>
+				<option value={null}>{$_('ai-workbench.list_view.option_all')}</option>
 				{#each missions.value as m (m.id)}
 					<option value={m.id}>{m.title}</option>
 				{/each}
 			</select>
 		</label>
 		<label>
-			<span class="lbl">Agent</span>
+			<span class="lbl">{$_('ai-workbench.list_view.label_agent')}</span>
 			<select bind:value={agentFilter}>
-				<option value={null}>alle</option>
+				<option value={null}>{$_('ai-workbench.list_view.option_all')}</option>
 				{#each agents.value as a (a.id)}
 					<option value={a.id}>{a.avatar ?? '🤖'} {a.name}</option>
 				{/each}
 			</select>
 		</label>
 		{#if tab === 'timeline'}
-			<div class="range-group" role="tablist" aria-label="Zeitraum">
-				{#each [{ id: '24h', label: '24h' }, { id: '7d', label: '7T' }, { id: 'all', label: 'alle' }] as const as opt}
+			<div class="range-group" role="tablist" aria-label={$_('ai-workbench.list_view.range_aria')}>
+				{#each [{ id: '24h', labelKey: 'range_24h' }, { id: '7d', labelKey: 'range_7d' }, { id: 'all', labelKey: 'range_all' }] as const as opt}
 					<button
 						type="button"
 						class="range-btn"
@@ -185,7 +203,7 @@
 						aria-pressed={timeRangeFilter === opt.id}
 						onclick={() => (timeRangeFilter = opt.id)}
 					>
-						{opt.label}
+						{$_('ai-workbench.list_view.' + opt.labelKey)}
 					</button>
 				{/each}
 			</div>
@@ -194,23 +212,23 @@
 
 	{#if tab === 'audit'}
 		{#if auditLoading}
-			<p class="empty">Lade Audit…</p>
+			<p class="empty">{$_('ai-workbench.list_view.audit_loading')}</p>
 		{:else if auditError}
-			<p class="empty error">Fehler: {auditError}</p>
+			<p class="empty error">
+				{$_('ai-workbench.list_view.audit_error_prefix', { values: { error: auditError } })}
+			</p>
 		{:else if auditRows.length === 0}
 			<p class="empty">
-				Keine serverseitigen Entschlüsselungen. Der mana-ai Runner hat für diese Mission noch keine
-				Records gelesen — entweder ist kein Key-Grant erteilt, oder die Mission nutzt nur plaintext
-				Inputs (goals).
+				{$_('ai-workbench.list_view.audit_empty')}
 			</p>
 		{:else}
 			<table class="audit-table">
 				<thead>
 					<tr>
-						<th>Zeit</th>
-						<th>Mission</th>
-						<th>Record</th>
-						<th>Status</th>
+						<th>{$_('ai-workbench.list_view.audit_col_time')}</th>
+						<th>{$_('ai-workbench.list_view.audit_col_mission')}</th>
+						<th>{$_('ai-workbench.list_view.audit_col_record')}</th>
+						<th>{$_('ai-workbench.list_view.audit_col_status')}</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -230,8 +248,7 @@
 		{/if}
 	{:else if buckets.length === 0}
 		<p class="empty">
-			Noch keine AI-Aktivität. Sobald eine Mission läuft und Proposals approved werden, erscheinen
-			hier die Änderungen.
+			{$_('ai-workbench.list_view.timeline_empty')}
 		</p>
 	{:else}
 		<ol class="timeline">
@@ -251,8 +268,11 @@
 								<span class="agent-name">{bucketAgent?.name ?? b.agentDisplayName}</span>
 								<span class="mission-sep">·</span>
 								{missionTitleById.get(b.missionId) ?? b.missionId}
-								<span class="event-count" title="{b.events.length} Änderungen in dieser Iteration"
-									>{b.events.length}</span
+								<span
+									class="event-count"
+									title={$_('ai-workbench.list_view.event_count_title', {
+										values: { n: b.events.length },
+									})}>{b.events.length}</span
 								>
 							</span>
 							{#if b.rationale}
@@ -264,10 +284,14 @@
 							class="revert"
 							disabled={revertingKey !== null}
 							onclick={() => handleRevert(b.key, b.missionId, b.iterationId)}
-							title="Alle Änderungen dieser Iteration zurücknehmen"
+							title={$_('ai-workbench.list_view.revert_title')}
 						>
 							<ArrowCounterClockwise size={13} weight="bold" />
-							<span>{revertingKey === b.key ? 'Läuft…' : 'Rückgängig'}</span>
+							<span
+								>{revertingKey === b.key
+									? $_('ai-workbench.list_view.revert_running')
+									: $_('ai-workbench.list_view.revert_label')}</span
+							>
 						</button>
 					</header>
 					<ul class="events">
@@ -275,7 +299,11 @@
 							<li class="event">
 								<span class="mod">{e.meta.appId}</span>
 								<span class="desc">{describeEvent(e)}</span>
-								<a class="link" href={`/${e.meta.appId}`} title="Zum Modul">
+								<a
+									class="link"
+									href={`/${e.meta.appId}`}
+									title={$_('ai-workbench.list_view.event_link_title')}
+								>
 									<ArrowSquareOut size={11} />
 								</a>
 							</li>
