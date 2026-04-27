@@ -80,5 +80,33 @@
 		"mealDeleted": "Repas supprimé",
 		"goalsSaved": "Objectifs enregistrés",
 		"favoriteAdded": "Ajouté aux favoris"
+	},
+	"detail": {
+		"page_title_html": "{description} - Food - Mana",
+		"untitled_fallback": "Repas",
+		"back": "Retour",
+		"not_found": "Repas introuvable.",
+		"lightbox_open_aria": "Agrandir l'image",
+		"lightbox_close_aria": "Fermer l'image",
+		"section_foods": "Ingrédients détectés",
+		"section_nutrients": "Nutriments",
+		"label_meal_type": "Type de repas",
+		"label_description": "Description",
+		"label_calories_kcal": "Calories (kcal)",
+		"label_protein_g": "Protéines (g)",
+		"label_carbs_g": "Glucides (g)",
+		"label_fat_g": "Lipides (g)",
+		"label_fiber_g": "Fibres (g)",
+		"label_sugar_g": "Sucres (g)",
+		"fiber_with_value": "Fibres : {n}g",
+		"sugar_with_value": "Sucres : {n}g",
+		"action_reanalyze": "🔄 Ré-analyser",
+		"action_reanalyzing": "Analyse…",
+		"action_saving": "Enregistrement…",
+		"confirm_sure": "Sûr ?",
+		"error_description_required": "La description ne peut pas être vide",
+		"error_save_failed": "Échec de l'enregistrement",
+		"error_analyze_failed": "Échec de l'analyse IA",
+		"error_delete_failed": "Échec de la suppression"
 	}
 }

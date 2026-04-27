@@ -80,5 +80,33 @@
 		"mealDeleted": "Pasto eliminato",
 		"goalsSaved": "Obiettivi salvati",
 		"favoriteAdded": "Aggiunto ai preferiti"
+	},
+	"detail": {
+		"page_title_html": "{description} - Food - Mana",
+		"untitled_fallback": "Pasto",
+		"back": "Indietro",
+		"not_found": "Pasto non trovato.",
+		"lightbox_open_aria": "Ingrandisci immagine",
+		"lightbox_close_aria": "Chiudi immagine",
+		"section_foods": "Componenti rilevati",
+		"section_nutrients": "Nutrienti",
+		"label_meal_type": "Tipo di pasto",
+		"label_description": "Descrizione",
+		"label_calories_kcal": "Calorie (kcal)",
+		"label_protein_g": "Proteine (g)",
+		"label_carbs_g": "Carboidrati (g)",
+		"label_fat_g": "Grassi (g)",
+		"label_fiber_g": "Fibre (g)",
+		"label_sugar_g": "Zuccheri (g)",
+		"fiber_with_value": "Fibre: {n}g",
+		"sugar_with_value": "Zuccheri: {n}g",
+		"action_reanalyze": "🔄 Rianalizza",
+		"action_reanalyzing": "Analisi…",
+		"action_saving": "Salvataggio…",
+		"confirm_sure": "Sicuro?",
+		"error_description_required": "La descrizione non può essere vuota",
+		"error_save_failed": "Salvataggio non riuscito",
+		"error_analyze_failed": "Analisi AI non riuscita",
+		"error_delete_failed": "Eliminazione non riuscita"
 	}
 }

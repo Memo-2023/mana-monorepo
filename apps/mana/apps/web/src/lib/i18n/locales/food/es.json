@@ -80,5 +80,33 @@
 		"mealDeleted": "Comida eliminada",
 		"goalsSaved": "Objetivos guardados",
 		"favoriteAdded": "Añadido a favoritos"
+	},
+	"detail": {
+		"page_title_html": "{description} - Food - Mana",
+		"untitled_fallback": "Comida",
+		"back": "Atrás",
+		"not_found": "Comida no encontrada.",
+		"lightbox_open_aria": "Ampliar imagen",
+		"lightbox_close_aria": "Cerrar imagen",
+		"section_foods": "Componentes detectados",
+		"section_nutrients": "Nutrientes",
+		"label_meal_type": "Tipo de comida",
+		"label_description": "Descripción",
+		"label_calories_kcal": "Calorías (kcal)",
+		"label_protein_g": "Proteína (g)",
+		"label_carbs_g": "Carbohidratos (g)",
+		"label_fat_g": "Grasa (g)",
+		"label_fiber_g": "Fibra (g)",
+		"label_sugar_g": "Azúcar (g)",
+		"fiber_with_value": "Fibra: {n}g",
+		"sugar_with_value": "Azúcar: {n}g",
+		"action_reanalyze": "🔄 Reanalizar",
+		"action_reanalyzing": "Analizando…",
+		"action_saving": "Guardando…",
+		"confirm_sure": "¿Seguro?",
+		"error_description_required": "La descripción no puede estar vacía",
+		"error_save_failed": "Error al guardar",
+		"error_analyze_failed": "Error en el análisis IA",
+		"error_delete_failed": "Error al eliminar"
 	}
 }
