@@ -61,6 +61,31 @@ export function createFeedbackRoutes(feedbackService: FeedbackService) {
 		return c.json(await feedbackService.getMyFeedback(user.userId));
 	});
 
+	r.get('/me/reacted', async (c) => {
+		const user = c.get('user');
+		const limit = Math.min(parseInt(c.req.query('limit') || '100', 10), 200);
+		return c.json({ items: await feedbackService.getMyReactedItems(user.userId, limit) });
+	});
+
+	r.get('/me/notifications', async (c) => {
+		const user = c.get('user');
+		const unreadOnly = c.req.query('unread_only') === 'true';
+		const limit = Math.min(parseInt(c.req.query('limit') || '50', 10), 200);
+		return c.json({
+			items: await feedbackService.getNotifications(user.userId, { unreadOnly, limit }),
+		});
+	});
+
+	r.post('/me/notifications/:id/read', async (c) => {
+		const user = c.get('user');
+		return c.json(await feedbackService.markNotificationRead(c.req.param('id'), user.userId));
+	});
+
+	r.post('/me/notifications/read-all', async (c) => {
+		const user = c.get('user');
+		return c.json(await feedbackService.markAllNotificationsRead(user.userId));
+	});
+
 	r.get('/:id/replies', async (c) => {
 		return c.json(await feedbackService.getReplies(c.req.param('id')));
 	});

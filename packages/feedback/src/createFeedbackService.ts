@@ -18,7 +18,7 @@ import type {
 	ReactInput,
 } from './api';
 import type { FeedbackServiceConfig } from './types';
-import type { PublicFeedbackItem, ReactionEmoji } from './feedback';
+import type { FeedbackNotification, PublicFeedbackItem, ReactionEmoji } from './feedback';
 
 export function createFeedbackService(config: FeedbackServiceConfig) {
 	const {
@@ -95,6 +95,40 @@ export function createFeedbackService(config: FeedbackServiceConfig) {
 		return fetchWithAuth<FeedbackListResponse>(`${feedbackEndpoint}/me`);
 	}
 
+	async function getMyReactedItems(): Promise<PublicFeedbackItem[]> {
+		const res = await fetchWithAuth<{ items: PublicFeedbackItem[] }>(
+			`${feedbackEndpoint}/me/reacted`
+		);
+		return res.items;
+	}
+
+	async function getNotifications(opts?: {
+		unreadOnly?: boolean;
+		limit?: number;
+	}): Promise<FeedbackNotification[]> {
+		const params = new URLSearchParams();
+		if (opts?.unreadOnly) params.set('unread_only', 'true');
+		if (opts?.limit) params.set('limit', String(opts.limit));
+		const qs = params.toString();
+		const res = await fetchWithAuth<{ items: FeedbackNotification[] }>(
+			`${feedbackEndpoint}/me/notifications${qs ? `?${qs}` : ''}`
+		);
+		return res.items;
+	}
+
+	async function markNotificationRead(id: string): Promise<{ ok: true }> {
+		return fetchWithAuth<{ ok: true }>(`${feedbackEndpoint}/me/notifications/${id}/read`, {
+			method: 'POST',
+		});
+	}
+
+	async function markAllNotificationsRead(): Promise<{ ok: true; count: number }> {
+		return fetchWithAuth<{ ok: true; count: number }>(
+			`${feedbackEndpoint}/me/notifications/read-all`,
+			{ method: 'POST' }
+		);
+	}
+
 	async function getReplies(feedbackId: string): Promise<PublicFeedbackItem[]> {
 		return fetchWithAuth<PublicFeedbackItem[]>(`${feedbackEndpoint}/${feedbackId}/replies`);
 	}
@@ -153,6 +187,10 @@ export function createFeedbackService(config: FeedbackServiceConfig) {
 		getPublicFeedAnonymous,
 		getPublicItemAnonymous,
 		getMyFeedback,
+		getMyReactedItems,
+		getNotifications,
+		markNotificationRead,
+		markAllNotificationsRead,
 		getReplies,
 		toggleReaction,
 		deleteFeedback,

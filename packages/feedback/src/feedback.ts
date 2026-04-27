@@ -65,6 +65,33 @@ export interface PublicFeedbackItem {
 }
 
 /**
+ * Inbox notification — server enqueues one row per status-transition
+ * for the author + each reactioner-with-👍/🚀-on-completed. Web polls
+ * /me/notifications and renders unread ones as toasts.
+ */
+export type NotificationKind =
+	| 'status_planned'
+	| 'status_in_progress'
+	| 'status_completed'
+	| 'status_declined'
+	| 'status_under_review'
+	| 'status_submitted'
+	| 'admin_response'
+	| 'reactioner_bonus';
+
+export interface FeedbackNotification {
+	id: string;
+	userId: string;
+	feedbackId: string;
+	kind: NotificationKind;
+	title: string;
+	body: string | null;
+	creditsAwarded: number;
+	readAt: string | null;
+	createdAt: string;
+}
+
+/**
  * Authenticated, full feedback record (own submissions / admin views).
  * Includes the user-private fields the public feed redacts.
  */

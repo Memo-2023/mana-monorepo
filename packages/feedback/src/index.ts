@@ -13,6 +13,8 @@ export {
 	type FeedbackCategory,
 	type FeedbackStatus,
 	type Feedback,
+	type FeedbackNotification,
+	type NotificationKind,
 	type PublicFeedbackItem,
 	type ReactionEmoji,
 	REACTION_EMOJIS,

@@ -104,6 +104,35 @@ export const feedbackReactions = feedbackSchema.table(
 	})
 );
 
+// Per-user notification inbox. Server enqueues rows whenever a feedback
+// status changes (author + reactioners get a row each). Web polls
+// /api/v1/feedback/me/notifications and renders unread ones as toasts.
+// `read_at IS NULL` is the inbox; the partial index keeps fetches O(log n).
+export const feedbackNotifications = feedbackSchema.table(
+	'feedback_notifications',
+	{
+		id: uuid('id').primaryKey().defaultRandom(),
+		userId: text('user_id').notNull(),
+		feedbackId: uuid('feedback_id')
+			.notNull()
+			.references(() => userFeedback.id, { onDelete: 'cascade' }),
+		// 'status_planned' | 'status_in_progress' | 'status_completed'
+		// | 'status_declined' | 'admin_response' | 'reactioner_bonus'
+		// (when their reacted-on item shipped — keeps loop closed for
+		//  Sympathisanten, not just original authors).
+		kind: text('kind').notNull(),
+		title: text('title').notNull(),
+		body: text('body'),
+		creditsAwarded: integer('credits_awarded').default(0).notNull(),
+		readAt: timestamp('read_at', { withTimezone: true }),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+	},
+	(table) => ({
+		unreadIdx: index('feedback_notifications_unread_idx').on(table.userId, table.createdAt),
+		feedbackIdx: index('feedback_notifications_feedback_idx').on(table.feedbackId),
+	})
+);
+
 // Append-only log of community-credit grants. Used as a sliding-window
 // rate-limit counter ("max 10 grants per user per 24h") and as an audit
 // trail. Cleanup of rows older than 7d is handled by a nightly cron.
@@ -121,3 +150,4 @@ export const feedbackGrantLog = feedbackSchema.table(
 
 export type Feedback = typeof userFeedback.$inferSelect;
 export type FeedbackReaction = typeof feedbackReactions.$inferSelect;
+export type FeedbackNotification = typeof feedbackNotifications.$inferSelect;

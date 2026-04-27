@@ -13,7 +13,12 @@
  */
 
 import { eq, and, desc, sql, isNull, gte, inArray } from 'drizzle-orm';
-import { userFeedback, feedbackReactions, feedbackGrantLog } from '../db/schema/feedback';
+import {
+	userFeedback,
+	feedbackReactions,
+	feedbackGrantLog,
+	feedbackNotifications,
+} from '../db/schema/feedback';
 import type { Database } from '../db/connection';
 import { NotFoundError, BadRequestError } from '../lib/errors';
 import { createDisplayHash, generateDisplayName } from '../lib/pseudonym';
@@ -260,6 +265,30 @@ export class FeedbackService {
 			.orderBy(desc(userFeedback.createdAt));
 	}
 
+	/**
+	 * Items the user has reacted to (any emoji), with their current
+	 * status — feeds the /profile/my-wishes "what you supported" tab so
+	 * users can watch wishes they cared about move through the pipeline.
+	 * Excludes the user's own posts (those are in getMyFeedback).
+	 */
+	async getMyReactedItems(userId: string, limit = 100): Promise<PublicFeedbackItem[]> {
+		const rows = await this.db
+			.selectDistinct({ feedback: userFeedback })
+			.from(feedbackReactions)
+			.innerJoin(userFeedback, eq(feedbackReactions.feedbackId, userFeedback.id))
+			.where(
+				and(
+					eq(feedbackReactions.userId, userId),
+					sql`${userFeedback.userId} <> ${userId}`,
+					eq(userFeedback.isPublic, true)
+				)
+			)
+			.orderBy(desc(userFeedback.updatedAt))
+			.limit(limit);
+
+		return rows.map((r) => redact(r.feedback));
+	}
+
 	/** Map of emoji → boolean for the requesting user on a feedback item. */
 	async getMyReactionsFor(feedbackId: string, userId: string): Promise<string[]> {
 		const rows = await this.db
@@ -409,16 +438,123 @@ export class FeedbackService {
 			.where(eq(userFeedback.id, feedbackId))
 			.returning();
 
-		// Ship-Bonus: only on the FRESH 'completed' transition. Status-
-		// flapping ('completed' → 'in_progress' → 'completed') won't
-		// double-pay because the credit grant is keyed off
-		// `${id}_shipped`, but skipping the trigger entirely keeps the
-		// reactioner-bonus loop from spamming as well.
+		// Status-Transition triggert immer eine Author-Notification, plus
+		// Reactioner-Notifications + Ship-Bonus-Credits beim FRISCHEN
+		// 'completed'-Übergang. Doppel-Triggering bei Status-Flapping wird
+		// strukturell durch den `before.status !== row.status`-Guard
+		// verhindert, plus Idempotency via referenceId in den Credit-Grants.
+		const statusChanged = before.status !== row.status && patch.status !== undefined;
+		const adminResponseChanged =
+			patch.adminResponse !== undefined && before.adminResponse !== row.adminResponse;
+
+		if (statusChanged) {
+			void this.enqueueStatusNotifications(row, before.status);
+		}
+		if (adminResponseChanged && row.adminResponse) {
+			void this.enqueueAdminResponseNotification(row);
+		}
+
+		// Credit-Layer hängt nur am completed-Übergang.
 		if (before.status !== 'completed' && row.status === 'completed') {
 			void this.tryGrantShipBonus(row);
 		}
 
 		return row;
+	}
+
+	/**
+	 * Enqueue a per-user notification for the author when status changes.
+	 * Reactioners-with-👍/🚀 get their own notification on 'completed'
+	 * via tryGrantShipBonus (which also pays them +25). Statuses that
+	 * mean "we heard you" (planned, in_progress) only notify the author.
+	 */
+	private async enqueueStatusNotifications(
+		feedback: typeof userFeedback.$inferSelect,
+		previousStatus: string
+	): Promise<void> {
+		try {
+			const titleByStatus: Record<string, string> = {
+				planned: `Geplant: ›${feedback.title ?? this.shortTitle(feedback)}‹`,
+				in_progress: `Wir bauen ›${feedback.title ?? this.shortTitle(feedback)}‹ gerade`,
+				completed: `Dein Wunsch ist live: ›${feedback.title ?? this.shortTitle(feedback)}‹`,
+				declined: `Abgelehnt: ›${feedback.title ?? this.shortTitle(feedback)}‹`,
+				submitted: `Reaktiviert: ›${feedback.title ?? this.shortTitle(feedback)}‹`,
+				under_review: `Wird geprüft: ›${feedback.title ?? this.shortTitle(feedback)}‹`,
+			};
+
+			const title = titleByStatus[feedback.status] ?? `Status: ${feedback.status}`;
+			const bodyByStatus: Record<string, string | undefined> = {
+				planned: 'Auf der Roadmap eingetragen.',
+				in_progress: 'Wird aktiv umgesetzt — wir melden uns wenn live.',
+				completed: '+500 Mana — danke für die Idee 🎉',
+				declined: 'Können wir gerade nicht umsetzen. Schau in der Antwort, falls du möchtest.',
+				under_review: 'Schauen wir uns gleich an.',
+			};
+
+			await this.db.insert(feedbackNotifications).values({
+				userId: feedback.userId,
+				feedbackId: feedback.id,
+				kind: `status_${feedback.status}`,
+				title,
+				body: bodyByStatus[feedback.status] ?? null,
+				creditsAwarded: feedback.status === 'completed' ? REWARD.shipped : 0,
+			});
+			void previousStatus; // reserved for future "wurde rückgesetzt"-flavored copy
+		} catch (err) {
+			console.warn('[feedback] enqueue status notify failed:', err);
+		}
+	}
+
+	private async enqueueAdminResponseNotification(
+		feedback: typeof userFeedback.$inferSelect
+	): Promise<void> {
+		try {
+			await this.db.insert(feedbackNotifications).values({
+				userId: feedback.userId,
+				feedbackId: feedback.id,
+				kind: 'admin_response',
+				title: `Antwort vom Team: ›${feedback.title ?? this.shortTitle(feedback)}‹`,
+				body: feedback.adminResponse?.slice(0, 200) ?? null,
+				creditsAwarded: 0,
+			});
+		} catch (err) {
+			console.warn('[feedback] enqueue admin-response notify failed:', err);
+		}
+	}
+
+	private shortTitle(feedback: typeof userFeedback.$inferSelect): string {
+		return feedback.feedbackText.slice(0, 40) + (feedback.feedbackText.length > 40 ? '…' : '');
+	}
+
+	// ── Notifications inbox ──────────────────────────────────────────
+
+	async getNotifications(userId: string, opts: { unreadOnly?: boolean; limit?: number } = {}) {
+		const { unreadOnly = false, limit = 50 } = opts;
+		const conds = [eq(feedbackNotifications.userId, userId)];
+		if (unreadOnly) conds.push(isNull(feedbackNotifications.readAt));
+		return this.db
+			.select()
+			.from(feedbackNotifications)
+			.where(and(...conds))
+			.orderBy(desc(feedbackNotifications.createdAt))
+			.limit(limit);
+	}
+
+	async markNotificationRead(notifId: string, userId: string): Promise<{ ok: true }> {
+		await this.db
+			.update(feedbackNotifications)
+			.set({ readAt: new Date() })
+			.where(and(eq(feedbackNotifications.id, notifId), eq(feedbackNotifications.userId, userId)));
+		return { ok: true };
+	}
+
+	async markAllNotificationsRead(userId: string): Promise<{ ok: true; count: number }> {
+		const result = await this.db
+			.update(feedbackNotifications)
+			.set({ readAt: new Date() })
+			.where(and(eq(feedbackNotifications.userId, userId), isNull(feedbackNotifications.readAt)))
+			.returning({ id: feedbackNotifications.id });
+		return { ok: true, count: result.length };
 	}
 
 	private async tryGrantShipBonus(feedback: typeof userFeedback.$inferSelect): Promise<void> {
@@ -459,6 +595,18 @@ export class FeedbackService {
 						reason: 'feedback_reaction_match',
 						referenceId: `${feedback.id}_reaction_${supporter}`,
 						description: `Du hast ›${feedback.title ?? '(Wunsch)'}‹ unterstützt — danke!`,
+					});
+
+					// Inbox-Notify zusätzlich zur Credit-Auszahlung — sonst sieht
+					// der Reactioner zwar Credits in seiner History, aber weiß
+					// nicht warum.
+					await this.db.insert(feedbackNotifications).values({
+						userId: supporter,
+						feedbackId: feedback.id,
+						kind: 'reactioner_bonus',
+						title: `Dein Like ist gelandet: ›${feedback.title ?? this.shortTitle(feedback)}‹`,
+						body: '+25 Mana — der Wunsch, den du unterstützt hast, ist live.',
+						creditsAwarded: REWARD.reactionMatch,
 					});
 				} catch (err) {
 					console.warn('[feedback] reactioner-bonus failed for', supporter, err);
