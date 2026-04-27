@@ -7,6 +7,10 @@
 			"label": "Privacy",
 			"description": "Cosa è pubblico o condiviso tramite link adesso — con interruttore di emergenza."
 		},
+		"community": {
+			"label": "Community",
+			"description": "Come appari nella community — pseudonimo di gufo, nome reale, karma."
+		},
 		"data": {
 			"label": "Dati e sincronizzazione",
 			"description": "Cloud sync, esportazione, backup e GDPR"
@@ -43,6 +47,14 @@
 		"reset_all_private": {
 			"label": "Riporta tutto a privato",
 			"keywords": "kill-switch, reset, privato, revocare"
+		},
+		"community_show_real_name": {
+			"label": "Nome reale nella community",
+			"keywords": "nome, gufo, pseudonimo, anonimo, identità"
+		},
+		"community_karma": {
+			"label": "Karma e tier",
+			"keywords": "karma, tier, bronzo, argento, oro, platino, gufo"
 		},
 		"cloud_sync": { "label": "Cloud Sync", "keywords": "sync, dispositivi" },
 		"data_export": { "label": "Esporta i dati", "keywords": "export, gdpr, json" },

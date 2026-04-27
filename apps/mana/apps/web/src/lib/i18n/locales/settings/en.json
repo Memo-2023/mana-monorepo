@@ -7,6 +7,10 @@
 			"label": "Privacy",
 			"description": "What is currently public or shared via link — with kill switch."
 		},
+		"community": {
+			"label": "Community",
+			"description": "How you appear in the community — owl pseudonym, real name, karma."
+		},
 		"data": { "label": "Data & Sync", "description": "Cloud sync, export, backup & GDPR" },
 		"tag_presets": { "label": "Tag presets", "description": "Tag sets for new spaces" }
 	},
@@ -40,6 +44,14 @@
 		"reset_all_private": {
 			"label": "Reset all to private",
 			"keywords": "kill-switch, kill switch, reset, private, revoke"
+		},
+		"community_show_real_name": {
+			"label": "Real name in community",
+			"keywords": "name, owl, pseudonym, anonymous, identity"
+		},
+		"community_karma": {
+			"label": "Karma & Tier",
+			"keywords": "karma, tier, bronze, silver, gold, platinum, owl"
 		},
 		"cloud_sync": { "label": "Cloud Sync", "keywords": "sync, devices" },
 		"data_export": { "label": "Export data", "keywords": "export, dsgvo, gdpr, json" },

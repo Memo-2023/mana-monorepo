@@ -8,9 +8,16 @@
  * `getSearchIndex()` so components stay reactive to locale changes.
  */
 import type { Component } from 'svelte';
-import { Gear, Robot, ShieldCheck, Cloud, Tag } from '@mana/shared-icons';
+import { Gear, Robot, ShieldCheck, Cloud, Tag, Megaphone } from '@mana/shared-icons';
 
-export type CategoryId = 'general' | 'ai' | 'security' | 'privacy' | 'data' | 'tag-presets';
+export type CategoryId =
+	| 'general'
+	| 'ai'
+	| 'security'
+	| 'privacy'
+	| 'community'
+	| 'data'
+	| 'tag-presets';
 
 export interface Category {
 	id: CategoryId;
@@ -39,6 +46,7 @@ const CATEGORY_DEFS: Record<CategoryId, CategoryDef> = {
 		i18nKey: 'security',
 	},
 	privacy: { icon: ShieldCheck, anchors: ['privacy'], i18nKey: 'privacy' },
+	community: { icon: Megaphone, anchors: ['community-identity'], i18nKey: 'community' },
 	data: {
 		icon: Cloud,
 		anchors: [
@@ -110,6 +118,9 @@ const SEARCH_ENTRY_DEFS: SearchEntryDef[] = [
 	// Privacy
 	{ i18nKey: 'privacy_overview', category: 'privacy', anchor: 'privacy' },
 	{ i18nKey: 'reset_all_private', category: 'privacy', anchor: 'privacy' },
+	// Community
+	{ i18nKey: 'community_show_real_name', category: 'community', anchor: 'community-identity' },
+	{ i18nKey: 'community_karma', category: 'community', anchor: 'community-identity' },
 	// Data
 	{ i18nKey: 'cloud_sync', category: 'data', anchor: 'cloud-sync' },
 	{ i18nKey: 'data_export', category: 'data', anchor: 'my-data' },

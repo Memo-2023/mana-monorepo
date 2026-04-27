@@ -7,6 +7,10 @@
 			"label": "Confidentialité",
 			"description": "Ce qui est public ou partagé par lien actuellement — avec interrupteur d'urgence."
 		},
+		"community": {
+			"label": "Communauté",
+			"description": "Comment tu apparais dans la communauté — pseudonyme de chouette, vrai nom, karma."
+		},
 		"data": {
 			"label": "Données et synchro",
 			"description": "Cloud sync, export, sauvegarde et RGPD"
@@ -46,6 +50,14 @@
 		"reset_all_private": {
 			"label": "Tout repasser en privé",
 			"keywords": "kill-switch, reset, privé, révoquer"
+		},
+		"community_show_real_name": {
+			"label": "Vrai nom dans la communauté",
+			"keywords": "nom, chouette, pseudonyme, anonyme, identité"
+		},
+		"community_karma": {
+			"label": "Karma & niveau",
+			"keywords": "karma, niveau, bronze, argent, or, platine, chouette"
 		},
 		"cloud_sync": { "label": "Cloud Sync", "keywords": "sync, appareils" },
 		"data_export": { "label": "Exporter les données", "keywords": "export, rgpd, gdpr, json" },

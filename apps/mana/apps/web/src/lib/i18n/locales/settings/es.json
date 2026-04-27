@@ -7,6 +7,10 @@
 			"label": "Privacidad",
 			"description": "Qué es público o compartido por enlace ahora mismo — con interruptor de emergencia."
 		},
+		"community": {
+			"label": "Comunidad",
+			"description": "Cómo apareces en la comunidad — pseudónimo de búho, nombre real, karma."
+		},
 		"data": {
 			"label": "Datos y sincronización",
 			"description": "Cloud sync, exportación, copia de seguridad y RGPD"
@@ -46,6 +50,14 @@
 		"reset_all_private": {
 			"label": "Restablecer todo a privado",
 			"keywords": "kill-switch, reset, privado, revocar"
+		},
+		"community_show_real_name": {
+			"label": "Nombre real en la comunidad",
+			"keywords": "nombre, búho, pseudónimo, anónimo, identidad"
+		},
+		"community_karma": {
+			"label": "Karma y nivel",
+			"keywords": "karma, nivel, bronce, plata, oro, platino, búho"
 		},
 		"cloud_sync": { "label": "Cloud Sync", "keywords": "sync, dispositivos" },
 		"data_export": { "label": "Exportar datos", "keywords": "export, rgpd, gdpr, json" },

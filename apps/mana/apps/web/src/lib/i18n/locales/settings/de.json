@@ -10,6 +10,10 @@
 			"label": "Privatsphäre",
 			"description": "Was ist gerade öffentlich oder per Link geteilt — mit Kill-Switch."
 		},
+		"community": {
+			"label": "Community",
+			"description": "Wie du in der Community auftauchst — Eulen-Pseudonym, Klarname, Karma."
+		},
 		"data": { "label": "Daten & Sync", "description": "Cloud-Sync, Export, Backup & DSGVO" },
 		"tag_presets": { "label": "Tag-Presets", "description": "Tag-Sets für neue Spaces" }
 	},
@@ -46,6 +50,14 @@
 		"reset_all_private": {
 			"label": "Alle auf privat zurücksetzen",
 			"keywords": "kill-switch, kill switch, reset, privat, widerrufen"
+		},
+		"community_show_real_name": {
+			"label": "Klarname in der Community",
+			"keywords": "name, eule, pseudonym, klarname, anonym"
+		},
+		"community_karma": {
+			"label": "Karma & Tier",
+			"keywords": "karma, tier, bronze, silver, gold, platin, eule"
 		},
 		"cloud_sync": { "label": "Cloud Sync", "keywords": "sync, geräte" },
 		"data_export": { "label": "Daten exportieren", "keywords": "export, dsgvo, gdpr, json" },
