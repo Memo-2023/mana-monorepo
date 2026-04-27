@@ -10,6 +10,7 @@
 	import DetailViewShell from '$lib/components/DetailViewShell.svelte';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalQuestion, QuestionStatus, QuestionPriority, ResearchDepth } from '../types';
+	import { _ } from 'svelte-i18n';
 
 	let { params, goBack }: ViewProps = $props();
 	let questionId = $derived(params.questionId as string);
@@ -36,7 +37,7 @@
 	async function saveField() {
 		detail.blur();
 		const diff: Record<string, unknown> = {
-			title: editTitle.trim() || detail.entity?.title || 'Ohne Titel',
+			title: editTitle.trim() || detail.entity?.title || $_('questions.detail.title_fallback'),
 			description: editDescription.trim() || undefined,
 			status: editStatus,
 			priority: editPriority,
@@ -60,45 +61,25 @@
 		});
 	}
 
-	const statusLabels: Record<QuestionStatus, string> = {
-		open: 'Offen',
-		researching: 'Recherche',
-		answered: 'Beantwortet',
-		archived: 'Archiviert',
-	};
-
-	const priorityLabels: Record<QuestionPriority, string> = {
-		low: 'Niedrig',
-		normal: 'Normal',
-		high: 'Hoch',
-		urgent: 'Dringend',
-	};
-
 	const priorityColors: Record<QuestionPriority, string> = {
 		low: '#9ca3af',
 		normal: '#3b82f6',
 		high: '#f59e0b',
 		urgent: '#ef4444',
 	};
-
-	const depthLabels: Record<ResearchDepth, string> = {
-		quick: 'Schnell',
-		standard: 'Standard',
-		deep: 'Tiefgehend',
-	};
 </script>
 
 <DetailViewShell
 	entity={detail.entity}
 	loading={detail.loading}
-	notFoundLabel="Frage nicht gefunden"
+	notFoundLabel={$_('questions.detail.not_found')}
 	confirmDelete={detail.confirmDelete}
 	onAskDelete={detail.askDelete}
 	onCancelDelete={detail.cancelDelete}
-	confirmDeleteLabel="Frage wirklich löschen?"
+	confirmDeleteLabel={$_('questions.detail.confirm_delete')}
 	onConfirmDelete={() =>
 		detail.deleteWithUndo({
-			label: 'Frage gelöscht',
+			label: $_('questions.detail.toast_deleted'),
 			delete: deleteQuestion,
 			goBack,
 		})}
@@ -109,21 +90,21 @@
 			bind:value={editTitle}
 			onfocus={detail.focus}
 			onblur={saveField}
-			placeholder="Titel..."
+			placeholder={$_('questions.detail.placeholder_title')}
 		/>
 
 		<div class="properties">
 			<div class="prop-row">
-				<span class="prop-label">Status</span>
+				<span class="prop-label">{$_('questions.detail.prop_status')}</span>
 				<select class="prop-select" bind:value={editStatus} onchange={handleSelectChange}>
 					{#each ['open', 'researching', 'answered', 'archived'] as const as s}
-						<option value={s}>{statusLabels[s]}</option>
+						<option value={s}>{$_('questions.status.' + s)}</option>
 					{/each}
 				</select>
 			</div>
 
 			<div class="prop-row">
-				<span class="prop-label">Priorität</span>
+				<span class="prop-label">{$_('questions.detail.prop_priority')}</span>
 				<select
 					class="prop-select"
 					bind:value={editPriority}
@@ -131,36 +112,36 @@
 					style="color: {priorityColors[editPriority]}"
 				>
 					{#each ['low', 'normal', 'high', 'urgent'] as const as p}
-						<option value={p}>{priorityLabels[p]}</option>
+						<option value={p}>{$_('questions.priority.' + p)}</option>
 					{/each}
 				</select>
 			</div>
 
 			<div class="prop-row">
-				<span class="prop-label">Recherchetiefe</span>
+				<span class="prop-label">{$_('questions.detail.prop_research_depth')}</span>
 				<select class="prop-select" bind:value={editResearchDepth} onchange={handleSelectChange}>
 					{#each ['quick', 'standard', 'deep'] as const as d}
-						<option value={d}>{depthLabels[d]}</option>
+						<option value={d}>{$_('questions.detail.depth_' + d)}</option>
 					{/each}
 				</select>
 			</div>
 		</div>
 
 		<div class="section">
-			<span class="section-label">Beschreibung</span>
+			<span class="section-label">{$_('questions.detail.section_description')}</span>
 			<textarea
 				class="description-input"
 				bind:value={editDescription}
 				onfocus={detail.focus}
 				onblur={saveField}
-				placeholder="Beschreibung hinzufügen..."
+				placeholder={$_('questions.detail.placeholder_description')}
 				rows={3}
 			></textarea>
 		</div>
 
 		{#if question.tags.length > 0}
 			<div class="section">
-				<span class="section-label">Tags</span>
+				<span class="section-label">{$_('questions.detail.section_tags')}</span>
 				<div class="tag-list">
 					{#each question.tags as tag}
 						<span class="tag">{tag}</span>
@@ -170,9 +151,17 @@
 		{/if}
 
 		<div class="meta">
-			<span>Erstellt: {formatDate(new Date(question.createdAt ?? ''))}</span>
+			<span
+				>{$_('questions.detail.meta_created', {
+					values: { date: formatDate(new Date(question.createdAt ?? '')) },
+				})}</span
+			>
 			{#if question.updatedAt}
-				<span>Bearbeitet: {formatDate(new Date(question.updatedAt))}</span>
+				<span
+					>{$_('questions.detail.meta_updated', {
+						values: { date: formatDate(new Date(question.updatedAt)) },
+					})}</span
+				>
 			{/if}
 		</div>
 	{/snippet}

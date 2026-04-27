@@ -23,6 +23,7 @@
 	"apps/mana/apps/web/src/lib/modules/period/ListView.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/places/views/DetailView.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/plants/ListView.svelte": 5,
+	"apps/mana/apps/web/src/lib/modules/questions/views/DetailView.svelte": 3,
 	"apps/mana/apps/web/src/lib/modules/quiz/EditView.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/quotes/components/QuoteCard.svelte": 4,
 	"apps/mana/apps/web/src/lib/modules/recipes/ListView.svelte": 1,

@@ -95,20 +95,25 @@
 	onkeydown={handleKey}
 	role="dialog"
 	aria-modal="true"
-	aria-label="Übung auswählen"
+	aria-label={$_('body.exercisePicker.dialog_label')}
 	tabindex="-1"
 >
 	<div class="sheet">
 		<header>
-			<h2>{$_('body.exercisePicker.title', { default: 'Übung wählen' })}</h2>
-			<button type="button" class="close" onclick={onClose} aria-label="Schließen">×</button>
+			<h2>{$_('body.exercisePicker.title')}</h2>
+			<button
+				type="button"
+				class="close"
+				onclick={onClose}
+				aria-label={$_('body.exercisePicker.close_aria')}>×</button
+			>
 		</header>
 
 		<!-- svelte-ignore a11y_autofocus -->
 		<input
 			class="search"
 			type="search"
-			placeholder={$_('body.exercisePicker.search', { default: 'Suchen…' })}
+			placeholder={$_('body.exercisePicker.search')}
 			bind:value={query}
 			autofocus
 		/>
@@ -120,7 +125,7 @@
 				class:active={activeFilter === 'all'}
 				onclick={() => (activeFilter = 'all')}
 			>
-				Alle
+				{$_('body.exercisePicker.filter_all')}
 			</button>
 			{#each MUSCLE_GROUPS as g (g)}
 				<button
@@ -137,7 +142,7 @@
 		<div class="results">
 			{#if filtered.length === 0}
 				<p class="empty">
-					{$_('body.exercisePicker.empty', { default: 'Nichts gefunden' })}
+					{$_('body.exercisePicker.empty')}
 				</p>
 			{:else}
 				<ul>
@@ -168,18 +173,25 @@
 		<footer>
 			{#if creating}
 				<form class="create-form" onsubmit={createInline}>
-					<input type="text" placeholder="Name" bind:value={newName} required />
+					<input
+						type="text"
+						placeholder={$_('body.exercisePicker.placeholder_name')}
+						bind:value={newName}
+						required
+					/>
 					<select bind:value={newMuscle}>
 						{#each MUSCLE_GROUPS as g (g)}
-							<option value={g}>{$_(`body.muscle.${g}`, { default: g })}</option>
+							<option value={g}>{$_(`body.muscle.${g}`)}</option>
 						{/each}
 					</select>
-					<button type="submit" class="primary">Anlegen</button>
-					<button type="button" onclick={() => (creating = false)}>Abbrechen</button>
+					<button type="submit" class="primary">{$_('body.exercisePicker.action_create')}</button>
+					<button type="button" onclick={() => (creating = false)}
+						>{$_('body.exercisePicker.action_cancel')}</button
+					>
 				</form>
 			{:else}
 				<button type="button" class="add" onclick={() => (creating = true)}>
-					+ {$_('body.exercisePicker.create', { default: 'Neue Übung anlegen' })}
+					+ {$_('body.exercisePicker.create')}
 				</button>
 			{/if}
 		</footer>

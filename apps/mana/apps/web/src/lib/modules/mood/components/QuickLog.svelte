@@ -12,6 +12,7 @@
 		type CoreEmotion,
 		type ActivityContext,
 	} from '../types';
+	import { _ } from 'svelte-i18n';
 
 	interface Props {
 		onComplete: () => void;
@@ -27,9 +28,15 @@
 	let selectedTags = $state<string[]>([]);
 	let showDetails = $state(false);
 
-	let positiveEmotions = $derived(CORE_EMOTIONS.filter((e) => EMOTION_META[e].valence === 'positive'));
-	let neutralEmotions = $derived(CORE_EMOTIONS.filter((e) => EMOTION_META[e].valence === 'neutral'));
-	let negativeEmotions = $derived(CORE_EMOTIONS.filter((e) => EMOTION_META[e].valence === 'negative'));
+	let positiveEmotions = $derived(
+		CORE_EMOTIONS.filter((e) => EMOTION_META[e].valence === 'positive')
+	);
+	let neutralEmotions = $derived(
+		CORE_EMOTIONS.filter((e) => EMOTION_META[e].valence === 'neutral')
+	);
+	let negativeEmotions = $derived(
+		CORE_EMOTIONS.filter((e) => EMOTION_META[e].valence === 'negative')
+	);
 
 	function toggleTag(tag: string) {
 		if (selectedTags.includes(tag)) {
@@ -69,7 +76,7 @@
 
 <div class="quick-log">
 	<div class="ql-header">
-		<span class="ql-title">Wie geht es dir?</span>
+		<span class="ql-title">{$_('mood.quick_log.title')}</span>
 		<button class="ql-close" onclick={onCancel}>×</button>
 	</div>
 
@@ -85,14 +92,14 @@
 			style:accent-color={levelColor(level)}
 		/>
 		<div class="level-labels">
-			<span>Schlecht</span>
-			<span>Super</span>
+			<span>{$_('mood.quick_log.level_low')}</span>
+			<span>{$_('mood.quick_log.level_high')}</span>
 		</div>
 	</div>
 
 	<!-- Emotion Picker -->
 	<div class="emotion-section">
-		<span class="section-label">Was fühlst du?</span>
+		<span class="section-label">{$_('mood.quick_log.section_emotion')}</span>
 		<div class="emotion-grid">
 			{#each [...positiveEmotions, ...neutralEmotions, ...negativeEmotions] as e}
 				<button
@@ -110,12 +117,12 @@
 	<!-- Details Toggle -->
 	{#if !showDetails}
 		<button class="details-toggle" onclick={() => (showDetails = true)}>
-			+ Details hinzufügen
+			{$_('mood.quick_log.action_show_details')}
 		</button>
 	{:else}
 		<!-- Activity -->
 		<div class="activity-section">
-			<span class="section-label">Was machst du gerade?</span>
+			<span class="section-label">{$_('mood.quick_log.section_activity')}</span>
 			<div class="activity-grid">
 				{#each Object.entries(ACTIVITY_LABELS) as [key, meta]}
 					<button
@@ -132,14 +139,14 @@
 
 		<!-- Tags -->
 		<div class="tags-section">
-			<span class="section-label">Tags</span>
+			<span class="section-label">{$_('mood.quick_log.section_tags')}</span>
 			<div class="tags-row">
 				{#each MOOD_TAG_PRESETS as tag}
 					<button
 						class="tag-chip"
 						class:active={selectedTags.includes(tag)}
-						onclick={() => toggleTag(tag)}
-					>{tag}</button>
+						onclick={() => toggleTag(tag)}>{tag}</button
+					>
 				{/each}
 			</div>
 		</div>
@@ -147,7 +154,7 @@
 		<!-- Notes -->
 		<textarea
 			class="notes-input"
-			placeholder="Notizen (optional)..."
+			placeholder={$_('mood.quick_log.placeholder_notes')}
 			bind:value={notes}
 			rows="2"
 		></textarea>
@@ -155,7 +162,7 @@
 
 	<!-- Save -->
 	<button class="save-btn" onclick={handleSave} disabled={!emotion}>
-		Speichern
+		{$_('mood.quick_log.action_save')}
 	</button>
 </div>
 
@@ -256,11 +263,15 @@
 		background: hsl(var(--color-background));
 		border: 2px solid transparent;
 		cursor: pointer;
-		transition: transform 0.1s, border-color 0.15s;
+		transition:
+			transform 0.1s,
+			border-color 0.15s;
 		color: hsl(var(--color-foreground));
 	}
 
-	.emotion-btn:hover { transform: scale(1.05); }
+	.emotion-btn:hover {
+		transform: scale(1.05);
+	}
 
 	.emotion-btn.selected {
 		border-color: #f59e0b;
@@ -271,8 +282,15 @@
 		background: hsl(40 30% 15%);
 	}
 
-	.emo-emoji { font-size: 1rem; line-height: 1; }
-	.emo-label { font-size: 0.5rem; text-align: center; line-height: 1.1; }
+	.emo-emoji {
+		font-size: 1rem;
+		line-height: 1;
+	}
+	.emo-label {
+		font-size: 0.5rem;
+		text-align: center;
+		line-height: 1.1;
+	}
 
 	/* ── Activity ─────────────────────────────────── */
 	.activity-section {
@@ -307,8 +325,12 @@
 		color: hsl(var(--color-foreground));
 	}
 
-	.act-emoji { font-size: 0.875rem; }
-	.act-label { line-height: 1.1; }
+	.act-emoji {
+		font-size: 0.875rem;
+	}
+	.act-label {
+		line-height: 1.1;
+	}
 
 	/* ── Tags & Notes ─────────────────────────────── */
 	.tags-section {
