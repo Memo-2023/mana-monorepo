@@ -8,8 +8,9 @@
 	import type { ViewProps } from '$lib/app-registry';
 	import { useGuide, useSections, useSteps, useLatestRun, getStepProgress } from '../queries';
 	import { guidesStore } from '../stores/guides.svelte';
-	import { GUIDE_CATEGORIES, DIFFICULTY_LABELS } from '../types';
-	import type { Step, Section } from '../types';
+	import { GUIDE_CATEGORIES } from '../types';
+	import type { Step } from '../types';
+	import { _ } from 'svelte-i18n';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 	let guideId = $derived((params.guideId as string) ?? '');
@@ -84,7 +85,8 @@
 
 	async function handleDelete() {
 		if (!guide) return;
-		if (!confirm(`Guide "${guide.title}" wirklich löschen?`)) return;
+		if (!confirm($_('guides.detail.confirm_delete_guide', { values: { title: guide.title } })))
+			return;
 		await guidesStore.deleteGuide(guide.id);
 		goBack();
 	}
@@ -115,26 +117,40 @@
 </script>
 
 {#if !guide}
-	<div class="loading">Lade Guide...</div>
+	<div class="loading">{$_('guides.detail.loading')}</div>
 {:else}
 	<div class="detail">
 		<!-- Header -->
 		<header class="detail-header">
 			<div class="header-actions">
-				<button class="action-btn" onclick={startEdit}>Bearbeiten</button>
-				<button class="action-btn danger" onclick={handleDelete}>Löschen</button>
+				<button class="action-btn" onclick={startEdit}>{$_('guides.detail.action_edit')}</button>
+				<button class="action-btn danger" onclick={handleDelete}>
+					{$_('guides.detail.action_delete')}
+				</button>
 			</div>
 		</header>
 
 		<!-- Editing form -->
 		{#if editing}
 			<div class="edit-form">
-				<input class="title-input" bind:value={titleDraft} placeholder="Guide-Titel" />
-				<textarea class="desc-input" bind:value={descDraft} rows="3" placeholder="Beschreibung"
+				<input
+					class="title-input"
+					bind:value={titleDraft}
+					placeholder={$_('guides.detail.placeholder_title')}
+				/>
+				<textarea
+					class="desc-input"
+					bind:value={descDraft}
+					rows="3"
+					placeholder={$_('guides.detail.placeholder_description')}
 				></textarea>
 				<div class="form-actions">
-					<button class="action-btn" onclick={() => (editing = false)}>Abbrechen</button>
-					<button class="action-btn primary" onclick={saveEdit}>Speichern</button>
+					<button class="action-btn" onclick={() => (editing = false)}>
+						{$_('guides.detail.action_cancel')}
+					</button>
+					<button class="action-btn primary" onclick={saveEdit}>
+						{$_('guides.detail.action_save')}
+					</button>
 				</div>
 			</div>
 		{:else}
@@ -142,9 +158,11 @@
 			{@const catInfo = GUIDE_CATEGORIES[guide.category]}
 			<div class="meta">
 				<div class="meta-badges">
-					<span class="badge {catInfo.color}">{catInfo.label}</span>
-					<span class="badge bg-muted/10">{DIFFICULTY_LABELS[guide.difficulty]}</span>
-					<span class="badge bg-muted/10">{guide.estimatedMinutes} min</span>
+					<span class="badge {catInfo.color}">{$_('guides.categories.' + guide.category)}</span>
+					<span class="badge bg-muted/10">{$_('guides.difficulties.' + guide.difficulty)}</span>
+					<span class="badge bg-muted/10">
+						{$_('guides.detail.minutes', { values: { n: guide.estimatedMinutes } })}
+					</span>
 				</div>
 				<h1 class="title">{guide.title}</h1>
 				<p class="description">{guide.description}</p>
@@ -157,9 +175,11 @@
 				<div class="progress-header">
 					<span class="progress-label">
 						{#if isComplete}
-							Abgeschlossen
+							{$_('guides.detail.completed')}
 						{:else}
-							{run.completedStepIds.length} / {steps.length} Schritte
+							{$_('guides.detail.steps_progress', {
+								values: { done: run.completedStepIds.length, total: steps.length },
+							})}
 						{/if}
 					</span>
 					<span class="progress-pct">{progress}%</span>
@@ -171,11 +191,15 @@
 					></div>
 				</div>
 				{#if isComplete}
-					<button class="action-btn small" onclick={resetProgress}>Fortschritt zurücksetzen</button>
+					<button class="action-btn small" onclick={resetProgress}>
+						{$_('guides.detail.reset_progress')}
+					</button>
 				{/if}
 			</div>
 		{:else if steps.length > 0}
-			<button class="action-btn primary" onclick={startGuide}>Guide starten</button>
+			<button class="action-btn primary" onclick={startGuide}>
+				{$_('guides.detail.start_guide')}
+			</button>
 		{/if}
 
 		<!-- Sections + Steps -->
@@ -218,7 +242,7 @@
 							<input
 								type="text"
 								bind:value={newStepTitle}
-								placeholder="Neuer Schritt..."
+								placeholder={$_('guides.detail.placeholder_new_step')}
 								class="inline-input"
 								onkeydown={(e) => e.key === 'Enter' && addStep(section.id)}
 							/>
@@ -234,7 +258,7 @@
 								newStepTitle = '';
 							}}
 						>
-							+ Schritt
+							{$_('guides.detail.add_step')}
 						</button>
 					{/if}
 				</div>
@@ -273,7 +297,7 @@
 					<input
 						type="text"
 						bind:value={newSectionTitle}
-						placeholder="Neuer Abschnitt..."
+						placeholder={$_('guides.detail.placeholder_new_section')}
 						class="inline-input"
 						onkeydown={(e) => e.key === 'Enter' && addSection()}
 					/>
@@ -289,7 +313,7 @@
 							newSectionTitle = '';
 						}}
 					>
-						+ Abschnitt
+						{$_('guides.detail.add_section')}
 					</button>
 					<button
 						class="add-link"
@@ -298,7 +322,7 @@
 							newStepTitle = '';
 						}}
 					>
-						+ Schritt
+						{$_('guides.detail.add_step')}
 					</button>
 				</div>
 			{/if}
@@ -308,7 +332,7 @@
 					<input
 						type="text"
 						bind:value={newStepTitle}
-						placeholder="Neuer Schritt..."
+						placeholder={$_('guides.detail.placeholder_new_step')}
 						class="inline-input"
 						onkeydown={(e) => e.key === 'Enter' && addStep(null)}
 					/>

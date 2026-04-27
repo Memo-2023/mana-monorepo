@@ -15,12 +15,12 @@
 	import { comicStoriesTable } from '../collections';
 	import { comicStoriesStore } from '../stores/stories.svelte';
 	import { useStory } from '../queries';
-	import { STYLE_LABELS } from '../constants';
 	import PanelStrip from '../components/PanelStrip.svelte';
 	import PanelEditor from '../components/PanelEditor.svelte';
 	import BatchPanelEditor from '../components/BatchPanelEditor.svelte';
 	import StoryboardSuggester from '../components/StoryboardSuggester.svelte';
 	import { encryptRecord } from '$lib/data/crypto';
+	import { _ } from 'svelte-i18n';
 	import type { ComicPanelMeta, LocalComicStory } from '../types';
 
 	interface Props {
@@ -48,7 +48,8 @@
 
 	async function handleDelete() {
 		if (!story) return;
-		if (!confirm(`Story "${story.title}" wirklich löschen?`)) return;
+		if (!confirm($_('comic.detail.confirm_delete_story', { values: { title: story.title } })))
+			return;
 		await comicStoriesStore.deleteStory(story.id);
 		await goto('/comic');
 	}
@@ -65,12 +66,7 @@
 	 */
 	async function handleRemovePanel(panelId: string) {
 		if (!story) return;
-		if (
-			!confirm(
-				'Panel aus der Story entfernen? Das Bild bleibt in deiner Picture-Galerie und kann dort gelöscht werden.'
-			)
-		)
-			return;
+		if (!confirm($_('comic.detail.confirm_remove_panel'))) return;
 
 		const existing = await comicStoriesTable.get(story.id);
 		if (!existing) return;
@@ -91,20 +87,20 @@
 		<a
 			href="/comic"
 			class="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted"
-			aria-label="Zurück zu Comics"
+			aria-label={$_('comic.detail.back_aria')}
 		>
 			<ArrowLeft size={16} />
 		</a>
-		<span class="text-muted-foreground">Comics</span>
+		<span class="text-muted-foreground">{$_('comic.detail.breadcrumb')}</span>
 	</nav>
 
 	{#if !story}
 		{#if story$.loading}
-			<p class="text-sm text-muted-foreground">Lädt…</p>
+			<p class="text-sm text-muted-foreground">{$_('comic.detail.loading')}</p>
 		{:else}
 			<div class="rounded-2xl border border-dashed border-border bg-background/50 p-8 text-center">
-				<p class="text-sm font-medium text-foreground">Story nicht gefunden.</p>
-				<p class="mt-1 text-sm text-muted-foreground">Gelöscht oder in einem anderen Space.</p>
+				<p class="text-sm font-medium text-foreground">{$_('comic.detail.not_found')}</p>
+				<p class="mt-1 text-sm text-muted-foreground">{$_('comic.detail.not_found_hint')}</p>
 			</div>
 		{/if}
 	{:else}
@@ -115,18 +111,23 @@
 					<h1 class="truncate text-lg font-semibold text-foreground">{story.title}</h1>
 					<div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
 						<span class="rounded-full bg-primary/10 px-2 py-0.5 font-medium text-primary">
-							{STYLE_LABELS[story.style].de}
+							{$_('comic.styles.' + story.style)}
 						</span>
 						<span>
-							{story.panelImageIds.length}
-							{story.panelImageIds.length === 1 ? 'Panel' : 'Panels'}
+							{story.panelImageIds.length === 1
+								? $_('comic.detail.panel_one', { values: { n: story.panelImageIds.length } })
+								: $_('comic.detail.panel_other', { values: { n: story.panelImageIds.length } })}
 						</span>
 						{#if story.characterMediaIds.length > 0}
 							<span class="text-border">·</span>
 							<span>
-								{story.characterMediaIds.length} Referenz{story.characterMediaIds.length === 1
-									? ''
-									: 'en'}
+								{story.characterMediaIds.length === 1
+									? $_('comic.detail.reference_one', {
+											values: { n: story.characterMediaIds.length },
+										})
+									: $_('comic.detail.reference_other', {
+											values: { n: story.characterMediaIds.length },
+										})}
 							</span>
 						{/if}
 					</div>
@@ -140,8 +141,12 @@
 					<button
 						type="button"
 						onclick={handleToggleFavorite}
-						aria-label={story.isFavorite ? 'Favorit entfernen' : 'Als Favorit markieren'}
-						title={story.isFavorite ? 'Favorit entfernen' : 'Als Favorit markieren'}
+						aria-label={story.isFavorite
+							? $_('comic.detail.favorite_remove')
+							: $_('comic.detail.favorite_set')}
+						title={story.isFavorite
+							? $_('comic.detail.favorite_remove')
+							: $_('comic.detail.favorite_set')}
 						class="flex h-8 w-8 items-center justify-center rounded-md transition-colors {story.isFavorite
 							? 'text-rose-500 hover:bg-rose-500/10'
 							: 'text-muted-foreground hover:bg-muted hover:text-foreground'}"
@@ -157,7 +162,7 @@
 
 			{#if story.storyContext}
 				<div class="rounded-md bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
-					<strong class="text-foreground">Kontext:</strong>
+					<strong class="text-foreground">{$_('comic.detail.context_label')}</strong>
 					{story.storyContext}
 				</div>
 			{/if}
@@ -166,7 +171,9 @@
 		<!-- Panels -->
 		<div class="space-y-3">
 			<div class="flex items-center justify-between">
-				<h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Panels</h2>
+				<h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+					{$_('comic.detail.section_panels')}
+				</h2>
 				{#if editorMode === 'off' && !story.isArchived}
 					<div class="flex items-center gap-1">
 						<button
@@ -175,25 +182,25 @@
 							class="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
 						>
 							<Plus size={12} />
-							Panel
+							{$_('comic.detail.add_panel')}
 						</button>
 						<button
 							type="button"
 							onclick={() => (editorMode = 'batch')}
 							class="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
-							title="2–4 Panels in einem Rutsch generieren"
+							title={$_('comic.detail.add_batch_title')}
 						>
 							<Plus size={12} />
-							Batch
+							{$_('comic.detail.add_batch')}
 						</button>
 						<button
 							type="button"
 							onclick={() => (editorMode = 'ai')}
 							class="inline-flex items-center gap-1.5 rounded-md border border-primary/40 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10"
-							title="KI schlägt Panels aus einem Tagebuch-Eintrag, Notiz oder Review vor"
+							title={$_('comic.detail.add_ai_title')}
 						>
 							<Sparkle size={12} weight="fill" />
-							Mit KI
+							{$_('comic.detail.add_ai')}
 						</button>
 					</div>
 				{/if}
@@ -230,7 +237,7 @@
 				class="flex flex-1 items-center justify-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground transition-colors hover:bg-muted"
 			>
 				<Archive size={14} />
-				{story.isArchived ? 'Wieder aktiv' : 'Archivieren'}
+				{story.isArchived ? $_('comic.detail.unarchive') : $_('comic.detail.archive')}
 			</button>
 			<button
 				type="button"
@@ -238,7 +245,7 @@
 				class="flex flex-1 items-center justify-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-error transition-colors hover:bg-error/10"
 			>
 				<Trash size={14} />
-				Löschen
+				{$_('comic.detail.delete')}
 			</button>
 		</div>
 
@@ -246,8 +253,8 @@
 			<p
 				class="rounded-md border border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground"
 			>
-				<Sparkle size={12} class="inline" /> Archivierte Story — keine Panel-Generierung möglich, bis
-				wieder aktiviert.
+				<Sparkle size={12} class="inline" />
+				{$_('comic.detail.archived_hint')}
 			</p>
 		{/if}
 	{/if}
