@@ -6,6 +6,8 @@
 	import { toast } from '$lib/stores/toast.svelte';
 	import { giftsService, type GiftCodeInfo } from '$lib/api/gifts';
 	import { RoutePage } from '$lib/components/shell';
+	import { _, locale } from 'svelte-i18n';
+	import { get } from 'svelte/store';
 
 	let code = $derived($page.params.code ?? '');
 	let giftInfo = $state<GiftCodeInfo | null>(null);
@@ -29,7 +31,7 @@
 		try {
 			giftInfo = await giftsService.getGiftInfo(code);
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Geschenk-Code nicht gefunden';
+			error = e instanceof Error ? e.message : $_('gifts.redeem.err_not_found');
 			console.error('Failed to load gift info:', e);
 		} finally {
 			loading = false;
@@ -49,13 +51,13 @@
 				success = true;
 				receivedCredits = result.credits || 0;
 				newBalance = result.newBalance || 0;
-				toast.success(`${receivedCredits} Credits erhalten!`);
+				toast.success($_('gifts.redeem.toast_received', { values: { credits: receivedCredits } }));
 			} else {
-				error = result.error || 'Einlösen fehlgeschlagen';
+				error = result.error || $_('gifts.redeem.err_redeem_failed');
 				toast.error(error);
 			}
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Einlösen fehlgeschlagen';
+			error = e instanceof Error ? e.message : $_('gifts.redeem.err_redeem_failed');
 			toast.error(error);
 			console.error('Failed to redeem gift:', e);
 		} finally {
@@ -64,7 +66,7 @@
 	}
 
 	function formatDate(dateStr: string): string {
-		return new Date(dateStr).toLocaleDateString('de-DE', {
+		return new Date(dateStr).toLocaleDateString(get(locale) ?? 'de', {
 			day: '2-digit',
 			month: '2-digit',
 			year: 'numeric',
@@ -74,15 +76,15 @@
 	function getStatusLabel(status: string): string {
 		switch (status) {
 			case 'active':
-				return 'Aktiv';
+				return $_('gifts.redeem.status_active');
 			case 'depleted':
-				return 'Aufgebraucht';
+				return $_('gifts.redeem.status_depleted');
 			case 'expired':
-				return 'Abgelaufen';
+				return $_('gifts.redeem.status_expired');
 			case 'cancelled':
-				return 'Storniert';
+				return $_('gifts.redeem.status_cancelled');
 			case 'refunded':
-				return 'Erstattet';
+				return $_('gifts.redeem.status_refunded');
 			default:
 				return status;
 		}
@@ -91,18 +93,22 @@
 	function getTypeLabel(type: string): string {
 		switch (type) {
 			case 'simple':
-				return 'Geschenk';
+				return $_('gifts.redeem.type_simple');
 			case 'personalized':
-				return 'Persönliches Geschenk';
+				return $_('gifts.redeem.type_personalized');
 			default:
 				return type;
 		}
 	}
 </script>
 
-<RoutePage appId="gifts" backHref="/gifts" title="Gutschein">
+<RoutePage appId="gifts" backHref="/gifts" title={$_('gifts.redeem.page_back_title')}>
 	<div>
-		<PageHeader title="Geschenk einlösen" description="Löse deinen Geschenk-Code ein" size="lg" />
+		<PageHeader
+			title={$_('gifts.redeem.page_title')}
+			description={$_('gifts.redeem.page_description')}
+			size="lg"
+		/>
 
 		{#if loading}
 			<div class="flex items-center justify-center py-12">
@@ -119,24 +125,26 @@
 					>
 						<span class="text-5xl">🎉</span>
 					</div>
-					<h2 class="text-2xl font-bold text-foreground">Geschenk eingelöst!</h2>
+					<h2 class="text-2xl font-bold text-foreground">{$_('gifts.redeem.success_heading')}</h2>
 					<p class="mt-2 text-5xl font-bold text-primary">+{receivedCredits}</p>
-					<p class="text-lg text-muted-foreground">Credits erhalten</p>
+					<p class="text-lg text-muted-foreground">{$_('gifts.redeem.success_credits_label')}</p>
 					<p class="mt-4 text-muted-foreground">
-						Dein neuer Kontostand: <span class="font-semibold">{newBalance} Credits</span>
+						{@html $_('gifts.redeem.success_balance_html', {
+							values: { balance: newBalance },
+						})}
 					</p>
 					<div class="mt-8 flex justify-center gap-4">
 						<a
 							href="/?app=credits"
 							class="rounded-lg bg-primary px-6 py-2 font-medium text-primary-foreground hover:bg-primary/90"
 						>
-							Zu meinen Credits
+							{$_('gifts.redeem.success_link_credits')}
 						</a>
 						<a
 							href="/gifts"
 							class="rounded-lg bg-surface px-6 py-2 font-medium text-foreground hover:bg-surface-hover"
 						>
-							Geschenke ansehen
+							{$_('gifts.redeem.success_link_overview')}
 						</a>
 					</div>
 				</div>
@@ -155,7 +163,7 @@
 						href="/gifts/redeem"
 						class="inline-block rounded-lg bg-primary px-6 py-2 text-primary-foreground hover:bg-primary/90"
 					>
-						Anderen Code eingeben
+						{$_('gifts.redeem.action_other_code')}
 					</a>
 				</div>
 			</Card>
@@ -171,23 +179,27 @@
 						</div>
 						<p class="font-mono text-lg font-bold text-primary">{giftInfo.code}</p>
 						{#if giftInfo.creatorName}
-							<p class="mt-1 text-sm text-muted-foreground">Von {giftInfo.creatorName}</p>
+							<p class="mt-1 text-sm text-muted-foreground">
+								{$_('gifts.redeem.label_from', {
+									values: { name: giftInfo.creatorName },
+								})}
+							</p>
 						{/if}
 					</div>
 
 					<div class="mt-6 text-center">
-						<p class="text-sm text-muted-foreground">Du erhältst</p>
+						<p class="text-sm text-muted-foreground">{$_('gifts.redeem.label_you_get')}</p>
 						<p class="text-4xl font-bold text-primary">{giftInfo.totalCredits}</p>
-						<p class="text-muted-foreground">Credits</p>
+						<p class="text-muted-foreground">{$_('gifts.redeem.label_credits')}</p>
 					</div>
 
 					<div class="mt-6 space-y-3 rounded-lg bg-surface p-4">
 						<div class="flex justify-between text-sm">
-							<span class="text-muted-foreground">Art</span>
+							<span class="text-muted-foreground">{$_('gifts.redeem.label_type')}</span>
 							<span class="font-medium">{getTypeLabel(giftInfo.type)}</span>
 						</div>
 						<div class="flex justify-between text-sm">
-							<span class="text-muted-foreground">Status</span>
+							<span class="text-muted-foreground">{$_('gifts.redeem.label_status')}</span>
 							<span
 								class="font-medium {giftInfo.status === 'active'
 									? 'text-green-600 dark:text-green-400'
@@ -198,7 +210,7 @@
 						</div>
 						{#if giftInfo.expiresAt}
 							<div class="flex justify-between text-sm">
-								<span class="text-muted-foreground">Gültig bis</span>
+								<span class="text-muted-foreground">{$_('gifts.redeem.label_valid_until')}</span>
 								<span class="font-medium">{formatDate(giftInfo.expiresAt)}</span>
 							</div>
 						{/if}
@@ -206,7 +218,9 @@
 
 					{#if giftInfo.message}
 						<div class="mt-6 rounded-lg border border-border p-4">
-							<p class="text-sm text-muted-foreground mb-1">Nachricht:</p>
+							<p class="text-sm text-muted-foreground mb-1">
+								{$_('gifts.redeem.label_message_prefix')}
+							</p>
 							<p class="italic text-foreground">"{giftInfo.message}"</p>
 						</div>
 					{/if}
@@ -214,17 +228,17 @@
 
 				<!-- Redemption card -->
 				<Card>
-					<h3 class="text-lg font-semibold mb-4">Einlösen</h3>
+					<h3 class="text-lg font-semibold mb-4">{$_('gifts.redeem.section_redeem')}</h3>
 
 					{#if giftInfo.status !== 'active'}
 						<div class="rounded-lg bg-amber-50 dark:bg-amber-900/20 p-4 text-center">
 							<p class="font-medium text-amber-800 dark:text-amber-200">
 								{#if giftInfo.status === 'depleted'}
-									Dieses Geschenk wurde bereits eingelöst
+									{$_('gifts.redeem.warn_depleted')}
 								{:else if giftInfo.status === 'expired'}
-									Dieses Geschenk ist abgelaufen
+									{$_('gifts.redeem.warn_expired')}
 								{:else}
-									Dieses Geschenk kann nicht eingelöst werden
+									{$_('gifts.redeem.warn_other')}
 								{/if}
 							</p>
 						</div>
@@ -234,8 +248,7 @@
 								<div class="flex items-center gap-2">
 									<span class="text-xl">👤</span>
 									<p class="text-sm text-blue-800 dark:text-blue-200">
-										Dieses Geschenk ist für eine bestimmte Person. Nur der vorgesehene Empfänger
-										kann es einlösen.
+										{$_('gifts.redeem.info_personalized')}
 									</p>
 								</div>
 							</div>
@@ -268,16 +281,16 @@
 										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
 									></path>
 								</svg>
-								Wird eingelöst...
+								{$_('gifts.redeem.action_redeeming')}
 							{:else}
-								🎁 Geschenk einlösen
+								{$_('gifts.redeem.action_redeem')}
 							{/if}
 						</button>
 					{/if}
 
 					<div class="mt-6 text-center">
 						<a href="/gifts/redeem" class="text-sm text-primary hover:underline">
-							Anderen Code eingeben
+							{$_('gifts.redeem.action_other_code')}
 						</a>
 					</div>
 				</Card>
