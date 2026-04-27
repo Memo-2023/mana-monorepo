@@ -15,18 +15,16 @@
 	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
 	import type { ViewProps } from '$lib/app-registry';
 	import type { LocalMemo, ProcessingStatus } from '../types';
+	import { _ } from 'svelte-i18n';
 
-	// Human-readable labels for the title-source badge below the title
-	// input. We use these specific strings (not @mana/shared-llm's
-	// generic tierLabel) so we can surface the actual model family
-	// — both browser and mana-server now run Gemma 4 variants, so the
-	// label stays coherent across tiers.
-	const TITLE_SOURCE_LABELS: Record<LlmTier, string> = {
-		none: 'Lokal (regelbasiert)',
-		browser: 'Auf deinem Gerät (Gemma 4 E2B)',
-		'mana-server': 'Mana-Server (Gemma 4 E4B)',
-		byok: 'Dein API-Key',
-		cloud: 'Google Gemini',
+	// Map LlmTier → i18n key (mana-server keyed as 'mana_server' since dots are
+	// reserved path separators). Strings live in memoro.detail_view.title_sources.
+	const TITLE_SOURCE_KEYS: Record<LlmTier, string> = {
+		none: 'memoro.detail_view.title_sources.none',
+		browser: 'memoro.detail_view.title_sources.browser',
+		'mana-server': 'memoro.detail_view.title_sources.mana_server',
+		byok: 'memoro.detail_view.title_sources.byok',
+		cloud: 'memoro.detail_view.title_sources.cloud',
 	};
 
 	function isLlmTier(value: unknown): value is LlmTier {
@@ -84,11 +82,11 @@
 		return `${m}:${String(s).padStart(2, '0')}`;
 	}
 
-	const statusLabels: Record<ProcessingStatus, string> = {
-		pending: 'Ausstehend',
-		processing: 'Wird verarbeitet',
-		completed: 'Fertig',
-		failed: 'Fehlgeschlagen',
+	const STATUS_KEYS: Record<ProcessingStatus, string> = {
+		pending: 'memoro.detail_view.statuses.pending',
+		processing: 'memoro.detail_view.statuses.processing',
+		completed: 'memoro.detail_view.statuses.completed',
+		failed: 'memoro.detail_view.statuses.failed',
 	};
 
 	const statusColors: Record<ProcessingStatus, string> = {
@@ -130,21 +128,21 @@
 		if (detail.focused) return null;
 		const metadata = (memo.metadata as Record<string, unknown> | null) ?? {};
 		const source = metadata.titleSource;
-		return isLlmTier(source) ? TITLE_SOURCE_LABELS[source] : null;
+		return isLlmTier(source) ? $_(TITLE_SOURCE_KEYS[source]) : null;
 	});
 </script>
 
 <DetailViewShell
 	entity={detail.entity}
 	loading={detail.loading}
-	notFoundLabel="Memo nicht gefunden"
+	notFoundLabel={$_('memoro.detail_view.not_found')}
 	confirmDelete={detail.confirmDelete}
 	onAskDelete={detail.askDelete}
 	onCancelDelete={detail.cancelDelete}
-	confirmDeleteLabel="Memo wirklich löschen?"
+	confirmDeleteLabel={$_('memoro.detail_view.confirm_delete')}
 	onConfirmDelete={() =>
 		detail.deleteWithUndo({
-			label: 'Memo gelöscht',
+			label: $_('memoro.detail_view.toast_deleted'),
 			delete: () => memosStore.delete(memoId),
 			goBack,
 		})}
@@ -156,7 +154,9 @@
 				bind:value={editTitle}
 				onfocus={detail.focus}
 				onblur={saveField}
-				placeholder={titleIsGenerating && !editTitle ? 'Titel wird generiert…' : 'Titel…'}
+				placeholder={titleIsGenerating && !editTitle
+					? $_('memoro.detail_view.placeholder_title_generating')
+					: $_('memoro.detail_view.placeholder_title_idle')}
 			/>
 			<button class="pin-btn" class:pinned={memo.isPinned} onclick={togglePin}>
 				<PushPin size={16} />
@@ -169,30 +169,30 @@
 
 		<div class="properties">
 			<div class="prop-row">
-				<span class="prop-label">Status</span>
+				<span class="prop-label">{$_('memoro.detail_view.label_status')}</span>
 				<span class="prop-value" style="color: {statusColors[memo.processingStatus]}">
-					{statusLabels[memo.processingStatus]}
+					{$_(STATUS_KEYS[memo.processingStatus])}
 				</span>
 			</div>
 
 			<div class="prop-row">
-				<span class="prop-label">Dauer</span>
+				<span class="prop-label">{$_('memoro.detail_view.label_duration')}</span>
 				<span class="prop-value">{formatDuration(memo.audioDurationMs)}</span>
 			</div>
 
 			<div class="prop-row">
-				<span class="prop-label">Sprache</span>
+				<span class="prop-label">{$_('memoro.detail_view.label_language')}</span>
 				<input
 					class="prop-input"
 					bind:value={editLanguage}
 					onfocus={detail.focus}
 					onblur={saveField}
-					placeholder="z.B. de"
+					placeholder={$_('memoro.detail_view.placeholder_language')}
 				/>
 			</div>
 
 			<div class="prop-row">
-				<span class="prop-label">Sichtbarkeit</span>
+				<span class="prop-label">{$_('memoro.detail_view.label_visibility')}</span>
 				<VisibilityPicker
 					level={memo.visibility ?? 'space'}
 					onChange={(next: VisibilityLevel) => memosStore.setVisibility(memoId, next)}
@@ -202,42 +202,50 @@
 		</div>
 
 		<div class="section">
-			<span class="section-label">Zusammenfassung</span>
+			<span class="section-label">{$_('memoro.detail_view.section_summary')}</span>
 			<textarea
 				class="description-input"
 				bind:value={editIntro}
 				onfocus={detail.focus}
 				onblur={saveField}
-				placeholder="Zusammenfassung hinzufügen..."
+				placeholder={$_('memoro.detail_view.placeholder_summary')}
 				rows={2}
 			></textarea>
 		</div>
 
 		<div class="section">
-			<span class="section-label">Transkript</span>
+			<span class="section-label">{$_('memoro.detail_view.section_transcript')}</span>
 			{#if memo.processingStatus === 'processing'}
 				<div class="transcript transcript-loading">
 					<span class="loading-dot"></span>
 					<span class="loading-dot"></span>
 					<span class="loading-dot"></span>
-					<span>Wird transkribiert…</span>
+					<span>{$_('memoro.detail_view.transcribing')}</span>
 				</div>
 			{:else if memo.processingStatus === 'failed'}
 				<div class="transcript transcript-failed">
-					Transkription fehlgeschlagen. Versuche es erneut oder gib das Transkript manuell ein.
+					{$_('memoro.detail_view.transcript_failed')}
 				</div>
 			{:else if memo.transcript}
 				<div class="transcript">{memo.transcript}</div>
-				<div class="source-label">Voxtral via mana-stt</div>
+				<div class="source-label">{$_('memoro.detail_view.transcript_source')}</div>
 			{:else}
-				<div class="transcript transcript-empty">Kein Transkript vorhanden.</div>
+				<div class="transcript transcript-empty">{$_('memoro.detail_view.transcript_empty')}</div>
 			{/if}
 		</div>
 
 		<div class="meta">
-			<span>Erstellt: {formatDate(new Date(memo.createdAt ?? ''))}</span>
+			<span
+				>{$_('memoro.detail_view.meta_created', {
+					values: { date: formatDate(new Date(memo.createdAt ?? '')) },
+				})}</span
+			>
 			{#if memo.updatedAt}
-				<span>Bearbeitet: {formatDate(new Date(memo.updatedAt))}</span>
+				<span
+					>{$_('memoro.detail_view.meta_updated', {
+						values: { date: formatDate(new Date(memo.updatedAt)) },
+					})}</span
+				>
 			{/if}
 		</div>
 	{/snippet}

@@ -131,7 +131,6 @@
 	"apps/mana/apps/web/src/lib/modules/meditate/components/SessionPlayer.svelte": 3,
 	"apps/mana/apps/web/src/lib/modules/meditate/components/StatsOverview.svelte": 3,
 	"apps/mana/apps/web/src/lib/modules/meditate/ListView.svelte": 1,
-	"apps/mana/apps/web/src/lib/modules/memoro/views/DetailView.svelte": 8,
 	"apps/mana/apps/web/src/lib/modules/mood/components/QuickLog.svelte": 6,
 	"apps/mana/apps/web/src/lib/modules/mood/ListView.svelte": 6,
 	"apps/mana/apps/web/src/lib/modules/moodlit/components/mood/CreateMoodDialog.svelte": 3,
