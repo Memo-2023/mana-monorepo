@@ -14,6 +14,7 @@
 	import { ALL_TEMPLATES, type AgentTemplate } from '@mana/shared-ai';
 	import { applyTemplate } from '$lib/data/ai/agents/apply-template';
 	import { RoutePage } from '$lib/components/shell';
+	import { _ } from 'svelte-i18n';
 
 	let selected = $state<AgentTemplate | null>(null);
 	const agentTemplates = ALL_TEMPLATES.filter(
@@ -101,7 +102,7 @@
 </script>
 
 <svelte:head>
-	<title>Templates — Mana</title>
+	<title>{$_('agents.templates.page_title_html')}</title>
 </svelte:head>
 
 {#snippet templateCard(t: AgentTemplate)}
@@ -116,14 +117,24 @@
 		<span class="label">{t.label}</span>
 		<span class="tagline">{t.tagline}</span>
 		<span class="meta">
-			{#if t.agent}<span class="chip">Agent</span>{/if}
-			{#if t.scene}<span class="chip">Scene</span>{/if}
+			{#if t.agent}<span class="chip">{$_('agents.templates.chip_agent')}</span>{/if}
+			{#if t.scene}<span class="chip">{$_('agents.templates.chip_scene')}</span>{/if}
 			{#if t.missions && t.missions.length > 0}
-				<span class="chip">{t.missions.length} Mission{t.missions.length !== 1 ? 'en' : ''}</span>
+				<span class="chip"
+					>{t.missions.length === 1
+						? $_('agents.templates.chip_mission_one', { values: { n: t.missions.length } })
+						: $_('agents.templates.chip_mission_other', {
+								values: { n: t.missions.length },
+							})}</span
+				>
 			{/if}
 			{#if t.seeds}
 				{@const total = Object.values(t.seeds).reduce((s, items) => s + items.length, 0)}
-				<span class="chip">{total} Seed{total !== 1 ? 's' : ''}</span>
+				<span class="chip"
+					>{total === 1
+						? $_('agents.templates.chip_seed_one', { values: { n: total } })
+						: $_('agents.templates.chip_seed_other', { values: { n: total } })}</span
+				>
 			{/if}
 		</span>
 	</button>
@@ -133,19 +144,18 @@
 	<div class="page">
 		<header class="header">
 			<button type="button" class="back" onclick={() => goto('/')}>
-				<ArrowLeft size={14} /><span>Zurück zum Workbench</span>
+				<ArrowLeft size={14} /><span>{$_('agents.templates.back')}</span>
 			</button>
-			<h1>Templates</h1>
+			<h1>{$_('agents.templates.title')}</h1>
 			<p class="sub">
-				Vorgefertigte Setups für deinen Workbench. Wähle ein Template und du hast in einem Klick
-				eine passende Scene, optionale AI-Agenten und erste Daten in den richtigen Modulen.
+				{$_('agents.templates.sub')}
 			</p>
 		</header>
 
 		<section class="section">
 			<div class="section-head">
-				<h2>🤖 Agent-Templates</h2>
-				<p>Benannte AI-Personas mit eigener Policy, Memory und Starter-Mission.</p>
+				<h2>{$_('agents.templates.section_agent_title')}</h2>
+				<p>{$_('agents.templates.section_agent_desc')}</p>
 			</div>
 			<div class="grid">
 				{#each agentTemplates as t (t.id)}
@@ -156,10 +166,9 @@
 
 		<section class="section">
 			<div class="section-head">
-				<h2>🎨 Workbench-Templates</h2>
+				<h2>{$_('agents.templates.section_workbench_title')}</h2>
 				<p>
-					Starter-Kits ohne AI — Scene-Layout + vor-gefüllte Habits, Goals und Module-Daten. Du
-					arbeitest selbst, das Template nimmt dir die Einrichtung ab.
+					{$_('agents.templates.section_workbench_desc')}
 				</p>
 			</div>
 			<div class="grid">
@@ -178,7 +187,7 @@
 						{#if selected.agent}
 							<p class="detail-role">{selected.agent.role}</p>
 						{:else}
-							<p class="detail-role">Workbench-Setup ohne AI-Agent</p>
+							<p class="detail-role">{$_('agents.templates.detail_no_agent_role')}</p>
 						{/if}
 					</div>
 				</header>
@@ -187,7 +196,7 @@
 
 				{#if selected.scene}
 					<section class="preview">
-						<h3>Scene-Layout</h3>
+						<h3>{$_('agents.templates.section_scene')}</h3>
 						<p class="preview-name">
 							<strong>{selected.scene.name}</strong>
 							{#if selected.scene.description}
@@ -206,21 +215,32 @@
 
 				{#if selected.missions && selected.missions.length > 0}
 					<section class="preview">
-						<h3>Starter-Missionen</h3>
+						<h3>{$_('agents.templates.section_missions')}</h3>
 						<ul class="missions-preview">
 							{#each selected.missions as m}
 								<li>
 									<strong>{m.title}</strong>
 									<p>{m.objective}</p>
 									<span class="cadence">
-										{#if m.cadence.kind === 'manual'}manuell auslösen
-										{:else if m.cadence.kind === 'daily'}täglich {m.cadence.atHour}:{String(
-												m.cadence.atMinute
-											).padStart(2, '0')}
-										{:else if m.cadence.kind === 'weekly'}wöchentlich, Tag {m.cadence.dayOfWeek} um {m
-												.cadence.atHour}:00
-										{:else if m.cadence.kind === 'interval'}alle {m.cadence.everyMinutes} Minuten
-										{:else}cron: {m.cadence.expression}
+										{#if m.cadence.kind === 'manual'}{$_('agents.templates.cadence_manual')}
+										{:else if m.cadence.kind === 'daily'}{$_('agents.templates.cadence_daily', {
+												values: {
+													h: m.cadence.atHour,
+													m: String(m.cadence.atMinute).padStart(2, '0'),
+												},
+											})}
+										{:else if m.cadence.kind === 'weekly'}{$_('agents.templates.cadence_weekly', {
+												values: { day: m.cadence.dayOfWeek, h: m.cadence.atHour },
+											})}
+										{:else if m.cadence.kind === 'interval'}{$_(
+												'agents.templates.cadence_interval',
+												{
+													values: { n: m.cadence.everyMinutes },
+												}
+											)}
+										{:else}{$_('agents.templates.cadence_cron', {
+												values: { expression: m.cadence.expression },
+											})}
 										{/if}
 									</span>
 								</li>
@@ -231,22 +251,28 @@
 
 				{#if selected.seeds && Object.keys(selected.seeds).length > 0}
 					<section class="preview">
-						<h3>Seeds</h3>
+						<h3>{$_('agents.templates.section_seeds')}</h3>
 						<p class="seed-hint">
-							Vorgefüllte Einträge in deinen Modulen. Werden als neue Records angelegt; bestehende
-							Einträge mit gleicher Seed-ID werden übersprungen (idempotent).
+							{$_('agents.templates.seed_hint')}
 						</p>
 						<ul class="seeds-preview">
 							{#each Object.entries(selected.seeds) as [moduleName, items]}
 								<li>
 									<strong>{moduleName}</strong>
 									<span class="seed-count">
-										{items.length} Eintr{items.length !== 1 ? 'äge' : 'ag'}
+										{items.length === 1
+											? $_('agents.templates.seed_count_one', { values: { n: items.length } })
+											: $_('agents.templates.seed_count_other', {
+													values: { n: items.length },
+												})}
 									</span>
 									<ul class="seed-items">
 										{#each items as item}
 											<li>
-												<code>{(item.data as { name?: string }).name ?? '(unbenannt)'}</code>
+												<code
+													>{(item.data as { name?: string }).name ??
+														$_('agents.templates.seed_unnamed')}</code
+												>
 											</li>
 										{/each}
 									</ul>
@@ -257,27 +283,31 @@
 				{/if}
 
 				<section class="options">
-					<h3>Optionen</h3>
+					<h3>{$_('agents.templates.section_options')}</h3>
 					{#if selected.scene}
 						<label class="opt">
 							<input type="checkbox" bind:checked={optCreateScene} />
-							<span>Scene „{selected.scene.name}" anlegen und direkt öffnen</span>
+							<span
+								>{$_('agents.templates.opt_create_scene', {
+									values: { name: selected.scene.name },
+								})}</span
+							>
 						</label>
 					{/if}
 					{#if selected.missions && selected.missions.length > 0}
 						<label class="opt">
 							<input type="checkbox" bind:checked={optCreateMissions} />
-							<span>Starter-Mission(en) mit anlegen</span>
+							<span>{$_('agents.templates.opt_create_missions')}</span>
 						</label>
 						<label class="opt" class:disabled={!optCreateMissions}>
 							<input type="checkbox" bind:checked={optStartActive} disabled={!optCreateMissions} />
-							<span>Mission(en) sofort aktivieren (Standard: pausiert)</span>
+							<span>{$_('agents.templates.opt_start_active')}</span>
 						</label>
 					{/if}
 					{#if selected.seeds && Object.keys(selected.seeds).length > 0}
 						<label class="opt">
 							<input type="checkbox" bind:checked={optApplySeeds} />
-							<span>Seed-Daten in Module einpflegen</span>
+							<span>{$_('agents.templates.opt_apply_seeds')}</span>
 						</label>
 					{/if}
 				</section>
@@ -289,22 +319,42 @@
 							<strong>
 								{#if result.agentName}
 									{result.wasExistingAgent
-										? `„${result.agentName}" existierte schon — wiederverwendet.`
-										: `Agent „${result.agentName}" angelegt.`}
+										? $_('agents.templates.result_existing_agent', {
+												values: { name: result.agentName },
+											})
+										: $_('agents.templates.result_new_agent', {
+												values: { name: result.agentName },
+											})}
 								{:else}
-									Template angewendet.
+									{$_('agents.templates.result_template_applied')}
 								{/if}
 							</strong>
 							<p>
-								{#if result.sceneCreated}Scene angelegt + aktiviert.{/if}
+								{#if result.sceneCreated}{$_('agents.templates.result_scene_created')}{/if}
 								{#if result.missionCount > 0}
-									{result.missionCount} Mission{result.missionCount !== 1 ? 'en' : ''}
-									{optStartActive ? 'aktiviert' : 'pausiert angelegt'}.
+									{optStartActive
+										? $_('agents.templates.result_missions_active', {
+												values: { n: result.missionCount },
+											})
+										: $_('agents.templates.result_missions_paused', {
+												values: { n: result.missionCount },
+											})}
 								{/if}
 								{#if result.seedCreated + result.seedSkipped + result.seedFailed > 0}
-									{result.seedCreated} Seed{result.seedCreated !== 1 ? 's' : ''} neu,
-									{result.seedSkipped} bereits vorhanden{#if result.seedFailed > 0}, {result.seedFailed}
-										fehlgeschlagen{/if}.
+									{result.seedFailed > 0
+										? $_('agents.templates.result_seeds_summary_with_failed', {
+												values: {
+													created: result.seedCreated,
+													skipped: result.seedSkipped,
+													failed: result.seedFailed,
+												},
+											})
+										: $_('agents.templates.result_seeds_summary_no_failed', {
+												values: {
+													created: result.seedCreated,
+													skipped: result.seedSkipped,
+												},
+											})}
 								{/if}
 							</p>
 							{#if result.warnings.length > 0}
@@ -318,23 +368,29 @@
 					</div>
 					<div class="result-actions">
 						<button type="button" class="btn-ghost" onclick={() => (selected = null)}>
-							Weiteres Template auswählen
+							{$_('agents.templates.result_action_pick_other')}
 						</button>
 						<button type="button" class="btn-primary" onclick={() => goto('/')}>
-							Zum Workbench
+							{$_('agents.templates.result_action_workbench')}
 						</button>
 					</div>
 				{:else}
 					{#if error}
 						<div class="result error">
-							<strong>Konnte Template nicht anwenden</strong>
+							<strong>{$_('agents.templates.err_apply_failed')}</strong>
 							<p>{error}</p>
 						</div>
 					{/if}
 					<div class="apply-row">
 						<button type="button" class="btn-primary" onclick={handleApply} disabled={applying}>
 							<Play size={14} />
-							<span>{applying ? 'Lege an…' : `Template „${selected.label}" anwenden`}</span>
+							<span
+								>{applying
+									? $_('agents.templates.action_applying')
+									: $_('agents.templates.action_apply_template', {
+											values: { label: selected.label },
+										})}</span
+							>
 						</button>
 					</div>
 				{/if}

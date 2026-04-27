@@ -201,7 +201,6 @@
 	"apps/mana/apps/web/src/routes/(app)/+page.svelte": 1,
 	"apps/mana/apps/web/src/routes/(app)/admin/+layout.svelte": 1,
 	"apps/mana/apps/web/src/routes/(app)/admin/user-data/[userId]/+page.svelte": 19,
-	"apps/mana/apps/web/src/routes/(app)/agents/templates/+page.svelte": 7,
 	"apps/mana/apps/web/src/routes/(app)/articles/settings/+page.svelte": 3,
 	"apps/mana/apps/web/src/routes/(app)/broadcasts/[id]/+page.svelte": 2,
 	"apps/mana/apps/web/src/routes/(app)/broadcasts/[id]/edit/+page.svelte": 4,
