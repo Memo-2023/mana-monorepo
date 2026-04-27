@@ -34,7 +34,6 @@
 	"apps/mana/apps/web/src/lib/components/shell/ModuleShell.svelte": 3,
 	"apps/mana/apps/web/src/lib/components/SuggestionToast.svelte": 1,
 	"apps/mana/apps/web/src/lib/components/voice/VoiceCaptureBar.svelte": 1,
-	"apps/mana/apps/web/src/lib/components/wallpaper/WallpaperPicker.svelte": 7,
 	"apps/mana/apps/web/src/lib/components/workbench/AppPage.svelte": 6,
 	"apps/mana/apps/web/src/lib/components/workbench/AppPagePicker.svelte": 1,
 	"apps/mana/apps/web/src/lib/components/workbench/SceneAppBar.svelte": 1,

@@ -1,0 +1,26 @@
+{
+	"picker": {
+		"scope_global": "Toutes les scènes",
+		"scope_scene": "Seulement cette scène",
+		"action_reset": "Réinitialiser",
+		"tab_gradients": "Couleurs",
+		"tab_images": "Images",
+		"tab_upload": "Upload",
+		"section_recommended": "Recommandé",
+		"section_others": "Autres",
+		"images_coming_soon": "Fonds d'écran bientôt disponibles",
+		"upload_in_progress": "Téléversement…",
+		"upload_drop": "Déposer ici",
+		"upload_prompt": "Téléverser une image",
+		"upload_hint": "JPG, PNG, WebP — glisser-déposer ou clic",
+		"err_upload_failed": "Échec du téléversement ({status})",
+		"err_upload_generic": "Échec du téléversement",
+		"loading_gallery": "Chargement des images…",
+		"section_my_images": "Mes images",
+		"action_delete_image": "Supprimer l'image",
+		"section_overlay": "Surimpression",
+		"label_blur": "Flou",
+		"label_dim": "Atténuation",
+		"alt_image": "Image"
+	}
+}

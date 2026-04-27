@@ -1,0 +1,26 @@
+{
+	"picker": {
+		"scope_global": "Tutte le scene",
+		"scope_scene": "Solo questa scena",
+		"action_reset": "Ripristina",
+		"tab_gradients": "Colori",
+		"tab_images": "Immagini",
+		"tab_upload": "Upload",
+		"section_recommended": "Consigliati",
+		"section_others": "Altri",
+		"images_coming_soon": "Sfondi in arrivo",
+		"upload_in_progress": "Caricamento…",
+		"upload_drop": "Rilascia qui",
+		"upload_prompt": "Carica immagine",
+		"upload_hint": "JPG, PNG, WebP — drag & drop o clic",
+		"err_upload_failed": "Caricamento non riuscito ({status})",
+		"err_upload_generic": "Caricamento non riuscito",
+		"loading_gallery": "Caricamento immagini…",
+		"section_my_images": "Le mie immagini",
+		"action_delete_image": "Elimina immagine",
+		"section_overlay": "Overlay",
+		"label_blur": "Sfocatura",
+		"label_dim": "Oscuramento",
+		"alt_image": "Immagine"
+	}
+}

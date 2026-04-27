@@ -1,0 +1,26 @@
+{
+	"picker": {
+		"scope_global": "All scenes",
+		"scope_scene": "Just this scene",
+		"action_reset": "Reset",
+		"tab_gradients": "Colors",
+		"tab_images": "Images",
+		"tab_upload": "Upload",
+		"section_recommended": "Recommended",
+		"section_others": "Others",
+		"images_coming_soon": "Wallpapers coming soon",
+		"upload_in_progress": "Uploading…",
+		"upload_drop": "Drop here",
+		"upload_prompt": "Upload image",
+		"upload_hint": "JPG, PNG, WebP — drag & drop or click",
+		"err_upload_failed": "Upload failed ({status})",
+		"err_upload_generic": "Upload failed",
+		"loading_gallery": "Loading images…",
+		"section_my_images": "My images",
+		"action_delete_image": "Delete image",
+		"section_overlay": "Overlay",
+		"label_blur": "Blur",
+		"label_dim": "Dim",
+		"alt_image": "Image"
+	}
+}

@@ -1,0 +1,26 @@
+{
+	"picker": {
+		"scope_global": "Alle Szenen",
+		"scope_scene": "Nur diese Szene",
+		"action_reset": "Zurücksetzen",
+		"tab_gradients": "Farben",
+		"tab_images": "Bilder",
+		"tab_upload": "Upload",
+		"section_recommended": "Empfohlen",
+		"section_others": "Weitere",
+		"images_coming_soon": "Hintergrundbilder kommen bald",
+		"upload_in_progress": "Wird hochgeladen...",
+		"upload_drop": "Hier ablegen",
+		"upload_prompt": "Bild hochladen",
+		"upload_hint": "JPG, PNG, WebP — Drag & Drop oder Klick",
+		"err_upload_failed": "Upload fehlgeschlagen ({status})",
+		"err_upload_generic": "Upload fehlgeschlagen",
+		"loading_gallery": "Lade Bilder...",
+		"section_my_images": "Eigene Bilder",
+		"action_delete_image": "Bild löschen",
+		"section_overlay": "Overlay",
+		"label_blur": "Weichzeichner",
+		"label_dim": "Abdunklung",
+		"alt_image": "Bild"
+	}
+}

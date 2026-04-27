@@ -15,6 +15,7 @@
 	import { wallpaperStore } from '$lib/stores/wallpaper.svelte';
 	import { theme } from '$lib/stores/theme';
 	import { workbenchScenesStore } from '$lib/stores/workbench-scenes.svelte';
+	import { _ } from 'svelte-i18n';
 
 	// ── Media URL ───────────────────────────────────────────────
 
@@ -81,7 +82,7 @@
 					id: m.id,
 					url: `${MEDIA_URL}/api/v1/media/${m.id}/file/large`,
 					thumbUrl: `${MEDIA_URL}/api/v1/media/${m.id}/file/thumb`,
-					originalName: m.originalName ?? 'Bild',
+					originalName: m.originalName ?? $_('wallpaper.picker.alt_image'),
 				})
 			);
 			uploadedWallpapers = items;
@@ -205,7 +206,9 @@
 			});
 
 			if (!res.ok) {
-				throw new Error(`Upload fehlgeschlagen (${res.status})`);
+				throw new Error(
+					$_('wallpaper.picker.err_upload_failed', { values: { status: res.status } })
+				);
 			}
 
 			const data = await res.json();
@@ -226,7 +229,7 @@
 
 			await applyWallpaper(buildConfig({ type: 'upload', mediaId, url }));
 		} catch (err) {
-			uploadError = err instanceof Error ? err.message : 'Upload fehlgeschlagen';
+			uploadError = err instanceof Error ? err.message : $_('wallpaper.picker.err_upload_generic');
 		} finally {
 			uploading = false;
 		}
@@ -272,11 +275,11 @@
 		}
 	}
 
-	// Tab items
-	const tabs: { id: Tab; label: string; icon: typeof Image }[] = [
-		{ id: 'gradients', label: 'Farben', icon: Palette },
-		{ id: 'images', label: 'Bilder', icon: Image },
-		{ id: 'upload', label: 'Upload', icon: UploadSimple },
+	// Tab items — labelKey routed through $_() at render time
+	const tabs: { id: Tab; labelKey: string; icon: typeof Image }[] = [
+		{ id: 'gradients', labelKey: 'wallpaper.picker.tab_gradients', icon: Palette },
+		{ id: 'images', labelKey: 'wallpaper.picker.tab_images', icon: Image },
+		{ id: 'upload', labelKey: 'wallpaper.picker.tab_upload', icon: UploadSimple },
 	];
 </script>
 
@@ -294,7 +297,7 @@
 					class:text-muted-foreground={scope !== 'global'}
 					onclick={() => (scope = 'global')}
 				>
-					Alle Szenen
+					{$_('wallpaper.picker.scope_global')}
 				</button>
 				<button
 					type="button"
@@ -305,7 +308,7 @@
 					class:text-muted-foreground={scope !== 'scene'}
 					onclick={() => (scope = 'scene')}
 				>
-					Nur diese Szene
+					{$_('wallpaper.picker.scope_scene')}
 				</button>
 			</div>
 		{:else}
@@ -319,7 +322,7 @@
 				onclick={clearWallpaper}
 			>
 				<Prohibit size={12} />
-				Zurücksetzen
+				{$_('wallpaper.picker.action_reset')}
 			</button>
 		{/if}
 	</div>
@@ -337,7 +340,7 @@
 				onclick={() => (activeTab = tab.id)}
 			>
 				<tab.icon size={15} weight={activeTab === tab.id ? 'fill' : 'regular'} />
-				{tab.label}
+				{$_(tab.labelKey)}
 			</button>
 		{/each}
 	</div>
@@ -346,7 +349,7 @@
 	{#if activeTab === 'gradients'}
 		<!-- Current theme gradients (prominent) -->
 		<p class="mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-			Empfohlen
+			{$_('wallpaper.picker.section_recommended')}
 			<span class="normal-case tracking-normal font-normal">({currentVariant})</span>
 		</p>
 		<div class="grid grid-cols-2 gap-2.5 mb-5">
@@ -396,7 +399,7 @@
 		{#if PREDEFINED_WALLPAPERS.length === 0}
 			<div class="flex flex-col items-center justify-center py-8 text-muted-foreground">
 				<Image size={32} class="mb-2 opacity-40" />
-				<p class="text-sm">Hintergrundbilder kommen bald</p>
+				<p class="text-sm">{$_('wallpaper.picker.images_coming_soon')}</p>
 			</div>
 		{:else}
 			{#if variantWallpapers.length > 0}
@@ -428,7 +431,7 @@
 
 			{#if otherWallpapers.length > 0}
 				<p class="mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-					Weitere
+					{$_('wallpaper.picker.section_others')}
 				</p>
 				<div class="grid grid-cols-4 gap-2 mb-4">
 					{#each otherWallpapers as wp}
@@ -473,13 +476,13 @@
 		>
 			{#if uploading}
 				<SpinnerGap size={28} class="text-primary mb-1 animate-spin" />
-				<p class="text-sm text-foreground">Wird hochgeladen...</p>
+				<p class="text-sm text-foreground">{$_('wallpaper.picker.upload_in_progress')}</p>
 			{:else}
 				<UploadSimple size={28} class="text-muted-foreground mb-1" />
 				<p class="text-sm text-muted-foreground">
-					{isDragging ? 'Hier ablegen' : 'Bild hochladen'}
+					{isDragging ? $_('wallpaper.picker.upload_drop') : $_('wallpaper.picker.upload_prompt')}
 				</p>
-				<p class="text-xs text-muted-foreground/60">JPG, PNG, WebP — Drag & Drop oder Klick</p>
+				<p class="text-xs text-muted-foreground/60">{$_('wallpaper.picker.upload_hint')}</p>
 			{/if}
 		</div>
 		<input
@@ -506,11 +509,11 @@
 		{#if loadingGallery}
 			<div class="mt-4 flex items-center justify-center py-4 text-muted-foreground">
 				<SpinnerGap size={20} class="animate-spin mr-2" />
-				<span class="text-sm">Lade Bilder...</span>
+				<span class="text-sm">{$_('wallpaper.picker.loading_gallery')}</span>
 			</div>
 		{:else if uploadedWallpapers.length > 0}
 			<p class="mt-4 mb-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-				Eigene Bilder
+				{$_('wallpaper.picker.section_my_images')}
 			</p>
 			<div class="grid grid-cols-3 gap-2">
 				{#each uploadedWallpapers as media (media.id)}
@@ -539,7 +542,7 @@
 						<button
 							type="button"
 							class="delete-btn"
-							title="Bild löschen"
+							title={$_('wallpaper.picker.action_delete_image')}
 							onclick={() => deleteUpload(media.id)}
 						>
 							<Trash size={12} />
@@ -552,11 +555,15 @@
 
 	<!-- Overlay controls (always visible, disabled when no wallpaper) -->
 	<div class="mt-4 border-t border-border pt-4" class:opacity-40={currentSource.type === 'none'}>
-		<p class="mb-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Overlay</p>
+		<p class="mb-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+			{$_('wallpaper.picker.section_overlay')}
+		</p>
 
 		<div class="mb-3">
 			<div class="flex items-center justify-between mb-1">
-				<label for="wp-blur" class="text-sm text-foreground">Weichzeichner</label>
+				<label for="wp-blur" class="text-sm text-foreground"
+					>{$_('wallpaper.picker.label_blur')}</label
+				>
 				<span class="text-xs text-muted-foreground tabular-nums">{blur}px</span>
 			</div>
 			<input
@@ -574,7 +581,9 @@
 
 		<div>
 			<div class="flex items-center justify-between mb-1">
-				<label for="wp-opacity" class="text-sm text-foreground">Abdunklung</label>
+				<label for="wp-opacity" class="text-sm text-foreground"
+					>{$_('wallpaper.picker.label_dim')}</label
+				>
 				<span class="text-xs text-muted-foreground tabular-nums"
 					>{Math.round(overlayOpacity * 100)}%</span
 				>

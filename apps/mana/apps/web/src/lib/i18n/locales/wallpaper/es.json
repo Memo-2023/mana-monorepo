@@ -1,0 +1,26 @@
+{
+	"picker": {
+		"scope_global": "Todas las escenas",
+		"scope_scene": "Solo esta escena",
+		"action_reset": "Restablecer",
+		"tab_gradients": "Colores",
+		"tab_images": "Imágenes",
+		"tab_upload": "Subir",
+		"section_recommended": "Recomendados",
+		"section_others": "Otros",
+		"images_coming_soon": "Fondos próximamente",
+		"upload_in_progress": "Subiendo…",
+		"upload_drop": "Soltar aquí",
+		"upload_prompt": "Subir imagen",
+		"upload_hint": "JPG, PNG, WebP — arrastra y suelta o haz clic",
+		"err_upload_failed": "Error de subida ({status})",
+		"err_upload_generic": "Error de subida",
+		"loading_gallery": "Cargando imágenes…",
+		"section_my_images": "Mis imágenes",
+		"action_delete_image": "Eliminar imagen",
+		"section_overlay": "Superposición",
+		"label_blur": "Desenfoque",
+		"label_dim": "Atenuación",
+		"alt_image": "Imagen"
+	}
+}
