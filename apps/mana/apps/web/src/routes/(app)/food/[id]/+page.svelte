@@ -8,6 +8,9 @@
 	import type { MealType, MealWithNutrition, NutritionData } from '$lib/modules/food/types';
 	import { ArrowLeft, Trash } from '@mana/shared-icons';
 	import { RoutePage } from '$lib/components/shell';
+	import { _ } from 'svelte-i18n';
+	import { get } from 'svelte/store';
+	import { locale } from 'svelte-i18n';
 
 	// Inline the live query so the closure captures page.params.id directly
 	// (matches the plants DetailView pattern).
@@ -58,7 +61,7 @@
 	async function saveEdit() {
 		if (!meal) return;
 		if (!editDescription.trim()) {
-			error = 'Beschreibung darf nicht leer sein';
+			error = $_('food.detail.error_description_required');
 			return;
 		}
 		saving = true;
@@ -83,7 +86,7 @@
 			editing = false;
 		} catch (err) {
 			console.error('meal update failed:', err);
-			error = 'Speichern fehlgeschlagen';
+			error = $_('food.detail.error_save_failed');
 		} finally {
 			saving = false;
 		}
@@ -111,7 +114,7 @@
 			});
 		} catch (err) {
 			console.error('re-analyze failed:', err);
-			error = 'KI-Analyse fehlgeschlagen';
+			error = $_('food.detail.error_analyze_failed');
 		} finally {
 			reanalyzing = false;
 		}
@@ -124,13 +127,14 @@
 			goto('/food');
 		} catch (err) {
 			console.error('delete failed:', err);
-			error = 'Löschen fehlgeschlagen';
+			error = $_('food.detail.error_delete_failed');
 			confirmDelete = false;
 		}
 	}
 
 	function formatDateTime(dateString: string): string {
-		return new Date(dateString).toLocaleString('de-DE', {
+		const lang = get(locale) ?? 'de';
+		return new Date(dateString).toLocaleString(lang, {
 			weekday: 'long',
 			day: 'numeric',
 			month: 'long',
@@ -145,24 +149,30 @@
 </script>
 
 <svelte:head>
-	<title>{meal?.description ?? 'Mahlzeit'} - Food - Mana</title>
+	<title
+		>{$_('food.detail.page_title_html', {
+			values: { description: meal?.description ?? $_('food.detail.untitled_fallback') },
+		})}</title
+	>
 </svelte:head>
 
-<RoutePage appId="food" backHref="/food" title="Mahlzeit">
+<RoutePage appId="food" backHref="/food" title={$_('food.detail.untitled_fallback')}>
 	<div class="mx-auto max-w-2xl space-y-6">
 		<a
 			href="/food"
 			class="inline-flex items-center gap-2 text-sm text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))]"
 		>
 			<ArrowLeft class="h-4 w-4" />
-			Zurueck
+			{$_('food.detail.back')}
 		</a>
 
 		{#if !meal}
 			<div
 				class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-12 text-center"
 			>
-				<p class="text-sm text-[hsl(var(--color-muted-foreground))]">Mahlzeit nicht gefunden.</p>
+				<p class="text-sm text-[hsl(var(--color-muted-foreground))]">
+					{$_('food.detail.not_found')}
+				</p>
 			</div>
 		{:else}
 			{#if error}
@@ -179,7 +189,7 @@
 					type="button"
 					onclick={() => (lightboxOpen = true)}
 					class="block w-full overflow-hidden rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-muted))] transition-opacity hover:opacity-95"
-					aria-label="Bild vergrößern"
+					aria-label={$_('food.detail.lightbox_open_aria')}
 				>
 					<img src={meal.photoUrl} alt={meal.description} class="max-h-96 w-full object-contain" />
 				</button>
@@ -220,7 +230,9 @@
 										class="h-2 w-2 rounded-full"
 										style="background-color: {NUTRIENT_INFO.calories.color}"
 									></div>
-									<span class="text-xs text-[hsl(var(--color-muted-foreground))]">Kalorien</span>
+									<span class="text-xs text-[hsl(var(--color-muted-foreground))]"
+										>{$_('food.nutrition.calories')}</span
+									>
 								</div>
 								<p class="mt-1 text-lg font-bold text-[hsl(var(--color-foreground))]">
 									{meal.nutrition.calories}
@@ -235,7 +247,9 @@
 										class="h-2 w-2 rounded-full"
 										style="background-color: {NUTRIENT_INFO.protein.color}"
 									></div>
-									<span class="text-xs text-[hsl(var(--color-muted-foreground))]">Protein</span>
+									<span class="text-xs text-[hsl(var(--color-muted-foreground))]"
+										>{$_('food.nutrition.protein')}</span
+									>
 								</div>
 								<p class="mt-1 text-lg font-bold text-[hsl(var(--color-foreground))]">
 									{meal.nutrition.protein}<span
@@ -250,7 +264,7 @@
 										style="background-color: {NUTRIENT_INFO.carbohydrates.color}"
 									></div>
 									<span class="text-xs text-[hsl(var(--color-muted-foreground))]"
-										>Kohlenhydrate</span
+										>{$_('food.nutrition.carbs')}</span
 									>
 								</div>
 								<p class="mt-1 text-lg font-bold text-[hsl(var(--color-foreground))]">
@@ -265,7 +279,9 @@
 										class="h-2 w-2 rounded-full"
 										style="background-color: {NUTRIENT_INFO.fat.color}"
 									></div>
-									<span class="text-xs text-[hsl(var(--color-muted-foreground))]">Fett</span>
+									<span class="text-xs text-[hsl(var(--color-muted-foreground))]"
+										>{$_('food.nutrition.fat')}</span
+									>
 								</div>
 								<p class="mt-1 text-lg font-bold text-[hsl(var(--color-foreground))]">
 									{meal.nutrition.fat}<span
@@ -277,8 +293,16 @@
 						<div
 							class="mt-2 grid grid-cols-2 gap-3 text-xs text-[hsl(var(--color-muted-foreground))]"
 						>
-							<div>Ballaststoffe: {meal.nutrition.fiber}g</div>
-							<div>Zucker: {meal.nutrition.sugar}g</div>
+							<div>
+								{$_('food.detail.fiber_with_value', {
+									values: { n: meal.nutrition.fiber },
+								})}
+							</div>
+							<div>
+								{$_('food.detail.sugar_with_value', {
+									values: { n: meal.nutrition.sugar },
+								})}
+							</div>
 						</div>
 					{/if}
 
@@ -288,7 +312,7 @@
 							onclick={startEdit}
 							class="rounded-lg border border-[hsl(var(--color-border))] px-4 py-2 text-sm text-[hsl(var(--color-foreground))] hover:bg-[hsl(var(--color-muted))]"
 						>
-							Bearbeiten
+							{$_('food.common.edit')}
 						</button>
 						{#if meal.inputType === 'photo' && meal.photoUrl}
 							<button
@@ -297,7 +321,9 @@
 								disabled={reanalyzing}
 								class="rounded-lg border border-[hsl(var(--color-border))] px-4 py-2 text-sm text-[hsl(var(--color-foreground))] hover:bg-[hsl(var(--color-muted))] disabled:opacity-50"
 							>
-								{reanalyzing ? 'Analysiere…' : '🔄 Erneut analysieren'}
+								{reanalyzing
+									? $_('food.detail.action_reanalyzing')
+									: $_('food.detail.action_reanalyze')}
 							</button>
 						{/if}
 						{#if !confirmDelete}
@@ -307,24 +333,26 @@
 								class="ml-auto inline-flex items-center gap-1 rounded-lg border border-[hsl(var(--color-border))] px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
 							>
 								<Trash size={14} />
-								Löschen
+								{$_('food.common.delete')}
 							</button>
 						{:else}
 							<div class="ml-auto flex items-center gap-2">
-								<span class="text-xs text-[hsl(var(--color-muted-foreground))]">Sicher?</span>
+								<span class="text-xs text-[hsl(var(--color-muted-foreground))]"
+									>{$_('food.detail.confirm_sure')}</span
+								>
 								<button
 									type="button"
 									onclick={() => (confirmDelete = false)}
 									class="rounded-lg border border-[hsl(var(--color-border))] px-3 py-1.5 text-xs text-[hsl(var(--color-foreground))]"
 								>
-									Abbrechen
+									{$_('food.common.cancel')}
 								</button>
 								<button
 									type="button"
 									onclick={handleDelete}
 									class="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700"
 								>
-									Löschen
+									{$_('food.common.delete')}
 								</button>
 							</div>
 						{/if}
@@ -334,7 +362,7 @@
 					<div class="space-y-5">
 						<div>
 							<span class="mb-2 block text-sm font-medium text-[hsl(var(--color-foreground))]">
-								Mahlzeittyp
+								{$_('food.detail.label_meal_type')}
 							</span>
 							<div class="grid grid-cols-4 gap-2">
 								{#each mealTypes as type}
@@ -357,7 +385,7 @@
 								for="edit-desc"
 								class="mb-2 block text-sm font-medium text-[hsl(var(--color-foreground))]"
 							>
-								Beschreibung
+								{$_('food.detail.label_description')}
 							</label>
 							<textarea
 								id="edit-desc"
@@ -369,7 +397,7 @@
 
 						<div>
 							<h3 class="mb-3 text-sm font-medium text-[hsl(var(--color-foreground))]">
-								Naehrwerte
+								{$_('food.detail.section_nutrients')}
 							</h3>
 							<div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
 								<div>
@@ -377,7 +405,7 @@
 										for="edit-cal"
 										class="mb-1 block text-xs text-[hsl(var(--color-muted-foreground))]"
 									>
-										Kalorien (kcal)
+										{$_('food.detail.label_calories_kcal')}
 									</label>
 									<input
 										id="edit-cal"
@@ -392,7 +420,7 @@
 										for="edit-prot"
 										class="mb-1 block text-xs text-[hsl(var(--color-muted-foreground))]"
 									>
-										Protein (g)
+										{$_('food.detail.label_protein_g')}
 									</label>
 									<input
 										id="edit-prot"
@@ -407,7 +435,7 @@
 										for="edit-carbs"
 										class="mb-1 block text-xs text-[hsl(var(--color-muted-foreground))]"
 									>
-										Kohlenhydrate (g)
+										{$_('food.detail.label_carbs_g')}
 									</label>
 									<input
 										id="edit-carbs"
@@ -422,7 +450,7 @@
 										for="edit-fat"
 										class="mb-1 block text-xs text-[hsl(var(--color-muted-foreground))]"
 									>
-										Fett (g)
+										{$_('food.detail.label_fat_g')}
 									</label>
 									<input
 										id="edit-fat"
@@ -437,7 +465,7 @@
 										for="edit-fiber"
 										class="mb-1 block text-xs text-[hsl(var(--color-muted-foreground))]"
 									>
-										Ballaststoffe (g)
+										{$_('food.detail.label_fiber_g')}
 									</label>
 									<input
 										id="edit-fiber"
@@ -452,7 +480,7 @@
 										for="edit-sugar"
 										class="mb-1 block text-xs text-[hsl(var(--color-muted-foreground))]"
 									>
-										Zucker (g)
+										{$_('food.detail.label_sugar_g')}
 									</label>
 									<input
 										id="edit-sugar"
@@ -471,7 +499,7 @@
 								onclick={cancelEdit}
 								class="flex-1 rounded-lg border border-[hsl(var(--color-border))] px-4 py-3 text-sm font-medium text-[hsl(var(--color-foreground))] hover:bg-[hsl(var(--color-muted))]"
 							>
-								Abbrechen
+								{$_('food.common.cancel')}
 							</button>
 							<button
 								type="button"
@@ -479,7 +507,7 @@
 								disabled={saving || !editDescription.trim()}
 								class="flex-1 rounded-lg bg-[hsl(var(--color-primary))] px-4 py-3 text-sm font-medium text-[hsl(var(--color-primary-foreground))] hover:opacity-90 disabled:opacity-50"
 							>
-								{saving ? 'Speichere…' : 'Speichern'}
+								{saving ? $_('food.detail.action_saving') : $_('food.common.save')}
 							</button>
 						</div>
 					</div>
@@ -492,7 +520,7 @@
 					class="rounded-xl border border-[hsl(var(--color-border))] bg-[hsl(var(--color-card))] p-6"
 				>
 					<h2 class="mb-3 text-sm font-semibold text-[hsl(var(--color-foreground))]">
-						Erkannte Bestandteile
+						{$_('food.detail.section_foods')}
 					</h2>
 					<ul class="space-y-2">
 						{#each meal.foods as food}
@@ -526,7 +554,7 @@
 			type="button"
 			class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
 			onclick={() => (lightboxOpen = false)}
-			aria-label="Bild schließen"
+			aria-label={$_('food.detail.lightbox_close_aria')}
 		>
 			<img
 				src={meal.photoUrl}

@@ -239,7 +239,6 @@
 	"apps/mana/apps/web/src/routes/(app)/context/documents/+page.svelte": 5,
 	"apps/mana/apps/web/src/routes/(app)/context/spaces/[id]/+page.svelte": 3,
 	"apps/mana/apps/web/src/routes/(app)/context/spaces/+page.svelte": 5,
-	"apps/mana/apps/web/src/routes/(app)/food/[id]/+page.svelte": 10,
 	"apps/mana/apps/web/src/routes/(app)/food/+page.svelte": 7,
 	"apps/mana/apps/web/src/routes/(app)/food/add/+page.svelte": 2,
 	"apps/mana/apps/web/src/routes/(app)/food/goals/+page.svelte": 1,
