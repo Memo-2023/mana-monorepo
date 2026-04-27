@@ -1,0 +1,32 @@
+{
+	"list_view": {
+		"tab_timeline": "Timeline",
+		"tab_audit": "Acceso a datos",
+		"label_module": "Módulo",
+		"label_mission": "Mission",
+		"label_agent": "Agent",
+		"option_all": "todos",
+		"range_aria": "Período",
+		"range_24h": "24h",
+		"range_7d": "7d",
+		"range_all": "todos",
+		"audit_loading": "Cargando audit…",
+		"audit_error_prefix": "Error: {error}",
+		"audit_empty": "Sin descifrados del servidor. El runner mana-ai no ha leído registros para esta mission — no se concedió ninguna clave, o la mission usa solo inputs plaintext (goals).",
+		"audit_col_time": "Hora",
+		"audit_col_mission": "Mission",
+		"audit_col_record": "Registro",
+		"audit_col_status": "Estado",
+		"timeline_empty": "Aún no hay actividad de IA. Cuando una mission se ejecute y las propuestas sean aprobadas, los cambios aparecerán aquí.",
+		"event_count_title": "{n} cambios en esta iteración",
+		"revert_title": "Revertir todos los cambios de esta iteración",
+		"revert_running": "Ejecutando…",
+		"revert_label": "Revertir",
+		"event_link_title": "Al módulo",
+		"confirm_revert": "¿Revertir todas las escrituras IA de esta iteración?",
+		"revert_summary_done": "{n} revertidos",
+		"revert_summary_unsupported": "{n} no soportados",
+		"revert_summary_failed": "{n} fallaron",
+		"revert_alert_failed": "Reversión fallida — ver consola."
+	}
+}

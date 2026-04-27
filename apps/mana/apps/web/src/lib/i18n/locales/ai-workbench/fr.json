@@ -1,0 +1,32 @@
+{
+	"list_view": {
+		"tab_timeline": "Timeline",
+		"tab_audit": "Accès aux données",
+		"label_module": "Module",
+		"label_mission": "Mission",
+		"label_agent": "Agent",
+		"option_all": "tous",
+		"range_aria": "Période",
+		"range_24h": "24h",
+		"range_7d": "7j",
+		"range_all": "tous",
+		"audit_loading": "Chargement de l'audit…",
+		"audit_error_prefix": "Erreur : {error}",
+		"audit_empty": "Aucun déchiffrement côté serveur. Le runner mana-ai n'a lu aucun enregistrement pour cette mission — soit aucune clé n'est accordée, soit la mission utilise uniquement des inputs plaintext (goals).",
+		"audit_col_time": "Heure",
+		"audit_col_mission": "Mission",
+		"audit_col_record": "Enregistrement",
+		"audit_col_status": "Statut",
+		"timeline_empty": "Pas encore d'activité IA. Dès qu'une mission est exécutée et que les propositions sont approuvées, les changements apparaissent ici.",
+		"event_count_title": "{n} changements dans cette itération",
+		"revert_title": "Annuler tous les changements de cette itération",
+		"revert_running": "En cours…",
+		"revert_label": "Annuler",
+		"event_link_title": "Vers le module",
+		"confirm_revert": "Annuler toutes les écritures IA de cette itération ?",
+		"revert_summary_done": "{n} annulés",
+		"revert_summary_unsupported": "{n} non pris en charge",
+		"revert_summary_failed": "{n} échec(s)",
+		"revert_alert_failed": "Échec de l'annulation — voir la console."
+	}
+}

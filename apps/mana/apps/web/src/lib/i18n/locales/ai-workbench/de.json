@@ -1,0 +1,32 @@
+{
+	"list_view": {
+		"tab_timeline": "Timeline",
+		"tab_audit": "Datenzugriff",
+		"label_module": "Modul",
+		"label_mission": "Mission",
+		"label_agent": "Agent",
+		"option_all": "alle",
+		"range_aria": "Zeitraum",
+		"range_24h": "24h",
+		"range_7d": "7T",
+		"range_all": "alle",
+		"audit_loading": "Lade Audit…",
+		"audit_error_prefix": "Fehler: {error}",
+		"audit_empty": "Keine serverseitigen Entschlüsselungen. Der mana-ai Runner hat für diese Mission noch keine Records gelesen — entweder ist kein Key-Grant erteilt, oder die Mission nutzt nur plaintext Inputs (goals).",
+		"audit_col_time": "Zeit",
+		"audit_col_mission": "Mission",
+		"audit_col_record": "Record",
+		"audit_col_status": "Status",
+		"timeline_empty": "Noch keine AI-Aktivität. Sobald eine Mission läuft und Proposals approved werden, erscheinen hier die Änderungen.",
+		"event_count_title": "{n} Änderungen in dieser Iteration",
+		"revert_title": "Alle Änderungen dieser Iteration zurücknehmen",
+		"revert_running": "Läuft…",
+		"revert_label": "Rückgängig",
+		"event_link_title": "Zum Modul",
+		"confirm_revert": "Alle AI-Writes dieser Iteration zurücknehmen?",
+		"revert_summary_done": "{n} zurückgenommen",
+		"revert_summary_unsupported": "{n} nicht unterstützt",
+		"revert_summary_failed": "{n} fehlgeschlagen",
+		"revert_alert_failed": "Revert fehlgeschlagen — siehe Console."
+	}
+}

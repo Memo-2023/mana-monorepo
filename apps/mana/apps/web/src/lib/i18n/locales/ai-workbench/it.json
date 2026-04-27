@@ -1,0 +1,32 @@
+{
+	"list_view": {
+		"tab_timeline": "Timeline",
+		"tab_audit": "Accesso ai dati",
+		"label_module": "Modulo",
+		"label_mission": "Mission",
+		"label_agent": "Agent",
+		"option_all": "tutti",
+		"range_aria": "Periodo",
+		"range_24h": "24h",
+		"range_7d": "7g",
+		"range_all": "tutti",
+		"audit_loading": "Caricamento audit…",
+		"audit_error_prefix": "Errore: {error}",
+		"audit_empty": "Nessuna decifratura lato server. Il runner mana-ai non ha letto record per questa mission — non è stata concessa una key, oppure la mission usa solo input plaintext (goals).",
+		"audit_col_time": "Ora",
+		"audit_col_mission": "Mission",
+		"audit_col_record": "Record",
+		"audit_col_status": "Stato",
+		"timeline_empty": "Nessuna attività AI. Quando una mission viene eseguita e le proposte vengono approvate, i cambiamenti appaiono qui.",
+		"event_count_title": "{n} cambiamenti in questa iterazione",
+		"revert_title": "Annulla tutti i cambiamenti di questa iterazione",
+		"revert_running": "In corso…",
+		"revert_label": "Annulla",
+		"event_link_title": "Al modulo",
+		"confirm_revert": "Annullare tutte le scritture AI di questa iterazione?",
+		"revert_summary_done": "{n} annullati",
+		"revert_summary_unsupported": "{n} non supportati",
+		"revert_summary_failed": "{n} falliti",
+		"revert_alert_failed": "Annullamento non riuscito — vedi la console."
+	}
+}
