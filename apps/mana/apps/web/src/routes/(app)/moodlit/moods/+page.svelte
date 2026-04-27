@@ -39,7 +39,7 @@
 			colors: newColors,
 			animation: newAnimation,
 		});
-		toast.success(`"${newName}" erstellt`);
+		toast.success($_('moodlit.moodsPage.toast_created', { values: { name: newName } }));
 		newName = '';
 		showCreate = false;
 	}
@@ -65,27 +65,29 @@
 
 	async function deleteMood(mood: LocalMood) {
 		if (mood.isDefault) {
-			toast.error('Standard-Moods konnen nicht geloscht werden');
+			toast.error($_('moodlit.moodsPage.toast_default_protected'));
 			return;
 		}
 		await moodsStore.deleteMood(mood.id);
-		toast.success('Geloscht');
+		toast.success($_('moodlit.moodsPage.toast_deleted'));
 	}
 </script>
 
 <svelte:head>
-	<title>Moods - Moodlit - Mana</title>
+	<title>{$_('moodlit.moodsPage.page_title_html')}</title>
 </svelte:head>
 
 <RoutePage appId="moodlit" backHref="/moodlit">
 	<div class="mx-auto max-w-4xl">
 		<div class="mb-6 flex items-center justify-between">
-			<h1 class="text-3xl font-bold">Moods</h1>
+			<h1 class="text-3xl font-bold">{$_('moodlit.moodsPage.title')}</h1>
 			<button
 				onclick={() => (showCreate = !showCreate)}
 				class="rounded-lg bg-purple-600 px-4 py-2 font-medium text-white hover:bg-purple-700"
 			>
-				{showCreate ? 'Schliessen' : '+ Neues Mood'}
+				{showCreate
+					? $_('moodlit.moodsPage.action_close')
+					: $_('moodlit.moodsPage.action_new_mood')}
 			</button>
 		</div>
 
@@ -94,20 +96,21 @@
 				<div class="grid gap-4 md:grid-cols-2">
 					<div>
 						<label for="moodlit-name" class="mb-1 block text-sm font-medium text-muted-foreground"
-							>Name</label
+							>{$_('moodlit.moodsPage.label_name')}</label
 						>
 						<input
 							id="moodlit-name"
 							type="text"
 							bind:value={newName}
-							placeholder="Mein Mood"
+							placeholder={$_('moodlit.moodsPage.placeholder_name')}
 							class="w-full rounded-lg border border-border bg-input px-4 py-2 text-foreground"
 						/>
 					</div>
 					<div>
 						<label
 							for="moodlit-animation"
-							class="mb-1 block text-sm font-medium text-muted-foreground">Animation</label
+							class="mb-1 block text-sm font-medium text-muted-foreground"
+							>{$_('moodlit.moodsPage.label_animation')}</label
 						>
 						<select
 							id="moodlit-animation"
@@ -122,7 +125,9 @@
 						</select>
 					</div>
 					<div class="md:col-span-2">
-						<span class="mb-1 block text-sm font-medium text-muted-foreground">Farben</span>
+						<span class="mb-1 block text-sm font-medium text-muted-foreground"
+							>{$_('moodlit.moodsPage.label_colors')}</span
+						>
 						<div class="flex gap-2">
 							{#each newColors as color, i}
 								<input

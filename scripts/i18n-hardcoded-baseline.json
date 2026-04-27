@@ -261,7 +261,7 @@
 	"apps/mana/apps/web/src/routes/(app)/memoro/archive/+page.svelte": 2,
 	"apps/mana/apps/web/src/routes/(app)/memoro/tags/+page.svelte": 6,
 	"apps/mana/apps/web/src/routes/(app)/moodlit/+page.svelte": 3,
-	"apps/mana/apps/web/src/routes/(app)/moodlit/moods/+page.svelte": 9,
+	"apps/mana/apps/web/src/routes/(app)/moodlit/moods/+page.svelte": 5,
 	"apps/mana/apps/web/src/routes/(app)/moodlit/sequences/+page.svelte": 3,
 	"apps/mana/apps/web/src/routes/(app)/music/+page.svelte": 6,
 	"apps/mana/apps/web/src/routes/(app)/music/library/+page.svelte": 6,

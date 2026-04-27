@@ -74,5 +74,18 @@
 		"error": "Error",
 		"success": "Success",
 		"create": "Create"
+	},
+	"moodsPage": {
+		"page_title_html": "Moods - Moodlit - Mana",
+		"title": "Moods",
+		"action_close": "Close",
+		"action_new_mood": "+ New mood",
+		"label_name": "Name",
+		"placeholder_name": "My mood",
+		"label_animation": "Animation",
+		"label_colors": "Colors",
+		"toast_created": "\"{name}\" created",
+		"toast_default_protected": "Default moods can't be deleted",
+		"toast_deleted": "Deleted"
 	}
 }
