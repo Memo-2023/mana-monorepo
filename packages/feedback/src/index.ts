@@ -31,7 +31,6 @@ export {
 	type ReactionResponse,
 	type AdminPatchInput,
 	type ReactInput,
-	type VoteResponse,
 } from './api';
 
 // Services
@@ -43,10 +42,4 @@ export {
 export type { FeedbackServiceConfig, PublicFeedbackServiceConfig } from './types';
 
 // UI Components
-export { default as FeedbackPage } from './FeedbackPage.svelte';
-export { default as FeedbackForm } from './FeedbackForm.svelte';
-export { default as FeedbackList } from './FeedbackList.svelte';
-export { default as FeedbackCard } from './FeedbackCard.svelte';
-export { default as VoteButton } from './VoteButton.svelte';
 export { default as ReactionBar } from './ReactionBar.svelte';
-export { default as StatusBadge } from './StatusBadge.svelte';

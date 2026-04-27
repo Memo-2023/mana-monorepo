@@ -1324,16 +1324,6 @@ registerApp({
 });
 
 registerApp({
-	id: 'feedback',
-	name: 'Feedback',
-	color: '#8B5CF6',
-	icon: ChatCircleDots,
-	views: {
-		list: { load: () => import('$lib/modules/feedback/ListView.svelte') },
-	},
-});
-
-registerApp({
 	id: 'community',
 	name: 'Community',
 	color: '#F59E0B',

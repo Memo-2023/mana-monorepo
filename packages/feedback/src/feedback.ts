@@ -78,7 +78,6 @@ export interface Feedback {
 	status: FeedbackStatus;
 	isPublic: boolean;
 	adminResponse?: string;
-	voteCount: number;
 	displayHash?: string;
 	displayName?: string;
 	moduleContext?: string;
@@ -90,8 +89,6 @@ export interface Feedback {
 	updatedAt: string;
 	publishedAt?: string;
 	completedAt?: string;
-	// Legacy / derived for older UI surfaces:
-	userHasVoted?: boolean;
 }
 
 export const FEEDBACK_CATEGORY_LABELS: Record<FeedbackCategory, string> = {

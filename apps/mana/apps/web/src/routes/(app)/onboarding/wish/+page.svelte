@@ -138,7 +138,11 @@
 
 	{#if submittedDisplayName}
 		<aside class="preview" aria-live="polite">
-			Gesendet — sichtbar als <strong>{submittedDisplayName}</strong>
+			<div>Gesendet — sichtbar als <strong>{submittedDisplayName}</strong></div>
+			<div class="reward-chip">
+				<span class="reward-amount">+5</span>
+				<span class="reward-label">Mana Credits</span>
+			</div>
 		</aside>
 	{/if}
 </div>
@@ -319,11 +323,52 @@
 	}
 
 	.preview {
-		padding: 0.625rem 0.875rem;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 0.875rem;
 		border-radius: 0.625rem;
 		background: hsl(var(--color-primary) / 0.1);
 		color: hsl(var(--color-primary));
 		font-size: 0.8125rem;
 		text-align: center;
+	}
+
+	.reward-chip {
+		display: inline-flex;
+		align-items: baseline;
+		gap: 0.375rem;
+		padding: 0.4375rem 0.75rem;
+		border-radius: 999px;
+		background: linear-gradient(
+			135deg,
+			hsl(var(--color-primary) / 0.18),
+			hsl(var(--color-primary) / 0.08)
+		);
+		border: 1px solid hsl(var(--color-primary) / 0.35);
+		font-weight: 600;
+		animation: reward-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+	}
+
+	.reward-amount {
+		font-size: 1rem;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.reward-label {
+		font-size: 0.8125rem;
+		opacity: 0.85;
+	}
+
+	@keyframes reward-in {
+		from {
+			opacity: 0;
+			transform: translateY(-6px) scale(0.92);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0) scale(1);
+		}
 	}
 </style>

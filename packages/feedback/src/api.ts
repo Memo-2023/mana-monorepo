@@ -73,10 +73,3 @@ export interface AdminPatchInput {
 }
 
 export type ReactInput = { emoji: ReactionEmoji };
-
-export interface VoteResponse {
-	success: boolean;
-	newVoteCount?: number;
-	userHasVoted?: boolean;
-	error?: string;
-}

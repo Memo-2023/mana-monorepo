@@ -16,7 +16,6 @@ import type {
 	ReactionResponse,
 	AdminPatchInput,
 	ReactInput,
-	VoteResponse,
 } from './api';
 import type { FeedbackServiceConfig } from './types';
 import type { PublicFeedbackItem, ReactionEmoji } from './feedback';
@@ -148,27 +147,6 @@ export function createFeedbackService(config: FeedbackServiceConfig) {
 		});
 	}
 
-	// ── Legacy (back-compat shims) ─────────────────────────────────
-	// Older callers still use vote/unvote — translate to 👍-reaction toggles.
-
-	async function vote(feedbackId: string): Promise<VoteResponse> {
-		const res = await toggleReaction(feedbackId, '👍');
-		return {
-			success: true,
-			newVoteCount: res.reactions['👍'] ?? 0,
-			userHasVoted: res.userHasReacted,
-		};
-	}
-	const unvote = vote; // toggle, semantically idempotent for legacy callers
-	async function toggleVote(feedbackId: string): Promise<VoteResponse> {
-		return vote(feedbackId);
-	}
-
-	async function getPublicFeedback(query?: FeedbackQueryParams): Promise<FeedbackListResponse> {
-		const items = await getPublicFeed(query);
-		return { items: items as unknown as FeedbackListResponse['items'] };
-	}
-
 	return {
 		createFeedback,
 		getPublicFeed,
@@ -180,11 +158,6 @@ export function createFeedbackService(config: FeedbackServiceConfig) {
 		deleteFeedback,
 		adminListAll,
 		adminPatch,
-		// Legacy (deprecated):
-		getPublicFeedback,
-		vote,
-		unvote,
-		toggleVote,
 	};
 }
 

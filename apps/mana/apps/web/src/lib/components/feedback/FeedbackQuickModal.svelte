@@ -105,6 +105,10 @@
 						Dein Feedback ist eingegangen — sichtbar als
 						<strong>{submittedDisplayName}</strong>.
 					</p>
+					<div class="reward-chip" aria-live="polite">
+						<span class="reward-amount">+5</span>
+						<span class="reward-label">Mana Credits</span>
+					</div>
 					{#if isPublic}
 						<p class="muted">Es taucht in der Community-Page auf, sobald wir es freigeben.</p>
 					{:else}
@@ -259,6 +263,45 @@
 	.success .btn-primary {
 		align-self: flex-end;
 		margin-top: 0.5rem;
+	}
+
+	.reward-chip {
+		align-self: flex-start;
+		display: inline-flex;
+		align-items: baseline;
+		gap: 0.375rem;
+		padding: 0.4375rem 0.75rem;
+		border-radius: 999px;
+		background: linear-gradient(
+			135deg,
+			hsl(var(--color-primary) / 0.18),
+			hsl(var(--color-primary) / 0.08)
+		);
+		color: hsl(var(--color-primary));
+		border: 1px solid hsl(var(--color-primary) / 0.3);
+		font-weight: 600;
+		animation: reward-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+	}
+
+	.reward-amount {
+		font-size: 1rem;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.reward-label {
+		font-size: 0.8125rem;
+		opacity: 0.85;
+	}
+
+	@keyframes reward-in {
+		from {
+			opacity: 0;
+			transform: translateY(-6px) scale(0.92);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0) scale(1);
+		}
 	}
 
 	.context-badge {
