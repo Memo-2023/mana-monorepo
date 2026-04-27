@@ -21,11 +21,15 @@ export const creditsSchema = pgSchema('credits');
 
 // ─── Enums ──────────────────────────────────────────────────
 
+// Enum values must mirror cross-service consumers. New values need a
+// hand-authored SQL migration (drizzle-kit push won't add enum members
+// reliably across mana-credits' own pgEnum installs).
 export const transactionTypeEnum = pgEnum('transaction_type', [
 	'purchase',
 	'usage',
 	'refund',
 	'gift',
+	'grant',
 ]);
 
 export const transactionStatusEnum = pgEnum('transaction_status', [

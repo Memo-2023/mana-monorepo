@@ -75,6 +75,14 @@ export const internalRedeemPendingSchema = z.object({
 	email: z.string().email(),
 });
 
+export const internalGrantSchema = z.object({
+	userId: z.string().min(1),
+	amount: z.number().int().positive(),
+	reason: z.string().min(1).max(64),
+	referenceId: z.string().min(1).max(128),
+	description: z.string().max(256).optional(),
+});
+
 // ─── Reservations (2-phase debit) ──────────────────────────
 
 export const internalReserveSchema = z.object({

@@ -49,7 +49,6 @@ export const userFeedback = feedbackSchema.table(
 		status: feedbackStatusEnum('status').default('submitted').notNull(),
 		isPublic: boolean('is_public').default(true).notNull(),
 		adminResponse: text('admin_response'),
-		voteCount: integer('vote_count').default(0).notNull(),
 		// Public-community fields (Phase 2.1):
 		// `display_hash` = SHA256(userId + serviceKey), never exposed.
 		// `display_name` = deterministic Tier-pseudonym derived from hash.
@@ -102,6 +101,21 @@ export const feedbackReactions = feedbackSchema.table(
 	(table) => ({
 		uniq: unique('feedback_reactions_unique').on(table.feedbackId, table.userId, table.emoji),
 		feedbackIdx: index('feedback_reactions_feedback_idx').on(table.feedbackId),
+	})
+);
+
+// Append-only log of community-credit grants. Used as a sliding-window
+// rate-limit counter ("max 10 grants per user per 24h") and as an audit
+// trail. Cleanup of rows older than 7d is handled by a nightly cron.
+export const feedbackGrantLog = feedbackSchema.table(
+	'feedback_grant_log',
+	{
+		userId: text('user_id').notNull(),
+		grantedAt: timestamp('granted_at', { withTimezone: true }).defaultNow().notNull(),
+		reason: text('reason').notNull(),
+	},
+	(table) => ({
+		recentIdx: index('feedback_grant_log_recent_idx').on(table.userId, table.grantedAt),
 	})
 );
 

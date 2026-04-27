@@ -14,6 +14,7 @@ import {
 	internalReserveSchema,
 	internalCommitSchema,
 	internalRefundReservationSchema,
+	internalGrantSchema,
 } from '../lib/validation';
 
 export function createInternalRoutes(
@@ -41,6 +42,11 @@ export function createInternalRoutes(
 				body.appId,
 				body.metadata
 			);
+			return c.json(result);
+		})
+		.post('/credits/grant', async (c) => {
+			const body = internalGrantSchema.parse(await c.req.json());
+			const result = await creditsService.grantCredits(body);
 			return c.json(result);
 		})
 		.post('/credits/init', async (c) => {

@@ -20,7 +20,14 @@ import { createPublicFeedbackRoutes } from './routes/public';
 const config = loadConfig();
 const db = getDb(config.databaseUrl);
 
-const feedbackService = new FeedbackService(db, config.manaLlmUrl, config.pseudonymSecret);
+const feedbackService = new FeedbackService(
+	db,
+	config.manaLlmUrl,
+	config.pseudonymSecret,
+	config.manaCreditsUrl,
+	config.serviceKey,
+	config.founderUserIds
+);
 
 const app = new Hono();
 

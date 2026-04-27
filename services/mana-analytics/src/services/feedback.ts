@@ -12,11 +12,30 @@
  * column.
  */
 
-import { eq, and, desc, sql, isNull } from 'drizzle-orm';
-import { userFeedback, feedbackReactions } from '../db/schema/feedback';
+import { eq, and, desc, sql, isNull, gte, inArray } from 'drizzle-orm';
+import { userFeedback, feedbackReactions, feedbackGrantLog } from '../db/schema/feedback';
 import type { Database } from '../db/connection';
 import { NotFoundError, BadRequestError } from '../lib/errors';
 import { createDisplayHash, generateDisplayName } from '../lib/pseudonym';
+
+/**
+ * Reward amounts (community-credit grants). Lives next to the policy
+ * so it's obvious in code review. Tweak here, no DB migration needed.
+ */
+const REWARD = {
+	submit: 5,
+	shipped: 500,
+	reactionMatch: 25,
+} as const;
+
+/** Min chars before a submit qualifies for the +5 bonus (anti-junk). */
+const MIN_SUBMIT_CHARS_FOR_BONUS = 20;
+
+/** Max grants per user per 24h (sliding window via feedback_grant_log). */
+const MAX_GRANTS_PER_24H = 10;
+
+/** Reactioner-bonus is only paid for these "I want this"-emojis, not 🤔. */
+const SHIP_BONUS_REACTION_EMOJIS = ['👍', '🚀'] as const;
 
 /**
  * Allowed reaction emojis with sort-score weights.
@@ -54,7 +73,13 @@ export class FeedbackService {
 		private db: Database,
 		private llmUrl: string,
 		/** Secret used to derive non-reversible per-user display hashes. */
-		private pseudonymSecret: string
+		private pseudonymSecret: string,
+		/** mana-credits internal API base, used for community grants. */
+		private creditsUrl: string,
+		/** Service-key for X-Service-Key header on internal calls. */
+		private serviceKey: string,
+		/** UserIds that should not receive +5 / +500 community grants. */
+		private founderUserIds: Set<string>
 	) {}
 
 	// ── Submission ────────────────────────────────────────────────────
@@ -104,7 +129,68 @@ export class FeedbackService {
 			})
 			.returning();
 
+		// Fire-and-forget reward grant. Failure must not block the
+		// submission — credits service is non-critical for the user
+		// flow. Replies (parentId set) skip the bonus to avoid
+		// rewarding chatter; only top-level wishes count.
+		if (!data.parentId) {
+			void this.tryGrantSubmitBonus(feedback);
+		}
+
 		return feedback;
+	}
+
+	private async tryGrantSubmitBonus(feedback: typeof userFeedback.$inferSelect): Promise<void> {
+		try {
+			if (this.founderUserIds.has(feedback.userId)) return;
+			if (feedback.feedbackText.trim().length < MIN_SUBMIT_CHARS_FOR_BONUS) return;
+			if (await this.exceedsGrantRateLimit(feedback.userId)) return;
+
+			await this.grantCredits({
+				userId: feedback.userId,
+				amount: REWARD.submit,
+				reason: 'feedback_submit',
+				referenceId: feedback.id,
+				description: `Danke für dein Feedback (${feedback.category})`,
+			});
+		} catch (err) {
+			console.warn('[feedback] submit bonus failed (non-blocking):', err);
+		}
+	}
+
+	private async exceedsGrantRateLimit(userId: string): Promise<boolean> {
+		const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+		const rows = await this.db
+			.select({ ct: sql<number>`count(*)::int` })
+			.from(feedbackGrantLog)
+			.where(and(eq(feedbackGrantLog.userId, userId), gte(feedbackGrantLog.grantedAt, since)));
+		return (rows[0]?.ct ?? 0) >= MAX_GRANTS_PER_24H;
+	}
+
+	private async grantCredits(args: {
+		userId: string;
+		amount: number;
+		reason: string;
+		referenceId: string;
+		description?: string;
+	}): Promise<void> {
+		const res = await fetch(`${this.creditsUrl}/api/v1/internal/credits/grant`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-Service-Key': this.serviceKey,
+			},
+			body: JSON.stringify(args),
+		});
+		if (!res.ok) {
+			throw new Error(`grant failed (${res.status}): ${await res.text().catch(() => '')}`);
+		}
+		const body = (await res.json()) as { alreadyGranted?: boolean };
+		// Only count fresh grants against the rate limit. Idempotent
+		// re-tries (alreadyGranted=true) shouldn't burn the budget.
+		if (!body.alreadyGranted) {
+			await this.db.insert(feedbackGrantLog).values({ userId: args.userId, reason: args.reason });
+		}
 	}
 
 	// ── Public reads (no auth) ────────────────────────────────────────
@@ -305,6 +391,13 @@ export class FeedbackService {
 		feedbackId: string,
 		patch: { status?: string; adminResponse?: string; isPublic?: boolean }
 	) {
+		const [before] = await this.db
+			.select()
+			.from(userFeedback)
+			.where(eq(userFeedback.id, feedbackId))
+			.limit(1);
+		if (!before) throw new NotFoundError('Feedback not found');
+
 		const update: Record<string, unknown> = { updatedAt: new Date() };
 		if (patch.status !== undefined) update.status = patch.status;
 		if (patch.adminResponse !== undefined) update.adminResponse = patch.adminResponse;
@@ -315,8 +408,65 @@ export class FeedbackService {
 			.set(update)
 			.where(eq(userFeedback.id, feedbackId))
 			.returning();
-		if (!row) throw new NotFoundError('Feedback not found');
+
+		// Ship-Bonus: only on the FRESH 'completed' transition. Status-
+		// flapping ('completed' → 'in_progress' → 'completed') won't
+		// double-pay because the credit grant is keyed off
+		// `${id}_shipped`, but skipping the trigger entirely keeps the
+		// reactioner-bonus loop from spamming as well.
+		if (before.status !== 'completed' && row.status === 'completed') {
+			void this.tryGrantShipBonus(row);
+		}
+
 		return row;
+	}
+
+	private async tryGrantShipBonus(feedback: typeof userFeedback.$inferSelect): Promise<void> {
+		try {
+			// Original wisher gets the +500.
+			if (!this.founderUserIds.has(feedback.userId)) {
+				await this.grantCredits({
+					userId: feedback.userId,
+					amount: REWARD.shipped,
+					reason: 'feedback_shipped',
+					referenceId: `${feedback.id}_shipped`,
+					description: `Dein Wunsch ›${feedback.title ?? feedback.feedbackText.slice(0, 40)}‹ ist live`,
+				});
+			}
+
+			// Reactioners who pushed for this with 👍 or 🚀 each get +25.
+			const reactionRows = await this.db
+				.select({ userId: feedbackReactions.userId, emoji: feedbackReactions.emoji })
+				.from(feedbackReactions)
+				.where(
+					and(
+						eq(feedbackReactions.feedbackId, feedback.id),
+						inArray(feedbackReactions.emoji, [...SHIP_BONUS_REACTION_EMOJIS])
+					)
+				);
+
+			// One reward per user even if they reacted with multiple emojis.
+			const supporters = new Set<string>();
+			for (const r of reactionRows) supporters.add(r.userId);
+			supporters.delete(feedback.userId); // author already got the big bonus
+			for (const fid of this.founderUserIds) supporters.delete(fid);
+
+			for (const supporter of supporters) {
+				try {
+					await this.grantCredits({
+						userId: supporter,
+						amount: REWARD.reactionMatch,
+						reason: 'feedback_reaction_match',
+						referenceId: `${feedback.id}_reaction_${supporter}`,
+						description: `Du hast ›${feedback.title ?? '(Wunsch)'}‹ unterstützt — danke!`,
+					});
+				} catch (err) {
+					console.warn('[feedback] reactioner-bonus failed for', supporter, err);
+				}
+			}
+		} catch (err) {
+			console.warn('[feedback] ship bonus failed (non-blocking):', err);
+		}
 	}
 
 	// ── LLM helpers ───────────────────────────────────────────────────
