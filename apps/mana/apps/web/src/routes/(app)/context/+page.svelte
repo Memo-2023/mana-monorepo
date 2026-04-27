@@ -9,6 +9,7 @@
 	} from '$lib/modules/context/queries';
 	import { documentTable } from '$lib/modules/context/collections';
 	import { RoutePage } from '$lib/components/shell';
+	import { _ } from 'svelte-i18n';
 
 	const allSpaces = useAllSpaces();
 	const allDocuments = useAllDocuments();
@@ -20,7 +21,7 @@
 	const recentDocs = $derived(documents.slice(0, 6));
 
 	async function handleDeleteDoc(id: string) {
-		if (!confirm('Dokument wirklich loeschen?')) return;
+		if (!confirm($_('context.home.confirm_delete_doc'))) return;
 		await documentTable.delete(id);
 	}
 
@@ -33,14 +34,14 @@
 </script>
 
 <svelte:head>
-	<title>Context - Mana</title>
+	<title>{$_('context.home.page_title_html')}</title>
 </svelte:head>
 
 <RoutePage appId="context">
 	<div class="mx-auto max-w-5xl">
 		<header class="mb-8">
-			<h1 class="text-2xl font-bold">Context</h1>
-			<p class="mt-1 text-sm opacity-60">Dein Wissensmanagement Hub</p>
+			<h1 class="text-2xl font-bold">{$_('context.home.title')}</h1>
+			<p class="mt-1 text-sm opacity-60">{$_('context.home.subtitle')}</p>
 		</header>
 
 		<!-- Stats -->
@@ -49,25 +50,25 @@
 				class="rounded-xl border border-border-strong bg-white p-4 text-center dark:border-border dark:bg-card"
 			>
 				<div class="text-2xl font-bold">{spaces.length}</div>
-				<div class="mt-1 text-xs opacity-60">Spaces</div>
+				<div class="mt-1 text-xs opacity-60">{$_('context.home.stat_spaces')}</div>
 			</div>
 			<div
 				class="rounded-xl border border-border-strong bg-white p-4 text-center dark:border-border dark:bg-card"
 			>
 				<div class="text-2xl font-bold">{stats.total}</div>
-				<div class="mt-1 text-xs opacity-60">Dokumente</div>
+				<div class="mt-1 text-xs opacity-60">{$_('context.home.stat_documents')}</div>
 			</div>
 			<div
 				class="rounded-xl border border-border-strong bg-white p-4 text-center dark:border-border dark:bg-card"
 			>
 				<div class="text-2xl font-bold">{stats.totalWords.toLocaleString()}</div>
-				<div class="mt-1 text-xs opacity-60">Woerter</div>
+				<div class="mt-1 text-xs opacity-60">{$_('context.home.stat_words')}</div>
 			</div>
 			<div
 				class="rounded-xl border border-border-strong bg-white p-4 text-center dark:border-border dark:bg-card"
 			>
 				<div class="text-2xl font-bold">{stats.text}/{stats.context}/{stats.prompt}</div>
-				<div class="mt-1 text-xs opacity-60">Text/Kontext/Prompt</div>
+				<div class="mt-1 text-xs opacity-60">{$_('context.home.stat_split_label')}</div>
 			</div>
 		</div>
 
@@ -78,21 +79,21 @@
 				class="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
 			>
 				<Folder size={16} />
-				Spaces
+				{$_('context.home.action_spaces')}
 			</a>
 			<a
 				href="/context/documents"
 				class="flex items-center gap-2 rounded-lg border border-border-strong px-4 py-2 text-sm font-medium transition-colors hover:bg-muted dark:border-border dark:hover:bg-muted"
 			>
 				<FileText size={16} />
-				Alle Dokumente
+				{$_('context.home.action_all_documents')}
 			</a>
 		</div>
 
 		<!-- Pinned Spaces -->
 		{#if pinnedSpaces.length > 0}
 			<section class="mb-8">
-				<h2 class="mb-4 text-lg font-semibold">Angeheftete Spaces</h2>
+				<h2 class="mb-4 text-lg font-semibold">{$_('context.home.section_pinned')}</h2>
 				<div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
 					{#each pinnedSpaces as space}
 						<a
@@ -122,9 +123,9 @@
 		{#if recentDocs.length > 0}
 			<section>
 				<div class="mb-4 flex items-center justify-between">
-					<h2 class="text-lg font-semibold">Zuletzt bearbeitet</h2>
+					<h2 class="text-lg font-semibold">{$_('context.home.section_recent')}</h2>
 					<a href="/context/documents" class="text-sm text-indigo-600 hover:underline"
-						>Alle anzeigen</a
+						>{$_('context.home.action_show_all')}</a
 					>
 				</div>
 				<div class="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -147,7 +148,7 @@
 											{doc.type}
 										</span>
 										{#if doc.pinned}
-											<span class="text-xs opacity-40">Angeheftet</span>
+											<span class="text-xs opacity-40">{$_('context.home.badge_pinned')}</span>
 										{/if}
 									</div>
 									<h3 class="mt-1 truncate font-semibold">{doc.title}</h3>
@@ -163,7 +164,7 @@
 										handleTogglePinDoc(doc.id);
 									}}
 									class="ml-2 rounded p-1 opacity-0 transition-opacity hover:bg-muted group-hover:opacity-100 dark:hover:bg-muted"
-									title={doc.pinned ? 'Loslassen' : 'Anheften'}
+									title={doc.pinned ? $_('context.common.unpin') : $_('context.common.pin')}
 								>
 									{doc.pinned ? '&#9733;' : '&#9734;'}
 								</button>
@@ -187,16 +188,16 @@
 				class="rounded-xl border-2 border-dashed border-border-strong p-12 text-center dark:border-border"
 			>
 				<FileText size={48} class="mx-auto mb-4 opacity-20" />
-				<h3 class="text-lg font-medium opacity-60">Noch keine Dokumente</h3>
+				<h3 class="text-lg font-medium opacity-60">{$_('context.home.empty_title')}</h3>
 				<p class="mt-1 text-sm opacity-40">
-					Erstelle deinen ersten Space und beginne mit dem Schreiben.
+					{$_('context.home.empty_hint')}
 				</p>
 				<a
 					href="/context/spaces"
 					class="mt-4 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
 				>
 					<Plus size={16} />
-					Ersten Space erstellen
+					{$_('context.home.empty_action')}
 				</a>
 			</div>
 		{/if}
