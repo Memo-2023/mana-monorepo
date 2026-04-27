@@ -12,8 +12,10 @@ COPY packages/shared-hono ./packages/shared-hono
 COPY packages/shared-logger ./packages/shared-logger
 COPY packages/shared-types ./packages/shared-types
 
-# Install only mana-credits and its workspace deps
-RUN pnpm install --filter @mana/credits... --no-frozen-lockfile --ignore-scripts
+# Install only mana-credits-service and its workspace deps.
+# Note the suffix — the workspace name is `@mana/credits-service`, not
+# `@mana/credits` (which is a different package under packages/credits).
+RUN pnpm install --filter @mana/credits-service... --no-frozen-lockfile --ignore-scripts
 
 # Runtime stage: bun
 FROM oven/bun:1 AS production
