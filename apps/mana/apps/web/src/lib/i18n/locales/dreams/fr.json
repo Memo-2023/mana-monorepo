@@ -1,4 +1,28 @@
 {
+	"symbol_detail": {
+		"back": "← Symboles",
+		"saved": "Enregistré",
+		"action_merge": "Fusionner…",
+		"action_delete": "Supprimer",
+		"merge_label": "Fusionner « {name} » avec :",
+		"merge_select_default": "– Choisir un symbole –",
+		"merge_confirm": "OK",
+		"merge_cancel": "Annuler",
+		"empty_not_found": "Symbole introuvable.",
+		"name_placeholder": "Nom du symbole",
+		"count_singular": "rêve",
+		"count_plural": "rêves",
+		"color_aria": "Couleur {color}",
+		"label_meaning": "Ma signification",
+		"meaning_placeholder": "Que signifie ce symbole pour toi ? (facultatif)",
+		"label_mood_dist": "Distribution des humeurs",
+		"label_cooccurring": "Souvent avec",
+		"cooccurring_title": "Passer à « {name} »",
+		"label_dream_list": "Rêves avec ce symbole",
+		"mood_unknown": "Inconnu",
+		"confirm_delete": "Vraiment supprimer le symbole « {name} » ? Il sera retiré de tous les rêves.",
+		"confirm_merge": "Fusionner « {source} » dans « {target} » ? Tous les rêves seront réécrits."
+	},
 	"moods": {
 		"angenehm": "Agréable",
 		"neutral": "Neutre",

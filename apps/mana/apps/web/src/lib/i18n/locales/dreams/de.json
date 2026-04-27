@@ -1,4 +1,28 @@
 {
+	"symbol_detail": {
+		"back": "← Symbole",
+		"saved": "Gespeichert",
+		"action_merge": "Zusammenführen…",
+		"action_delete": "Löschen",
+		"merge_label": "\"{name}\" zusammenführen mit:",
+		"merge_select_default": "– Symbol wählen –",
+		"merge_confirm": "OK",
+		"merge_cancel": "Abbrechen",
+		"empty_not_found": "Symbol nicht gefunden.",
+		"name_placeholder": "Symbolname",
+		"count_singular": "Traum",
+		"count_plural": "Träume",
+		"color_aria": "Farbe {color}",
+		"label_meaning": "Meine Bedeutung",
+		"meaning_placeholder": "Was bedeutet dieses Symbol für dich? (optional)",
+		"label_mood_dist": "Stimmungs-Verteilung",
+		"label_cooccurring": "Häufig zusammen mit",
+		"cooccurring_title": "Zu \"{name}\" wechseln",
+		"label_dream_list": "Träume mit diesem Symbol",
+		"mood_unknown": "Unbekannt",
+		"confirm_delete": "Symbol \"{name}\" wirklich löschen? Es wird aus allen Träumen entfernt.",
+		"confirm_merge": "\"{source}\" in \"{target}\" zusammenführen? Alle Träume werden umgeschrieben."
+	},
 	"moods": {
 		"angenehm": "Angenehm",
 		"neutral": "Neutral",

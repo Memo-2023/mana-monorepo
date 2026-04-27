@@ -1,4 +1,28 @@
 {
+	"symbol_detail": {
+		"back": "← Símbolos",
+		"saved": "Guardado",
+		"action_merge": "Fusionar…",
+		"action_delete": "Eliminar",
+		"merge_label": "Fusionar «{name}» con:",
+		"merge_select_default": "– Elige símbolo –",
+		"merge_confirm": "OK",
+		"merge_cancel": "Cancelar",
+		"empty_not_found": "Símbolo no encontrado.",
+		"name_placeholder": "Nombre del símbolo",
+		"count_singular": "sueño",
+		"count_plural": "sueños",
+		"color_aria": "Color {color}",
+		"label_meaning": "Mi significado",
+		"meaning_placeholder": "¿Qué significa este símbolo para ti? (opcional)",
+		"label_mood_dist": "Distribución de ánimos",
+		"label_cooccurring": "A menudo con",
+		"cooccurring_title": "Cambiar a «{name}»",
+		"label_dream_list": "Sueños con este símbolo",
+		"mood_unknown": "Desconocido",
+		"confirm_delete": "¿Eliminar realmente el símbolo «{name}»? Se quitará de todos los sueños.",
+		"confirm_merge": "¿Fusionar «{source}» en «{target}»? Todos los sueños se reescribirán."
+	},
 	"moods": {
 		"angenehm": "Agradable",
 		"neutral": "Neutro",

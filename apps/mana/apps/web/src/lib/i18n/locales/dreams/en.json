@@ -1,4 +1,28 @@
 {
+	"symbol_detail": {
+		"back": "← Symbols",
+		"saved": "Saved",
+		"action_merge": "Merge…",
+		"action_delete": "Delete",
+		"merge_label": "Merge \"{name}\" with:",
+		"merge_select_default": "– Pick symbol –",
+		"merge_confirm": "OK",
+		"merge_cancel": "Cancel",
+		"empty_not_found": "Symbol not found.",
+		"name_placeholder": "Symbol name",
+		"count_singular": "dream",
+		"count_plural": "dreams",
+		"color_aria": "Color {color}",
+		"label_meaning": "My meaning",
+		"meaning_placeholder": "What does this symbol mean to you? (optional)",
+		"label_mood_dist": "Mood distribution",
+		"label_cooccurring": "Often together with",
+		"cooccurring_title": "Switch to \"{name}\"",
+		"label_dream_list": "Dreams with this symbol",
+		"mood_unknown": "Unknown",
+		"confirm_delete": "Really delete symbol \"{name}\"? It will be removed from all dreams.",
+		"confirm_merge": "Merge \"{source}\" into \"{target}\"? All dreams will be rewritten."
+	},
 	"moods": {
 		"angenehm": "Pleasant",
 		"neutral": "Neutral",
