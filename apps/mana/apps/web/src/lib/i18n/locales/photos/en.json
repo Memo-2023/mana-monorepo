@@ -127,5 +127,13 @@
 		"confirm": "Confirm",
 		"yes": "Yes",
 		"no": "No"
+	},
+	"detail_modal": {
+		"resolution": "Resolution",
+		"size": "Size",
+		"date": "Date",
+		"location_resolving": "Resolving…",
+		"open_in_osm": "Open in OpenStreetMap →",
+		"action_download": "Download"
 	}
 }

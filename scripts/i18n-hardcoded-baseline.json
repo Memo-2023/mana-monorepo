@@ -147,7 +147,6 @@
 	"apps/mana/apps/web/src/lib/modules/notes/ListView.svelte": 4,
 	"apps/mana/apps/web/src/lib/modules/photos/components/albums/CreateAlbumModal.svelte": 3,
 	"apps/mana/apps/web/src/lib/modules/photos/components/filters/FilterBar.svelte": 8,
-	"apps/mana/apps/web/src/lib/modules/photos/components/gallery/PhotoDetailModal.svelte": 9,
 	"apps/mana/apps/web/src/lib/modules/photos/ListView.svelte": 4,
 	"apps/mana/apps/web/src/lib/modules/picture/components/ImageLightbox.svelte": 3,
 	"apps/mana/apps/web/src/lib/modules/picture/components/ReferenceImagePicker.svelte": 1,

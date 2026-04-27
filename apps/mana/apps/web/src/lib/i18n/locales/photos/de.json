@@ -127,5 +127,13 @@
 		"confirm": "Bestätigen",
 		"yes": "Ja",
 		"no": "Nein"
+	},
+	"detail_modal": {
+		"resolution": "Auflösung",
+		"size": "Größe",
+		"date": "Datum",
+		"location_resolving": "Wird ermittelt…",
+		"open_in_osm": "In OpenStreetMap öffnen →",
+		"action_download": "Download"
 	}
 }

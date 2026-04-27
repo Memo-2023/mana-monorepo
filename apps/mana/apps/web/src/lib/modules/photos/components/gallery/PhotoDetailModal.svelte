@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { _ } from 'svelte-i18n';
+	import { _, locale } from 'svelte-i18n';
+	import { get } from 'svelte/store';
 	import type { Photo } from '$lib/modules/photos/types';
 	import { photoStore } from '$lib/modules/photos/stores/photos.svelte';
 	import { CaretRight, DownloadSimple, Heart, MapPin, X } from '@mana/shared-icons';
@@ -51,7 +52,7 @@
 
 	function formatDate(date: string | Date | null | undefined) {
 		if (!date) return '-';
-		return new Date(date).toLocaleDateString('de-DE', {
+		return new Date(date).toLocaleDateString(get(locale) ?? 'de', {
 			day: '2-digit',
 			month: '2-digit',
 			year: 'numeric',
@@ -83,7 +84,7 @@
 		{#if showInfo}
 			<div class="info-panel">
 				<div class="info-header">
-					<h3 class="font-medium">Details</h3>
+					<h3 class="font-medium">{$_('photos.photo.details')}</h3>
 					<button class="icon-btn" onclick={() => (showInfo = false)}>
 						<CaretRight size={20} />
 					</button>
@@ -92,35 +93,35 @@
 				<div class="info-actions">
 					<button class="action-btn" class:favorited={photo.isFavorited} onclick={handleFavorite}>
 						<Heart size={20} />
-						{photo.isFavorited ? 'Favorit entfernen' : 'Favorit'}
+						{photo.isFavorited ? $_('photos.photo.unfavorite') : $_('photos.photo.favorite')}
 					</button>
 					<a class="action-btn" href={photo.url} download target="_blank" rel="noopener noreferrer">
 						<DownloadSimple size={20} />
-						Download
+						{$_('photos.detail_modal.action_download')}
 					</a>
 				</div>
 
 				<div class="info-section">
-					<h4 class="info-label">Auflösung</h4>
+					<h4 class="info-label">{$_('photos.detail_modal.resolution')}</h4>
 					<p class="info-value">
 						{photo.width && photo.height ? `${photo.width} x ${photo.height}` : '-'}
 					</p>
 				</div>
 
 				<div class="info-section">
-					<h4 class="info-label">Größe</h4>
+					<h4 class="info-label">{$_('photos.detail_modal.size')}</h4>
 					<p class="info-value">{formatSize(photo.size)}</p>
 				</div>
 
 				<div class="info-section">
-					<h4 class="info-label">Datum</h4>
+					<h4 class="info-label">{$_('photos.detail_modal.date')}</h4>
 					<p class="info-value">{formatDate(photo.exif?.dateTaken || photo.createdAt)}</p>
 				</div>
 
 				{#if photo.exif}
 					{#if photo.exif.cameraMake || photo.exif.cameraModel}
 						<div class="info-section">
-							<h4 class="info-label">Kamera</h4>
+							<h4 class="info-label">{$_('photos.exif.camera')}</h4>
 							<p class="info-value">
 								{[photo.exif.cameraMake, photo.exif.cameraModel].filter(Boolean).join(' ')}
 							</p>
@@ -129,28 +130,28 @@
 
 					{#if photo.exif.focalLength}
 						<div class="info-section">
-							<h4 class="info-label">Brennweite</h4>
+							<h4 class="info-label">{$_('photos.exif.focalLength')}</h4>
 							<p class="info-value">{photo.exif.focalLength}</p>
 						</div>
 					{/if}
 
 					{#if photo.exif.aperture}
 						<div class="info-section">
-							<h4 class="info-label">Blende</h4>
+							<h4 class="info-label">{$_('photos.exif.aperture')}</h4>
 							<p class="info-value">f/{photo.exif.aperture}</p>
 						</div>
 					{/if}
 
 					{#if photo.exif.iso}
 						<div class="info-section">
-							<h4 class="info-label">ISO</h4>
+							<h4 class="info-label">{$_('photos.exif.iso')}</h4>
 							<p class="info-value">ISO {photo.exif.iso}</p>
 						</div>
 					{/if}
 
 					{#if photo.exif.gpsLatitude && photo.exif.gpsLongitude}
 						<div class="info-section">
-							<h4 class="info-label">Standort</h4>
+							<h4 class="info-label">{$_('photos.exif.location')}</h4>
 							{#if locationLabel}
 								<p class="info-value location-line">
 									<MapPin size={12} />
@@ -164,7 +165,9 @@
 									</p>
 								{/if}
 							{:else}
-								<p class="info-value location-loading">Wird ermittelt…</p>
+								<p class="info-value location-loading">
+									{$_('photos.detail_modal.location_resolving')}
+								</p>
 							{/if}
 							<a
 								class="info-value location-map-link"
@@ -172,7 +175,7 @@
 								target="_blank"
 								rel="noopener noreferrer"
 							>
-								In OpenStreetMap öffnen →
+								{$_('photos.detail_modal.open_in_osm')}
 							</a>
 						</div>
 					{/if}
@@ -180,7 +183,7 @@
 
 				{#if photo.tags && photo.tags.length > 0}
 					<div class="info-section">
-						<h4 class="info-label">Tags</h4>
+						<h4 class="info-label">{$_('photos.photo.tags')}</h4>
 						<div class="flex flex-wrap gap-2">
 							{#each photo.tags as tag}
 								<TagChip name={tag.name} color={tag.color} />
