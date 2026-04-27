@@ -85,12 +85,18 @@
 		"to": "Au",
 		"hasLocation": "Avec localisation",
 		"sortBy": "Trier par",
+		"sortByShort": "Tri",
 		"date": "Date",
+		"createdAt": "Créé",
 		"size": "Taille",
 		"sortOrder": "Ordre",
 		"asc": "Croissant",
 		"desc": "Décroissant",
-		"clear": "Effacer les filtres"
+		"newestFirst": "Plus récent d'abord",
+		"oldestFirst": "Plus ancien d'abord",
+		"clear": "Effacer les filtres",
+		"reset": "Réinitialiser",
+		"apply": "Appliquer"
 	},
 	"settings": {
 		"title": "Paramètres",

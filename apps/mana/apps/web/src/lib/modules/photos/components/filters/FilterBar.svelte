@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { photoStore } from '$lib/modules/photos/stores/photos.svelte';
+	import { _ } from 'svelte-i18n';
 
 	const apps = ['picture', 'chat', 'contacts', 'food'];
 
@@ -42,7 +43,9 @@
 
 <div class="mb-6 flex flex-wrap gap-4 rounded-xl border border-border bg-background-card p-4">
 	<div class="flex flex-col gap-1.5">
-		<span class="text-xs font-medium uppercase text-foreground-secondary">App</span>
+		<span class="text-xs font-medium uppercase text-foreground-secondary"
+			>{$_('photos.filters.app')}</span
+		>
 		<div class="flex flex-wrap gap-1">
 			{#each apps as app}
 				<button
@@ -58,7 +61,9 @@
 	</div>
 
 	<div class="flex flex-col gap-1.5">
-		<span class="text-xs font-medium uppercase text-foreground-secondary">Zeitraum</span>
+		<span class="text-xs font-medium uppercase text-foreground-secondary"
+			>{$_('photos.filters.dateRange')}</span
+		>
 		<div class="flex items-center gap-2">
 			<input
 				type="date"
@@ -76,30 +81,30 @@
 
 	<div class="flex flex-col gap-1.5">
 		<label for="sort-by" class="text-xs font-medium uppercase text-foreground-secondary"
-			>Sortierung</label
+			>{$_('photos.filters.sortByShort')}</label
 		>
 		<select
 			id="sort-by"
 			class="rounded-lg border border-border bg-background px-2 py-1 text-sm text-foreground"
 			bind:value={sortBy}
 		>
-			<option value="dateTaken">Datum</option>
-			<option value="createdAt">Erstellt</option>
-			<option value="size">Größe</option>
+			<option value="dateTaken">{$_('photos.filters.date')}</option>
+			<option value="createdAt">{$_('photos.filters.createdAt')}</option>
+			<option value="size">{$_('photos.filters.size')}</option>
 		</select>
 	</div>
 
 	<div class="flex flex-col gap-1.5">
 		<label for="sort-order" class="text-xs font-medium uppercase text-foreground-secondary"
-			>Reihenfolge</label
+			>{$_('photos.filters.sortOrder')}</label
 		>
 		<select
 			id="sort-order"
 			class="rounded-lg border border-border bg-background px-2 py-1 text-sm text-foreground"
 			bind:value={sortOrder}
 		>
-			<option value="desc">Neueste zuerst</option>
-			<option value="asc">Älteste zuerst</option>
+			<option value="desc">{$_('photos.filters.newestFirst')}</option>
+			<option value="asc">{$_('photos.filters.oldestFirst')}</option>
 		</select>
 	</div>
 
@@ -108,13 +113,13 @@
 			class="rounded-lg border border-border bg-background px-3 py-1.5 text-sm text-foreground-secondary hover:bg-background-card-hover"
 			onclick={clearFilters}
 		>
-			Zurücksetzen
+			{$_('photos.filters.reset')}
 		</button>
 		<button
 			class="rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90"
 			onclick={applyFilters}
 		>
-			Anwenden
+			{$_('photos.filters.apply')}
 		</button>
 	</div>
 </div>

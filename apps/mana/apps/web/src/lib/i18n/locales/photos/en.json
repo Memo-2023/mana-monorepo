@@ -85,12 +85,18 @@
 		"to": "To",
 		"hasLocation": "With Location",
 		"sortBy": "Sort by",
+		"sortByShort": "Sort",
 		"date": "Date",
+		"createdAt": "Created",
 		"size": "Size",
 		"sortOrder": "Order",
 		"asc": "Ascending",
 		"desc": "Descending",
-		"clear": "Clear Filters"
+		"newestFirst": "Newest first",
+		"oldestFirst": "Oldest first",
+		"clear": "Clear Filters",
+		"reset": "Reset",
+		"apply": "Apply"
 	},
 	"settings": {
 		"title": "Settings",

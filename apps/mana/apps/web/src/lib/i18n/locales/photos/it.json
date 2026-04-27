@@ -85,12 +85,18 @@
 		"to": "A",
 		"hasLocation": "Con posizione",
 		"sortBy": "Ordina per",
+		"sortByShort": "Ordinamento",
 		"date": "Data",
+		"createdAt": "Creato",
 		"size": "Dimensione",
 		"sortOrder": "Ordine",
 		"asc": "Crescente",
 		"desc": "Decrescente",
-		"clear": "Cancella filtri"
+		"newestFirst": "Più recenti prima",
+		"oldestFirst": "Più vecchi prima",
+		"clear": "Cancella filtri",
+		"reset": "Reimposta",
+		"apply": "Applica"
 	},
 	"settings": {
 		"title": "Impostazioni",

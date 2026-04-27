@@ -85,12 +85,18 @@
 		"to": "Bis",
 		"hasLocation": "Mit Standort",
 		"sortBy": "Sortieren nach",
+		"sortByShort": "Sortierung",
 		"date": "Datum",
+		"createdAt": "Erstellt",
 		"size": "Größe",
 		"sortOrder": "Reihenfolge",
 		"asc": "Aufsteigend",
 		"desc": "Absteigend",
-		"clear": "Filter zurücksetzen"
+		"newestFirst": "Neueste zuerst",
+		"oldestFirst": "Älteste zuerst",
+		"clear": "Filter zurücksetzen",
+		"reset": "Zurücksetzen",
+		"apply": "Anwenden"
 	},
 	"settings": {
 		"title": "Einstellungen",
