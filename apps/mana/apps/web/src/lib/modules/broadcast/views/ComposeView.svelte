@@ -745,8 +745,14 @@
 		font-weight: 600;
 	}
 
-	.failed-count {
-		color: #b91c1c;
+	/* `.failed-count` is referenced from the {@html …} done_failed_html
+	   locale strings — svelte-check can't see runtime-injected HTML, so
+	   the nested `:global` form keeps the rule alive without tripping
+	   the css_unused_selector warning. */
+	:global {
+		.failed-count {
+			color: #b91c1c;
+		}
 	}
 
 	.error-details {
