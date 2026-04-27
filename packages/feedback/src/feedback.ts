@@ -54,6 +54,9 @@ export interface PublicFeedbackItem {
 	status: FeedbackStatus;
 	moduleContext: string | null;
 	parentId: string | null;
+	/** Pseudonym-ID — non-reversible SHA256(userId+secret). Stable
+	 *  across sessions, used for avatar generation and Eulen-Profil-URLs. */
+	displayHash: string;
 	displayName: string;
 	reactions: Partial<Record<string, number>>;
 	score: number;
@@ -62,6 +65,11 @@ export interface PublicFeedbackItem {
 	updatedAt: string;
 	/** Auth-only: which emojis the requesting user has reacted with. */
 	myReactions?: string[];
+	/** Auth-only + opt-in: post-author's real name when they enabled
+	 *  the Klarname-Toggle. Anonymous public-mirror NEVER includes this. */
+	realName?: string;
+	/** Author's community karma — public, drives the tier-badge. */
+	karma?: number;
 }
 
 /**
@@ -127,6 +135,34 @@ export const FEEDBACK_CATEGORY_LABELS: Record<FeedbackCategory, string> = {
 	'onboarding-wish': 'Was ich mir wünsche',
 	other: 'Sonstiges',
 };
+
+/**
+ * Karma → Tier-Mapping. Bronze ist Default für jeden, Tier wird sichtbar
+ * neben dem Pseudonym in ItemCard.
+ */
+export type KarmaTier = 'bronze' | 'silver' | 'gold' | 'platinum';
+
+export const KARMA_THRESHOLDS = {
+	bronze: 0,
+	silver: 10,
+	gold: 50,
+	platinum: 200,
+} as const satisfies Record<KarmaTier, number>;
+
+export const KARMA_TIER_CONFIG: Record<KarmaTier, { label: string; emoji: string; color: string }> =
+	{
+		bronze: { label: 'Bronze', emoji: '🦉', color: '#a16207' },
+		silver: { label: 'Silver', emoji: '🦉', color: '#737373' },
+		gold: { label: 'Gold', emoji: '🦉', color: '#d97706' },
+		platinum: { label: 'Platin', emoji: '🦉', color: '#7c3aed' },
+	};
+
+export function tierFromKarma(karma: number): KarmaTier {
+	if (karma >= KARMA_THRESHOLDS.platinum) return 'platinum';
+	if (karma >= KARMA_THRESHOLDS.gold) return 'gold';
+	if (karma >= KARMA_THRESHOLDS.silver) return 'silver';
+	return 'bronze';
+}
 
 export const FEEDBACK_STATUS_CONFIG: Record<
 	FeedbackStatus,

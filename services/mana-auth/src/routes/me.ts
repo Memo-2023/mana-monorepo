@@ -72,9 +72,15 @@ export function createMeRoutes(userDataService: UserDataService, db: Database) {
 				const body = (await c.req.json().catch(() => ({}))) as {
 					name?: unknown;
 					image?: unknown;
+					communityShowRealName?: unknown;
 				};
 
-				const patch: { name?: string; image?: string; updatedAt: Date } = {
+				const patch: {
+					name?: string;
+					image?: string;
+					communityShowRealName?: boolean;
+					updatedAt: Date;
+				} = {
 					updatedAt: new Date(),
 				};
 				if (typeof body.name === 'string') {
@@ -87,8 +93,11 @@ export function createMeRoutes(userDataService: UserDataService, db: Database) {
 				if (typeof body.image === 'string') {
 					patch.image = body.image;
 				}
+				if (typeof body.communityShowRealName === 'boolean') {
+					patch.communityShowRealName = body.communityShowRealName;
+				}
 
-				if (!('name' in patch) && !('image' in patch)) {
+				if (!('name' in patch) && !('image' in patch) && !('communityShowRealName' in patch)) {
 					return c.json({ error: 'no fields to update' }, 400);
 				}
 
@@ -96,10 +105,19 @@ export function createMeRoutes(userDataService: UserDataService, db: Database) {
 					.update(users)
 					.set(patch)
 					.where(eq(users.id, user.userId))
-					.returning({ id: users.id, name: users.name, image: users.image });
+					.returning({
+						id: users.id,
+						name: users.name,
+						image: users.image,
+						communityShowRealName: users.communityShowRealName,
+					});
 
 				if (!updated) return c.json({ error: 'User not found' }, 404);
-				return c.json({ name: updated.name, image: updated.image });
+				return c.json({
+					name: updated.name,
+					image: updated.image,
+					communityShowRealName: updated.communityShowRealName,
+				});
 			})
 	);
 }

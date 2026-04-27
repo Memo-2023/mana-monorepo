@@ -44,6 +44,7 @@ export function createFeedbackRoutes(feedbackService: FeedbackService) {
 			status,
 			limit,
 			offset,
+			includeRealName: true,
 		});
 
 		const enriched = await Promise.all(
@@ -87,7 +88,7 @@ export function createFeedbackRoutes(feedbackService: FeedbackService) {
 	});
 
 	r.get('/:id/replies', async (c) => {
-		return c.json(await feedbackService.getReplies(c.req.param('id')));
+		return c.json(await feedbackService.getReplies(c.req.param('id'), { includeRealName: true }));
 	});
 
 	// ── Reactions ─────────────────────────────────────────────────────

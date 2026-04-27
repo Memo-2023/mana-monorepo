@@ -60,6 +60,13 @@ export interface PublicItemResponse {
 	replies: PublicFeedbackItem[];
 }
 
+export interface EulenProfileResponse {
+	displayHash: string;
+	displayName: string | null;
+	karma: number;
+	items: PublicFeedbackItem[];
+}
+
 export interface ReactionResponse {
 	reactions: Partial<Record<string, number>>;
 	score: number;

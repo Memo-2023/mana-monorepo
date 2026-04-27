@@ -6,8 +6,11 @@
 <script lang="ts">
 	import {
 		ReactionBar,
+		EulenAvatar,
 		FEEDBACK_CATEGORY_LABELS,
 		FEEDBACK_STATUS_CONFIG,
+		KARMA_TIER_CONFIG,
+		tierFromKarma,
 		type PublicFeedbackItem,
 		type ReactionEmoji,
 	} from '@mana/feedback';
@@ -24,6 +27,8 @@
 
 	let statusConfig = $derived(FEEDBACK_STATUS_CONFIG[item.status]);
 	let categoryLabel = $derived(FEEDBACK_CATEGORY_LABELS[item.category] ?? item.category);
+	let tier = $derived(tierFromKarma(item.karma ?? 0));
+	let tierCfg = $derived(KARMA_TIER_CONFIG[tier]);
 
 	function handleClick() {
 		if (onClick) onClick(item.id);
@@ -82,7 +87,19 @@
 	{/if}
 
 	<footer class="item-footer">
-		<span class="author">{item.displayName}</span>
+		<a
+			class="author-link"
+			href={`/community/eule/${item.displayHash}`}
+			onclick={(e) => e.stopPropagation()}
+			title={`Profil von ${item.displayName} öffnen · ${tierCfg.label}-Eule (${item.karma ?? 0} Karma)`}
+		>
+			<EulenAvatar displayHash={item.displayHash} size={24} title={item.displayName} />
+			<span class="author">
+				<span class="tier-dot" style:background-color={tierCfg.color} aria-hidden="true"></span>
+				{item.displayName}
+				{#if item.realName}<span class="real-name">· {item.realName}</span>{/if}
+			</span>
+		</a>
 		<ReactionBar
 			reactions={item.reactions}
 			myReactions={item.myReactions ?? []}
@@ -209,10 +226,41 @@
 		margin-top: 0.125rem;
 	}
 
+	.author-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		text-decoration: none;
+		color: inherit;
+		padding: 0.125rem 0.25rem;
+		margin: -0.125rem -0.25rem;
+		border-radius: 0.375rem;
+		transition: background 0.15s;
+	}
+
+	.author-link:hover {
+		background: hsl(var(--color-muted) / 0.4);
+	}
+
 	.author {
 		font-size: 0.75rem;
 		font-weight: 600;
 		color: hsl(var(--color-muted-foreground));
 		font-style: italic;
+	}
+
+	.real-name {
+		font-style: normal;
+		opacity: 0.7;
+	}
+
+	.tier-dot {
+		display: inline-block;
+		width: 0.5rem;
+		height: 0.5rem;
+		border-radius: 50%;
+		margin-right: 0.25rem;
+		box-shadow: 0 0 0 1px hsl(0 0% 0% / 0.08);
+		vertical-align: middle;
 	}
 </style>

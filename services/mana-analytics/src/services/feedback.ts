@@ -19,6 +19,7 @@ import {
 	feedbackGrantLog,
 	feedbackNotifications,
 } from '../db/schema/feedback';
+import { authUsers } from '../db/schema/auth-users';
 import type { Database } from '../db/connection';
 import { NotFoundError, BadRequestError } from '../lib/errors';
 import { createDisplayHash, generateDisplayName } from '../lib/pseudonym';
@@ -65,13 +66,31 @@ export type PublicFeedbackItem = {
 	status: string;
 	moduleContext: string | null;
 	parentId: string | null;
+	/** Public Pseudonym ID — SHA256 of userId+secret, one-way and
+	 *  safe to expose. Used for avatar generation and Eulen-Profil-URLs. */
+	displayHash: string;
 	displayName: string;
 	reactions: Record<string, number>;
 	score: number;
 	adminResponse: string | null;
 	createdAt: Date;
 	updatedAt: Date;
+	/** Author's community karma (public, drives tier-badge). */
+	karma: number;
+	/** Real name, only present when:
+	 *  - the post-author opted in via communityShowRealName=true, AND
+	 *  - the response is going to an authenticated caller (the
+	 *    anonymous /public endpoint always strips this).
+	 */
+	realName?: string;
 };
+
+type FeedbackRow = typeof userFeedback.$inferSelect;
+type AuthUserRow = {
+	name: string;
+	communityShowRealName: boolean;
+	communityKarma: number;
+} | null;
 
 export class FeedbackService {
 	constructor(
@@ -213,9 +232,18 @@ export class FeedbackService {
 			status?: string;
 			limit?: number;
 			offset?: number;
+			includeRealName?: boolean;
 		} = {}
 	): Promise<PublicFeedbackItem[]> {
-		const { appId, moduleContext, category, status, limit = 50, offset = 0 } = opts;
+		const {
+			appId,
+			moduleContext,
+			category,
+			status,
+			limit = 50,
+			offset = 0,
+			includeRealName = false,
+		} = opts;
 
 		const conditions = [eq(userFeedback.isPublic, true), isNull(userFeedback.parentId)];
 		if (appId) conditions.push(eq(userFeedback.appId, appId));
@@ -224,34 +252,84 @@ export class FeedbackService {
 		if (status) conditions.push(eq(userFeedback.status, status as any));
 
 		const rows = await this.db
-			.select()
+			.select({ feedback: userFeedback, author: this.authorSelection() })
 			.from(userFeedback)
+			.leftJoin(authUsers, eq(authUsers.id, userFeedback.userId))
 			.where(and(...conditions))
 			.orderBy(desc(userFeedback.score), desc(userFeedback.createdAt))
 			.limit(limit)
 			.offset(offset);
 
-		return rows.map(redact);
+		return rows.map((r) => redact(r.feedback, r.author, { includeRealName }));
 	}
 
 	/** Replies for a single parent item (1-level threading). */
-	async getReplies(parentId: string): Promise<PublicFeedbackItem[]> {
+	async getReplies(
+		parentId: string,
+		opts: { includeRealName?: boolean } = {}
+	): Promise<PublicFeedbackItem[]> {
 		const rows = await this.db
-			.select()
+			.select({ feedback: userFeedback, author: this.authorSelection() })
 			.from(userFeedback)
+			.leftJoin(authUsers, eq(authUsers.id, userFeedback.userId))
 			.where(and(eq(userFeedback.parentId, parentId), eq(userFeedback.isPublic, true)))
 			.orderBy(userFeedback.createdAt);
-		return rows.map(redact);
+		return rows.map((r) =>
+			redact(r.feedback, r.author, { includeRealName: opts.includeRealName ?? false })
+		);
+	}
+
+	/**
+	 * Public Eulen-Profil — alle public-Posts unter dem display_hash plus
+	 * aggregierte Karma vom Author. Liefert auch ein leeres Array (kein
+	 * Throw), wenn der Hash nirgends auftaucht; das macht das Frontend
+	 * easier (keine 404-Race auf dynamic IDs).
+	 */
+	async getEulenProfile(displayHash: string): Promise<{
+		displayHash: string;
+		displayName: string | null;
+		karma: number;
+		items: PublicFeedbackItem[];
+	}> {
+		const rows = await this.db
+			.select({ feedback: userFeedback, author: this.authorSelection() })
+			.from(userFeedback)
+			.leftJoin(authUsers, eq(authUsers.id, userFeedback.userId))
+			.where(and(eq(userFeedback.displayHash, displayHash), eq(userFeedback.isPublic, true)))
+			.orderBy(desc(userFeedback.createdAt))
+			.limit(200);
+
+		const items = rows.map((r) => redact(r.feedback, r.author, { includeRealName: false }));
+		const displayName = items[0]?.displayName ?? null;
+		const karma = rows[0]?.author?.communityKarma ?? 0;
+
+		return { displayHash, displayName, karma, items };
 	}
 
 	/** Single public item by id. Returns null if not found / not public. */
-	async getPublicItem(id: string): Promise<PublicFeedbackItem | null> {
+	async getPublicItem(
+		id: string,
+		opts: { includeRealName?: boolean } = {}
+	): Promise<PublicFeedbackItem | null> {
 		const [row] = await this.db
-			.select()
+			.select({ feedback: userFeedback, author: this.authorSelection() })
 			.from(userFeedback)
+			.leftJoin(authUsers, eq(authUsers.id, userFeedback.userId))
 			.where(and(eq(userFeedback.id, id), eq(userFeedback.isPublic, true)))
 			.limit(1);
-		return row ? redact(row) : null;
+		return row
+			? redact(row.feedback, row.author, { includeRealName: opts.includeRealName ?? false })
+			: null;
+	}
+
+	/** Selection helper — picks the auth-user columns we need. Drizzle
+	 *  treats the missing-author case (deleted user, FK orphan) as null. */
+	private authorSelection() {
+		return {
+			name: authUsers.name,
+			communityShowRealName: authUsers.communityShowRealName,
+			communityKarma: authUsers.communityKarma,
+		};
 	}
 
 	// ── Authenticated reads ───────────────────────────────────────────
@@ -273,9 +351,10 @@ export class FeedbackService {
 	 */
 	async getMyReactedItems(userId: string, limit = 100): Promise<PublicFeedbackItem[]> {
 		const rows = await this.db
-			.selectDistinct({ feedback: userFeedback })
+			.selectDistinct({ feedback: userFeedback, author: this.authorSelection() })
 			.from(feedbackReactions)
 			.innerJoin(userFeedback, eq(feedbackReactions.feedbackId, userFeedback.id))
+			.leftJoin(authUsers, eq(authUsers.id, userFeedback.userId))
 			.where(
 				and(
 					eq(feedbackReactions.userId, userId),
@@ -286,7 +365,7 @@ export class FeedbackService {
 			.orderBy(desc(userFeedback.updatedAt))
 			.limit(limit);
 
-		return rows.map((r) => redact(r.feedback));
+		return rows.map((r) => redact(r.feedback, r.author, { includeRealName: true }));
 	}
 
 	/** Map of emoji → boolean for the requesting user on a feedback item. */
@@ -315,13 +394,19 @@ export class FeedbackService {
 			throw new BadRequestError(`Unsupported emoji: ${emoji}`);
 		}
 
-		// Ensure target item exists.
+		// Ensure target item exists + grab the author for karma tracking.
 		const [item] = await this.db
-			.select({ id: userFeedback.id })
+			.select({ id: userFeedback.id, authorId: userFeedback.userId })
 			.from(userFeedback)
 			.where(eq(userFeedback.id, feedbackId))
 			.limit(1);
 		if (!item) throw new NotFoundError('Feedback not found');
+
+		// Karma is per-react (not per-author-per-user). Self-reactions
+		// don't count — that would be self-promotion. Founder users also
+		// don't farm karma off each other since they tend to react on
+		// their own things; the author check below handles both cases.
+		const counts = item.authorId !== userId;
 
 		// Try to insert (react). If conflicting → user already reacted, so unreact.
 		const inserted = await this.db
@@ -345,6 +430,21 @@ export class FeedbackService {
 			userHasReacted = false;
 		} else {
 			userHasReacted = true;
+		}
+
+		// Author karma: +1 on react, -1 on unreact (per emoji-toggle).
+		// Skipped when the reactor is the author themselves so people
+		// can't farm karma off their own posts. Floor-clamped at 0 so
+		// edge-cases (e.g. author deletes the row externally) don't go
+		// negative.
+		if (counts && item.authorId) {
+			const delta = userHasReacted ? 1 : -1;
+			await this.db
+				.update(authUsers)
+				.set({
+					communityKarma: sql`GREATEST(${authUsers.communityKarma} + ${delta}, 0)`,
+				})
+				.where(eq(authUsers.id, item.authorId));
 		}
 
 		// Recompute aggregated reactions + score for this item.
@@ -643,8 +743,13 @@ export class FeedbackService {
 }
 
 /** Strips userId / displayHash / deviceInfo from a row. */
-function redact(row: typeof userFeedback.$inferSelect): PublicFeedbackItem {
-	return {
+function redact(
+	row: FeedbackRow,
+	author: AuthUserRow = null,
+	options: { includeRealName?: boolean } = {}
+): PublicFeedbackItem {
+	const includeReal = options.includeRealName ?? false;
+	const item: PublicFeedbackItem = {
 		id: row.id,
 		appId: row.appId,
 		title: row.title,
@@ -653,13 +758,21 @@ function redact(row: typeof userFeedback.$inferSelect): PublicFeedbackItem {
 		status: row.status,
 		moduleContext: row.moduleContext,
 		parentId: row.parentId,
+		// displayHash is the public Pseudonym-ID. One-way (SHA256 of
+		// userId+secret), safe to expose; userId itself never leaves.
+		displayHash: row.displayHash ?? '',
 		displayName: row.displayName ?? 'Anonym',
 		reactions: (row.reactions as Record<string, number>) ?? {},
 		score: row.score,
 		adminResponse: row.adminResponse,
 		createdAt: row.createdAt,
 		updatedAt: row.updatedAt,
+		karma: author?.communityKarma ?? 0,
 	};
+	if (includeReal && author?.communityShowRealName && author.name) {
+		item.realName = author.name;
+	}
+	return item;
 }
 
 export { ALLOWED_EMOJIS, REACTION_WEIGHTS };

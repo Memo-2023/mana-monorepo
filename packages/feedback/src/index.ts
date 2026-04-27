@@ -15,12 +15,16 @@ export {
 	type Feedback,
 	type FeedbackNotification,
 	type NotificationKind,
+	type KarmaTier,
 	type PublicFeedbackItem,
 	type ReactionEmoji,
 	REACTION_EMOJIS,
 	REACTION_LABELS,
 	FEEDBACK_CATEGORY_LABELS,
 	FEEDBACK_STATUS_CONFIG,
+	KARMA_THRESHOLDS,
+	KARMA_TIER_CONFIG,
+	tierFromKarma,
 } from './feedback';
 
 export {
@@ -30,6 +34,7 @@ export {
 	type FeedbackListResponse,
 	type PublicFeedListResponse,
 	type PublicItemResponse,
+	type EulenProfileResponse,
 	type ReactionResponse,
 	type AdminPatchInput,
 	type ReactInput,
@@ -43,5 +48,9 @@ export {
 } from './createPublicFeedbackService';
 export type { FeedbackServiceConfig, PublicFeedbackServiceConfig } from './types';
 
+// Avatar
+export { generateAvatarSvg } from './avatar';
+
 // UI Components
 export { default as ReactionBar } from './ReactionBar.svelte';
+export { default as EulenAvatar } from './EulenAvatar.svelte';

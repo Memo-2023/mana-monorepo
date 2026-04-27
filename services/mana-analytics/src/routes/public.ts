@@ -33,6 +33,15 @@ export function createPublicFeedbackRoutes(feedbackService: FeedbackService) {
 		return c.json({ items });
 	});
 
+	r.get('/eule/:hash', async (c) => {
+		const hash = c.req.param('hash');
+		// Display-hashes are 64-char hex (SHA256) — bail early on garbage.
+		if (!/^[0-9a-f]{32,64}$/i.test(hash)) {
+			return c.json({ error: 'invalid display_hash' }, 400);
+		}
+		return c.json(await feedbackService.getEulenProfile(hash));
+	});
+
 	r.get('/:id', async (c) => {
 		const item = await feedbackService.getPublicItem(c.req.param('id'));
 		if (!item) return c.json({ error: 'Not found' }, 404);

@@ -6,7 +6,12 @@
  * `createFeedbackService()` instead and pass a getAuthToken callback.
  */
 
-import type { PublicFeedListResponse, PublicItemResponse, FeedbackQueryParams } from './api';
+import type {
+	PublicFeedListResponse,
+	PublicItemResponse,
+	EulenProfileResponse,
+	FeedbackQueryParams,
+} from './api';
 import type { PublicFeedbackItem } from './feedback';
 import type { PublicFeedbackServiceConfig } from './types';
 
@@ -42,7 +47,11 @@ export function createPublicFeedbackService(config: PublicFeedbackServiceConfig)
 		return fetchPublic<PublicItemResponse>(`${publicEndpoint}/${id}`);
 	}
 
-	return { getFeed, getItem };
+	async function getEulenProfile(displayHash: string): Promise<EulenProfileResponse> {
+		return fetchPublic<EulenProfileResponse>(`${publicEndpoint}/eule/${displayHash}`);
+	}
+
+	return { getFeed, getItem, getEulenProfile };
 }
 
 export type PublicFeedbackService = ReturnType<typeof createPublicFeedbackService>;
