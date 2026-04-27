@@ -1,0 +1,20 @@
+{
+	"analytics": {
+		"page_title": "Analisi del tempo",
+		"period_days_short": "{n}g",
+		"stat_total": "Totale",
+		"stat_streak": "Giorni di fila",
+		"stat_adherence": "Fedeltà al piano",
+		"stat_entries": "Voci",
+		"section_breakdown": "Distribuzione del tempo",
+		"empty_no_data": "Nessun dato nel periodo",
+		"section_daily": "Distribuzione giornaliera",
+		"section_heatmap": "Attività delle abitudini (90 giorni)",
+		"heatmap_cell_title": "{date}: {count} abitudini",
+		"section_plan_vs_reality": "Piano vs realtà",
+		"adherence_scheduled": "Pianificato",
+		"adherence_completed": "Completato",
+		"adherence_percent": "Fedeltà",
+		"adherence_avg_delay": "Deviazione media"
+	}
+}

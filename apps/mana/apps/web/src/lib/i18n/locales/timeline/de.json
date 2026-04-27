@@ -1,0 +1,20 @@
+{
+	"analytics": {
+		"page_title": "Zeitanalyse",
+		"period_days_short": "{n}T",
+		"stat_total": "Gesamt",
+		"stat_streak": "Tage Streak",
+		"stat_adherence": "Plan-Treue",
+		"stat_entries": "Einträge",
+		"section_breakdown": "Zeitverteilung",
+		"empty_no_data": "Keine Daten im Zeitraum",
+		"section_daily": "Tagesverteilung",
+		"section_heatmap": "Habit-Aktivität (90 Tage)",
+		"heatmap_cell_title": "{date}: {count} Habits",
+		"section_plan_vs_reality": "Plan vs Realität",
+		"adherence_scheduled": "Geplant",
+		"adherence_completed": "Erledigt",
+		"adherence_percent": "Treue",
+		"adherence_avg_delay": "Ø Abweichung"
+	}
+}
