@@ -9,6 +9,7 @@
 	import { ALL_TOPICS, type Topic, type Language } from '$lib/modules/news/types';
 	import { TOPIC_LABELS } from '$lib/modules/news/sources-meta';
 	import { RoutePage } from '$lib/components/shell';
+	import { _ } from 'svelte-i18n';
 
 	const prefs$ = usePreferences();
 	const prefs = $derived(prefs$.value);
@@ -29,7 +30,7 @@
 		await preferencesStore.setLanguages(next);
 	}
 	async function resetWeights() {
-		if (!confirm('Alle gelernten Gewichtungen zurücksetzen?')) return;
+		if (!confirm($_('news.preferences.weightsResetConfirm'))) return;
 		await preferencesStore.resetWeights();
 	}
 	async function rerunOnboarding() {
@@ -45,21 +46,21 @@
 </script>
 
 <svelte:head>
-	<title>News-Einstellungen — Mana</title>
+	<title>{$_('news.preferences.page_title_html')}</title>
 </svelte:head>
 
 <RoutePage appId="news" backHref="/news">
 	<div class="pane">
 		<header class="bar">
 			<div class="title">
-				<strong>News-Einstellungen</strong>
-				<span class="sub">Themen · Sprachen · Gewichtungen</span>
+				<strong>{$_('news.preferences.title')}</strong>
+				<span class="sub">{$_('news.preferences.subtitle')}</span>
 			</div>
 		</header>
 
 		<section class="card">
-			<h2>Themen</h2>
-			<p class="hint">Welche Themen sollen im Feed auftauchen?</p>
+			<h2>{$_('news.preferences.topicsHeading')}</h2>
+			<p class="hint">{$_('news.preferences.topicsHint')}</p>
 			<div class="grid">
 				{#each ALL_TOPICS as topic}
 					<button
@@ -76,7 +77,7 @@
 		</section>
 
 		<section class="card">
-			<h2>Sprachen</h2>
+			<h2>{$_('news.preferences.languagesHeading')}</h2>
 			<div class="row">
 				<button
 					type="button"
@@ -84,7 +85,7 @@
 					class:selected={prefs.preferredLanguages.includes('de')}
 					onclick={() => toggleLang('de')}
 				>
-					🇩🇪 Deutsch
+					🇩🇪 {$_('news.languages.de')}
 				</button>
 				<button
 					type="button"
@@ -92,33 +93,38 @@
 					class:selected={prefs.preferredLanguages.includes('en')}
 					onclick={() => toggleLang('en')}
 				>
-					🇬🇧 English
+					🇬🇧 {$_('news.languages.en')}
 				</button>
 			</div>
 		</section>
 
 		<section class="card">
-			<h2>Quellen</h2>
+			<h2>{$_('news.preferences.sourcesHeading')}</h2>
 			<p class="hint">
-				Du blockst aktuell <strong>{prefs.blockedSources.length}</strong> Quellen.
+				{@html $_('news.preferences.sourcesHintHtml', {
+					values: { count: prefs.blockedSources.length },
+				})}
 			</p>
-			<a class="btn-link" href="/news/sources">Quellen verwalten →</a>
+			<a class="btn-link" href="/news/sources">{$_('news.preferences.sourcesLinkArrow')}</a>
 		</section>
 
 		<section class="card">
-			<h2>Gelernte Gewichtungen</h2>
+			<h2>{$_('news.preferences.weightsHeading')}</h2>
 			<p class="hint">
-				Über Reaktionen lernt der Feed deine Vorlieben:
-				{topicWeightCount} Themen-Gewichte, {sourceWeightCount} Quellen-Gewichte.
+				{$_('news.preferences.weightsHint', {
+					values: { topics: topicWeightCount, sources: sourceWeightCount },
+				})}
 			</p>
-			<button type="button" class="btn-secondary" onclick={resetWeights}>Zurücksetzen</button>
+			<button type="button" class="btn-secondary" onclick={resetWeights}
+				>{$_('news.preferences.weightsReset')}</button
+			>
 		</section>
 
 		<section class="card">
-			<h2>Onboarding</h2>
-			<p class="hint">Themen, Sprachen und Quellen neu wählen.</p>
+			<h2>{$_('news.preferences.onboardingHeading')}</h2>
+			<p class="hint">{$_('news.preferences.onboardingHint')}</p>
 			<button type="button" class="btn-secondary" onclick={rerunOnboarding}>
-				Onboarding neu starten
+				{$_('news.preferences.onboardingRerun')}
 			</button>
 		</section>
 	</div>
