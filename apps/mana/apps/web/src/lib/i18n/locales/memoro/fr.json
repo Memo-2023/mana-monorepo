@@ -298,5 +298,39 @@
 		"unauthorized": "Non autorisé.",
 		"forbidden": "Accès refusé.",
 		"server_error": "Erreur serveur. Veuillez réessayer plus tard."
+	},
+	"detail_view": {
+		"title_sources": {
+			"none": "Local (règles)",
+			"browser": "Sur ton appareil (Gemma 4 E2B)",
+			"mana_server": "Serveur Mana (Gemma 4 E4B)",
+			"byok": "Ta clé API",
+			"cloud": "Google Gemini"
+		},
+		"statuses": {
+			"pending": "En attente",
+			"processing": "En traitement",
+			"completed": "Terminé",
+			"failed": "Échec"
+		},
+		"not_found": "Mémo introuvable",
+		"confirm_delete": "Vraiment supprimer le mémo ?",
+		"toast_deleted": "Mémo supprimé",
+		"placeholder_title_idle": "Titre…",
+		"placeholder_title_generating": "Génération du titre…",
+		"label_status": "Statut",
+		"label_duration": "Durée",
+		"label_language": "Langue",
+		"placeholder_language": "p. ex. fr",
+		"label_visibility": "Visibilité",
+		"section_summary": "Résumé",
+		"placeholder_summary": "Ajouter un résumé…",
+		"section_transcript": "Transcription",
+		"transcribing": "Transcription en cours…",
+		"transcript_failed": "Échec de la transcription. Réessaie ou saisis manuellement.",
+		"transcript_empty": "Pas de transcription.",
+		"transcript_source": "Voxtral via mana-stt",
+		"meta_created": "Créé : {date}",
+		"meta_updated": "Modifié : {date}"
 	}
 }
