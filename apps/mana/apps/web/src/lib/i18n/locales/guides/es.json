@@ -32,5 +32,35 @@
 		"delete": "Eliminar",
 		"create": "Crear",
 		"back": "Atrás"
+	},
+	"categories": {
+		"getting-started": "Primeros pasos",
+		"productivity": "Productividad",
+		"advanced": "Avanzado",
+		"integrations": "Integraciones"
+	},
+	"difficulties": {
+		"beginner": "Principiante",
+		"intermediate": "Intermedio",
+		"advanced": "Avanzado"
+	},
+	"detail": {
+		"loading": "Cargando guía...",
+		"action_edit": "Editar",
+		"action_delete": "Eliminar",
+		"action_save": "Guardar",
+		"action_cancel": "Cancelar",
+		"placeholder_title": "Título de la guía",
+		"placeholder_description": "Descripción",
+		"minutes": "{n} min",
+		"completed": "Completada",
+		"steps_progress": "{done} / {total} pasos",
+		"reset_progress": "Reiniciar progreso",
+		"start_guide": "Iniciar guía",
+		"placeholder_new_step": "Nuevo paso...",
+		"placeholder_new_section": "Nueva sección...",
+		"add_section": "+ Sección",
+		"add_step": "+ Paso",
+		"confirm_delete_guide": "¿Eliminar realmente la guía \"{title}\"?"
 	}
 }

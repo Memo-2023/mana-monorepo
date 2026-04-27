@@ -32,5 +32,35 @@
 		"delete": "Delete",
 		"create": "Create",
 		"back": "Back"
+	},
+	"categories": {
+		"getting-started": "Getting started",
+		"productivity": "Productivity",
+		"advanced": "Advanced",
+		"integrations": "Integrations"
+	},
+	"difficulties": {
+		"beginner": "Beginner",
+		"intermediate": "Intermediate",
+		"advanced": "Advanced"
+	},
+	"detail": {
+		"loading": "Loading guide...",
+		"action_edit": "Edit",
+		"action_delete": "Delete",
+		"action_save": "Save",
+		"action_cancel": "Cancel",
+		"placeholder_title": "Guide title",
+		"placeholder_description": "Description",
+		"minutes": "{n} min",
+		"completed": "Completed",
+		"steps_progress": "{done} / {total} steps",
+		"reset_progress": "Reset progress",
+		"start_guide": "Start guide",
+		"placeholder_new_step": "New step...",
+		"placeholder_new_section": "New section...",
+		"add_section": "+ Section",
+		"add_step": "+ Step",
+		"confirm_delete_guide": "Really delete guide \"{title}\"?"
 	}
 }

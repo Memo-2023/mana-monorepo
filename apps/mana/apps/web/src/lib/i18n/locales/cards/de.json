@@ -51,5 +51,17 @@
 		"loading": "Lädt...",
 		"error": "Fehler",
 		"success": "Erfolgreich"
+	},
+	"progress": {
+		"page_title_html": "Fortschritt - Cards - Mana",
+		"heading": "Fortschritt",
+		"subtitle": "Verfolge deinen Lernfortschritt",
+		"stat_decks": "Decks",
+		"stat_total_cards": "Karten gesamt",
+		"stat_due": "Fällig zur Wiederholung",
+		"section_overview": "Decks Übersicht",
+		"empty_title": "Noch keine Lernsitzungen.",
+		"empty_hint": "Erstelle ein Deck und beginne zu lernen!",
+		"deck_cards": "{n} Karten"
 	}
 }

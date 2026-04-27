@@ -32,5 +32,35 @@
 		"delete": "Supprimer",
 		"create": "Créer",
 		"back": "Retour"
+	},
+	"categories": {
+		"getting-started": "Premiers pas",
+		"productivity": "Productivité",
+		"advanced": "Avancé",
+		"integrations": "Intégrations"
+	},
+	"difficulties": {
+		"beginner": "Débutant",
+		"intermediate": "Intermédiaire",
+		"advanced": "Expert"
+	},
+	"detail": {
+		"loading": "Chargement du guide...",
+		"action_edit": "Modifier",
+		"action_delete": "Supprimer",
+		"action_save": "Enregistrer",
+		"action_cancel": "Annuler",
+		"placeholder_title": "Titre du guide",
+		"placeholder_description": "Description",
+		"minutes": "{n} min",
+		"completed": "Terminé",
+		"steps_progress": "{done} / {total} étapes",
+		"reset_progress": "Réinitialiser la progression",
+		"start_guide": "Démarrer le guide",
+		"placeholder_new_step": "Nouvelle étape...",
+		"placeholder_new_section": "Nouvelle section...",
+		"add_section": "+ Section",
+		"add_step": "+ Étape",
+		"confirm_delete_guide": "Vraiment supprimer le guide « {title} » ?"
 	}
 }

@@ -51,5 +51,17 @@
 		"loading": "Chargement...",
 		"error": "Erreur",
 		"success": "Succès"
+	},
+	"progress": {
+		"page_title_html": "Progression - Cards - Mana",
+		"heading": "Progression",
+		"subtitle": "Suis ta progression d'apprentissage",
+		"stat_decks": "Paquets",
+		"stat_total_cards": "Cartes au total",
+		"stat_due": "À réviser",
+		"section_overview": "Vue d'ensemble des paquets",
+		"empty_title": "Pas encore de sessions d'étude.",
+		"empty_hint": "Crée un paquet et commence à étudier !",
+		"deck_cards": "{n} cartes"
 	}
 }

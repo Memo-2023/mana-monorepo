@@ -32,5 +32,35 @@
 		"delete": "Löschen",
 		"create": "Erstellen",
 		"back": "Zurück"
+	},
+	"categories": {
+		"getting-started": "Erste Schritte",
+		"productivity": "Produktivität",
+		"advanced": "Fortgeschritten",
+		"integrations": "Integrationen"
+	},
+	"difficulties": {
+		"beginner": "Einsteiger",
+		"intermediate": "Fortgeschritten",
+		"advanced": "Profi"
+	},
+	"detail": {
+		"loading": "Lade Guide...",
+		"action_edit": "Bearbeiten",
+		"action_delete": "Löschen",
+		"action_save": "Speichern",
+		"action_cancel": "Abbrechen",
+		"placeholder_title": "Guide-Titel",
+		"placeholder_description": "Beschreibung",
+		"minutes": "{n} min",
+		"completed": "Abgeschlossen",
+		"steps_progress": "{done} / {total} Schritte",
+		"reset_progress": "Fortschritt zurücksetzen",
+		"start_guide": "Guide starten",
+		"placeholder_new_step": "Neuer Schritt...",
+		"placeholder_new_section": "Neuer Abschnitt...",
+		"add_section": "+ Abschnitt",
+		"add_step": "+ Schritt",
+		"confirm_delete_guide": "Guide \"{title}\" wirklich löschen?"
 	}
 }

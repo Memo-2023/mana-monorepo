@@ -1,0 +1,35 @@
+{
+	"detail": {
+		"back_aria": "Zurück zu Comics",
+		"breadcrumb": "Comics",
+		"loading": "Lädt…",
+		"not_found": "Story nicht gefunden.",
+		"not_found_hint": "Gelöscht oder in einem anderen Space.",
+		"panel_one": "{n} Panel",
+		"panel_other": "{n} Panels",
+		"reference_one": "{n} Referenz",
+		"reference_other": "{n} Referenzen",
+		"favorite_remove": "Favorit entfernen",
+		"favorite_set": "Als Favorit markieren",
+		"context_label": "Kontext:",
+		"section_panels": "Panels",
+		"add_panel": "Panel",
+		"add_batch": "Batch",
+		"add_batch_title": "2–4 Panels in einem Rutsch generieren",
+		"add_ai": "Mit KI",
+		"add_ai_title": "KI schlägt Panels aus einem Tagebuch-Eintrag, Notiz oder Review vor",
+		"unarchive": "Wieder aktiv",
+		"archive": "Archivieren",
+		"delete": "Löschen",
+		"archived_hint": "Archivierte Story — keine Panel-Generierung möglich, bis wieder aktiviert.",
+		"confirm_delete_story": "Story \"{title}\" wirklich löschen?",
+		"confirm_remove_panel": "Panel aus der Story entfernen? Das Bild bleibt in deiner Picture-Galerie und kann dort gelöscht werden."
+	},
+	"styles": {
+		"comic": "US-Comic",
+		"manga": "Manga",
+		"cartoon": "Cartoon",
+		"graphic-novel": "Graphic Novel",
+		"webtoon": "Webtoon"
+	}
+}

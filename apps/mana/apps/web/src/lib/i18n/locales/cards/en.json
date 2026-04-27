@@ -51,5 +51,17 @@
 		"loading": "Loading...",
 		"error": "Error",
 		"success": "Success"
+	},
+	"progress": {
+		"page_title_html": "Progress - Cards - Mana",
+		"heading": "Progress",
+		"subtitle": "Track your learning progress",
+		"stat_decks": "Decks",
+		"stat_total_cards": "Total cards",
+		"stat_due": "Due for review",
+		"section_overview": "Decks overview",
+		"empty_title": "No study sessions yet.",
+		"empty_hint": "Create a deck and start studying!",
+		"deck_cards": "{n} cards"
 	}
 }

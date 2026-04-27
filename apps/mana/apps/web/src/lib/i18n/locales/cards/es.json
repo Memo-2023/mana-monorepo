@@ -51,5 +51,17 @@
 		"loading": "Cargando...",
 		"error": "Error",
 		"success": "Éxito"
+	},
+	"progress": {
+		"page_title_html": "Progreso - Cards - Mana",
+		"heading": "Progreso",
+		"subtitle": "Sigue tu progreso de aprendizaje",
+		"stat_decks": "Mazos",
+		"stat_total_cards": "Tarjetas en total",
+		"stat_due": "Pendientes de repasar",
+		"section_overview": "Resumen de mazos",
+		"empty_title": "Aún no hay sesiones de estudio.",
+		"empty_hint": "¡Crea un mazo y empieza a estudiar!",
+		"deck_cards": "{n} tarjetas"
 	}
 }

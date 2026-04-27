@@ -1,0 +1,35 @@
+{
+	"detail": {
+		"back_aria": "Retour aux comics",
+		"breadcrumb": "Comics",
+		"loading": "Chargement…",
+		"not_found": "Histoire introuvable.",
+		"not_found_hint": "Supprimée ou dans un autre espace.",
+		"panel_one": "{n} panneau",
+		"panel_other": "{n} panneaux",
+		"reference_one": "{n} référence",
+		"reference_other": "{n} références",
+		"favorite_remove": "Retirer des favoris",
+		"favorite_set": "Marquer comme favori",
+		"context_label": "Contexte :",
+		"section_panels": "Panneaux",
+		"add_panel": "Panneau",
+		"add_batch": "Lot",
+		"add_batch_title": "Générer 2 à 4 panneaux d'un coup",
+		"add_ai": "Avec IA",
+		"add_ai_title": "L'IA propose des panneaux à partir d'une entrée de journal, note ou critique",
+		"unarchive": "Réactiver",
+		"archive": "Archiver",
+		"delete": "Supprimer",
+		"archived_hint": "Histoire archivée — pas de génération de panneaux possible jusqu'à réactivation.",
+		"confirm_delete_story": "Vraiment supprimer l'histoire « {title} » ?",
+		"confirm_remove_panel": "Retirer le panneau de l'histoire ? L'image reste dans ta galerie Picture et peut y être supprimée."
+	},
+	"styles": {
+		"comic": "Comic US",
+		"manga": "Manga",
+		"cartoon": "Cartoon",
+		"graphic-novel": "Roman graphique",
+		"webtoon": "Webtoon"
+	}
+}
