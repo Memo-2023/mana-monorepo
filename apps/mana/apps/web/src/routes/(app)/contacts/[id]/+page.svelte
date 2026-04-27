@@ -4,7 +4,6 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { getContext } from 'svelte';
-	import type { Observable } from 'dexie';
 	import { type Contact, contactsStore, getDisplayName, getInitials } from '$lib/modules/contacts';
 	import {
 		CaretLeft,
@@ -94,7 +93,10 @@
 
 	async function handleDelete() {
 		if (!contact) return;
-		if (!confirm(`"${getDisplayName(contact)}" endgueltig loeschen?`)) return;
+		if (
+			!confirm($_('contacts.detail.confirm_delete', { values: { name: getDisplayName(contact) } }))
+		)
+			return;
 		await contactsStore.deleteContact(contact.id);
 		goto('/contacts');
 	}
@@ -113,10 +115,16 @@
 </script>
 
 <svelte:head>
-	<title>{contact ? getDisplayName(contact) : 'Kontakt'} - Mana</title>
+	<title
+		>{$_('contacts.detail.page_title_html', {
+			values: {
+				name: contact ? getDisplayName(contact) : $_('contacts.detail.page_title_fallback'),
+			},
+		})}</title
+	>
 </svelte:head>
 
-<RoutePage appId="contacts" backHref="/contacts" title="Kontakt">
+<RoutePage appId="contacts" backHref="/contacts" title={$_('contacts.detail.page_title_fallback')}>
 	<div class="mx-auto max-w-2xl">
 		<!-- Back Link -->
 		<a
@@ -124,20 +132,22 @@
 			class="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
 		>
 			<CaretLeft size={16} />
-			Kontakte
+			{$_('contacts.detail.breadcrumb')}
 		</a>
 
 		{#if !contact}
 			<div class="flex flex-col items-center py-16 text-center">
-				<h2 class="text-lg font-semibold text-foreground">Kontakt nicht gefunden</h2>
+				<h2 class="text-lg font-semibold text-foreground">
+					{$_('contacts.detail.empty_title')}
+				</h2>
 				<p class="mt-1 text-sm text-muted-foreground">
-					Dieser Kontakt existiert nicht oder wurde geloescht.
+					{$_('contacts.detail.empty_hint')}
 				</p>
 				<a
 					href="/contacts"
 					class="mt-4 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
 				>
-					Zurueck zu Kontakten
+					{$_('contacts.detail.empty_back')}
 				</a>
 			</div>
 		{:else}
@@ -179,7 +189,7 @@
 						<button
 							onclick={() => (showShare = true)}
 							class="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-							title="Kurzlink teilen"
+							title={$_('contacts.detail.action_share_title')}
 						>
 							<ShareNetwork size={18} />
 						</button>
@@ -193,7 +203,9 @@
 						<button
 							onclick={handleToggleFavorite}
 							class="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-amber-500"
-							title={contact.isFavorite ? 'Favorit entfernen' : 'Zu Favoriten'}
+							title={contact.isFavorite
+								? $_('contacts.detail.action_unfavorite_title')
+								: $_('contacts.detail.action_favorite_title')}
 						>
 							{#if contact.isFavorite}
 								<Star weight="fill" size={18} class="text-amber-500" />
@@ -204,14 +216,14 @@
 						<button
 							onclick={handleArchive}
 							class="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted"
-							title="Archivieren"
+							title={$_('contacts.detail.action_archive_title')}
 						>
 							<Archive size={18} />
 						</button>
 						<button
 							onclick={handleDelete}
 							class="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-red-500"
-							title="Loeschen"
+							title={$_('contacts.detail.action_delete_title')}
 						>
 							<Trash size={18} />
 						</button>
@@ -448,7 +460,8 @@
 								href="tel:{contact.phone}"
 								class="flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
 							>
-								<Phone size={16} /> Anrufen
+								<Phone size={16} />
+								{$_('contacts.detail.quick_call')}
 							</a>
 						{/if}
 						{#if contact.email}
@@ -456,7 +469,8 @@
 								href="mailto:{contact.email}"
 								class="flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
 							>
-								<Envelope size={16} /> E-Mail
+								<Envelope size={16} />
+								{$_('contacts.detail.quick_email')}
 							</a>
 						{/if}
 						{#if contact.mobile}
@@ -464,7 +478,8 @@
 								href="sms:{contact.mobile}"
 								class="flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
 							>
-								<DeviceMobile size={16} /> SMS
+								<DeviceMobile size={16} />
+								{$_('contacts.detail.quick_sms')}
 							</a>
 						{/if}
 					</div>
@@ -475,7 +490,7 @@
 					<!-- Contact Info -->
 					<div class="rounded-xl border border-border bg-card p-5">
 						<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-							Kontakt
+							{$_('contacts.detail.section_contact')}
 						</h2>
 						<div class="space-y-3">
 							{#if contact.email}
@@ -492,7 +507,9 @@
 									<a href="tel:{contact.mobile}" class="text-sm text-primary hover:underline"
 										>{contact.mobile}</a
 									>
-									<span class="text-xs text-muted-foreground">Mobil</span>
+									<span class="text-xs text-muted-foreground"
+										>{$_('contacts.detail.label_mobile')}</span
+									>
 								</div>
 							{/if}
 							{#if contact.phone}
@@ -501,12 +518,16 @@
 									<a href="tel:{contact.phone}" class="text-sm text-primary hover:underline"
 										>{contact.phone}</a
 									>
-									<span class="text-xs text-muted-foreground">Telefon</span>
+									<span class="text-xs text-muted-foreground"
+										>{$_('contacts.detail.label_phone')}</span
+									>
 								</div>
 							{/if}
 						</div>
 						{#if !contact.email && !contact.phone && !contact.mobile}
-							<p class="text-sm text-muted-foreground">Keine Kontaktdaten hinterlegt.</p>
+							<p class="text-sm text-muted-foreground">
+								{$_('contacts.detail.empty_contact_info')}
+							</p>
 						{/if}
 					</div>
 
@@ -514,7 +535,7 @@
 					{#if contact.company || contact.jobTitle || contact.website}
 						<div class="rounded-xl border border-border bg-card p-5">
 							<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-								Arbeit
+								{$_('contacts.detail.section_work')}
 							</h2>
 							<div class="space-y-3">
 								{#if contact.company}
@@ -550,7 +571,7 @@
 					{#if contact.street || contact.city || contact.postalCode || contact.country}
 						<div class="rounded-xl border border-border bg-card p-5">
 							<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-								Adresse
+								{$_('contacts.detail.section_address')}
 							</h2>
 							<div class="flex items-start gap-3">
 								<MapPin size={16} class="mt-0.5 flex-shrink-0 text-muted-foreground" />
@@ -585,7 +606,7 @@
 					{#if contact.notes}
 						<div class="rounded-xl border border-border bg-card p-5">
 							<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-								Notizen
+								{$_('contacts.detail.section_notes')}
 							</h2>
 							<p class="whitespace-pre-wrap text-sm text-foreground">{contact.notes}</p>
 						</div>
@@ -595,7 +616,7 @@
 					{#if contact.linkedin || contact.twitter || contact.instagram || contact.github}
 						<div class="rounded-xl border border-border bg-card p-5">
 							<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-								Social Media
+								{$_('contacts.detail.section_social')}
 							</h2>
 							<div class="space-y-3">
 								{#if contact.linkedin}
@@ -658,7 +679,7 @@
 					{#if contact.tags.length > 0}
 						<div class="rounded-xl border border-border bg-card p-5">
 							<h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-								Tags
+								{$_('contacts.detail.section_tags')}
 							</h2>
 							<div class="flex flex-wrap gap-2">
 								{#each contact.tags as tag (tag.id)}
@@ -674,7 +695,7 @@
 					<!-- Metadata -->
 					<div class="rounded-xl border border-border bg-card p-5">
 						<div class="grid grid-cols-2 gap-y-2 text-xs text-muted-foreground">
-							<span>Erstellt</span>
+							<span>{$_('contacts.detail.meta_created')}</span>
 							<span
 								>{formatDate(new Date(contact.createdAt), {
 									day: 'numeric',
@@ -682,7 +703,7 @@
 									year: 'numeric',
 								})}</span
 							>
-							<span>Aktualisiert</span>
+							<span>{$_('contacts.detail.meta_updated')}</span>
 							<span
 								>{formatDate(new Date(contact.updatedAt), {
 									day: 'numeric',

@@ -9,8 +9,8 @@
 	import { PencilSimple, Eye, LinkSimple, X } from '@mana/shared-icons';
 	import { crawlUrlViaApi, type CrawlMode } from '$lib/modules/kontext/api';
 	import { requireAuth } from '$lib/auth/require-auth.svelte';
+	import { _ } from 'svelte-i18n';
 
-	const PLACEHOLDER = 'Was soll Mana sonst noch über dich wissen?';
 	const SAVE_DEBOUNCE_MS = 500;
 
 	let urlPanelOpen = $state(false);
@@ -95,7 +95,7 @@
 		if (!trimmed) return;
 		const ok = await requireAuth({
 			feature: 'context-url-import',
-			reason: 'Das Crawlen einer Web-Seite läuft serverseitig und erfordert ein Mana-Konto.',
+			reason: $_('profile.freeform.auth_reason_crawl'),
 		});
 		if (!ok) return;
 		importing = true;
@@ -123,12 +123,13 @@
 			});
 			if (phaseTimer) clearTimeout(phaseTimer);
 			importPhase = 'appending';
-			const header = `## ${result.title}\n\n_Quelle: ${result.sourceUrl}_\n\n`;
+			const sourceLabel = $_('profile.freeform.crawl_source_label');
+			const header = `## ${result.title}\n\n_${sourceLabel}: ${result.sourceUrl}_\n\n`;
 			await userContextStore.appendFreeform(header + result.content);
 			if (mode === 'edit' && ctx) draft = ctx.freeform;
 			closeUrlPanel();
 		} catch (err) {
-			importError = err instanceof Error ? err.message : 'Import fehlgeschlagen';
+			importError = err instanceof Error ? err.message : $_('profile.freeform.error_import_failed');
 		} finally {
 			if (phaseTimer) clearTimeout(phaseTimer);
 			clearInterval(tick);
@@ -152,21 +153,29 @@
 <div class="freeform">
 	<header class="bar">
 		<div class="status">
-			{#if saveState === 'pending'}<span class="status-text">Speichert…</span>
-			{:else if saveState === 'saved'}<span class="status-text saved">Gespeichert</span>{/if}
+			{#if saveState === 'pending'}<span class="status-text">{$_('profile.freeform.saving')}</span>
+			{:else if saveState === 'saved'}<span class="status-text saved"
+					>{$_('profile.freeform.saved')}</span
+				>{/if}
 		</div>
 		<div class="actions">
 			<button
 				class="mode-btn"
 				class:active={urlPanelOpen}
 				onclick={() => (urlPanelOpen ? closeUrlPanel() : (urlPanelOpen = true))}
-				title="Web-Seite crawlen und anhängen"
+				title={$_('profile.freeform.toggle_url_title')}
 			>
-				<LinkSimple size={14} /><span>Aus URL</span>
+				<LinkSimple size={14} /><span>{$_('profile.freeform.action_from_url')}</span>
 			</button>
-			<button class="mode-btn" onclick={toggleMode} title="Cmd/Ctrl + E">
-				{#if mode === 'view'}<PencilSimple size={14} /><span>Bearbeiten</span>
-				{:else}<Eye size={14} /><span>Ansicht</span>{/if}
+			<button
+				class="mode-btn"
+				onclick={toggleMode}
+				title={$_('profile.freeform.toggle_mode_title')}
+			>
+				{#if mode === 'view'}<PencilSimple size={14} /><span
+						>{$_('profile.freeform.action_edit')}</span
+					>
+				{:else}<Eye size={14} /><span>{$_('profile.freeform.action_view')}</span>{/if}
 			</button>
 		</div>
 	</header>
@@ -178,37 +187,40 @@
 					type="url"
 					bind:value={importUrl}
 					required
-					placeholder="https://example.com/article"
+					placeholder={$_('profile.freeform.url_placeholder')}
 					disabled={importing}
 					class="url-input"
 				/>
 				<button type="submit" disabled={importing || !importUrl.trim()} class="url-submit">
 					{#if importing}{importPhase === 'crawling'
-							? 'Crawle…'
+							? $_('profile.freeform.phase_crawling')
 							: importPhase === 'summarizing'
-								? 'Fasse zusammen…'
-								: 'Speichere…'}{:else}Einfügen{/if}
+								? $_('profile.freeform.phase_summarizing')
+								: $_('profile.freeform.phase_appending')}{:else}{$_(
+							'profile.freeform.action_insert'
+						)}{/if}
 				</button>
 				<button
 					type="button"
 					onclick={closeUrlPanel}
 					disabled={importing}
 					class="url-close"
-					title="Schließen"><X size={14} /></button
+					title={$_('profile.freeform.action_close_title')}><X size={14} /></button
 				>
 			</div>
 			<div class="url-opts">
 				<label class:disabled={importing}
-					><input type="radio" bind:group={importMode} value="single" disabled={importing} /> Nur diese
-					Seite</label
+					><input type="radio" bind:group={importMode} value="single" disabled={importing} />
+					{$_('profile.freeform.option_single')}</label
 				>
 				<label class:disabled={importing}
-					><input type="radio" bind:group={importMode} value="deep" disabled={importing} /> Ganze Website
-					(max. 20)</label
+					><input type="radio" bind:group={importMode} value="deep" disabled={importing} />
+					{$_('profile.freeform.option_deep')}</label
 				>
 				<span class="url-sep">·</span>
 				<label class:disabled={importing}
-					><input type="checkbox" bind:checked={importSummarize} disabled={importing} /> Mit KI zusammenfassen</label
+					><input type="checkbox" bind:checked={importSummarize} disabled={importing} />
+					{$_('profile.freeform.option_summarize')}</label
 				>
 			</div>
 			{#if importError}<p class="url-error">{importError}</p>{/if}
@@ -221,14 +233,16 @@
 			bind:value={draft}
 			oninput={scheduleSave}
 			onblur={flush}
-			placeholder={PLACEHOLDER}
+			placeholder={$_('profile.freeform.placeholder')}
 		></textarea>
 	{:else if renderedHtml}
 		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 		<article class="prose">{@html renderedHtml}</article>
 	{:else}
 		<button class="empty" onclick={() => (mode = 'edit')}
-			><span>{PLACEHOLDER}</span><span class="hint">Klicken zum Bearbeiten</span></button
+			><span>{$_('profile.freeform.placeholder')}</span><span class="hint"
+				>{$_('profile.freeform.empty_hint')}</span
+			></button
 		>
 	{/if}
 </div>

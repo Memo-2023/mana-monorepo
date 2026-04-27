@@ -5,8 +5,9 @@
 -->
 <script lang="ts">
 	import { formatDate, formatTime } from '$lib/i18n/format';
-	import { getComparison, type CompareResponse, type ModelComparison } from '../api';
+	import { getComparison, type CompareResponse } from '../api';
 	import { getWeatherIcon, getWeatherLabel } from '../weather-icons';
+	import { _ } from 'svelte-i18n';
 
 	interface Props {
 		lat: number;
@@ -32,7 +33,7 @@
 		try {
 			data = await getComparison(lt, ln);
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Vergleichsdaten nicht verfuegbar';
+			error = e instanceof Error ? e.message : $_('wetter.comparison.error_unavailable');
 		} finally {
 			loading = false;
 		}
@@ -56,18 +57,18 @@
 
 <div class="comparison-section">
 	<div class="section-header">
-		<span class="section-label">Modell-Vergleich</span>
+		<span class="section-label">{$_('wetter.comparison.section_label')}</span>
 		<span class="section-sub">{locationName}</span>
 	</div>
 
 	{#if loading}
-		<div class="loading">Modelle werden verglichen...</div>
+		<div class="loading">{$_('wetter.comparison.loading')}</div>
 	{:else if error}
 		<div class="error">{error}</div>
 	{:else if data}
 		<!-- Current conditions comparison -->
 		<div class="compare-block">
-			<span class="block-label">Aktuell</span>
+			<span class="block-label">{$_('wetter.comparison.block_current')}</span>
 			<div class="model-cards">
 				{#each data.models as model (model.id)}
 					{@const c = model.current}
@@ -80,7 +81,7 @@
 						</div>
 						<div class="model-desc">{model.description}</div>
 						{#if model.error || !c}
-							<div class="model-error">Nicht verfuegbar</div>
+							<div class="model-error">{$_('wetter.comparison.model_unavailable')}</div>
 						{:else}
 							<div class="model-current">
 								<span class="mc-icon"
@@ -91,19 +92,19 @@
 							</div>
 							<div class="model-details">
 								<div class="md-row">
-									<span class="md-label">Gefuehlt</span>
+									<span class="md-label">{$_('wetter.comparison.label_apparent')}</span>
 									<span class="md-val">{Math.round(c.apparent_temperature ?? 0)}°</span>
 								</div>
 								<div class="md-row">
-									<span class="md-label">Wind</span>
+									<span class="md-label">{$_('wetter.comparison.label_wind')}</span>
 									<span class="md-val">{Math.round(c.wind_speed_10m ?? 0)} km/h</span>
 								</div>
 								<div class="md-row">
-									<span class="md-label">Niederschlag</span>
+									<span class="md-label">{$_('wetter.comparison.label_precip')}</span>
 									<span class="md-val">{(c.precipitation ?? 0).toFixed(1)} mm</span>
 								</div>
 								<div class="md-row">
-									<span class="md-label">Feuchtigkeit</span>
+									<span class="md-label">{$_('wetter.comparison.label_humidity')}</span>
 									<span class="md-val">{c.relative_humidity_2m ?? 0}%</span>
 								</div>
 							</div>
@@ -115,14 +116,14 @@
 
 		<!-- Daily forecast comparison -->
 		<div class="compare-block">
-			<span class="block-label">7-Tage-Vergleich</span>
-			{#each Array.from( { length: Math.min(7, data.models[0]?.daily?.time?.length ?? 0) } ) as _, dayIdx}
+			<span class="block-label">{$_('wetter.comparison.block_seven_day')}</span>
+			{#each Array.from( { length: Math.min(7, data.models[0]?.daily?.time?.length ?? 0) } ) as _ignored, dayIdx}
 				{@const dateStr = data.models[0]?.daily?.time?.[dayIdx] ?? ''}
 				{@const dayLabel =
 					dayIdx === 0
-						? 'Heute'
+						? $_('wetter.comparison.day_today')
 						: dayIdx === 1
-							? 'Morgen'
+							? $_('wetter.comparison.day_tomorrow')
 							: formatDate(new Date(dateStr), { weekday: 'short', day: 'numeric' })}
 				<div class="day-compare">
 					<div class="day-compare-header">{dayLabel}</div>
@@ -161,7 +162,7 @@
 		<!-- DWD Alerts -->
 		{#if data.alerts.length > 0}
 			<div class="compare-block">
-				<span class="block-label">DWD Wetterwarnungen</span>
+				<span class="block-label">{$_('wetter.comparison.block_alerts')}</span>
 				{#each data.alerts.slice(0, 5) as alert}
 					<div class="alert-row">
 						<span
@@ -177,9 +178,10 @@
 		{/if}
 
 		<div class="fetched-at">
-			Abgerufen: {formatTime(new Date(data.fetchedAt))}
+			{$_('wetter.comparison.fetched_at')}
+			{formatTime(new Date(data.fetchedAt))}
 			<button class="refresh-btn" onclick={() => loadComparison(lat, lon)} disabled={loading}>
-				Aktualisieren
+				{$_('wetter.comparison.action_refresh')}
 			</button>
 		</div>
 	{/if}
