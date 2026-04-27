@@ -54,6 +54,25 @@
 		"weekday_5": "Fr",
 		"weekday_6": "Sa"
 	},
+	"hub": {
+		"toast_account_deleting": "Konto wird gelöscht...",
+		"tab_overview": "Übersicht",
+		"tab_interview": "Interview",
+		"tab_freeform": "Freitext",
+		"tab_account": "Konto",
+		"hero_title": "Interview starten",
+		"hero_subtitle_progress": "{answered} von {total} Fragen beantwortet — mach weiter!",
+		"hero_subtitle_initial": "Erzähl Mana mehr über dich, damit die App besser zu dir passt.",
+		"option_text_title": "Per Text",
+		"option_text_hint": "Fragen lesen und tippen",
+		"option_voice_title": "Per Sprache",
+		"option_voice_hint": "Fragen hören und sprechen",
+		"option_conversation_title": "Als Gespräch",
+		"option_conversation_hint": "Fließend — Antworten werden automatisch gespeichert",
+		"avatar_alt": "Avatar",
+		"action_my_images": "Meine Bilder",
+		"action_my_images_hint": "Gesichts- und Ganzkörperbilder für KI-Bildgenerierung"
+	},
 	"freeform": {
 		"placeholder": "Was soll Mana sonst noch über dich wissen?",
 		"saving": "Speichert…",
