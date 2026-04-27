@@ -14,7 +14,6 @@
 	} from './queries';
 	import { recipesStore } from './stores/recipes.svelte';
 	import {
-		DIFFICULTY_LABELS,
 		DIFFICULTY_COLORS,
 		DEFAULT_TAGS,
 		UNIT_OPTIONS,
@@ -26,6 +25,7 @@
 	import { useItemContextMenu } from '$lib/data/item-context-menu.svelte';
 	import { Trash, Heart, Copy, Star } from '@mana/shared-icons';
 	import { VisibilityPicker } from '@mana/shared-privacy';
+	import { _ } from 'svelte-i18n';
 
 	let recipes$ = useAllRecipes();
 	let recipes = $derived(recipes$.value);
@@ -64,7 +64,9 @@
 			? [
 					{
 						id: 'favorite',
-						label: ctxMenu.state.target.isFavorite ? 'Favorit entfernen' : 'Als Favorit',
+						label: ctxMenu.state.target.isFavorite
+							? $_('recipes.list_view.ctx_remove_fav')
+							: $_('recipes.list_view.ctx_make_fav'),
 						icon: Heart,
 						action: () => {
 							const t = ctxMenu.state.target;
@@ -73,7 +75,7 @@
 					},
 					{
 						id: 'duplicate',
-						label: 'Duplizieren',
+						label: $_('recipes.list_view.ctx_duplicate'),
 						icon: Copy,
 						action: () => {
 							const t = ctxMenu.state.target;
@@ -83,7 +85,7 @@
 					{ id: 'div', label: '', type: 'divider' as const },
 					{
 						id: 'delete',
-						label: 'Löschen',
+						label: $_('recipes.list_view.ctx_delete'),
 						icon: Trash,
 						variant: 'danger' as const,
 						action: () => {
@@ -161,7 +163,7 @@
 		<input
 			class="search-input"
 			type="text"
-			placeholder="Rezept suchen..."
+			placeholder={$_('recipes.list_view.search_placeholder')}
 			bind:value={searchQuery}
 		/>
 		<div class="chip-row">
@@ -171,7 +173,7 @@
 				onclick={() => (showFavoritesOnly = !showFavoritesOnly)}
 			>
 				<Star size={12} weight={showFavoritesOnly ? 'fill' : 'regular'} />
-				Favoriten
+				{$_('recipes.list_view.chip_favorites')}
 			</button>
 			{#each ['easy', 'medium', 'hard'] as const as d}
 				<button
@@ -180,7 +182,7 @@
 					onclick={() => (activeDifficulty = activeDifficulty === d ? null : d)}
 				>
 					<span class="diff-dot" style:background={DIFFICULTY_COLORS[d]}></span>
-					{DIFFICULTY_LABELS[d].de}
+					{$_('recipes.difficulties.' + d)}
 				</button>
 			{/each}
 		</div>
@@ -244,10 +246,12 @@
 							style:background="{DIFFICULTY_COLORS[recipe.difficulty]}22"
 							style:color={DIFFICULTY_COLORS[recipe.difficulty]}
 						>
-							{DIFFICULTY_LABELS[recipe.difficulty].de}
+							{$_('recipes.difficulties.' + recipe.difficulty)}
 						</span>
 						{#if totalTime}<span class="meta-pill">{formatTime(totalTime)}</span>{/if}
-						<span class="meta-pill">{recipe.servings} Port.</span>
+						<span class="meta-pill"
+							>{$_('recipes.list_view.badge_servings', { values: { n: recipe.servings } })}</span
+						>
 					</div>
 					{#if recipe.tags.length > 0}
 						<div class="card-tags">
@@ -262,7 +266,7 @@
 			{#if expandedId === recipe.id}
 				<div class="detail-panel">
 					<div class="detail-section">
-						<div class="detail-heading">Sichtbarkeit</div>
+						<div class="detail-heading">{$_('recipes.detail_panel.heading_visibility')}</div>
 						<VisibilityPicker
 							level={recipe.visibility ?? 'private'}
 							onChange={(next) => recipesStore.setVisibility(recipe.id, next)}
@@ -271,7 +275,12 @@
 					{#if recipe.ingredients.length > 0}
 						<div class="detail-section">
 							<div class="detail-heading">
-								Zutaten <span class="detail-sub">({recipe.servings} Portionen)</span>
+								{$_('recipes.detail_panel.heading_ingredients')}
+								<span class="detail-sub"
+									>{$_('recipes.detail_panel.ingredients_servings_suffix', {
+										values: { n: recipe.servings },
+									})}</span
+								>
 							</div>
 							{#each recipe.ingredients as ing}
 								<div class="ing-row">
@@ -283,7 +292,7 @@
 					{/if}
 					{#if recipe.steps.length > 0}
 						<div class="detail-section">
-							<div class="detail-heading">Zubereitung</div>
+							<div class="detail-heading">{$_('recipes.detail_panel.heading_steps')}</div>
 							{#each recipe.steps as step, i}
 								<div class="step-row">
 									<span class="step-num">{i + 1}</span>
@@ -311,7 +320,7 @@
 				}}
 			>
 				<span class="add-icon">+</span>
-				<span class="add-label">Neues Rezept</span>
+				<span class="add-label">{$_('recipes.list_view.add_card')}</span>
 			</div>
 		{/if}
 	</div>
@@ -320,41 +329,47 @@
 	{#if showCreate}
 		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		<form class="create-form" onsubmit={handleCreate} onkeydown={handleCreateKeydown}>
-			<div class="form-heading">Neues Rezept</div>
+			<div class="form-heading">{$_('recipes.create_form.heading_new_recipe')}</div>
 			<!-- svelte-ignore a11y_autofocus -->
-			<input class="form-input" type="text" placeholder="Titel *" bind:value={newTitle} autofocus />
+			<input
+				class="form-input"
+				type="text"
+				placeholder={$_('recipes.create_form.placeholder_title')}
+				bind:value={newTitle}
+				autofocus
+			/>
 			<textarea
 				class="form-input"
-				placeholder="Beschreibung (optional)"
+				placeholder={$_('recipes.create_form.placeholder_description')}
 				bind:value={newDescription}
 				rows="2"
 			></textarea>
 
 			<div class="form-grid">
 				<label class="form-field">
-					<span class="form-label">Schwierigkeit</span>
+					<span class="form-label">{$_('recipes.create_form.label_difficulty')}</span>
 					<select class="form-input" bind:value={newDifficulty}>
 						{#each ['easy', 'medium', 'hard'] as const as d}<option value={d}
-								>{DIFFICULTY_LABELS[d].de}</option
+								>{$_('recipes.difficulties.' + d)}</option
 							>{/each}
 					</select>
 				</label>
 				<label class="form-field">
-					<span class="form-label">Portionen</span>
+					<span class="form-label">{$_('recipes.create_form.label_servings')}</span>
 					<input class="form-input" type="number" min="1" bind:value={newServings} />
 				</label>
 				<label class="form-field">
-					<span class="form-label">Vorb. (Min.)</span>
+					<span class="form-label">{$_('recipes.create_form.label_prep_time_min')}</span>
 					<input class="form-input" type="number" min="0" bind:value={newPrepTime} />
 				</label>
 				<label class="form-field">
-					<span class="form-label">Koch (Min.)</span>
+					<span class="form-label">{$_('recipes.create_form.label_cook_time_min')}</span>
 					<input class="form-input" type="number" min="0" bind:value={newCookTime} />
 				</label>
 			</div>
 
 			<div class="form-section">
-				<span class="form-label">Tags</span>
+				<span class="form-label">{$_('recipes.create_form.label_tags')}</span>
 				<div class="chip-row">
 					{#each DEFAULT_TAGS as tag}
 						<button
@@ -368,13 +383,13 @@
 			</div>
 
 			<div class="form-section">
-				<span class="form-label">Zutaten</span>
+				<span class="form-label">{$_('recipes.create_form.label_ingredients')}</span>
 				{#each newIngredients as ing, i}
 					<div class="ing-edit-row">
 						<input
 							class="form-input ing-qty-input"
 							type="text"
-							placeholder="Menge"
+							placeholder={$_('recipes.create_form.placeholder_amount')}
 							bind:value={ing.amount}
 						/>
 						<select class="form-input ing-unit-input" bind:value={ing.unit}>
@@ -383,7 +398,7 @@
 						<input
 							class="form-input"
 							type="text"
-							placeholder="Zutat"
+							placeholder={$_('recipes.create_form.placeholder_ingredient')}
 							bind:value={ing.name}
 							style="flex:1"
 						/>
@@ -394,18 +409,20 @@
 							>{/if}
 					</div>
 				{/each}
-				<button type="button" class="add-row-btn" onclick={addIngredientRow}>+ Zutat</button>
+				<button type="button" class="add-row-btn" onclick={addIngredientRow}
+					>{$_('recipes.create_form.action_add_ingredient')}</button
+				>
 			</div>
 
 			<div class="form-section">
-				<span class="form-label">Schritte</span>
+				<span class="form-label">{$_('recipes.create_form.label_steps')}</span>
 				{#each newSteps as _, i}
 					<div class="step-edit-row">
 						<span class="step-edit-num">{i + 1}.</span>
 						<input
 							class="form-input"
 							type="text"
-							placeholder="Schritt beschreiben..."
+							placeholder={$_('recipes.create_form.placeholder_step')}
 							bind:value={newSteps[i]}
 							style="flex:1"
 						/>
@@ -416,12 +433,18 @@
 							>{/if}
 					</div>
 				{/each}
-				<button type="button" class="add-row-btn" onclick={addStepRow}>+ Schritt</button>
+				<button type="button" class="add-row-btn" onclick={addStepRow}
+					>{$_('recipes.create_form.action_add_step')}</button
+				>
 			</div>
 
 			<div class="form-actions">
-				<button type="button" class="btn-cancel" onclick={resetForm}>Abbrechen</button>
-				<button type="submit" class="btn-create" disabled={!newTitle.trim()}>Erstellen</button>
+				<button type="button" class="btn-cancel" onclick={resetForm}
+					>{$_('recipes.create_form.action_cancel')}</button
+				>
+				<button type="submit" class="btn-create" disabled={!newTitle.trim()}
+					>{$_('recipes.create_form.action_create')}</button
+				>
 			</div>
 		</form>
 	{/if}
@@ -429,11 +452,12 @@
 	{#if filtered.length === 0 && !showCreate}
 		<div class="empty">
 			{#if recipes.length === 0}
-				<p>Noch keine Rezepte gespeichert.</p>
-				<button class="btn-create" onclick={() => (showCreate = true)}>Erstes Rezept anlegen</button
+				<p>{$_('recipes.list_view.empty_no_recipes')}</p>
+				<button class="btn-create" onclick={() => (showCreate = true)}
+					>{$_('recipes.list_view.action_create_first')}</button
 				>
 			{:else}
-				<p>Keine Rezepte gefunden.</p>
+				<p>{$_('recipes.list_view.empty_no_match')}</p>
 			{/if}
 		</div>
 	{/if}

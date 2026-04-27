@@ -176,7 +176,6 @@
 	"apps/mana/apps/web/src/lib/modules/quiz/ListView.svelte": 5,
 	"apps/mana/apps/web/src/lib/modules/quiz/PlayView.svelte": 6,
 	"apps/mana/apps/web/src/lib/modules/quotes/views/DetailView.svelte": 2,
-	"apps/mana/apps/web/src/lib/modules/recipes/ListView.svelte": 14,
 	"apps/mana/apps/web/src/lib/modules/research-lab/components/CompareColumn.svelte": 2,
 	"apps/mana/apps/web/src/lib/modules/research-lab/ListView.svelte": 4,
 	"apps/mana/apps/web/src/lib/modules/rituals/ListView.svelte": 1,

@@ -15,6 +15,7 @@
 	"apps/mana/apps/web/src/lib/modules/period/ListView.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/plants/ListView.svelte": 5,
 	"apps/mana/apps/web/src/lib/modules/quotes/components/QuoteCard.svelte": 4,
+	"apps/mana/apps/web/src/lib/modules/recipes/ListView.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/times/components/EntryForm.svelte": 6,
 	"apps/mana/apps/web/src/lib/modules/times/components/EntryItem.svelte": 6,
 	"apps/mana/apps/web/src/lib/modules/times/components/EntryList.svelte": 2,
