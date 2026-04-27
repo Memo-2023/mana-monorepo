@@ -12,11 +12,17 @@
 		"emptyHint": "Try ↻ or pick more topics.",
 		"loadError": "Loading failed",
 		"savedLink": "Saved",
-		"settingsLink": "Settings"
+		"settingsLink": "Settings",
+		"openArticleAria": "Open article",
+		"savedBadgeTitle": "In your reading list",
+		"savedBadgeText": "❤️ saved",
+		"readingTimeMin": "{n} min"
 	},
 	"reactions": {
 		"interested": "Interested",
+		"interestedSaved": "Saved",
 		"interestedTitle": "Save and see more like this",
+		"interestedSavedTitle": "Already saved — clicking again only confirms",
 		"notInterested": "Not for me",
 		"notInterestedTitle": "Show less of this",
 		"blockSource": "Hide source",
@@ -35,7 +41,8 @@
 		"sourcesHint": "Tap a source to hide it. You can change this any time.",
 		"back": "Back",
 		"next": "Next",
-		"finish": "Done"
+		"finish": "Done",
+		"finishLoading": "Saving…"
 	},
 	"reader": {
 		"back": "Back",

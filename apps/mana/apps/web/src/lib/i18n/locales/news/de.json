@@ -12,11 +12,17 @@
 		"emptyHint": "Probiere ↻ oder erweitere deine Themen.",
 		"loadError": "Fehler beim Laden",
 		"savedLink": "Gespeichert",
-		"settingsLink": "Einstellungen"
+		"settingsLink": "Einstellungen",
+		"openArticleAria": "Artikel öffnen",
+		"savedBadgeTitle": "In deiner Leseliste",
+		"savedBadgeText": "❤️ gespeichert",
+		"readingTimeMin": "{n} min"
 	},
 	"reactions": {
 		"interested": "Interessiert",
+		"interestedSaved": "Gespeichert",
 		"interestedTitle": "Speichern + mehr davon",
+		"interestedSavedTitle": "Schon gespeichert — nochmal klicken bestätigt nur",
 		"notInterested": "Nicht für mich",
 		"notInterestedTitle": "Weniger davon",
 		"blockSource": "Quelle ausblenden",
@@ -35,7 +41,8 @@
 		"sourcesHint": "Tippe eine Quelle an um sie auszublenden. Du kannst das jederzeit ändern.",
 		"back": "Zurück",
 		"next": "Weiter",
-		"finish": "Fertig"
+		"finish": "Fertig",
+		"finishLoading": "Speichere…"
 	},
 	"reader": {
 		"back": "Zurück",

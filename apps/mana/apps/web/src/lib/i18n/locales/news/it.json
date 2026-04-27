@@ -12,11 +12,17 @@
 		"emptyHint": "Prova ↻ o aggiungi temi.",
 		"loadError": "Errore di caricamento",
 		"savedLink": "Salvati",
-		"settingsLink": "Impostazioni"
+		"settingsLink": "Impostazioni",
+		"openArticleAria": "Apri articolo",
+		"savedBadgeTitle": "Nella tua lista di lettura",
+		"savedBadgeText": "❤️ salvato",
+		"readingTimeMin": "{n} min"
 	},
 	"reactions": {
 		"interested": "Mi interessa",
+		"interestedSaved": "Salvato",
 		"interestedTitle": "Salva e mostra di più di questo",
+		"interestedSavedTitle": "Già salvato — un altro click conferma soltanto",
 		"notInterested": "Non per me",
 		"notInterestedTitle": "Mostra di meno",
 		"blockSource": "Nascondi fonte",
@@ -35,7 +41,8 @@
 		"sourcesHint": "Tocca una fonte per nasconderla. Puoi cambiare in qualsiasi momento.",
 		"back": "Indietro",
 		"next": "Avanti",
-		"finish": "Fatto"
+		"finish": "Fatto",
+		"finishLoading": "Salvataggio…"
 	},
 	"reader": {
 		"back": "Indietro",

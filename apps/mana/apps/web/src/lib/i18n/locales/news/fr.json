@@ -12,11 +12,17 @@
 		"emptyHint": "Essaie ↻ ou ajoute des thèmes.",
 		"loadError": "Échec du chargement",
 		"savedLink": "Enregistrés",
-		"settingsLink": "Réglages"
+		"settingsLink": "Réglages",
+		"openArticleAria": "Ouvrir l'article",
+		"savedBadgeTitle": "Dans ta liste de lecture",
+		"savedBadgeText": "❤️ enregistré",
+		"readingTimeMin": "{n} min"
 	},
 	"reactions": {
 		"interested": "Intéressant",
+		"interestedSaved": "Enregistré",
 		"interestedTitle": "Enregistrer et en voir plus",
+		"interestedSavedTitle": "Déjà enregistré — recliquer ne fait que confirmer",
 		"notInterested": "Pas pour moi",
 		"notInterestedTitle": "Moins de ce genre",
 		"blockSource": "Masquer la source",
@@ -35,7 +41,8 @@
 		"sourcesHint": "Touche une source pour la masquer. Tu peux changer à tout moment.",
 		"back": "Retour",
 		"next": "Suivant",
-		"finish": "Terminé"
+		"finish": "Terminé",
+		"finishLoading": "Enregistrement…"
 	},
 	"reader": {
 		"back": "Retour",

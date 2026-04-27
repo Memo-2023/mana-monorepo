@@ -12,11 +12,17 @@
 		"emptyHint": "Prueba ↻ o añade más temas.",
 		"loadError": "Error al cargar",
 		"savedLink": "Guardados",
-		"settingsLink": "Ajustes"
+		"settingsLink": "Ajustes",
+		"openArticleAria": "Abrir artículo",
+		"savedBadgeTitle": "En tu lista de lectura",
+		"savedBadgeText": "❤️ guardado",
+		"readingTimeMin": "{n} min"
 	},
 	"reactions": {
 		"interested": "Me interesa",
+		"interestedSaved": "Guardado",
 		"interestedTitle": "Guardar y ver más como esto",
+		"interestedSavedTitle": "Ya guardado — volver a hacer clic solo confirma",
 		"notInterested": "No es para mí",
 		"notInterestedTitle": "Mostrar menos de esto",
 		"blockSource": "Ocultar fuente",
@@ -35,7 +41,8 @@
 		"sourcesHint": "Toca una fuente para ocultarla. Puedes cambiarlo cuando quieras.",
 		"back": "Atrás",
 		"next": "Siguiente",
-		"finish": "Listo"
+		"finish": "Listo",
+		"finishLoading": "Guardando…"
 	},
 	"reader": {
 		"back": "Atrás",
