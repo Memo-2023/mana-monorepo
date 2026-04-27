@@ -27,6 +27,27 @@
 		"section_preview": "Wie die Kampagne aussah",
 		"confirm_cancel_scheduled": "Geplante Kampagne abbrechen?"
 	},
+	"list_view": {
+		"title": "Broadcasts",
+		"subtitle": "Newsletter und Kampagnen an deine Kontakte",
+		"action_settings": "Einstellungen",
+		"action_new": "+ Neue Kampagne",
+		"stat_sent_year": "Versendet {year}",
+		"stat_campaigns": "Kampagnen",
+		"stat_avg_open": "Ø Öffnungsrate",
+		"stat_avg_click": "Ø Klickrate",
+		"stat_over_all": "über alle Kampagnen",
+		"stat_drafts": "Entwürfe",
+		"stat_drafts_sub": "in Arbeit",
+		"chip_all": "Alle",
+		"search_placeholder": "Suchen (Name oder Betreff)",
+		"empty_heading": "Noch keine Kampagnen",
+		"empty_body": "Verschicke deinen ersten Newsletter — mit Rich-Text-Editor, Tracking und DSGVO-konformem Abmelden.",
+		"empty_action": "Erste Kampagne",
+		"empty_no_match": "Keine Kampagnen gefunden.",
+		"row_recipients": "{n} Empfänger",
+		"row_open_rate_title": "Öffnungsrate"
+	},
 	"compose_view": {
 		"default_name": "Neue Kampagne",
 		"name_placeholder": "Kampagnen-Name",

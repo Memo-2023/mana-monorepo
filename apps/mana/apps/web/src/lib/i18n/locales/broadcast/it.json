@@ -27,6 +27,27 @@
 		"section_preview": "Come appariva la campagna",
 		"confirm_cancel_scheduled": "Annullare la campagna pianificata?"
 	},
+	"list_view": {
+		"title": "Broadcasts",
+		"subtitle": "Newsletter e campagne per i tuoi contatti",
+		"action_settings": "Impostazioni",
+		"action_new": "+ Nuova campagna",
+		"stat_sent_year": "Inviate {year}",
+		"stat_campaigns": "Campagne",
+		"stat_avg_open": "Tasso apertura medio",
+		"stat_avg_click": "Tasso click medio",
+		"stat_over_all": "su tutte le campagne",
+		"stat_drafts": "Bozze",
+		"stat_drafts_sub": "in corso",
+		"chip_all": "Tutte",
+		"search_placeholder": "Cerca (nome o oggetto)",
+		"empty_heading": "Nessuna campagna",
+		"empty_body": "Invia la tua prima newsletter — con editor rich-text, tracking e disiscrizione conforme al GDPR.",
+		"empty_action": "Prima campagna",
+		"empty_no_match": "Nessuna campagna trovata.",
+		"row_recipients": "{n} destinatari",
+		"row_open_rate_title": "Tasso di apertura"
+	},
 	"compose_view": {
 		"default_name": "Nuova campagna",
 		"name_placeholder": "Nome della campagna",

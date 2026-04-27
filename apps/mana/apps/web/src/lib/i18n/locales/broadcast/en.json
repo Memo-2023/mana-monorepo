@@ -27,6 +27,27 @@
 		"section_preview": "What the campaign looked like",
 		"confirm_cancel_scheduled": "Cancel scheduled campaign?"
 	},
+	"list_view": {
+		"title": "Broadcasts",
+		"subtitle": "Newsletters and campaigns to your contacts",
+		"action_settings": "Settings",
+		"action_new": "+ New campaign",
+		"stat_sent_year": "Sent {year}",
+		"stat_campaigns": "Campaigns",
+		"stat_avg_open": "Avg open rate",
+		"stat_avg_click": "Avg click rate",
+		"stat_over_all": "across all campaigns",
+		"stat_drafts": "Drafts",
+		"stat_drafts_sub": "in progress",
+		"chip_all": "All",
+		"search_placeholder": "Search (name or subject)",
+		"empty_heading": "No campaigns yet",
+		"empty_body": "Send your first newsletter — with a rich-text editor, tracking, and GDPR-compliant unsubscribe.",
+		"empty_action": "First campaign",
+		"empty_no_match": "No campaigns found.",
+		"row_recipients": "{n} recipients",
+		"row_open_rate_title": "Open rate"
+	},
 	"compose_view": {
 		"default_name": "New campaign",
 		"name_placeholder": "Campaign name",

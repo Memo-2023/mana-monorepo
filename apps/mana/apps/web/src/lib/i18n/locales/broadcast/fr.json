@@ -27,6 +27,27 @@
 		"section_preview": "À quoi ressemblait la campagne",
 		"confirm_cancel_scheduled": "Annuler la campagne planifiée ?"
 	},
+	"list_view": {
+		"title": "Broadcasts",
+		"subtitle": "Newsletters et campagnes pour tes contacts",
+		"action_settings": "Paramètres",
+		"action_new": "+ Nouvelle campagne",
+		"stat_sent_year": "Envoyés {year}",
+		"stat_campaigns": "Campagnes",
+		"stat_avg_open": "Taux d'ouverture moy.",
+		"stat_avg_click": "Taux de clic moy.",
+		"stat_over_all": "sur toutes les campagnes",
+		"stat_drafts": "Brouillons",
+		"stat_drafts_sub": "en cours",
+		"chip_all": "Toutes",
+		"search_placeholder": "Rechercher (nom ou objet)",
+		"empty_heading": "Pas encore de campagnes",
+		"empty_body": "Envoie ta première newsletter — avec un éditeur rich-text, du tracking et un désabonnement conforme au RGPD.",
+		"empty_action": "Première campagne",
+		"empty_no_match": "Aucune campagne trouvée.",
+		"row_recipients": "{n} destinataires",
+		"row_open_rate_title": "Taux d'ouverture"
+	},
 	"compose_view": {
 		"default_name": "Nouvelle campagne",
 		"name_placeholder": "Nom de la campagne",

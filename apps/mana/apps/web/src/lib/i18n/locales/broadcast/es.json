@@ -27,6 +27,27 @@
 		"section_preview": "Cómo se veía la campaña",
 		"confirm_cancel_scheduled": "¿Cancelar la campaña programada?"
 	},
+	"list_view": {
+		"title": "Broadcasts",
+		"subtitle": "Boletines y campañas para tus contactos",
+		"action_settings": "Ajustes",
+		"action_new": "+ Nueva campaña",
+		"stat_sent_year": "Enviadas {year}",
+		"stat_campaigns": "Campañas",
+		"stat_avg_open": "Tasa de apertura prom.",
+		"stat_avg_click": "Tasa de clic prom.",
+		"stat_over_all": "en todas las campañas",
+		"stat_drafts": "Borradores",
+		"stat_drafts_sub": "en curso",
+		"chip_all": "Todas",
+		"search_placeholder": "Buscar (nombre o asunto)",
+		"empty_heading": "Aún no hay campañas",
+		"empty_body": "Envía tu primer boletín — con editor enriquecido, seguimiento y baja conforme a RGPD.",
+		"empty_action": "Primera campaña",
+		"empty_no_match": "No se encontraron campañas.",
+		"row_recipients": "{n} destinatarios",
+		"row_open_rate_title": "Tasa de apertura"
+	},
 	"compose_view": {
 		"default_name": "Nueva campaña",
 		"name_placeholder": "Nombre de la campaña",
