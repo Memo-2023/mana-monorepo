@@ -6,10 +6,10 @@
 	import { goto } from '$app/navigation';
 	import { useQuiz, useQuestions, blankOption } from './queries';
 	import { quizzesStore } from './stores/quizzes.svelte';
-	import { QUESTION_TYPE_LABELS } from './types';
 	import type { QuestionType, QuestionOption, QuizQuestion } from './types';
 	import { ArrowLeft, Plus, Trash, Check, Play, PencilSimple, X } from '@mana/shared-icons';
 	import { VisibilityPicker, type VisibilityLevel } from '@mana/shared-privacy';
+	import { _ } from 'svelte-i18n';
 
 	interface Props {
 		quizId: string;
@@ -42,7 +42,7 @@
 	async function saveMeta() {
 		if (!quiz) return;
 		await quizzesStore.updateQuiz(quiz.id, {
-			title: metaTitle.trim() || 'Unbenannt',
+			title: metaTitle.trim() || $_('quiz.edit_view.untitled_fallback'),
 			description: metaDescription.trim() || null,
 			category: metaCategory.trim() || null,
 			tags: metaTags
@@ -71,8 +71,8 @@
 	function defaultOptions(type: QuestionType): QuestionOption[] {
 		if (type === 'truefalse') {
 			return [
-				{ id: 't', text: 'Wahr', isCorrect: true },
-				{ id: 'f', text: 'Falsch', isCorrect: false },
+				{ id: 't', text: $_('quiz.edit_view.truefalse_true'), isCorrect: true },
+				{ id: 'f', text: $_('quiz.edit_view.truefalse_false'), isCorrect: false },
 			];
 		}
 		if (type === 'text') return [];
@@ -166,7 +166,7 @@
 	}
 
 	async function deleteQuestion(id: string) {
-		if (!confirm('Frage löschen?')) return;
+		if (!confirm($_('quiz.edit_view.confirm_delete_question'))) return;
 		await quizzesStore.deleteQuestion(id);
 	}
 
@@ -181,8 +181,9 @@
 
 <div class="wrap">
 	<header class="header">
-		<button class="back" onclick={() => goto('/quiz')} aria-label="Zurück">
-			<ArrowLeft size={18} /> Quiz
+		<button class="back" onclick={() => goto('/quiz')} aria-label={$_('quiz.edit_view.back_aria')}>
+			<ArrowLeft size={18} />
+			{$_('quiz.edit_view.back_label')}
 		</button>
 		{#if quiz}
 			<button
@@ -190,13 +191,14 @@
 				disabled={questions.length === 0}
 				onclick={() => goto(`/quiz/${quiz.id}/play`)}
 			>
-				<Play size={14} weight="fill" /> Spielen
+				<Play size={14} weight="fill" />
+				{$_('quiz.edit_view.action_play')}
 			</button>
 		{/if}
 	</header>
 
 	{#if !quiz}
-		<p class="empty">Quiz nicht gefunden.</p>
+		<p class="empty">{$_('quiz.edit_view.empty_quiz')}</p>
 	{:else}
 		<section class="meta-section">
 			<input
@@ -204,13 +206,13 @@
 				type="text"
 				bind:value={metaTitle}
 				onblur={saveMeta}
-				placeholder="Titel"
+				placeholder={$_('quiz.edit_view.placeholder_title')}
 			/>
 			<textarea
 				class="desc-input"
 				bind:value={metaDescription}
 				onblur={saveMeta}
-				placeholder="Beschreibung (optional)"
+				placeholder={$_('quiz.edit_view.placeholder_description')}
 				rows="2"
 			></textarea>
 			<div class="meta-row">
@@ -219,18 +221,18 @@
 					type="text"
 					bind:value={metaCategory}
 					onblur={saveMeta}
-					placeholder="Kategorie"
+					placeholder={$_('quiz.edit_view.placeholder_category')}
 				/>
 				<input
 					class="small-input"
 					type="text"
 					bind:value={metaTags}
 					onblur={saveMeta}
-					placeholder="Tags (Komma-getrennt)"
+					placeholder={$_('quiz.edit_view.placeholder_tags')}
 				/>
 			</div>
 			<div class="visibility-row">
-				<span class="visibility-label">Sichtbarkeit</span>
+				<span class="visibility-label">{$_('quiz.edit_view.label_visibility')}</span>
 				<VisibilityPicker
 					level={quiz.visibility ?? 'space'}
 					onChange={handleVisibilityChange}
@@ -240,28 +242,28 @@
 		</section>
 
 		<section class="questions-section">
-			<h2>Fragen ({questions.length})</h2>
+			<h2>{$_('quiz.edit_view.section_questions', { values: { n: questions.length } })}</h2>
 			{#if questions.length === 0}
-				<p class="empty">Noch keine Fragen — füge unten eine hinzu.</p>
+				<p class="empty">{$_('quiz.edit_view.empty_questions')}</p>
 			{:else}
 				<ol class="question-list">
 					{#each questions as q, i (q.id)}
 						<li class="question-item" class:editing={editingId === q.id}>
 							<div class="q-header">
 								<span class="q-num">{i + 1}</span>
-								<span class="q-type">{QUESTION_TYPE_LABELS[q.type]}</span>
+								<span class="q-type">{$_('quiz.question_types.' + q.type)}</span>
 								<button
 									class="icon-btn"
-									title="Bearbeiten"
-									aria-label="Bearbeiten"
+									title={$_('quiz.edit_view.action_edit')}
+									aria-label={$_('quiz.edit_view.action_edit')}
 									onclick={() => startEdit(q)}
 								>
 									<PencilSimple size={14} />
 								</button>
 								<button
 									class="icon-btn"
-									title="Löschen"
-									aria-label="Löschen"
+									title={$_('quiz.edit_view.action_delete')}
+									aria-label={$_('quiz.edit_view.action_delete')}
 									onclick={() => deleteQuestion(q.id)}
 								>
 									<Trash size={14} />
@@ -284,46 +286,61 @@
 			<div class="new-header">
 				<h2>
 					{editingId
-						? `Frage ${questions.findIndex((x) => x.id === editingId) + 1} bearbeiten`
-						: 'Neue Frage'}
+						? $_('quiz.edit_view.new_section_edit', {
+								values: { n: questions.findIndex((x) => x.id === editingId) + 1 },
+							})
+						: $_('quiz.edit_view.new_section_new')}
 				</h2>
 				{#if editingId}
 					<button class="cancel-btn" onclick={cancelEdit}>
-						<X size={12} /> Abbrechen
+						<X size={12} />
+						{$_('quiz.edit_view.action_cancel')}
 					</button>
 				{/if}
 			</div>
 			<label class="field">
-				<span>Typ</span>
+				<span>{$_('quiz.edit_view.label_type')}</span>
 				<select bind:value={newType} onchange={onTypeChange}>
-					<option value="single">Single Choice</option>
-					<option value="multi">Multiple Choice</option>
-					<option value="truefalse">Wahr / Falsch</option>
-					<option value="text">Texteingabe</option>
+					<option value="single">{$_('quiz.question_types.single')}</option>
+					<option value="multi">{$_('quiz.question_types.multi')}</option>
+					<option value="truefalse">{$_('quiz.question_types.truefalse')}</option>
+					<option value="text">{$_('quiz.question_types.text')}</option>
 				</select>
 			</label>
 			<label class="field">
-				<span>Frage</span>
-				<textarea bind:value={newText} rows="2" placeholder="Was möchtest du fragen?"></textarea>
+				<span>{$_('quiz.edit_view.label_question')}</span>
+				<textarea
+					bind:value={newText}
+					rows="2"
+					placeholder={$_('quiz.edit_view.placeholder_question')}
+				></textarea>
 			</label>
 
 			{#if newType === 'text'}
 				<label class="field">
-					<span>Korrekte Antwort</span>
-					<input type="text" bind:value={newTextAnswer} placeholder="Erwartete Eingabe" />
+					<span>{$_('quiz.edit_view.label_correct_answer')}</span>
+					<input
+						type="text"
+						bind:value={newTextAnswer}
+						placeholder={$_('quiz.edit_view.placeholder_expected')}
+					/>
 				</label>
 			{:else}
 				<div class="options-block">
 					<span class="options-label">
-						Antworten {newType === 'multi' ? '(mehrere richtig möglich)' : '(eine richtig)'}
+						{newType === 'multi'
+							? $_('quiz.edit_view.options_label_multi')
+							: $_('quiz.edit_view.options_label_single')}
 					</span>
 					{#each newOptions as opt, i (opt.id)}
 						<div class="option-row">
 							<button
 								class="correct-toggle"
 								class:on={opt.isCorrect}
-								title={opt.isCorrect ? 'Richtig' : 'Als richtig markieren'}
-								aria-label="Richtig"
+								title={opt.isCorrect
+									? $_('quiz.edit_view.correct_marked')
+									: $_('quiz.edit_view.correct_mark_action')}
+								aria-label={$_('quiz.edit_view.correct_marked')}
 								onclick={() => toggleNewCorrect(opt.id)}
 							>
 								{#if opt.isCorrect}<Check size={14} weight="bold" />{/if}
@@ -331,13 +348,15 @@
 							<input
 								type="text"
 								bind:value={newOptions[i].text}
-								placeholder={`Antwort ${i + 1}`}
+								placeholder={$_('quiz.edit_view.placeholder_option', {
+									values: { n: i + 1 },
+								})}
 								disabled={newType === 'truefalse'}
 							/>
 							{#if newType !== 'truefalse' && newOptions.length > 2}
 								<button
 									class="icon-btn"
-									aria-label="Entfernen"
+									aria-label={$_('quiz.edit_view.action_remove')}
 									onclick={() => removeNewOption(opt.id)}
 								>
 									<Trash size={14} />
@@ -347,26 +366,27 @@
 					{/each}
 					{#if newType !== 'truefalse' && newOptions.length < 6}
 						<button class="add-option" onclick={addNewOption}>
-							<Plus size={12} /> Antwort hinzufügen
+							<Plus size={12} />
+							{$_('quiz.edit_view.action_add_option')}
 						</button>
 					{/if}
 				</div>
 			{/if}
 
 			<label class="field">
-				<span>Erklärung (optional)</span>
+				<span>{$_('quiz.edit_view.label_explanation')}</span>
 				<textarea
 					bind:value={newExplanation}
 					rows="2"
-					placeholder="Wird nach dem Antworten angezeigt"
+					placeholder={$_('quiz.edit_view.placeholder_explanation')}
 				></textarea>
 			</label>
 
 			<button class="submit-btn" onclick={submitQuestion}>
 				{#if editingId}
-					<Check size={14} /> Änderungen speichern
+					<Check size={14} /> {$_('quiz.edit_view.action_save_changes')}
 				{:else}
-					<Plus size={14} /> Frage hinzufügen
+					<Plus size={14} /> {$_('quiz.edit_view.action_add_question')}
 				{/if}
 			</button>
 		</section>

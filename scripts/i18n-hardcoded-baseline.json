@@ -170,7 +170,6 @@
 	"apps/mana/apps/web/src/lib/modules/profile/MeImagesView.svelte": 2,
 	"apps/mana/apps/web/src/lib/modules/questions/ListView.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/questions/views/DetailView.svelte": 6,
-	"apps/mana/apps/web/src/lib/modules/quiz/EditView.svelte": 13,
 	"apps/mana/apps/web/src/lib/modules/quiz/ListView.svelte": 5,
 	"apps/mana/apps/web/src/lib/modules/quiz/PlayView.svelte": 6,
 	"apps/mana/apps/web/src/lib/modules/quotes/views/DetailView.svelte": 2,
