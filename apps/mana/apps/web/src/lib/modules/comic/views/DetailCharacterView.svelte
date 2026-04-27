@@ -8,9 +8,9 @@
 	import { ArrowLeft, Archive, Heart, Plus, Sparkle, Trash } from '@mana/shared-icons';
 	import { comicCharactersStore } from '../stores/characters.svelte';
 	import { useCharacter } from '../queries';
-	import { STYLE_LABELS } from '../constants';
 	import VariantTile from '../components/VariantTile.svelte';
 	import CharacterBuilder from '../components/CharacterBuilder.svelte';
+	import { _ } from 'svelte-i18n';
 
 	interface Props {
 		id: string;
@@ -36,7 +36,14 @@
 
 	async function handleDelete() {
 		if (!character) return;
-		if (!confirm(`Character "${character.name}" wirklich löschen?`)) return;
+		if (
+			!confirm(
+				$_('comic.character_detail.confirm_delete_character', {
+					values: { name: character.name },
+				})
+			)
+		)
+			return;
 		await comicCharactersStore.deleteCharacter(character.id);
 		await goto('/comic/character');
 	}
@@ -48,12 +55,7 @@
 
 	async function handleRemove(variantId: string) {
 		if (!character) return;
-		if (
-			!confirm(
-				'Variante aus dem Character entfernen? Das Bild bleibt in deiner Picture-Galerie und kann dort gelöscht werden.'
-			)
-		)
-			return;
+		if (!confirm($_('comic.character_detail.confirm_remove_variant'))) return;
 		await comicCharactersStore.removeVariant(character.id, variantId);
 	}
 </script>
@@ -63,20 +65,24 @@
 		<a
 			href="/comic/character"
 			class="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted"
-			aria-label="Zurück zu Characters"
+			aria-label={$_('comic.character_detail.back_aria')}
 		>
 			<ArrowLeft size={16} />
 		</a>
-		<span class="text-muted-foreground">Comic · Characters</span>
+		<span class="text-muted-foreground">{$_('comic.character_detail.breadcrumb')}</span>
 	</nav>
 
 	{#if !character}
 		{#if character$.loading}
-			<p class="text-sm text-muted-foreground">Lädt…</p>
+			<p class="text-sm text-muted-foreground">{$_('comic.character_detail.loading')}</p>
 		{:else}
 			<div class="rounded-2xl border border-dashed border-border bg-background/50 p-8 text-center">
-				<p class="text-sm font-medium text-foreground">Character nicht gefunden.</p>
-				<p class="mt-1 text-sm text-muted-foreground">Gelöscht oder in einem anderen Space.</p>
+				<p class="text-sm font-medium text-foreground">
+					{$_('comic.character_detail.not_found')}
+				</p>
+				<p class="mt-1 text-sm text-muted-foreground">
+					{$_('comic.character_detail.not_found_hint')}
+				</p>
 			</div>
 		{/if}
 	{:else}
@@ -87,15 +93,20 @@
 					<h1 class="truncate text-lg font-semibold text-foreground">{character.name}</h1>
 					<div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
 						<span class="rounded-full bg-primary/10 px-2 py-0.5 font-medium text-primary">
-							{STYLE_LABELS[character.style].de}
+							{$_('comic.styles.' + character.style)}
 						</span>
 						<span>
-							{character.variantMediaIds.length}
-							{character.variantMediaIds.length === 1 ? 'Variante' : 'Varianten'}
+							{character.variantMediaIds.length === 1
+								? $_('comic.character_detail.variant_one', {
+										values: { n: character.variantMediaIds.length },
+									})
+								: $_('comic.character_detail.variant_other', {
+										values: { n: character.variantMediaIds.length },
+									})}
 						</span>
 						{#if !character.pinnedVariantId && character.variantMediaIds.length > 0}
 							<span class="rounded-full bg-amber-500/15 px-2 py-0.5 font-medium text-amber-700"
-								>Pin offen</span
+								>{$_('comic.character_detail.pin_open')}</span
 							>
 						{/if}
 					</div>
@@ -103,8 +114,12 @@
 				<button
 					type="button"
 					onclick={handleToggleFavorite}
-					aria-label={character.isFavorite ? 'Favorit entfernen' : 'Als Favorit markieren'}
-					title={character.isFavorite ? 'Favorit entfernen' : 'Als Favorit markieren'}
+					aria-label={character.isFavorite
+						? $_('comic.character_detail.favorite_remove')
+						: $_('comic.character_detail.favorite_set')}
+					title={character.isFavorite
+						? $_('comic.character_detail.favorite_remove')
+						: $_('comic.character_detail.favorite_set')}
 					class="flex h-8 w-8 items-center justify-center rounded-md transition-colors {character.isFavorite
 						? 'text-rose-500 hover:bg-rose-500/10'
 						: 'text-muted-foreground hover:bg-muted hover:text-foreground'}"
@@ -119,7 +134,7 @@
 
 			{#if character.addPrompt}
 				<div class="rounded-md bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
-					<strong class="text-foreground">Prompt-Add:</strong>
+					<strong class="text-foreground">{$_('comic.character_detail.prompt_add_label')}</strong>
 					{character.addPrompt}
 				</div>
 			{/if}
@@ -129,7 +144,7 @@
 		<div class="space-y-3">
 			<div class="flex items-center justify-between">
 				<h2 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-					Varianten
+					{$_('comic.character_detail.section_variants')}
 				</h2>
 				{#if !showBuilder && !character.isArchived}
 					<button
@@ -138,7 +153,7 @@
 						class="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
 					>
 						<Plus size={12} />
-						Mehr Varianten
+						{$_('comic.character_detail.action_more_variants')}
 					</button>
 				{/if}
 			</div>
@@ -147,10 +162,12 @@
 				<div
 					class="rounded-2xl border border-dashed border-border bg-background/50 p-6 text-center"
 				>
-					<p class="text-sm font-medium text-foreground">Noch keine Varianten.</p>
+					<p class="text-sm font-medium text-foreground">
+						{$_('comic.character_detail.empty_variants_title')}
+					</p>
 					<p class="mt-1 text-sm text-muted-foreground">
-						Klick oben rechts auf <strong class="text-foreground">+ Mehr Varianten</strong>, um die
-						ersten 4 zu generieren.
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+						{@html $_('comic.character_detail.empty_variants_hint_html')}
 					</p>
 				</div>
 			{:else}
@@ -190,7 +207,9 @@
 				class="flex flex-1 items-center justify-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground transition-colors hover:bg-muted"
 			>
 				<Archive size={14} />
-				{character.isArchived ? 'Wieder aktiv' : 'Archivieren'}
+				{character.isArchived
+					? $_('comic.character_detail.unarchive')
+					: $_('comic.character_detail.archive')}
 			</button>
 			<button
 				type="button"
@@ -198,7 +217,7 @@
 				class="flex flex-1 items-center justify-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-error transition-colors hover:bg-error/10"
 			>
 				<Trash size={14} />
-				Löschen
+				{$_('comic.character_detail.delete')}
 			</button>
 		</div>
 
@@ -206,8 +225,8 @@
 			<p
 				class="rounded-md border border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground"
 			>
-				<Sparkle size={12} class="inline" /> Archivierter Character — keine Variant-Generierung möglich,
-				bis wieder aktiviert.
+				<Sparkle size={12} class="inline" />
+				{$_('comic.character_detail.archived_hint')}
 			</p>
 		{/if}
 	{/if}

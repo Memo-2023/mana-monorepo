@@ -18,6 +18,7 @@
 	import { useAllGarments } from '$lib/modules/wardrobe/queries';
 	import { garmentPhotoUrl } from '$lib/modules/wardrobe/api/media-url';
 	import type { Garment } from '$lib/modules/wardrobe/types';
+	import { _ } from 'svelte-i18n';
 
 	interface Props {
 		value: string[];
@@ -108,33 +109,30 @@
 <div class="space-y-3">
 	<div>
 		<h3 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-			Protagonist
+			{$_('comic.picker.section_title')}
 		</h3>
 		<p class="mt-0.5 text-xs text-muted-foreground">
-			Dein Gesicht ist Pflicht. Body-Ref und bis zu {MAX_GARMENTS} Kostüm-Fotos sind optional — klicke
-			ein Bild oder das ✕, um es wieder zu entfernen.
+			{$_('comic.picker.section_hint', { values: { max: MAX_GARMENTS } })}
 		</p>
 	</div>
 
 	<div class="flex flex-wrap items-start gap-2">
-		<!-- Face ref tile — mandatory, not deselectable. Small "Pflicht"-
-		     badge makes the locked state explicit so the user doesn't
-		     hunt for a remove button that doesn't exist. -->
+		<!-- Face ref tile — mandatory, not deselectable. -->
 		<div class="flex flex-col items-center gap-1">
 			{#if face?.publicUrl}
 				<div
 					class="relative h-20 w-20 overflow-hidden rounded-md border-2 border-primary/40"
-					title="Face-Ref ist Pflicht — kann nicht entfernt werden"
+					title={$_('comic.picker.face_required_title')}
 				>
 					<img
 						src={face.thumbnailUrl ?? face.publicUrl}
-						alt="Face-Ref"
+						alt={$_('comic.picker.face_alt')}
 						class="h-full w-full object-cover"
 					/>
 					<span
 						class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-1 py-0.5 text-center text-[9px] font-semibold uppercase tracking-wider text-white"
 					>
-						Pflicht
+						{$_('comic.picker.face_required_badge')}
 					</span>
 				</div>
 			{:else}
@@ -142,10 +140,12 @@
 					class="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-md border border-dashed border-border bg-muted/50 text-[10px] text-muted-foreground"
 				>
 					<UserCircle size={20} />
-					<span>Face fehlt</span>
+					<span>{$_('comic.picker.face_missing')}</span>
 				</div>
 			{/if}
-			<span class="text-[10px] font-medium text-muted-foreground">Face</span>
+			<span class="text-[10px] font-medium text-muted-foreground"
+				>{$_('comic.picker.face_label')}</span
+			>
 		</div>
 
 		<!-- Body ref tile — optional toggle. Two states need clear visual
@@ -165,11 +165,11 @@
 						? 'border-primary shadow-sm shadow-primary/20'
 						: 'border-border opacity-60 hover:border-primary/50 hover:opacity-100 hover:shadow-sm'}"
 					aria-pressed={bodyInValue}
-					title={bodyInValue ? 'Klick zum Entfernen' : 'Klick zum Hinzufügen'}
+					title={bodyInValue ? $_('comic.picker.toggle_remove') : $_('comic.picker.toggle_add')}
 				>
 					<img
 						src={body.thumbnailUrl ?? body.publicUrl}
-						alt="Body-Ref"
+						alt={$_('comic.picker.body_alt')}
 						class="h-full w-full object-cover"
 					/>
 					{#if !bodyInValue}
@@ -189,13 +189,15 @@
 			{:else}
 				<div
 					class="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-md border border-dashed border-border bg-muted/30 text-[10px] text-muted-foreground"
-					title="Kein Body-Ref im aktiven Space"
+					title={$_('comic.picker.body_no_in_space')}
 				>
 					<UserCircle size={18} />
-					<span>Body fehlt</span>
+					<span>{$_('comic.picker.body_missing')}</span>
 				</div>
 			{/if}
-			<span class="text-[10px] font-medium text-muted-foreground">Body</span>
+			<span class="text-[10px] font-medium text-muted-foreground"
+				>{$_('comic.picker.body_label')}</span
+			>
 		</div>
 
 		<!-- Garment tiles (picked). Whole tile is also clickable to
@@ -210,8 +212,8 @@
 					{disabled}
 					onclick={() => mediaId && removeGarment(mediaId)}
 					class="group relative h-20 w-20 overflow-hidden rounded-md border-2 border-primary/40 shadow-sm transition-all active:translate-y-px hover:border-error/60"
-					aria-label={`${g.name} entfernen`}
-					title="Klick zum Entfernen"
+					aria-label={$_('comic.picker.garment_remove_aria', { values: { name: g.name } })}
+					title={$_('comic.picker.toggle_remove')}
 				>
 					{#if mediaId}
 						<img
@@ -247,7 +249,7 @@
 					aria-expanded={showGarmentPicker}
 				>
 					<Plus size={16} />
-					<span class="text-[10px] font-medium">Kostüm</span>
+					<span class="text-[10px] font-medium">{$_('comic.picker.garment_label')}</span>
 				</button>
 				<span class="text-[10px] text-muted-foreground">
 					{garmentIdsInValue.length}/{MAX_GARMENTS}
@@ -260,21 +262,21 @@
 	{#if showGarmentPicker}
 		<div class="rounded-lg border border-border bg-muted/30 p-3">
 			<div class="mb-2 flex items-center justify-between">
-				<h4 class="text-xs font-semibold text-foreground">Kostüm aus dem Schrank wählen</h4>
+				<h4 class="text-xs font-semibold text-foreground">
+					{$_('comic.picker.garment_picker_title')}
+				</h4>
 				<button
 					type="button"
 					onclick={() => (showGarmentPicker = false)}
 					class="text-xs text-muted-foreground hover:text-foreground"
 				>
-					Schließen
+					{$_('comic.picker.garment_picker_close')}
 				</button>
 			</div>
 			{#if availableGarments.length === 0}
 				<p class="text-xs text-muted-foreground">
-					Keine weiteren Kleidungsstücke verfügbar — lade welche in <a
-						href="/wardrobe"
-						class="text-primary hover:underline">/wardrobe</a
-					> hoch.
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+					{@html $_('comic.picker.garment_picker_empty_html')}
 				</p>
 			{:else}
 				<div class="grid max-h-48 grid-cols-4 gap-2 overflow-y-auto sm:grid-cols-6">
@@ -307,14 +309,13 @@
 
 	{#if !hasFace}
 		<div class="rounded-md border border-error/30 bg-error/5 p-3 text-xs text-error" role="alert">
-			Kein Gesichtsbild in diesem Space. Lade eins in
-			<a href="/profile/me-images" class="underline hover:no-underline">Profil → Bilder</a>
-			hoch — ohne Face-Ref kein Comic.
+			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+			{@html $_('comic.picker.no_face_alert_html')}
 		</div>
 	{:else if !hasBody}
 		<p class="text-xs text-muted-foreground">
-			<TShirt size={12} class="inline" /> Tipp: Ein Body-Ref hilft, wenn der Comic Ganzkörper-Panels zeigen
-			soll.
+			<TShirt size={12} class="inline" />
+			{$_('comic.picker.body_tip')}
 		</p>
 	{/if}
 </div>

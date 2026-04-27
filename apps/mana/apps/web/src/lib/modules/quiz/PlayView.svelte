@@ -8,6 +8,7 @@
 	import { attemptsStore } from './stores/attempts.svelte';
 	import type { AttemptAnswer } from './types';
 	import { ArrowLeft, Check, X } from '@mana/shared-icons';
+	import { _ } from 'svelte-i18n';
 
 	interface Props {
 		quizId: string;
@@ -108,8 +109,9 @@
 
 <div class="wrap">
 	<header class="header">
-		<button class="back" onclick={() => goto('/quiz')} aria-label="Zurück">
-			<ArrowLeft size={18} /> Quiz
+		<button class="back" onclick={() => goto('/quiz')} aria-label={$_('quiz.play_view.back_aria')}>
+			<ArrowLeft size={18} />
+			{$_('quiz.play_view.back_label')}
 		</button>
 		{#if quiz}
 			<span class="title">{quiz.title}</span>
@@ -120,14 +122,18 @@
 	</header>
 
 	{#if !quiz}
-		<p class="empty">Quiz nicht gefunden.</p>
+		<p class="empty">{$_('quiz.play_view.empty_quiz')}</p>
 	{:else if total === 0}
-		<p class="empty">Dieses Quiz hat noch keine Fragen.</p>
+		<p class="empty">{$_('quiz.play_view.empty_no_questions')}</p>
 	{:else if finished}
 		<section class="result">
 			<div class="score">
 				<span class="score-num">{scorePct}%</span>
-				<span class="score-sub">{correctCount} von {total} richtig</span>
+				<span class="score-sub"
+					>{$_('quiz.play_view.score_summary', {
+						values: { correct: correctCount, total },
+					})}</span
+				>
 			</div>
 			<ol class="review">
 				{#each questions as q, i (q.id)}
@@ -142,15 +148,18 @@
 						</div>
 						{#if q.type === 'text'}
 							<p class="review-line">
-								Deine Antwort: <strong>{ans?.textAnswer || '—'}</strong>
+								{$_('quiz.play_view.review_your_answer')}<strong
+									>{ans?.textAnswer || $_('quiz.play_view.placeholder_review_dash')}</strong
+								>
 							</p>
 							{#if !ans?.correct}
-								<p class="review-line">Richtig: <strong>{q.options[0]?.text}</strong></p>
+								<p class="review-line">
+									{$_('quiz.play_view.review_correct')}<strong>{q.options[0]?.text}</strong>
+								</p>
 							{/if}
 						{:else}
 							<p class="review-line">
-								Richtig:
-								<strong>
+								{$_('quiz.play_view.review_correct')}<strong>
 									{q.options
 										.filter((o) => o.isCorrect)
 										.map((o) => o.text)
@@ -162,8 +171,10 @@
 				{/each}
 			</ol>
 			<div class="result-actions">
-				<button class="secondary-btn" onclick={() => goto('/quiz')}>Zurück zur Liste</button>
-				<button class="primary-btn" onclick={restart}>Nochmal spielen</button>
+				<button class="secondary-btn" onclick={() => goto('/quiz')}
+					>{$_('quiz.play_view.action_back_to_list')}</button
+				>
+				<button class="primary-btn" onclick={restart}>{$_('quiz.play_view.action_replay')}</button>
 			</div>
 		</section>
 	{:else if current}
@@ -176,14 +187,16 @@
 					type="text"
 					bind:value={textInput}
 					disabled={revealed}
-					placeholder="Deine Antwort"
+					placeholder={$_('quiz.play_view.placeholder_text_answer')}
 				/>
 				{#if revealed}
 					<p class="feedback" class:ok={answers.at(-1)?.correct}>
 						{#if answers.at(-1)?.correct}
-							<Check size={14} weight="bold" /> Richtig!
+							<Check size={14} weight="bold" />
+							{$_('quiz.play_view.feedback_correct')}
 						{:else}
-							<X size={14} weight="bold" /> Richtige Antwort:
+							<X size={14} weight="bold" />
+							{$_('quiz.play_view.feedback_incorrect_label')}
 							<strong>{current.options[0]?.text}</strong>
 						{/if}
 					</p>
@@ -221,11 +234,13 @@
 			<div class="play-actions">
 				{#if !revealed}
 					<button class="primary-btn" disabled={!canAnswer} onclick={reveal}>
-						Antwort prüfen
+						{$_('quiz.play_view.action_check')}
 					</button>
 				{:else}
 					<button class="primary-btn" onclick={next}>
-						{currentIndex + 1 >= total ? 'Ergebnis ansehen' : 'Weiter'}
+						{currentIndex + 1 >= total
+							? $_('quiz.play_view.action_view_result')
+							: $_('quiz.play_view.action_next')}
 					</button>
 				{/if}
 			</div>

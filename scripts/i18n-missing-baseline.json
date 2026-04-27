@@ -8,6 +8,7 @@
 	"apps/mana/apps/web/src/lib/modules/ai-workbench/ListView.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/broadcast/ListView.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/broadcast/views/DetailView.svelte": 1,
+	"apps/mana/apps/web/src/lib/modules/comic/views/DetailCharacterView.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/comic/views/DetailView.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/credits/ListView.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/dreams/ListView.svelte": 1,
