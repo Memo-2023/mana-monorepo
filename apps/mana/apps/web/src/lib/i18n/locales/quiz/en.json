@@ -42,5 +42,23 @@
 		"action_add_question": "Add question",
 		"truefalse_true": "True",
 		"truefalse_false": "False"
+	},
+	"play_view": {
+		"back_aria": "Back",
+		"back_label": "Quiz",
+		"empty_quiz": "Quiz not found.",
+		"empty_no_questions": "This quiz has no questions yet.",
+		"score_summary": "{correct} out of {total} correct",
+		"review_your_answer": "Your answer: ",
+		"review_correct": "Correct: ",
+		"action_back_to_list": "Back to list",
+		"action_replay": "Play again",
+		"placeholder_text_answer": "Your answer",
+		"feedback_correct": "Correct!",
+		"feedback_incorrect_label": "Correct answer:",
+		"action_check": "Check answer",
+		"action_view_result": "View result",
+		"action_next": "Next",
+		"placeholder_review_dash": "—"
 	}
 }

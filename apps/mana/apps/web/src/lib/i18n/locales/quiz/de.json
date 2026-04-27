@@ -42,5 +42,23 @@
 		"action_add_question": "Frage hinzufügen",
 		"truefalse_true": "Wahr",
 		"truefalse_false": "Falsch"
+	},
+	"play_view": {
+		"back_aria": "Zurück",
+		"back_label": "Quiz",
+		"empty_quiz": "Quiz nicht gefunden.",
+		"empty_no_questions": "Dieses Quiz hat noch keine Fragen.",
+		"score_summary": "{correct} von {total} richtig",
+		"review_your_answer": "Deine Antwort: ",
+		"review_correct": "Richtig: ",
+		"action_back_to_list": "Zurück zur Liste",
+		"action_replay": "Nochmal spielen",
+		"placeholder_text_answer": "Deine Antwort",
+		"feedback_correct": "Richtig!",
+		"feedback_incorrect_label": "Richtige Antwort:",
+		"action_check": "Antwort prüfen",
+		"action_view_result": "Ergebnis ansehen",
+		"action_next": "Weiter",
+		"placeholder_review_dash": "—"
 	}
 }
