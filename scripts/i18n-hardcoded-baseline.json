@@ -67,7 +67,6 @@
 	"apps/mana/apps/web/src/lib/modules/broadcast/components/SettingsForm.svelte": 3,
 	"apps/mana/apps/web/src/lib/modules/broadcast/editor/Editor.svelte": 3,
 	"apps/mana/apps/web/src/lib/modules/broadcast/ListView.svelte": 8,
-	"apps/mana/apps/web/src/lib/modules/broadcast/views/DetailView.svelte": 9,
 	"apps/mana/apps/web/src/lib/modules/broadcast/widgets/BroadcastsWidget.svelte": 3,
 	"apps/mana/apps/web/src/lib/modules/calc/ListView.svelte": 1,
 	"apps/mana/apps/web/src/lib/modules/cards/components/CreateDeckModal.svelte": 3,

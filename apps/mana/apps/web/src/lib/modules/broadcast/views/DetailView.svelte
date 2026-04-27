@@ -9,7 +9,10 @@
 <script lang="ts">
 	import { onDestroy, untrack } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { STATUS_LABELS, STATUS_COLORS } from '../constants';
+	import { STATUS_COLORS } from '../constants';
+	import { _ } from 'svelte-i18n';
+	import { get } from 'svelte/store';
+	import { locale } from 'svelte-i18n';
 	import { formatRate } from '../queries';
 	import { broadcastCampaignsStore } from '../stores/campaigns.svelte';
 	import { fetchCampaignStats } from '../api';
@@ -63,7 +66,9 @@
 					});
 				}
 			} catch (e) {
-				if (!cancelled) pollError = e instanceof Error ? e.message : 'Stats-Fetch fehlgeschlagen';
+				if (!cancelled)
+					pollError =
+						e instanceof Error ? e.message : $_('broadcast.detail_view.poll_error_prefix');
 			} finally {
 				polling = false;
 			}
@@ -110,7 +115,7 @@
 	}
 
 	async function onCancel() {
-		if (!confirm('Geplante Kampagne abbrechen?')) return;
+		if (!confirm($_('broadcast.detail_view.confirm_cancel_scheduled'))) return;
 		await broadcastCampaignsStore.cancel(campaign.id);
 	}
 
@@ -125,52 +130,71 @@
 			<h1>{campaign.name}</h1>
 			<span class="status" style="--dot: {STATUS_COLORS[campaign.status]}">
 				<span class="dot"></span>
-				{STATUS_LABELS[campaign.status].de}
+				{$_('broadcast.statuses.' + campaign.status)}
 			</span>
 			<p class="subject">{campaign.subject}</p>
 		</div>
 		<div class="head-right">
 			{#if campaign.sentAt}
-				<div class="sent-at">Versendet {new Date(campaign.sentAt).toLocaleString()}</div>
+				<div class="sent-at">
+					{$_('broadcast.detail_view.sent_at', {
+						values: { date: new Date(campaign.sentAt).toLocaleString(get(locale) ?? 'de') },
+					})}
+				</div>
 			{/if}
 			{#if campaign.scheduledAt}
-				<div class="sent-at">Geplant für {new Date(campaign.scheduledAt).toLocaleString()}</div>
+				<div class="sent-at">
+					{$_('broadcast.detail_view.scheduled_for', {
+						values: { date: new Date(campaign.scheduledAt).toLocaleString(get(locale) ?? 'de') },
+					})}
+				</div>
 			{/if}
 		</div>
 	</header>
 
 	<div class="actions">
-		<button class="btn" onclick={onDuplicate}>Duplizieren</button>
+		<button class="btn" onclick={onDuplicate}>{$_('broadcast.detail_view.action_duplicate')}</button
+		>
 		{#if campaign.status === 'scheduled'}
-			<button class="btn btn-danger" onclick={onCancel}>Abbrechen</button>
+			<button class="btn btn-danger" onclick={onCancel}
+				>{$_('broadcast.detail_view.action_cancel')}</button
+			>
 		{/if}
-		<a class="btn" href="/broadcasts">Zur Übersicht</a>
+		<a class="btn" href="/broadcasts">{$_('broadcast.detail_view.action_overview')}</a>
 	</div>
 
 	{#if liveStats}
 		<section class="stats-grid">
 			<div class="stat">
-				<div class="stat-label">Versendet</div>
+				<div class="stat-label">{$_('broadcast.detail_view.stat_sent')}</div>
 				<div class="stat-value">{liveStats.sent}</div>
-				<div class="stat-sub">von {liveStats.totalRecipients}</div>
+				<div class="stat-sub">
+					{$_('broadcast.detail_view.stat_sent_sub', {
+						values: { n: liveStats.totalRecipients },
+					})}
+				</div>
 			</div>
 			<div class="stat">
-				<div class="stat-label">Geöffnet</div>
+				<div class="stat-label">{$_('broadcast.detail_view.stat_opened')}</div>
 				<div class="stat-value">{formatRate(openRate)}</div>
-				<div class="stat-sub">{liveStats.opened} Öffnungen</div>
+				<div class="stat-sub">
+					{$_('broadcast.detail_view.stat_opened_sub', { values: { n: liveStats.opened } })}
+				</div>
 			</div>
 			<div class="stat">
-				<div class="stat-label">Geklickt</div>
+				<div class="stat-label">{$_('broadcast.detail_view.stat_clicked')}</div>
 				<div class="stat-value">{formatRate(clickRate)}</div>
-				<div class="stat-sub">{liveStats.clicked} Klicks</div>
+				<div class="stat-sub">
+					{$_('broadcast.detail_view.stat_clicked_sub', { values: { n: liveStats.clicked } })}
+				</div>
 			</div>
 			<div class="stat" class:stat-warn={liveStats.bounced > 0}>
-				<div class="stat-label">Bounced</div>
+				<div class="stat-label">{$_('broadcast.detail_view.stat_bounced')}</div>
 				<div class="stat-value">{formatRate(bounceRate)}</div>
 				<div class="stat-sub">{liveStats.bounced}</div>
 			</div>
 			<div class="stat" class:stat-warn={liveStats.unsubscribed > 0}>
-				<div class="stat-label">Abgemeldet</div>
+				<div class="stat-label">{$_('broadcast.detail_view.stat_unsubscribed')}</div>
 				<div class="stat-value">{formatRate(unsubRate)}</div>
 				<div class="stat-sub">{liveStats.unsubscribed}</div>
 			</div>
@@ -178,20 +202,26 @@
 
 		<p class="poll-hint">
 			{#if polling}
-				Live-Update …
+				{$_('broadcast.detail_view.poll_live')}
 			{:else}
-				Letzte Aktualisierung: {new Date(liveStats.lastSyncedAt).toLocaleTimeString()}
+				{$_('broadcast.detail_view.poll_last_update', {
+					values: {
+						time: new Date(liveStats.lastSyncedAt).toLocaleTimeString(get(locale) ?? 'de'),
+					},
+				})}
 			{/if}
 		</p>
 	{/if}
 
 	{#if pollError}
-		<div class="poll-error">Stats-Fetch fehlgeschlagen: {pollError}</div>
+		<div class="poll-error">
+			{$_('broadcast.detail_view.poll_error_inline', { values: { error: pollError } })}
+		</div>
 	{/if}
 
 	{#if settings && previewHtml}
 		<section class="preview-section">
-			<h3>Wie die Kampagne aussah</h3>
+			<h3>{$_('broadcast.detail_view.section_preview')}</h3>
 			<EmailPreview html={previewHtml} viewport="desktop" />
 		</section>
 	{/if}
