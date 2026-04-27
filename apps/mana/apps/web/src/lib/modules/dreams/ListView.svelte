@@ -18,6 +18,7 @@
 	import { useItemContextMenu } from '$lib/data/item-context-menu.svelte';
 	import { PencilSimple, PushPin, Trash } from '@mana/shared-icons';
 	import SymbolsView from './views/SymbolsView.svelte';
+	import { _ } from 'svelte-i18n';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
@@ -139,7 +140,7 @@
 			? [
 					{
 						id: 'edit',
-						label: 'Bearbeiten',
+						label: $_('dreams.list_view.ctx_edit'),
 						icon: PencilSimple,
 						action: () => {
 							const target = ctxMenu.state.target;
@@ -148,7 +149,9 @@
 					},
 					{
 						id: 'pin',
-						label: ctxMenu.state.target.isPinned ? 'Lösen' : 'Pinnen',
+						label: ctxMenu.state.target.isPinned
+							? $_('dreams.list_view.ctx_unpin')
+							: $_('dreams.list_view.ctx_pin'),
 						icon: PushPin,
 						action: () => {
 							const target = ctxMenu.state.target;
@@ -158,7 +161,7 @@
 					{ id: 'div', label: '', type: 'divider' as const },
 					{
 						id: 'delete',
-						label: 'Löschen',
+						label: $_('dreams.list_view.ctx_delete'),
 						icon: Trash,
 						variant: 'danger' as const,
 						action: () => {
@@ -188,14 +191,14 @@
 	<!-- View switcher -->
 	<div class="view-tabs">
 		<button class="view-tab" class:active={viewMode === 'list'} onclick={() => (viewMode = 'list')}>
-			Träume
+			{$_('dreams.list_view.tab_dreams')}
 		</button>
 		<button
 			class="view-tab"
 			class:active={viewMode === 'symbols'}
 			onclick={() => (viewMode = 'symbols')}
 		>
-			Symbole
+			{$_('dreams.list_view.tab_symbols')}
 		</button>
 	</div>
 
@@ -210,9 +213,15 @@
 		<!-- Insights ribbon -->
 		{#if insights.total > 0}
 			<div class="insights">
-				<span class="ins-stat">{insights.total} Träume</span>
+				<span class="ins-stat"
+					>{$_('dreams.list_view.insights_total', { values: { n: insights.total } })}</span
+				>
 				{#if insights.lucidCount > 0}
-					<span class="ins-stat">&#x2728; {insights.lucidCount} Klarträume</span>
+					<span class="ins-stat"
+						>{$_('dreams.list_view.insights_lucid', {
+							values: { n: insights.lucidCount },
+						})}</span
+					>
 				{/if}
 				{#each insights.topSymbols as sym}
 					<button
@@ -224,7 +233,9 @@
 					</button>
 				{/each}
 				{#if symbolFilter}
-					<button class="ins-clear" onclick={() => (symbolFilter = null)}>×&nbsp;Filter</button>
+					<button class="ins-clear" onclick={() => (symbolFilter = null)}
+						>{$_('dreams.list_view.clear_filter')}</button
+					>
 				{/if}
 			</div>
 		{/if}
@@ -237,28 +248,28 @@
 					class:active={filterMode === 'all'}
 					onclick={() => (filterMode = 'all')}
 				>
-					Alle
+					{$_('dreams.list_view.filter_all')}
 				</button>
 				<button
 					class="filter-tab"
 					class:active={filterMode === 'lucid'}
 					onclick={() => (filterMode = 'lucid')}
 				>
-					&#x2728; Klarträume
+					{$_('dreams.list_view.filter_lucid')}
 				</button>
 				<button
 					class="filter-tab"
 					class:active={filterMode === 'nightmare'}
 					onclick={() => (filterMode = 'nightmare')}
 				>
-					Albträume
+					{$_('dreams.list_view.filter_nightmare')}
 				</button>
 				<button
 					class="filter-tab"
 					class:active={filterMode === 'recurring'}
 					onclick={() => (filterMode = 'recurring')}
 				>
-					Wiederkehrend
+					{$_('dreams.list_view.filter_recurring')}
 				</button>
 			</div>
 		{/if}
@@ -268,7 +279,7 @@
 			<input
 				class="search-input"
 				type="text"
-				placeholder="Träume durchsuchen..."
+				placeholder={$_('dreams.list_view.search_placeholder')}
 				bind:value={searchQuery}
 			/>
 		{/if}
@@ -293,36 +304,40 @@
 								class="ed-title"
 								type="text"
 								bind:value={editTitle}
-								placeholder="Titel (optional)..."
+								placeholder={$_('dreams.list_view.editor_title_placeholder')}
 								autofocus
 							/>
 							{#if dream.processingStatus === 'transcribing'}
 								<div class="ed-status">
 									<span class="ed-status-dots">●●●</span>
-									Transkribiert deine Aufnahme…
+									{$_('dreams.list_view.editor_transcribing')}
 								</div>
 							{:else if dream.processingStatus === 'failed'}
 								<div class="ed-status failed">
-									Transkription fehlgeschlagen{dream.processingError
+									{$_('dreams.list_view.editor_transcribe_failed')}{dream.processingError
 										? `: ${dream.processingError}`
 										: ''}
 								</div>
 							{:else if dream.transcript && dream.transcriptModel}
-								<div class="ed-status muted" title="STT-Pipeline, die den Transkript erzeugt hat">
-									Transkribiert via <strong>{dream.transcriptModel}</strong>
+								<div
+									class="ed-status muted"
+									title={$_('dreams.list_view.editor_stt_pipeline_title')}
+								>
+									{$_('dreams.list_view.editor_transcribed_via')}
+									<strong>{dream.transcriptModel}</strong>
 								</div>
 							{/if}
 							<textarea
 								class="ed-content"
 								bind:value={editContent}
-								placeholder="Erzähl mir den Traum..."
+								placeholder={$_('dreams.list_view.editor_content_placeholder')}
 								rows="5"
 							></textarea>
 							<input
 								class="ed-symbols"
 								type="text"
 								bind:value={editSymbols}
-								placeholder="Symbole (Komma-getrennt): Wasser, Fliegen, Tür"
+								placeholder={$_('dreams.list_view.editor_symbols_placeholder')}
 							/>
 
 							<div class="ed-row">
@@ -333,10 +348,10 @@
 											class:active={editMood === mood}
 											style="--mood-color: {MOOD_COLORS[mood]}"
 											onclick={() => (editMood = editMood === mood ? null : mood)}
-											title={MOOD_LABELS[mood]}
+											title={$_('dreams.moods.' + mood)}
 										>
 											<span class="mood-dot"></span>
-											{MOOD_LABELS[mood]}
+											{$_('dreams.moods.' + mood)}
 										</button>
 									{/each}
 								</div>
@@ -344,29 +359,31 @@
 
 							<div class="ed-row sleep-row">
 								<label class="ed-field">
-									<span class="ed-label">Nacht</span>
+									<span class="ed-label">{$_('dreams.list_view.editor_label_night')}</span>
 									<input type="date" bind:value={editDreamDate} class="ed-input-sm" />
 								</label>
 								<label class="ed-field">
-									<span class="ed-label">Ins Bett</span>
+									<span class="ed-label">{$_('dreams.list_view.editor_label_bedtime')}</span>
 									<input type="time" bind:value={editBedtime} class="ed-input-sm" />
 								</label>
 								<label class="ed-field">
-									<span class="ed-label">Aufgewacht</span>
+									<span class="ed-label">{$_('dreams.list_view.editor_label_wake')}</span>
 									<input type="time" bind:value={editWakeTime} class="ed-input-sm" />
 								</label>
 							</div>
 
 							<div class="ed-row">
 								<div class="ed-field">
-									<span class="ed-label">Schlafqualität</span>
+									<span class="ed-label">{$_('dreams.list_view.editor_label_sleep_quality')}</span>
 									<div class="stars">
 										{#each [1, 2, 3, 4, 5] as q}
 											<button
 												class="star"
 												class:filled={editSleepQuality !== null && editSleepQuality >= q}
 												onclick={() => setSleepQuality(q as SleepQuality)}
-												aria-label={`${q} Sterne`}
+												aria-label={$_('dreams.list_view.editor_stars_aria', {
+													values: { n: q },
+												})}
 											>
 												★
 											</button>
@@ -376,19 +393,22 @@
 								<div class="toggles">
 									<label class="lucid-toggle">
 										<input type="checkbox" bind:checked={editIsLucid} />
-										&#x2728; Klartraum
+										{$_('dreams.list_view.editor_lucid_toggle')}
 									</label>
 									<label class="lucid-toggle">
 										<input type="checkbox" bind:checked={editIsRecurring} />
-										&#x21bb; Wiederkehrend
+										{$_('dreams.list_view.editor_recurring_toggle')}
 									</label>
 								</div>
 							</div>
 
 							<div class="ed-actions">
-								<button class="ed-btn danger" onclick={() => handleDelete(dream.id)}>Löschen</button
+								<button class="ed-btn danger" onclick={() => handleDelete(dream.id)}
+									>{$_('dreams.list_view.editor_action_delete')}</button
 								>
-								<button class="ed-btn primary" onclick={saveEdit}>Fertig</button>
+								<button class="ed-btn primary" onclick={saveEdit}
+									>{$_('dreams.list_view.editor_action_done')}</button
+								>
 							</div>
 						</div>
 					{:else}
@@ -414,11 +434,18 @@
 
 							<div class="dream-content">
 								<div class="dream-top">
-									<span class="dream-title">{dream.title || 'Traum ohne Titel'}</span>
+									<span class="dream-title">{dream.title || $_('dreams.list_view.untitled')}</span>
 									{#if dream.processingStatus === 'transcribing'}
-										<span class="badge transcribing" title="Wird transkribiert…">●●●</span>
+										<span
+											class="badge transcribing"
+											title={$_('dreams.list_view.badge_transcribing_title')}>●●●</span
+										>
 									{:else if dream.processingStatus === 'failed'}
-										<span class="badge failed" title={dream.processingError ?? 'Fehler'}>!</span>
+										<span
+											class="badge failed"
+											title={dream.processingError ?? $_('dreams.list_view.badge_failed_title')}
+											>!</span
+										>
 									{/if}
 									{#if dream.isLucid}<span class="badge lucid">&#x2728;</span>{/if}
 									{#if dream.isRecurring}<span class="badge">&#x21bb;</span>{/if}
@@ -432,7 +459,7 @@
 									<span>{formatDreamDate(dream.dreamDate)}</span>
 									{#if dream.transcriptModel}
 										<span class="dot">·</span>
-										<span class="stt-chip" title="STT-Pipeline">
+										<span class="stt-chip" title={$_('dreams.list_view.stt_chip_title')}>
 											&#x1f3a4; {dream.transcriptModel}
 										</span>
 									{/if}
@@ -461,21 +488,21 @@
 			{/each}
 
 			{#if filtered.length === 0 && dreams.length > 0}
-				<p class="empty">Keine Treffer</p>
+				<p class="empty">{$_('dreams.list_view.empty_no_match')}</p>
 			{/if}
 		</div>
 
 		{#if dreams.length === 0}
-			<p class="empty">Erzähl deinen ersten Traum.</p>
+			<p class="empty">{$_('dreams.list_view.empty_no_dreams')}</p>
 		{/if}
 
 		<FloatingInputBar
 			bind:value={newTitle}
-			placeholder="Was hast du geträumt?"
+			placeholder={$_('dreams.list_view.input_placeholder')}
 			onSubmit={handleQuickCreate}
 			voice
 			voiceFeature="dreams-voice-capture"
-			voiceReason="Sprach-Aufnahmen werden verschlüsselt in deinem persönlichen Tagebuch gespeichert. Dafür brauchst du ein Mana-Konto."
+			voiceReason={$_('dreams.list_view.voice_reason')}
 			onVoiceComplete={handleVoiceComplete}
 		/>
 
