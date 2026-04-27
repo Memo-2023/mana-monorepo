@@ -133,5 +133,13 @@
 		"title": "Noticias",
 		"empty": "Sin noticias por leer.",
 		"viewAll": "Ver todo"
+	},
+	"workbench": {
+		"cta_title": "Configurar el News Hub",
+		"cta_hint": "Elige temas, idiomas y fuentes — luego tus artículos aparecerán aquí.",
+		"cta_action": "Configurar ahora",
+		"err_short": "Error",
+		"empty_short": "No hay artículos nuevos.",
+		"open_aria": "Abrir"
 	}
 }

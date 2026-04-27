@@ -133,5 +133,13 @@
 		"title": "News",
 		"empty": "Keine ungelesenen News.",
 		"viewAll": "Alle ansehen"
+	},
+	"workbench": {
+		"cta_title": "News Hub einrichten",
+		"cta_hint": "Wähle Themen, Sprachen und Quellen — danach erscheinen hier deine Artikel.",
+		"cta_action": "Jetzt einrichten",
+		"err_short": "Fehler",
+		"empty_short": "Keine neuen Artikel.",
+		"open_aria": "Öffnen"
 	}
 }

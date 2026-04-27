@@ -29,6 +29,7 @@
 	import { articlesStore } from '$lib/modules/news/stores/articles.svelte';
 	import { feedCacheStore } from '$lib/modules/news/stores/feed-cache.svelte';
 	import type { LocalCachedArticle } from '$lib/modules/news/types';
+	import { _ } from 'svelte-i18n';
 
 	// We accept ViewProps for protocol compatibility but the workbench
 	// view doesn't navigate within itself — every "open" jumps to the
@@ -97,18 +98,18 @@
 <div class="wb-news">
 	{#if !prefs.onboardingCompleted}
 		<div class="cta">
-			<p class="cta-title">News Hub einrichten</p>
+			<p class="cta-title">{$_('news.workbench.cta_title')}</p>
 			<p class="cta-hint">
-				Wähle Themen, Sprachen und Quellen — danach erscheinen hier deine Artikel.
+				{$_('news.workbench.cta_hint')}
 			</p>
-			<a class="cta-btn" href="/news">Jetzt einrichten</a>
+			<a class="cta-btn" href="/news">{$_('news.workbench.cta_action')}</a>
 		</div>
 	{:else}
 		<div class="toolbar">
 			<div class="counts">
-				{ranked.length} Artikel
+				{$_('news.feed.articles', { values: { count: ranked.length } })}
 				{#if feedCacheStore.lastError}
-					· <span class="err">Fehler</span>
+					· <span class="err">{$_('news.workbench.err_short')}</span>
 				{/if}
 			</div>
 			<div class="tools">
@@ -117,22 +118,22 @@
 					class="tool"
 					onclick={refresh}
 					disabled={feedCacheStore.inFlight}
-					title="Neu laden"
+					title={$_('news.feed.refresh')}
 				>
 					{feedCacheStore.inFlight ? '…' : '↻'}
 				</button>
-				<a class="tool" href="/news/saved" title="Gespeichert">📑</a>
-				<a class="tool" href="/news/preferences" title="Einstellungen">⚙</a>
+				<a class="tool" href="/news/saved" title={$_('news.feed.savedLink')}>📑</a>
+				<a class="tool" href="/news/preferences" title={$_('news.feed.settingsLink')}>⚙</a>
 			</div>
 		</div>
 
 		{#if ranked.length === 0}
 			<div class="empty">
 				{#if pool.length === 0}
-					<p>Lade Artikel…</p>
+					<p>{$_('news.feed.loading')}</p>
 				{:else}
-					<p>Keine neuen Artikel.</p>
-					<button type="button" class="link" onclick={refresh}>Neu laden</button>
+					<p>{$_('news.workbench.empty_short')}</p>
+					<button type="button" class="link" onclick={refresh}>{$_('news.feed.refresh')}</button>
 				{/if}
 			</div>
 		{:else}
@@ -140,7 +141,12 @@
 				{#each ranked.slice(0, 30) as { article } (article.id)}
 					<li class="item">
 						{#if article.imageUrl}
-							<button type="button" class="thumb" onclick={() => open(article)} aria-label="Öffnen">
+							<button
+								type="button"
+								class="thumb"
+								onclick={() => open(article)}
+								aria-label={$_('news.workbench.open_aria')}
+							>
 								<img src={article.imageUrl} alt="" loading="lazy" />
 							</button>
 						{/if}
@@ -158,7 +164,7 @@
 									type="button"
 									class="rxn"
 									onclick={() => react(article, 'interested')}
-									title="Interessiert"
+									title={$_('news.reactions.interested')}
 								>
 									❤️
 								</button>
@@ -166,7 +172,7 @@
 									type="button"
 									class="rxn"
 									onclick={() => react(article, 'not_interested')}
-									title="Nicht für mich"
+									title={$_('news.reactions.notInterested')}
 								>
 									👎
 								</button>
@@ -174,7 +180,7 @@
 									type="button"
 									class="rxn"
 									onclick={() => react(article, 'source_blocked')}
-									title="Quelle ausblenden"
+									title={$_('news.reactions.blockSource')}
 								>
 									🚫
 								</button>
