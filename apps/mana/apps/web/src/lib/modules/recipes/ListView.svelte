@@ -416,7 +416,7 @@
 
 			<div class="form-section">
 				<span class="form-label">{$_('recipes.create_form.label_steps')}</span>
-				{#each newSteps as _, i}
+				{#each newSteps as _step, i}
 					<div class="step-edit-row">
 						<span class="step-edit-num">{i + 1}.</span>
 						<input
