@@ -327,7 +327,6 @@
 	"apps/mana/apps/web/src/routes/(app)/times/clock/+page.svelte": 1,
 	"apps/mana/apps/web/src/routes/(app)/times/projects/[id]/+page.svelte": 3,
 	"apps/mana/apps/web/src/routes/(app)/todo/+page.svelte": 1,
-	"apps/mana/apps/web/src/routes/(app)/todo/settings/+page.svelte": 13,
 	"apps/mana/apps/web/src/routes/(app)/wetter/+page.svelte": 2,
 	"apps/mana/apps/web/src/routes/(auth)/reset-password/+page.svelte": 1,
 	"apps/mana/apps/web/src/routes/+error.svelte": 1,
