@@ -276,7 +276,6 @@
 	"apps/mana/apps/web/src/routes/(app)/music/projects/+page.svelte": 4,
 	"apps/mana/apps/web/src/routes/(app)/news-research/+page.svelte": 2,
 	"apps/mana/apps/web/src/routes/(app)/news/[id]/+page.svelte": 3,
-	"apps/mana/apps/web/src/routes/(app)/news/+page.svelte": 10,
 	"apps/mana/apps/web/src/routes/(app)/news/add/+page.svelte": 1,
 	"apps/mana/apps/web/src/routes/(app)/news/preferences/+page.svelte": 8,
 	"apps/mana/apps/web/src/routes/(app)/news/saved/+page.svelte": 1,

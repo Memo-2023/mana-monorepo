@@ -26,6 +26,7 @@
 	} from '$lib/modules/news/types';
 	import { TOPIC_LABELS, sourcesForTopic } from '$lib/modules/news/sources-meta';
 	import { RoutePage } from '$lib/components/shell';
+	import { _ } from 'svelte-i18n';
 
 	const prefs$ = usePreferences();
 	const pool$ = useCachedFeed();
@@ -151,20 +152,26 @@
 		{#if !isOnboarded}
 			<!-- ─── Onboarding ───────────────────────────────────── -->
 			<header class="hero">
-				<h1>Willkommen beim News Hub</h1>
-				<p>In drei Schritten baust du dir deinen persönlichen Newsfeed.</p>
+				<h1>{$_('news.onboarding.welcome')}</h1>
+				<p>{$_('news.onboarding.intro')}</p>
 			</header>
 
 			<div class="steps">
-				<span class="step" class:active={onboardingStep === 1}>1. Themen</span>
-				<span class="step" class:active={onboardingStep === 2}>2. Sprache</span>
-				<span class="step" class:active={onboardingStep === 3}>3. Quellen</span>
+				<span class="step" class:active={onboardingStep === 1}
+					>{$_('news.onboarding.stepTopics')}</span
+				>
+				<span class="step" class:active={onboardingStep === 2}
+					>{$_('news.onboarding.stepLanguage')}</span
+				>
+				<span class="step" class:active={onboardingStep === 3}
+					>{$_('news.onboarding.stepSources')}</span
+				>
 			</div>
 
 			{#if onboardingStep === 1}
 				<section class="step-panel">
-					<h2>Was interessiert dich?</h2>
-					<p class="hint">Wähle mindestens zwei Themen.</p>
+					<h2>{$_('news.onboarding.topicsTitle')}</h2>
+					<p class="hint">{$_('news.onboarding.topicsHint')}</p>
 					<div class="topic-grid">
 						{#each ALL_TOPICS as topic}
 							<button
@@ -185,13 +192,13 @@
 							disabled={pickedTopics.length < 2}
 							onclick={() => (onboardingStep = 2)}
 						>
-							Weiter
+							{$_('news.onboarding.next')}
 						</button>
 					</div>
 				</section>
 			{:else if onboardingStep === 2}
 				<section class="step-panel">
-					<h2>In welchen Sprachen liest du?</h2>
+					<h2>{$_('news.onboarding.languageTitle')}</h2>
 					<div class="lang-row">
 						<button
 							type="button"
@@ -199,7 +206,7 @@
 							class:selected={pickedLanguages.includes('de')}
 							onclick={() => toggleLang('de')}
 						>
-							🇩🇪 Deutsch
+							🇩🇪 {$_('news.languages.de')}
 						</button>
 						<button
 							type="button"
@@ -207,12 +214,12 @@
 							class:selected={pickedLanguages.includes('en')}
 							onclick={() => toggleLang('en')}
 						>
-							🇬🇧 English
+							🇬🇧 {$_('news.languages.en')}
 						</button>
 					</div>
 					<div class="actions">
 						<button type="button" class="btn-secondary" onclick={() => (onboardingStep = 1)}>
-							Zurück
+							{$_('news.onboarding.back')}
 						</button>
 						<button
 							type="button"
@@ -220,15 +227,15 @@
 							disabled={pickedLanguages.length === 0}
 							onclick={() => (onboardingStep = 3)}
 						>
-							Weiter
+							{$_('news.onboarding.next')}
 						</button>
 					</div>
 				</section>
 			{:else}
 				<section class="step-panel">
-					<h2>Quellen aus deinen Themen</h2>
+					<h2>{$_('news.onboarding.sourcesTitle')}</h2>
 					<p class="hint">
-						Tippe eine Quelle an um sie auszublenden. Du kannst das jederzeit ändern.
+						{$_('news.onboarding.sourcesHint')}
 					</p>
 					<div class="sources-list">
 						{#each pickedTopics as topic}
@@ -255,7 +262,7 @@
 					</div>
 					<div class="actions">
 						<button type="button" class="btn-secondary" onclick={() => (onboardingStep = 2)}>
-							Zurück
+							{$_('news.onboarding.back')}
 						</button>
 						<button
 							type="button"
@@ -263,7 +270,9 @@
 							onclick={finishOnboarding}
 							disabled={onboardingSubmitting}
 						>
-							{onboardingSubmitting ? 'Speichere…' : 'Fertig'}
+							{onboardingSubmitting
+								? $_('news.onboarding.finishLoading')
+								: $_('news.onboarding.finish')}
 						</button>
 					</div>
 				</section>
@@ -272,11 +281,11 @@
 			<!-- ─── Feed ─────────────────────────────────────────── -->
 			<header class="feed-header">
 				<div>
-					<h1>News</h1>
+					<h1>{$_('news.feed.title')}</h1>
 					<div class="meta">
-						{ranked.length} Artikel
+						{$_('news.feed.articles', { values: { count: ranked.length } })}
 						{#if feedCacheStore.lastError}
-							· <span class="error">Fehler beim Laden</span>
+							· <span class="error">{$_('news.feed.loadError')}</span>
 						{/if}
 					</div>
 				</div>
@@ -286,12 +295,12 @@
 						class="icon-btn"
 						onclick={manualRefresh}
 						disabled={feedCacheStore.inFlight}
-						title="Neu laden"
+						title={$_('news.feed.refresh')}
 					>
 						{feedCacheStore.inFlight ? '…' : '↻'}
 					</button>
-					<a class="icon-btn" href="/news/saved" title="Gespeichert">📑</a>
-					<a class="icon-btn" href="/news/preferences" title="Einstellungen">⚙</a>
+					<a class="icon-btn" href="/news/saved" title={$_('news.feed.savedLink')}>📑</a>
+					<a class="icon-btn" href="/news/preferences" title={$_('news.feed.settingsLink')}>⚙</a>
 				</div>
 			</header>
 
@@ -308,10 +317,10 @@
 			{#if ranked.length === 0}
 				<div class="empty">
 					{#if pool.length === 0}
-						<p>Lade Artikel…</p>
+						<p>{$_('news.feed.loading')}</p>
 					{:else}
-						<p>Keine neuen Artikel zu deinen Themen.</p>
-						<p class="hint">Probiere "↻" oder erweitere deine Themen.</p>
+						<p>{$_('news.feed.empty')}</p>
+						<p class="hint">{$_('news.feed.emptyHint')}</p>
 					{/if}
 				</div>
 			{:else}
@@ -325,7 +334,7 @@
 									type="button"
 									class="card-image-btn"
 									onclick={() => openReader(article)}
-									aria-label="Artikel öffnen"
+									aria-label={$_('news.feed.openArticleAria')}
 								>
 									<img src={article.imageUrl} alt="" loading="lazy" />
 								</button>
@@ -337,10 +346,16 @@
 									<span>{formatRelativeTime(article.publishedAt)}</span>
 									{#if article.readingTimeMinutes}
 										<span class="dot">·</span>
-										<span>{article.readingTimeMinutes} min</span>
+										<span
+											>{$_('news.feed.readingTimeMin', {
+												values: { n: article.readingTimeMinutes },
+											})}</span
+										>
 									{/if}
 									{#if isSaved}
-										<span class="saved-badge" title="In deiner Leseliste">❤️ gespeichert</span>
+										<span class="saved-badge" title={$_('news.feed.savedBadgeTitle')}
+											>{$_('news.feed.savedBadgeText')}</span
+										>
 									{/if}
 								</div>
 								<button type="button" class="card-title-btn" onclick={() => openReader(article)}>
@@ -356,25 +371,27 @@
 										class:active={isSaved}
 										onclick={() => react(article, 'interested')}
 										title={isSaved
-											? 'Schon gespeichert — nochmal klicken bestätigt nur'
-											: 'In Leseliste speichern + mehr davon zeigen'}
+											? $_('news.reactions.interestedSavedTitle')
+											: $_('news.reactions.interestedTitle')}
 										disabled={isSaved}
 									>
-										❤️ {isSaved ? 'Gespeichert' : 'Interessiert'}
+										❤️ {isSaved
+											? $_('news.reactions.interestedSaved')
+											: $_('news.reactions.interested')}
 									</button>
 									<button
 										type="button"
 										class="reaction-btn not-interested"
 										onclick={() => react(article, 'not_interested')}
-										title="Weniger davon"
+										title={$_('news.reactions.notInterestedTitle')}
 									>
-										👎 Nicht für mich
+										👎 {$_('news.reactions.notInterested')}
 									</button>
 									<button
 										type="button"
 										class="reaction-btn block"
 										onclick={() => react(article, 'source_blocked')}
-										title="Quelle ausblenden"
+										title={$_('news.reactions.blockSource')}
 									>
 										🚫 {article.siteName}
 									</button>
