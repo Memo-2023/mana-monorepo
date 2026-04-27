@@ -15,6 +15,7 @@
 	} from '$lib/modules/finance/queries';
 	import { financeStore } from '$lib/modules/finance/stores/finance.svelte';
 	import { RoutePage } from '$lib/components/shell';
+	import { _ } from 'svelte-i18n';
 
 	const txs$: Observable<Transaction[]> = getContext('transactions');
 	const cats$: Observable<FinanceCategory[]> = getContext('financeCategories');
@@ -91,13 +92,13 @@
 </script>
 
 <svelte:head>
-	<title>Finance - Mana</title>
+	<title>{$_('finance.page.page_title_html')}</title>
 </svelte:head>
 
 <RoutePage appId="finance">
 	<div class="finance-page">
 		<header class="page-header">
-			<h1 class="page-title">Finance</h1>
+			<h1 class="page-title">{$_('finance.page.title')}</h1>
 		</header>
 
 		<!-- Month Navigation -->
@@ -111,15 +112,15 @@
 			<!-- Summary Cards -->
 			<div class="summary-cards">
 				<div class="summary-card">
-					<span class="card-label">Einnahmen</span>
+					<span class="card-label">{$_('finance.page.summary_income')}</span>
 					<span class="card-value income">+{formatCurrency(income)}</span>
 				</div>
 				<div class="summary-card">
-					<span class="card-label">Ausgaben</span>
+					<span class="card-label">{$_('finance.page.summary_expenses')}</span>
 					<span class="card-value expense">-{formatCurrency(expenses)}</span>
 				</div>
 				<div class="summary-card highlight">
-					<span class="card-label">Bilanz</span>
+					<span class="card-label">{$_('finance.page.summary_balance')}</span>
 					<span class="card-value" class:income={balance >= 0} class:expense={balance < 0}>
 						{balance >= 0 ? '+' : ''}{formatCurrency(balance)}
 					</span>
@@ -129,7 +130,7 @@
 			<!-- Category Breakdown -->
 			{#if spending.size > 0}
 				<section class="section">
-					<h2 class="section-title">Ausgaben nach Kategorie</h2>
+					<h2 class="section-title">{$_('finance.page.section_by_category')}</h2>
 					<div class="cat-breakdown">
 						{#each expenseCategories as cat (cat.id)}
 							{@const amount = spending.get(cat.id) ?? 0}
@@ -154,7 +155,7 @@
 
 			<!-- Add Button -->
 			<button class="add-btn" onclick={() => (showAdd = !showAdd)}>
-				{showAdd ? 'Abbrechen' : '+ Transaktion hinzufügen'}
+				{showAdd ? $_('finance.page.action_cancel') : $_('finance.page.action_add_transaction')}
 			</button>
 
 			<!-- Add Form -->
@@ -165,13 +166,13 @@
 							type="button"
 							class="type-btn"
 							class:active={addType === 'expense'}
-							onclick={() => (addType = 'expense')}>Ausgabe</button
+							onclick={() => (addType = 'expense')}>{$_('finance.page.type_expense')}</button
 						>
 						<button
 							type="button"
 							class="type-btn inc"
 							class:active={addType === 'income'}
-							onclick={() => (addType = 'income')}>Einnahme</button
+							onclick={() => (addType = 'income')}>{$_('finance.page.type_income')}</button
 						>
 					</div>
 					<div class="amount-row">
@@ -180,7 +181,7 @@
 							class="amount-input"
 							type="text"
 							inputmode="decimal"
-							placeholder="0,00"
+							placeholder={$_('finance.page.placeholder_amount')}
 							bind:value={addAmount}
 							autofocus
 						/>
@@ -189,7 +190,7 @@
 					<input
 						class="desc-input"
 						type="text"
-						placeholder="Beschreibung..."
+						placeholder={$_('finance.page.placeholder_description')}
 						bind:value={addDesc}
 					/>
 					<div class="cat-chips">
@@ -206,7 +207,7 @@
 						{/each}
 					</div>
 					<button type="submit" class="submit-btn" disabled={!addAmount || !addDesc.trim()}
-						>Hinzufügen</button
+						>{$_('finance.page.action_submit')}</button
 					>
 				</form>
 			{/if}
@@ -214,7 +215,7 @@
 			<!-- Transaction History -->
 			{#if monthTxs.length > 0}
 				<section class="section">
-					<h2 class="section-title">Transaktionen</h2>
+					<h2 class="section-title">{$_('finance.page.section_transactions')}</h2>
 					<div class="tx-list">
 						{#each [...grouped.entries()] as [date, dayTxs] (date)}
 							<div class="day-header">{formatDateLabel(date)}</div>
@@ -240,7 +241,7 @@
 				</section>
 			{/if}
 		{:else}
-			<div class="loading">Laden...</div>
+			<div class="loading">{$_('finance.page.loading')}</div>
 		{/if}
 	</div>
 </RoutePage>
