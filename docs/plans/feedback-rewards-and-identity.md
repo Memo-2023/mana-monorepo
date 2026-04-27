@@ -1,5 +1,5 @@
 ---
-status: draft
+status: shipped (3.A, 3.B, 3.C, 3.F live 2026-04-27 — 3.D, 3.E open)
 owner: till
 created: 2026-04-27
 parent: docs/plans/feedback-hub-public.md
@@ -419,19 +419,25 @@ nirgends entfernt. Drop alle Referenzen.
 
 ## Reihenfolge
 
-1. **Phase 3.A** *(jetzt)* — Credits-Loop
-   - mana-credits: `/internal/credits/grant` + `grantCredits()` + transaction-type 'grant'
-   - mana-analytics: `grantCreditsForSubmit` + `grantShipBonus` + Founder-Whitelist + Rate-Limit
-   - mana-web: UI-Toast "+5 Mana" im FeedbackQuickModal + Onboarding-Wish-Confirm
-   - 0003 SQL-Migration: `feedback_grant_log` mini-table + transaction.type-enum-Erweiterung
-2. **Phase 3.F** *(direkt danach, 2h)* — Legacy-Cleanup
-   - vote/unvote/toggleVote/getPublicFeedback raus
-   - voteCount Spalte raus
-   - /feedback Modul + Route + ListView raus
-3. **Phase 3.B** — Loop-Closure (Status-Notify + my-wishes + Digest)
-4. **Phase 3.C** — Identität (Klarname + Pixel-Avatar + Karma + Eulen-Profil)
-5. **Phase 3.D** — Engagement (Trending, Compass, Quests, Match-Existing)
-6. **Phase 3.E** — Smart Triggers (Frust-Detect, Voice, Companion)
+1. **Phase 3.A** ✅ shipped 2026-04-27 — Credits-Loop
+   - dbe24acfc + eecf64c1c (server + UI), e89958e9c (port-fix)
+   - mana-credits transaction-type 'grant', `/internal/credits/grant` idempotent
+   - mana-analytics +5/+500/+25 mit Founder-Whitelist + Rate-Limit
+   - Reward-Chip in FeedbackQuickModal + Onboarding-Wish-Confirm
+2. **Phase 3.F** ✅ shipped 2026-04-27 — Legacy-Cleanup
+   - eecf64c1c — vote/unvote/toggleVote shims raus, voteCount drop, /feedback Modul + Route gelöscht
+3. **Phase 3.B** ✅ shipped 2026-04-27 — Loop-Closure
+   - 3a18a5e50 — feedback_notifications-Tabelle, Status-Notify + AdminResponse-Notify, Toast-Polling
+   - /profile/my-wishes mit 3 Tabs (Eigene/Unterstützt/Inbox)
+   - Migration 0004
+4. **Phase 3.C** ✅ shipped 2026-04-27 — Identität
+   - ee5bb2871 + 1b30c3655 — Pixel-Identicon-Avatar (deterministic SVG), Klarname-Toggle
+     mit Settings-Section, Karma-System mit Bronze/Silver/Gold/Platin-Tiers,
+     /community/eule/[hash] Public-Profil mit SSR
+   - Migration `services/mana-auth/sql/008_community_identity.sql`
+   - Cross-schema-JOIN auth.users in mana-analytics
+5. **Phase 3.D** ⏸ offen — Engagement (Trending, Compass, Quests, Match-Existing)
+6. **Phase 3.E** ⏸ offen — Smart Triggers (Frust-Detect, Voice, Companion)
 
 ---
 

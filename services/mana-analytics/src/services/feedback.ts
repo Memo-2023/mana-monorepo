@@ -775,4 +775,8 @@ function redact(
 	return item;
 }
 
-export { ALLOWED_EMOJIS, REACTION_WEIGHTS };
+export { ALLOWED_EMOJIS, REACTION_WEIGHTS, REWARD };
+// Test-only exports — used by privacy-boundary tests to verify the
+// anonymous public path NEVER includes realName even when the user
+// opted in. Still safe to expose since redact is a pure-function.
+export const __TEST__ = { redact };
