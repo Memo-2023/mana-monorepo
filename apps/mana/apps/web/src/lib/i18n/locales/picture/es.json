@@ -48,5 +48,26 @@
 		"success": "Éxito",
 		"copy": "Copiar",
 		"copied": "¡Copiado!"
+	},
+	"list_view": {
+		"drop_overlay": "Soltar imágenes",
+		"action_upload_title": "Subir imágenes",
+		"action_upload": "Subir",
+		"action_generate_title": "Generar nueva imagen",
+		"action_generate": "Generar",
+		"action_favorites_title": "Mostrar solo favoritos",
+		"action_favorites": "Favoritos",
+		"view_list_title": "Lista",
+		"view_medium_title": "Mediano",
+		"view_small_title": "Pequeño",
+		"placeholder_search": "Buscar prompts…",
+		"empty_no_images": "Aún sin imágenes",
+		"empty_no_results": "Sin resultados",
+		"empty_hint_no_images": "Genera tu primera imagen con IA o sube algunas",
+		"empty_hint_no_results": "Ajusta los filtros",
+		"empty_cta_first": "Generar primera imagen",
+		"action_unfavorite": "Quitar",
+		"action_favorite": "Favorito",
+		"action_archive": "Archivar"
 	}
 }

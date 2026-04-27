@@ -48,5 +48,26 @@
 		"success": "Succès",
 		"copy": "Copier",
 		"copied": "Copié !"
+	},
+	"list_view": {
+		"drop_overlay": "Déposer les images",
+		"action_upload_title": "Télécharger des images",
+		"action_upload": "Téléverser",
+		"action_generate_title": "Générer une nouvelle image",
+		"action_generate": "Générer",
+		"action_favorites_title": "N'afficher que les favoris",
+		"action_favorites": "Favoris",
+		"view_list_title": "Liste",
+		"view_medium_title": "Moyen",
+		"view_small_title": "Petit",
+		"placeholder_search": "Rechercher des prompts…",
+		"empty_no_images": "Pas encore d'images",
+		"empty_no_results": "Aucun résultat",
+		"empty_hint_no_images": "Génère ta première image IA ou téléverse-en",
+		"empty_hint_no_results": "Ajuste tes filtres",
+		"empty_cta_first": "Générer la première image",
+		"action_unfavorite": "Retirer",
+		"action_favorite": "Favori",
+		"action_archive": "Archiver"
 	}
 }

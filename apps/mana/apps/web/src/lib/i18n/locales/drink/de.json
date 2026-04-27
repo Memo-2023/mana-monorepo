@@ -1,0 +1,15 @@
+{
+	"list_view": {
+		"section_today": "Heute",
+		"action_new": "Neu",
+		"section_log": "Verlauf",
+		"placeholder_name": "Name (z.B. Espresso)...",
+		"action_create": "Erstellen",
+		"action_cancel": "Abbrechen",
+		"empty_title": "Noch keine Getränke-Presets.",
+		"empty_action": "Erstes Getränk anlegen",
+		"ctx_archive": "Archivieren",
+		"ctx_activate": "Aktivieren",
+		"ctx_delete": "Löschen"
+	}
+}

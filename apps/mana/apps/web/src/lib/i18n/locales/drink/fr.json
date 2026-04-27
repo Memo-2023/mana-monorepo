@@ -1,0 +1,15 @@
+{
+	"list_view": {
+		"section_today": "Aujourd'hui",
+		"action_new": "Nouveau",
+		"section_log": "Historique",
+		"placeholder_name": "Nom (ex. Espresso)...",
+		"action_create": "Créer",
+		"action_cancel": "Annuler",
+		"empty_title": "Pas encore de presets de boisson.",
+		"empty_action": "Créer la première boisson",
+		"ctx_archive": "Archiver",
+		"ctx_activate": "Activer",
+		"ctx_delete": "Supprimer"
+	}
+}

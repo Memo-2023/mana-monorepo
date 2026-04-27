@@ -48,5 +48,26 @@
 		"success": "Erfolgreich",
 		"copy": "Kopieren",
 		"copied": "Kopiert!"
+	},
+	"list_view": {
+		"drop_overlay": "Bilder ablegen",
+		"action_upload_title": "Bilder hochladen",
+		"action_upload": "Upload",
+		"action_generate_title": "Neues Bild generieren",
+		"action_generate": "Generieren",
+		"action_favorites_title": "Nur Favoriten anzeigen",
+		"action_favorites": "Favoriten",
+		"view_list_title": "Liste",
+		"view_medium_title": "Mittel",
+		"view_small_title": "Klein",
+		"placeholder_search": "Prompts durchsuchen…",
+		"empty_no_images": "Noch keine Bilder",
+		"empty_no_results": "Keine Ergebnisse",
+		"empty_hint_no_images": "Generiere dein erstes Bild mit KI oder lade welche hoch",
+		"empty_hint_no_results": "Passe deine Filter an",
+		"empty_cta_first": "Erstes Bild generieren",
+		"action_unfavorite": "Entfernen",
+		"action_favorite": "Favorit",
+		"action_archive": "Archivieren"
 	}
 }

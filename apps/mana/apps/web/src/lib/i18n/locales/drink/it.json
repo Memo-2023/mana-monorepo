@@ -1,0 +1,15 @@
+{
+	"list_view": {
+		"section_today": "Oggi",
+		"action_new": "Nuovo",
+		"section_log": "Cronologia",
+		"placeholder_name": "Nome (es. Espresso)...",
+		"action_create": "Crea",
+		"action_cancel": "Annulla",
+		"empty_title": "Nessun preset di bevanda.",
+		"empty_action": "Crea la prima bevanda",
+		"ctx_archive": "Archivia",
+		"ctx_activate": "Attiva",
+		"ctx_delete": "Elimina"
+	}
+}

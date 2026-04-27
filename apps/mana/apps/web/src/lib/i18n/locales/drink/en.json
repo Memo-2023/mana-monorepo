@@ -1,0 +1,15 @@
+{
+	"list_view": {
+		"section_today": "Today",
+		"action_new": "New",
+		"section_log": "Log",
+		"placeholder_name": "Name (e.g. Espresso)...",
+		"action_create": "Create",
+		"action_cancel": "Cancel",
+		"empty_title": "No drink presets yet.",
+		"empty_action": "Add your first drink",
+		"ctx_archive": "Archive",
+		"ctx_activate": "Activate",
+		"ctx_delete": "Delete"
+	}
+}
