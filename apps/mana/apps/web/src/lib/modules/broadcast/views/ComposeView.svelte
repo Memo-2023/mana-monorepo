@@ -19,6 +19,7 @@
 	import { sendCampaign } from '../api';
 	import { useAllContacts } from '$lib/modules/contacts/queries';
 	import type { Campaign, CampaignContent, AudienceDefinition, BroadcastSettings } from '../types';
+	import { _ } from 'svelte-i18n';
 
 	interface Props {
 		existing?: Campaign;
@@ -34,7 +35,9 @@
 	let step = $state<Step>(1);
 
 	// ─── Form state (captured once at mount) ───────────────────
-	let name = $state<string>(initial?.name ?? 'Neue Kampagne');
+	let name = $state<string>(
+		initial?.name ?? untrack(() => $_('broadcast.compose_view.default_name'))
+	);
 	let subject = $state<string>(initial?.subject ?? '');
 	let preheader = $state<string>(initial?.preheader ?? '');
 	let fromName = $state<string>(initial?.fromName ?? '');
@@ -77,7 +80,7 @@
 			await broadcastCampaignsStore.updateContent(existing.id, content);
 			savedAt = new Date().toLocaleTimeString();
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Speichern fehlgeschlagen';
+			error = e instanceof Error ? e.message : $_('broadcast.compose_view.error_save_failed');
 		} finally {
 			saving = false;
 		}
@@ -149,7 +152,7 @@
 			};
 			sendState = 'done';
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Versand fehlgeschlagen';
+			error = e instanceof Error ? e.message : $_('broadcast.compose_view.error_send_failed');
 			sendState = 'idle';
 		}
 	}
@@ -160,17 +163,23 @@
 		<input
 			class="name-input"
 			type="text"
-			placeholder="Kampagnen-Name"
+			placeholder={$_('broadcast.compose_view.name_placeholder')}
 			bind:value={name}
-			aria-label="Kampagnen-Name"
+			aria-label={$_('broadcast.compose_view.name_aria')}
 		/>
 		<div class="head-actions">
 			{#if savedAt}
-				<span class="saved">Gespeichert um {savedAt}</span>
+				<span class="saved"
+					>{$_('broadcast.compose_view.saved_at', { values: { time: savedAt } })}</span
+				>
 			{/if}
-			<button type="button" class="btn-ghost" onclick={onCancel}>Schließen</button>
+			<button type="button" class="btn-ghost" onclick={onCancel}
+				>{$_('broadcast.compose_view.action_close')}</button
+			>
 			<button type="button" class="btn-primary" onclick={save} disabled={saving || !isEdit}>
-				{saving ? 'Speichert …' : 'Speichern'}
+				{saving
+					? $_('broadcast.compose_view.action_saving')
+					: $_('broadcast.compose_view.action_save')}
 			</button>
 		</div>
 	</header>
@@ -184,7 +193,7 @@
 			onclick={() => goToStep(1)}
 		>
 			<span class="step-num">1</span>
-			<span class="step-label">Empfänger</span>
+			<span class="step-label">{$_('broadcast.compose_view.step_recipients')}</span>
 		</button>
 		<button
 			type="button"
@@ -194,7 +203,7 @@
 			onclick={() => goToStep(2)}
 		>
 			<span class="step-num">2</span>
-			<span class="step-label">Inhalt</span>
+			<span class="step-label">{$_('broadcast.compose_view.step_content')}</span>
 		</button>
 		<button
 			type="button"
@@ -204,7 +213,7 @@
 			onclick={() => goToStep(3)}
 		>
 			<span class="step-num">3</span>
-			<span class="step-label">Check</span>
+			<span class="step-label">{$_('broadcast.compose_view.step_check')}</span>
 		</button>
 		<button
 			type="button"
@@ -214,7 +223,7 @@
 			onclick={() => goToStep(4)}
 		>
 			<span class="step-num">4</span>
-			<span class="step-label">Senden</span>
+			<span class="step-label">{$_('broadcast.compose_view.step_send')}</span>
 		</button>
 	</nav>
 
@@ -230,55 +239,64 @@
 		<section class="step-panel">
 			<div class="meta-grid">
 				<label class="field">
-					<span>Betreff *</span>
-					<input type="text" placeholder="Neuer Newsletter" bind:value={subject} />
-				</label>
-				<label class="field">
-					<span>Preheader</span>
+					<span>{$_('broadcast.compose_view.label_subject')}</span>
 					<input
 						type="text"
-						placeholder="Kurzer Vorschautext, erscheint in Gmail neben dem Betreff"
+						placeholder={$_('broadcast.compose_view.placeholder_subject')}
+						bind:value={subject}
+					/>
+				</label>
+				<label class="field">
+					<span>{$_('broadcast.compose_view.label_preheader')}</span>
+					<input
+						type="text"
+						placeholder={$_('broadcast.compose_view.placeholder_preheader')}
 						bind:value={preheader}
 					/>
 				</label>
 				<label class="field">
-					<span>Absender-Name *</span>
+					<span>{$_('broadcast.compose_view.label_from_name')}</span>
 					<input type="text" bind:value={fromName} />
 				</label>
 				<label class="field">
-					<span>Absender-E-Mail *</span>
+					<span>{$_('broadcast.compose_view.label_from_email')}</span>
 					<input type="email" bind:value={fromEmail} />
 				</label>
 			</div>
 
-			<Editor
-				bind:content
-				placeholder="Schreib deinen Newsletter. Nutze Bilder, Überschriften und Links."
-			/>
+			<Editor bind:content placeholder={$_('broadcast.compose_view.editor_placeholder')} />
 		</section>
 	{:else if step === 3}
 		<section class="step-panel">
 			<!-- Preflight checks — caught early so the user can fix before M4 send. -->
 			<div class="preflight-checks">
-				<h3>Vor dem Versand</h3>
+				<h3>{$_('broadcast.compose_view.preflight_heading')}</h3>
 				<ul class="check-list">
 					<li class:ok={subject.trim().length > 0} class:warn={!subject.trim()}>
 						<span class="icon">{subject.trim() ? '✓' : '!'}</span>
-						Betreff {subject.trim() ? 'gesetzt' : 'fehlt'}
+						{$_('broadcast.compose_view.check_subject_line', {
+							values: {
+								state: subject.trim()
+									? $_('broadcast.compose_view.check_subject_set')
+									: $_('broadcast.compose_view.check_subject_missing'),
+							},
+						})}
 						{#if subject.trim().length > 0}
 							<small>— {subject}</small>
 						{/if}
 					</li>
 					<li class:ok={audience.estimatedCount > 0} class:warn={audience.estimatedCount === 0}>
 						<span class="icon">{audience.estimatedCount > 0 ? '✓' : '!'}</span>
-						{audience.estimatedCount} Empfänger
+						{$_('broadcast.compose_view.check_recipients_line', {
+							values: { n: audience.estimatedCount },
+						})}
 						{#if audience.estimatedCount === 0}
-							<small>— kein Empfänger matched die Filter</small>
+							<small>{$_('broadcast.compose_view.check_recipients_no_match')}</small>
 						{/if}
 					</li>
 					<li class:ok={!!fromEmail && fromEmail.includes('@')} class:warn={!fromEmail}>
 						<span class="icon">{fromEmail.includes('@') ? '✓' : '!'}</span>
-						Absender
+						{$_('broadcast.compose_view.check_sender_label')}
 						<small>— {fromName} &lt;{fromEmail || '—'}&gt;</small>
 					</li>
 					<li
@@ -286,11 +304,11 @@
 						class:warn={!settings?.legalAddress?.trim()}
 					>
 						<span class="icon">{settings?.legalAddress?.trim() ? '✓' : '!'}</span>
-						Impressum
+						{$_('broadcast.compose_view.check_legal_label')}
 						{#if !settings?.legalAddress?.trim()}
 							<small
-								>— Pflicht laut DSGVO.
-								<a href="/broadcasts/settings">In Einstellungen ergänzen →</a>
+								>{$_('broadcast.compose_view.check_legal_missing')}
+								<a href="/broadcasts/settings">{$_('broadcast.compose_view.check_legal_link')}</a>
 							</small>
 						{/if}
 					</li>
@@ -300,26 +318,25 @@
 			{#if settings}
 				<PreviewTabs campaign={{ subject, preheader, fromName, fromEmail }} {content} {settings} />
 			{:else}
-				<p class="loading">Lade Einstellungen …</p>
+				<p class="loading">{$_('broadcast.compose_view.loading_settings')}</p>
 			{/if}
 		</section>
 	{:else if step === 4}
 		<section class="step-panel send-panel">
 			{#if sendState === 'idle'}
 				<div class="send-card">
-					<h3>Jetzt senden</h3>
+					<h3>{$_('broadcast.compose_view.send_idle_heading')}</h3>
 					<p>
-						<strong>{audience.estimatedCount}</strong> Empfänger erhalten die Kampagne
-						<strong>„{subject}"</strong>
-						von <strong>{fromName}</strong>.
+						{@html $_('broadcast.compose_view.send_idle_message_html', {
+							values: { n: audience.estimatedCount, subject, from: fromName },
+						})}
 					</p>
 					<p class="hint">
-						Der Versand läuft synchron und dauert je nach Liste 10–60 Sekunden. Du siehst jede Mail
-						in deinem „Gesendet"-Ordner (pro Empfänger ein Eintrag).
+						{$_('broadcast.compose_view.send_idle_hint')}
 					</p>
 					<div class="send-actions">
 						<button type="button" class="btn-ghost" onclick={() => (step = 3)}>
-							Zurück zum Check
+							{$_('broadcast.compose_view.send_action_back')}
 						</button>
 						<button
 							type="button"
@@ -327,48 +344,62 @@
 							onclick={() => (sendState = 'confirming')}
 							disabled={!audienceReady || !contentReady}
 						>
-							Jetzt an {audience.estimatedCount} Empfänger senden
+							{$_('broadcast.compose_view.send_action_send', {
+								values: { n: audience.estimatedCount },
+							})}
 						</button>
 					</div>
 				</div>
 			{:else if sendState === 'confirming'}
 				<div class="send-card confirm-card">
-					<h3>Sicher?</h3>
+					<h3>{$_('broadcast.compose_view.confirm_heading')}</h3>
 					<p>
-						Die Kampagne geht an <strong>{audience.estimatedCount}</strong> Empfänger. Nach dem Versand
-						kannst du nichts mehr ändern — wenn dir ein Fehler auffällt, musst du eine neue Kampagne als
-						Korrektur schicken.
+						{@html $_('broadcast.compose_view.confirm_message_html', {
+							values: { n: audience.estimatedCount },
+						})}
 					</p>
 					<div class="send-actions">
 						<button type="button" class="btn-ghost" onclick={() => (sendState = 'idle')}>
-							Abbrechen
+							{$_('broadcast.compose_view.confirm_action_cancel')}
 						</button>
 						<button type="button" class="btn-primary btn-danger" onclick={doSend}>
-							Ja, {audience.estimatedCount} Mails senden
+							{$_('broadcast.compose_view.confirm_action_yes', {
+								values: { n: audience.estimatedCount },
+							})}
 						</button>
 					</div>
 				</div>
 			{:else if sendState === 'sending'}
 				<div class="send-card sending-card">
 					<div class="spinner"></div>
-					<h3>Versand läuft …</h3>
+					<h3>{$_('broadcast.compose_view.sending_heading')}</h3>
 					<p>
-						Wir schicken {audience.estimatedCount} Mails raus. Bitte Fenster offen lassen.
+						{$_('broadcast.compose_view.sending_message', {
+							values: { n: audience.estimatedCount },
+						})}
 					</p>
 				</div>
 			{:else if sendState === 'done' && sendResult}
 				<div class="send-card done-card">
 					<div class="done-icon">✓</div>
-					<h3>Versand abgeschlossen</h3>
+					<h3>{$_('broadcast.compose_view.done_heading')}</h3>
 					<p>
-						<strong>{sendResult.delivered}</strong> Mails versendet
+						{@html $_('broadcast.compose_view.done_delivered_html', {
+							values: { n: sendResult.delivered },
+						})}
 						{#if sendResult.failed > 0}
-							· <strong class="failed-count">{sendResult.failed} Fehler</strong>
+							· {@html $_('broadcast.compose_view.done_failed_html', {
+								values: { n: sendResult.failed },
+							})}
 						{/if}
 					</p>
 					{#if sendResult.errors.length > 0}
 						<details class="error-details">
-							<summary>Fehler anzeigen ({sendResult.errors.length})</summary>
+							<summary
+								>{$_('broadcast.compose_view.done_error_summary', {
+									values: { n: sendResult.errors.length },
+								})}</summary
+							>
 							<ul>
 								{#each sendResult.errors as err (err.email)}
 									<li><code>{err.email}</code> — {err.reason}</li>
@@ -378,7 +409,7 @@
 					{/if}
 					<div class="send-actions">
 						<button type="button" class="btn-primary" onclick={() => goto('/broadcasts')}>
-							Zur Übersicht
+							{$_('broadcast.compose_view.done_action_overview')}
 						</button>
 					</div>
 				</div>
