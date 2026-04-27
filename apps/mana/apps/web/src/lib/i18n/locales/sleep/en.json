@@ -1,0 +1,22 @@
+{
+	"list_view": {
+		"cta_question": "How did you sleep?",
+		"cta_action": "Log now",
+		"label_last_night": "Last night",
+		"action_edit": "Edit",
+		"interruptions": "{n}× woke up",
+		"section_week": "This week",
+		"stat_avg_duration": "Avg duration (7d)",
+		"stat_avg_quality": "Avg quality",
+		"stat_sleep_debt": "Sleep debt",
+		"stat_consistency": "Consistency",
+		"stat_streak": "Streak",
+		"section_quality": "Quality (30 days)",
+		"heatmap_cell_title": "{date}: {label}",
+		"section_hygiene_corr": "Sleep hygiene effect",
+		"corr_with": "With hygiene (≥70%):",
+		"corr_without": "Without:",
+		"action_log_sleep": "Log sleep",
+		"action_hygiene_check": "Hygiene check"
+	}
+}

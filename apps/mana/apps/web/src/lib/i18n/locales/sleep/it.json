@@ -1,0 +1,22 @@
+{
+	"list_view": {
+		"cta_question": "Come hai dormito?",
+		"cta_action": "Registra ora",
+		"label_last_night": "Ultima notte",
+		"action_edit": "Modifica",
+		"interruptions": "{n}× risvegli",
+		"section_week": "Questa settimana",
+		"stat_avg_duration": "Durata media (7g)",
+		"stat_avg_quality": "Qualità media",
+		"stat_sleep_debt": "Debito di sonno",
+		"stat_consistency": "Costanza",
+		"stat_streak": "Serie",
+		"section_quality": "Qualità (30 giorni)",
+		"heatmap_cell_title": "{date}: {label}",
+		"section_hygiene_corr": "Effetto igiene del sonno",
+		"corr_with": "Con igiene (≥70%):",
+		"corr_without": "Senza:",
+		"action_log_sleep": "Registra sonno",
+		"action_hygiene_check": "Check igiene"
+	}
+}

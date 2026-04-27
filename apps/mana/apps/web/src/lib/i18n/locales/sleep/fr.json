@@ -1,0 +1,22 @@
+{
+	"list_view": {
+		"cta_question": "Comment as-tu dormi ?",
+		"cta_action": "Enregistrer maintenant",
+		"label_last_night": "Dernière nuit",
+		"action_edit": "Modifier",
+		"interruptions": "{n}× réveils",
+		"section_week": "Cette semaine",
+		"stat_avg_duration": "Durée moy. (7j)",
+		"stat_avg_quality": "Qualité moy.",
+		"stat_sleep_debt": "Dette de sommeil",
+		"stat_consistency": "Régularité",
+		"stat_streak": "Série",
+		"section_quality": "Qualité (30 jours)",
+		"heatmap_cell_title": "{date} : {label}",
+		"section_hygiene_corr": "Effet hygiène du sommeil",
+		"corr_with": "Avec hygiène (≥70 %) :",
+		"corr_without": "Sans :",
+		"action_log_sleep": "Enregistrer le sommeil",
+		"action_hygiene_check": "Check hygiène"
+	}
+}

@@ -1,0 +1,22 @@
+{
+	"list_view": {
+		"cta_question": "¿Cómo dormiste?",
+		"cta_action": "Registrar ahora",
+		"label_last_night": "Anoche",
+		"action_edit": "Editar",
+		"interruptions": "{n}× despertares",
+		"section_week": "Esta semana",
+		"stat_avg_duration": "Duración media (7d)",
+		"stat_avg_quality": "Calidad media",
+		"stat_sleep_debt": "Deuda de sueño",
+		"stat_consistency": "Consistencia",
+		"stat_streak": "Racha",
+		"section_quality": "Calidad (30 días)",
+		"heatmap_cell_title": "{date}: {label}",
+		"section_hygiene_corr": "Efecto higiene del sueño",
+		"corr_with": "Con higiene (≥70%):",
+		"corr_without": "Sin:",
+		"action_log_sleep": "Registrar sueño",
+		"action_hygiene_check": "Check higiene"
+	}
+}

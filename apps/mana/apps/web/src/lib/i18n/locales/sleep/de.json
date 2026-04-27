@@ -1,0 +1,22 @@
+{
+	"list_view": {
+		"cta_question": "Wie hast du geschlafen?",
+		"cta_action": "Jetzt loggen",
+		"label_last_night": "Letzte Nacht",
+		"action_edit": "Bearbeiten",
+		"interruptions": "{n}× aufgewacht",
+		"section_week": "Diese Woche",
+		"stat_avg_duration": "Ø Dauer (7T)",
+		"stat_avg_quality": "Ø Qualität",
+		"stat_sleep_debt": "Schlafschuld",
+		"stat_consistency": "Konsistenz",
+		"stat_streak": "Streak",
+		"section_quality": "Qualität (30 Tage)",
+		"heatmap_cell_title": "{date}: {label}",
+		"section_hygiene_corr": "Schlafhygiene-Effekt",
+		"corr_with": "Mit Hygiene (≥70%):",
+		"corr_without": "Ohne:",
+		"action_log_sleep": "Schlaf loggen",
+		"action_hygiene_check": "Hygiene-Check"
+	}
+}
