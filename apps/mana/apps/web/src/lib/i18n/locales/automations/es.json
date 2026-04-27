@@ -1,0 +1,31 @@
+{
+	"list_view": {
+		"section_suggestions": "Sugerencias",
+		"section_active": "Reglas activas",
+		"action_activate": "Activar",
+		"action_dismiss": "No",
+		"action_new": "+ Nueva",
+		"placeholder_name": "Nombre (opcional)",
+		"step_when": "CUANDO",
+		"step_filter": "FILTRO",
+		"step_then": "ENTONCES",
+		"placeholder_source": "Elige origen…",
+		"option_when_inserted": "se crea",
+		"option_when_updated": "se actualiza",
+		"option_no_filter": "Sin filtro",
+		"placeholder_value": "Valor…",
+		"placeholder_action": "Elige acción…",
+		"placeholder_habit": "Elige hábito…",
+		"action_cancel": "Cancelar",
+		"action_create": "Crear",
+		"toggle_disable": "Desactivar",
+		"toggle_enable": "Activar",
+		"action_delete": "Eliminar",
+		"flow_when": "cuando",
+		"empty_title": "Sin automatizaciones",
+		"empty_hint": "Conecta módulos con reglas: «Cuando X ocurre, hacer Y»",
+		"empty_action": "Crear la primera automatización",
+		"detail_inserted": "creado",
+		"detail_updated": "actualizado"
+	}
+}

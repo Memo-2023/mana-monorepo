@@ -1,0 +1,31 @@
+{
+	"list_view": {
+		"section_suggestions": "Suggestions",
+		"section_active": "Active rules",
+		"action_activate": "Activate",
+		"action_dismiss": "No",
+		"action_new": "+ New",
+		"placeholder_name": "Name (optional)",
+		"step_when": "WHEN",
+		"step_filter": "FILTER",
+		"step_then": "THEN",
+		"placeholder_source": "Choose source…",
+		"option_when_inserted": "is created",
+		"option_when_updated": "is updated",
+		"option_no_filter": "No filter",
+		"placeholder_value": "Value…",
+		"placeholder_action": "Choose action…",
+		"placeholder_habit": "Choose habit…",
+		"action_cancel": "Cancel",
+		"action_create": "Create",
+		"toggle_disable": "Disable",
+		"toggle_enable": "Enable",
+		"action_delete": "Delete",
+		"flow_when": "when",
+		"empty_title": "No automations",
+		"empty_hint": "Connect modules with rules: \"When X happens, do Y\"",
+		"empty_action": "Create your first automation",
+		"detail_inserted": "created",
+		"detail_updated": "updated"
+	}
+}
