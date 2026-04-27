@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { _, locale } from 'svelte-i18n';
+	import { get } from 'svelte/store';
 	import { onMount } from 'svelte';
 	import { Button, Input, Card, PageHeader, Badge } from '@mana/shared-ui';
 	import { Check, Copy, Info, Key, Plus, Prohibit } from '@mana/shared-icons';
@@ -57,7 +59,7 @@
 
 		// Validate at least one scope is selected
 		if (scopes.length === 0) {
-			error = 'Please select at least one scope';
+			error = $_('api-keys.page.err_pick_scope');
 			return;
 		}
 
@@ -114,8 +116,8 @@
 	}
 
 	function formatDate(dateString: string | null): string {
-		if (!dateString) return 'Never';
-		return new Date(dateString).toLocaleDateString('de-DE', {
+		if (!dateString) return $_('api-keys.page.never');
+		return new Date(dateString).toLocaleDateString(get(locale) ?? 'de', {
 			year: 'numeric',
 			month: 'short',
 			day: 'numeric',
@@ -128,14 +130,14 @@
 <RoutePage appId="api-keys">
 	<div>
 		<PageHeader
-			title="API Keys"
-			description="Manage your API keys for programmatic access to STT and TTS services"
+			title={$_('api-keys.page.title')}
+			description={$_('api-keys.page.subtitle')}
 			size="lg"
 		>
 			{#snippet actions()}
 				<Button onclick={() => (showCreateModal = true)}>
 					<Plus size={16} class="mr-2" />
-					Create API Key
+					{$_('api-keys.page.action_create')}
 				</Button>
 			{/snippet}
 		</PageHeader>
@@ -166,9 +168,15 @@
 								<Key size={20} />
 							</div>
 							<div>
-								<h2 class="text-lg font-semibold">Active Keys</h2>
+								<h2 class="text-lg font-semibold">{$_('api-keys.page.section_active_title')}</h2>
 								<p class="text-sm text-muted-foreground">
-									{activeKeys.length} active key{activeKeys.length !== 1 ? 's' : ''}
+									{activeKeys.length === 1
+										? $_('api-keys.page.section_active_count_one', {
+												values: { count: activeKeys.length },
+											})
+										: $_('api-keys.page.section_active_count_other', {
+												values: { count: activeKeys.length },
+											})}
 								</p>
 							</div>
 						</div>
@@ -176,8 +184,8 @@
 						{#if activeKeys.length === 0}
 							<div class="text-center py-8 text-muted-foreground">
 								<Key size={48} class="mx-auto mb-4 opacity-50" />
-								<p class="font-medium">No API keys yet</p>
-								<p class="text-sm mt-1">Create your first API key to get started</p>
+								<p class="font-medium">{$_('api-keys.page.empty_title')}</p>
+								<p class="text-sm mt-1">{$_('api-keys.page.empty_subtitle')}</p>
 							</div>
 						{:else}
 							<div class="space-y-3">
@@ -187,7 +195,11 @@
 											<div class="flex items-center gap-2 flex-wrap">
 												<span class="font-medium">{key.name}</span>
 												<Badge variant="default">{key.scopes.join(', ')}</Badge>
-												<Badge variant="info">{key.rateLimitRequests}/min</Badge>
+												<Badge variant="info"
+													>{$_('api-keys.page.rate_per_min', {
+														values: { rate: key.rateLimitRequests },
+													})}</Badge
+												>
 											</div>
 											<div
 												class="flex items-center gap-4 mt-1 text-sm text-muted-foreground flex-wrap"
@@ -195,8 +207,16 @@
 												<code class="bg-muted px-2 py-0.5 rounded font-mono text-xs"
 													>{key.keyPrefix}</code
 												>
-												<span>Created: {formatDate(key.createdAt)}</span>
-												<span>Last used: {formatDate(key.lastUsedAt)}</span>
+												<span
+													>{$_('api-keys.page.label_created', {
+														values: { date: formatDate(key.createdAt) },
+													})}</span
+												>
+												<span
+													>{$_('api-keys.page.label_last_used', {
+														values: { date: formatDate(key.lastUsedAt) },
+													})}</span
+												>
 											</div>
 										</div>
 										<Button
@@ -205,7 +225,9 @@
 											loading={revoking === key.id}
 											onclick={() => handleRevoke(key.id)}
 										>
-											{revoking === key.id ? 'Revoking...' : 'Revoke'}
+											{revoking === key.id
+												? $_('api-keys.page.action_revoking')
+												: $_('api-keys.page.action_revoke')}
 										</Button>
 									</div>
 								{/each}
@@ -225,9 +247,15 @@
 									<Prohibit size={20} />
 								</div>
 								<div>
-									<h2 class="text-lg font-semibold">Revoked Keys</h2>
+									<h2 class="text-lg font-semibold">{$_('api-keys.page.section_revoked_title')}</h2>
 									<p class="text-sm text-muted-foreground">
-										{revokedKeys.length} revoked key{revokedKeys.length !== 1 ? 's' : ''}
+										{revokedKeys.length === 1
+											? $_('api-keys.page.section_revoked_count_one', {
+													values: { count: revokedKeys.length },
+												})
+											: $_('api-keys.page.section_revoked_count_other', {
+													values: { count: revokedKeys.length },
+												})}
 									</p>
 								</div>
 							</div>
@@ -240,13 +268,17 @@
 										<div class="flex-1 min-w-0">
 											<div class="flex items-center gap-2">
 												<span class="font-medium line-through">{key.name}</span>
-												<Badge variant="danger">Revoked</Badge>
+												<Badge variant="danger">{$_('api-keys.page.badge_revoked')}</Badge>
 											</div>
 											<div class="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
 												<code class="bg-muted px-2 py-0.5 rounded font-mono text-xs"
 													>{key.keyPrefix}</code
 												>
-												<span>Revoked: {formatDate(key.revokedAt)}</span>
+												<span
+													>{$_('api-keys.page.label_revoked_at', {
+														values: { date: formatDate(key.revokedAt) },
+													})}</span
+												>
 											</div>
 										</div>
 									</div>
@@ -266,14 +298,16 @@
 								<Info size={20} />
 							</div>
 							<div>
-								<h2 class="text-lg font-semibold">How to Use</h2>
-								<p class="text-sm text-muted-foreground">Include your API key in requests</p>
+								<h2 class="text-lg font-semibold">{$_('api-keys.page.section_howto_title')}</h2>
+								<p class="text-sm text-muted-foreground">
+									{$_('api-keys.page.section_howto_subtitle')}
+								</p>
 							</div>
 						</div>
 
 						<div class="space-y-4">
 							<div>
-								<p class="text-sm font-medium mb-2">Speech-to-Text (STT)</p>
+								<p class="text-sm font-medium mb-2">{$_('api-keys.page.label_stt')}</p>
 								<pre class="bg-muted p-3 rounded-lg text-sm overflow-x-auto"><code
 										>curl -X POST https://gpu-stt.mana.how/transcribe \
   -H "X-API-Key: sk_live_your_key_here" \
@@ -282,7 +316,7 @@
 							</div>
 
 							<div>
-								<p class="text-sm font-medium mb-2">Text-to-Speech (TTS)</p>
+								<p class="text-sm font-medium mb-2">{$_('api-keys.page.label_tts')}</p>
 								<pre class="bg-muted p-3 rounded-lg text-sm overflow-x-auto"><code
 										>curl -X POST https://tts-api.mana.how/synthesize/kokoro \
   -H "X-API-Key: sk_live_your_key_here" \
@@ -303,7 +337,10 @@
 {#if showCreateModal}
 	<div class="fixed inset-0 z-50 flex items-center justify-center">
 		<!-- Backdrop -->
-		<button class="absolute inset-0 bg-black/50" onclick={closeCreateModal} aria-label="Close modal"
+		<button
+			class="absolute inset-0 bg-black/50"
+			onclick={closeCreateModal}
+			aria-label={$_('api-keys.page.action_close_modal')}
 		></button>
 
 		<!-- Modal -->
@@ -317,9 +354,9 @@
 						<Check size={20} />
 					</div>
 
-					<h3 class="text-lg font-semibold mb-2">API Key Created</h3>
+					<h3 class="text-lg font-semibold mb-2">{$_('api-keys.page.modal_created_title')}</h3>
 					<p class="text-sm text-muted-foreground mb-4">
-						Copy your API key now. You won't be able to see it again.
+						{$_('api-keys.page.modal_created_warning')}
 					</p>
 
 					<div class="relative mb-4">
@@ -341,29 +378,35 @@
 					</div>
 
 					{#if copied}
-						<p class="text-sm text-green-600 dark:text-green-400 mb-4">Copied to clipboard!</p>
+						<p class="text-sm text-green-600 dark:text-green-400 mb-4">
+							{$_('api-keys.page.toast_copied')}
+						</p>
 					{/if}
 
-					<Button onclick={closeCreateModal} class="w-full">Done</Button>
+					<Button onclick={closeCreateModal} class="w-full"
+						>{$_('api-keys.page.action_done')}</Button
+					>
 				</div>
 			{:else}
 				<!-- Form: Create key -->
-				<h3 class="text-lg font-semibold mb-4">Create API Key</h3>
+				<h3 class="text-lg font-semibold mb-4">{$_('api-keys.page.modal_create_title')}</h3>
 
 				<div class="mb-4">
-					<label for="keyName" class="block text-sm font-medium mb-2">Key Name</label>
+					<label for="keyName" class="block text-sm font-medium mb-2"
+						>{$_('api-keys.page.label_key_name')}</label
+					>
 					<Input
 						type="text"
 						id="keyName"
 						bind:value={newKeyName}
-						placeholder="e.g., Production API Key"
+						placeholder={$_('api-keys.page.placeholder_key_name')}
 					/>
-					<p class="mt-1 text-xs text-muted-foreground">A friendly name to identify this key</p>
+					<p class="mt-1 text-xs text-muted-foreground">{$_('api-keys.page.hint_key_name')}</p>
 				</div>
 
 				<!-- Scopes -->
 				<div class="mb-4">
-					<span class="block text-sm font-medium mb-2">Scopes</span>
+					<span class="block text-sm font-medium mb-2">{$_('api-keys.page.label_scopes')}</span>
 					<div class="space-y-2">
 						<label class="flex items-center gap-2 cursor-pointer">
 							<input
@@ -371,7 +414,7 @@
 								bind:checked={newKeyScopes.stt}
 								class="h-4 w-4 rounded border-border text-primary focus:ring-primary"
 							/>
-							<span class="text-sm">Speech-to-Text (stt)</span>
+							<span class="text-sm">{$_('api-keys.page.scope_stt')}</span>
 						</label>
 						<label class="flex items-center gap-2 cursor-pointer">
 							<input
@@ -379,35 +422,39 @@
 								bind:checked={newKeyScopes.tts}
 								class="h-4 w-4 rounded border-border text-primary focus:ring-primary"
 							/>
-							<span class="text-sm">Text-to-Speech (tts)</span>
+							<span class="text-sm">{$_('api-keys.page.scope_tts')}</span>
 						</label>
 					</div>
 					<p class="mt-1 text-xs text-muted-foreground">
-						Select which services this key can access
+						{$_('api-keys.page.hint_scopes')}
 					</p>
 				</div>
 
 				<!-- Rate Limit -->
 				<div class="mb-6">
-					<label for="rateLimit" class="block text-sm font-medium mb-2">Rate Limit</label>
+					<label for="rateLimit" class="block text-sm font-medium mb-2"
+						>{$_('api-keys.page.label_rate_limit')}</label
+					>
 					<div class="flex items-center gap-2">
 						<Input type="number" id="rateLimit" bind:value={newKeyRateLimit} class="w-24" />
-						<span class="text-sm text-muted-foreground">requests per minute</span>
+						<span class="text-sm text-muted-foreground">{$_('api-keys.page.label_rate_unit')}</span>
 					</div>
 					<p class="mt-1 text-xs text-muted-foreground">
-						Maximum number of API calls allowed per minute (default: 60)
+						{$_('api-keys.page.hint_rate_limit')}
 					</p>
 				</div>
 
 				<div class="flex gap-3">
-					<Button variant="secondary" onclick={closeCreateModal} class="flex-1">Cancel</Button>
+					<Button variant="secondary" onclick={closeCreateModal} class="flex-1"
+						>{$_('api-keys.page.action_cancel')}</Button
+					>
 					<Button
 						onclick={handleCreate}
 						loading={creating}
 						disabled={!newKeyName.trim() || (!newKeyScopes.stt && !newKeyScopes.tts)}
 						class="flex-1"
 					>
-						{creating ? 'Creating...' : 'Create Key'}
+						{creating ? $_('api-keys.page.action_creating') : $_('api-keys.page.action_create_key')}
 					</Button>
 				</div>
 			{/if}
