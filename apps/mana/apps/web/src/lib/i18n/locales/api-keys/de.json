@@ -42,6 +42,8 @@
 		"action_cancel": "Abbrechen",
 		"action_creating": "Erstelle…",
 		"action_create_key": "Key erstellen",
-		"action_close_modal": "Modal schließen"
+		"action_close_modal": "Modal schließen",
+		"label_rate_unit_short": "Anf./Min.",
+		"action_revoking_short": "..."
 	}
 }

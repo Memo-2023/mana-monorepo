@@ -42,6 +42,8 @@
 		"action_cancel": "Annulla",
 		"action_creating": "Creazione…",
 		"action_create_key": "Crea key",
-		"action_close_modal": "Chiudi modale"
+		"action_close_modal": "Chiudi modale",
+		"label_rate_unit_short": "req/min",
+		"action_revoking_short": "..."
 	}
 }

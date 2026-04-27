@@ -7,6 +7,9 @@
 	import { Button, Input, Card, Badge } from '@mana/shared-ui';
 	import { Check, Copy, Info, Key, Plus, Prohibit } from '@mana/shared-icons';
 	import { apiKeysService, type ApiKey, type ApiKeyWithSecret } from '$lib/api/api-keys';
+	import { _ } from 'svelte-i18n';
+	import { get } from 'svelte/store';
+	import { locale } from 'svelte-i18n';
 
 	let loading = $state(true);
 	let apiKeys = $state<ApiKey[]>([]);
@@ -47,7 +50,7 @@
 		if (newKeyScopes.stt) scopes.push('stt');
 		if (newKeyScopes.tts) scopes.push('tts');
 		if (scopes.length === 0) {
-			error = 'Please select at least one scope';
+			error = $_('api-keys.page.err_pick_scope');
 			return;
 		}
 		creating = true;
@@ -96,8 +99,9 @@
 	}
 
 	function formatDate(dateString: string | null): string {
-		if (!dateString) return 'Never';
-		return new Date(dateString).toLocaleDateString('de-DE', {
+		if (!dateString) return $_('api-keys.page.never');
+		const lang = get(locale) ?? 'de';
+		return new Date(dateString).toLocaleDateString(lang, {
 			year: 'numeric',
 			month: 'short',
 			day: 'numeric',
@@ -110,7 +114,8 @@
 <div class="apikeys-page">
 	<div class="header">
 		<button class="add-btn" onclick={() => (showCreateModal = true)}>
-			<Plus size={14} weight="bold" /> API Key
+			<Plus size={14} weight="bold" />
+			{$_('api-keys.page.action_create')}
 		</button>
 	</div>
 
@@ -127,14 +132,14 @@
 		<div class="section">
 			<div class="section-header">
 				<Key size={16} />
-				<span class="section-title">Active Keys</span>
+				<span class="section-title">{$_('api-keys.page.section_active_title')}</span>
 				<span class="section-count">{activeKeys.length}</span>
 			</div>
 
 			{#if activeKeys.length === 0}
 				<div class="empty">
 					<Key size={32} />
-					<p>No API keys yet</p>
+					<p>{$_('api-keys.page.empty_title')}</p>
 				</div>
 			{:else}
 				<div class="key-list">
@@ -144,11 +149,19 @@
 								<div class="key-name-row">
 									<span class="key-name">{key.name}</span>
 									<span class="key-scope">{key.scopes.join(', ')}</span>
-									<span class="key-rate">{key.rateLimitRequests}/min</span>
+									<span class="key-rate"
+										>{$_('api-keys.page.rate_per_min', {
+											values: { rate: key.rateLimitRequests },
+										})}</span
+									>
 								</div>
 								<div class="key-meta">
 									<code class="key-prefix">{key.keyPrefix}</code>
-									<span>Created: {formatDate(key.createdAt)}</span>
+									<span
+										>{$_('api-keys.page.label_created', {
+											values: { date: formatDate(key.createdAt) },
+										})}</span
+									>
 								</div>
 							</div>
 							<button
@@ -156,7 +169,9 @@
 								disabled={revoking === key.id}
 								onclick={() => handleRevoke(key.id)}
 							>
-								{revoking === key.id ? '...' : 'Revoke'}
+								{revoking === key.id
+									? $_('api-keys.page.action_revoking_short')
+									: $_('api-keys.page.action_revoke')}
 							</button>
 						</div>
 					{/each}
@@ -169,7 +184,7 @@
 			<div class="section dimmed">
 				<div class="section-header">
 					<Prohibit size={16} />
-					<span class="section-title">Revoked</span>
+					<span class="section-title">{$_('api-keys.page.section_revoked_title')}</span>
 					<span class="section-count">{revokedKeys.length}</span>
 				</div>
 				<div class="key-list">
@@ -179,7 +194,11 @@
 								<span class="key-name strikethrough">{key.name}</span>
 								<div class="key-meta">
 									<code class="key-prefix">{key.keyPrefix}</code>
-									<span>Revoked: {formatDate(key.revokedAt)}</span>
+									<span
+										>{$_('api-keys.page.label_revoked_at', {
+											values: { date: formatDate(key.revokedAt) },
+										})}</span
+									>
 								</div>
 							</div>
 						</div>
@@ -192,10 +211,10 @@
 		<div class="section">
 			<div class="section-header">
 				<Info size={16} />
-				<span class="section-title">How to Use</span>
+				<span class="section-title">{$_('api-keys.page.section_howto_title')}</span>
 			</div>
 			<div class="usage-block">
-				<p class="usage-label">Speech-to-Text (STT)</p>
+				<p class="usage-label">{$_('api-keys.page.label_stt')}</p>
 				<pre class="usage-code"><code
 						>curl -X POST https://gpu-stt.mana.how/transcribe \
   -H "X-API-Key: sk_live_..." \
@@ -203,7 +222,7 @@
 					></pre>
 			</div>
 			<div class="usage-block">
-				<p class="usage-label">Text-to-Speech (TTS)</p>
+				<p class="usage-label">{$_('api-keys.page.label_tts')}</p>
 				<pre class="usage-code"><code
 						>curl -X POST https://tts-api.mana.how/synthesize/kokoro \
   -H "X-API-Key: sk_live_..." \
@@ -219,33 +238,39 @@
 <!-- Create API Key Modal -->
 {#if showCreateModal}
 	<div class="modal-backdrop">
-		<button class="backdrop-btn" onclick={closeCreateModal} aria-label="Close modal"></button>
+		<button
+			class="backdrop-btn"
+			onclick={closeCreateModal}
+			aria-label={$_('api-keys.page.action_close_modal')}
+		></button>
 		<div class="modal">
 			{#if createdKey}
 				<div class="modal-success">
 					<div class="success-icon"><Check size={20} /></div>
-					<h3 class="modal-title">API Key Created</h3>
-					<p class="modal-hint">Copy your API key now. You won't be able to see it again.</p>
+					<h3 class="modal-title">{$_('api-keys.page.modal_created_title')}</h3>
+					<p class="modal-hint">{$_('api-keys.page.modal_created_warning')}</p>
 					<div class="key-display">
 						<code>{createdKey.key}</code>
 						<button class="copy-btn" onclick={() => copyToClipboard(createdKey!.key)}>
 							{#if copied}<Check size={16} />{:else}<Copy size={16} />{/if}
 						</button>
 					</div>
-					{#if copied}<p class="copied-msg">Copied!</p>{/if}
-					<button class="done-btn" onclick={closeCreateModal}>Done</button>
+					{#if copied}<p class="copied-msg">{$_('api-keys.page.toast_copied')}</p>{/if}
+					<button class="done-btn" onclick={closeCreateModal}
+						>{$_('api-keys.page.action_done')}</button
+					>
 				</div>
 			{:else}
-				<h3 class="modal-title">Create API Key</h3>
-				<label class="field-label" for="wbKeyName">Key Name</label>
+				<h3 class="modal-title">{$_('api-keys.page.modal_create_title')}</h3>
+				<label class="field-label" for="wbKeyName">{$_('api-keys.page.label_key_name')}</label>
 				<input
 					id="wbKeyName"
 					type="text"
 					class="field-input"
 					bind:value={newKeyName}
-					placeholder="e.g., Production API Key"
+					placeholder={$_('api-keys.page.placeholder_key_name')}
 				/>
-				<span class="field-label">Scopes</span>
+				<span class="field-label">{$_('api-keys.page.label_scopes')}</span>
 				<div class="scope-checks">
 					<label class="scope-check">
 						<input type="checkbox" bind:checked={newKeyScopes.stt} /> STT
@@ -254,7 +279,7 @@
 						<input type="checkbox" bind:checked={newKeyScopes.tts} /> TTS
 					</label>
 				</div>
-				<label class="field-label" for="wbRateLimit">Rate Limit</label>
+				<label class="field-label" for="wbRateLimit">{$_('api-keys.page.label_rate_limit')}</label>
 				<div class="rate-row">
 					<input
 						id="wbRateLimit"
@@ -262,16 +287,18 @@
 						class="field-input rate-input"
 						bind:value={newKeyRateLimit}
 					/>
-					<span class="rate-unit">req/min</span>
+					<span class="rate-unit">{$_('api-keys.page.label_rate_unit_short')}</span>
 				</div>
 				<div class="modal-actions">
-					<button class="cancel-btn" onclick={closeCreateModal}>Cancel</button>
+					<button class="cancel-btn" onclick={closeCreateModal}
+						>{$_('api-keys.page.action_cancel')}</button
+					>
 					<button
 						class="create-btn"
 						disabled={!newKeyName.trim() || (!newKeyScopes.stt && !newKeyScopes.tts) || creating}
 						onclick={handleCreate}
 					>
-						{creating ? 'Creating...' : 'Create'}
+						{creating ? $_('api-keys.page.action_creating') : $_('api-keys.page.action_create_key')}
 					</button>
 				</div>
 			{/if}
