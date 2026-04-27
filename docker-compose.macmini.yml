@@ -268,7 +268,13 @@ services:
       MANA_SERVICE_KEY: ${MANA_SERVICE_KEY}
       MANA_CREDITS_URL: http://mana-credits:3061
       MANA_SUBSCRIPTIONS_URL: http://mana-subscriptions:3063
-      SYNC_DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform
+      # Points at the mana-sync DB where sync_changes lives — read by
+      # the F4 bootstrap, the /api/v1/me/bootstrap-singletons endpoint,
+      # and the GDPR data summary in user-data.ts. Previously pointed
+      # at mana_platform which silently broke all three (F4 was
+      # fire-and-forget so the error went unnoticed; the explicit
+      # endpoint added in 099cac4a0 surfaced it as a 500).
+      SYNC_DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_sync
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-${JWT_SECRET:-your-jwt-secret-change-me}}
       # KEK for the encryption-vault feature (Phase 9). Required in production
       # — generate with `openssl rand -base64 32`. See services/mana-auth/CLAUDE.md.
