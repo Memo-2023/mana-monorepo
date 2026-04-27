@@ -583,7 +583,7 @@ services:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/mana_platform
       MANA_AUTH_URL: http://mana-auth:3001
       MANA_LLM_URL: http://mana-llm:3025
-      MANA_CREDITS_URL: http://mana-credits:3061
+      MANA_CREDITS_URL: http://mana-credits:3002
       MANA_SERVICE_KEY: ${MANA_SERVICE_KEY:?missing in .env.macmini}
       # Seeds the per-user display-hash for the public-community pseudonym
       # ("Wachsame Eule #4528"). Set in .env.macmini — rotation re-keys
