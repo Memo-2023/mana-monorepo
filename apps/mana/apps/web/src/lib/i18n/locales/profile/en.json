@@ -53,5 +53,28 @@
 		"weekday_4": "Thu",
 		"weekday_5": "Fri",
 		"weekday_6": "Sat"
+	},
+	"freeform": {
+		"placeholder": "What else should Mana know about you?",
+		"saving": "Saving…",
+		"saved": "Saved",
+		"toggle_url_title": "Crawl a web page and append it",
+		"action_from_url": "From URL",
+		"toggle_mode_title": "Cmd/Ctrl + E",
+		"action_edit": "Edit",
+		"action_view": "View",
+		"url_placeholder": "https://example.com/article",
+		"phase_crawling": "Crawling…",
+		"phase_summarizing": "Summarizing…",
+		"phase_appending": "Saving…",
+		"action_insert": "Insert",
+		"action_close_title": "Close",
+		"option_single": "This page only",
+		"option_deep": "Whole website (max. 20)",
+		"option_summarize": "Summarize with AI",
+		"empty_hint": "Click to edit",
+		"error_import_failed": "Import failed",
+		"auth_reason_crawl": "Crawling a web page runs server-side and requires a Mana account.",
+		"crawl_source_label": "Source"
 	}
 }

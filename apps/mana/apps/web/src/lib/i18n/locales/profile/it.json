@@ -53,5 +53,28 @@
 		"weekday_4": "Gio",
 		"weekday_5": "Ven",
 		"weekday_6": "Sab"
+	},
+	"freeform": {
+		"placeholder": "Cos'altro dovrebbe sapere Mana di te?",
+		"saving": "Salvataggio…",
+		"saved": "Salvato",
+		"toggle_url_title": "Effettua il crawling di una pagina web e aggiungila",
+		"action_from_url": "Da URL",
+		"toggle_mode_title": "Cmd/Ctrl + E",
+		"action_edit": "Modifica",
+		"action_view": "Vista",
+		"url_placeholder": "https://example.com/article",
+		"phase_crawling": "Crawling…",
+		"phase_summarizing": "Riepilogo…",
+		"phase_appending": "Salvataggio…",
+		"action_insert": "Inserisci",
+		"action_close_title": "Chiudi",
+		"option_single": "Solo questa pagina",
+		"option_deep": "Intero sito (max. 20)",
+		"option_summarize": "Riassumi con IA",
+		"empty_hint": "Clicca per modificare",
+		"error_import_failed": "Importazione fallita",
+		"auth_reason_crawl": "Il crawling di una pagina web viene eseguito lato server e richiede un account Mana.",
+		"crawl_source_label": "Fonte"
 	}
 }

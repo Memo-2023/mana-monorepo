@@ -53,5 +53,28 @@
 		"weekday_4": "Do",
 		"weekday_5": "Fr",
 		"weekday_6": "Sa"
+	},
+	"freeform": {
+		"placeholder": "Was soll Mana sonst noch über dich wissen?",
+		"saving": "Speichert…",
+		"saved": "Gespeichert",
+		"toggle_url_title": "Web-Seite crawlen und anhängen",
+		"action_from_url": "Aus URL",
+		"toggle_mode_title": "Cmd/Ctrl + E",
+		"action_edit": "Bearbeiten",
+		"action_view": "Ansicht",
+		"url_placeholder": "https://example.com/article",
+		"phase_crawling": "Crawle…",
+		"phase_summarizing": "Fasse zusammen…",
+		"phase_appending": "Speichere…",
+		"action_insert": "Einfügen",
+		"action_close_title": "Schließen",
+		"option_single": "Nur diese Seite",
+		"option_deep": "Ganze Website (max. 20)",
+		"option_summarize": "Mit KI zusammenfassen",
+		"empty_hint": "Klicken zum Bearbeiten",
+		"error_import_failed": "Import fehlgeschlagen",
+		"auth_reason_crawl": "Das Crawlen einer Web-Seite läuft serverseitig und erfordert ein Mana-Konto.",
+		"crawl_source_label": "Quelle"
 	}
 }

@@ -1,0 +1,19 @@
+{
+	"comparison": {
+		"section_label": "Model comparison",
+		"loading": "Comparing models...",
+		"error_unavailable": "Comparison data unavailable",
+		"block_current": "Current",
+		"block_seven_day": "7-day comparison",
+		"block_alerts": "DWD weather alerts",
+		"model_unavailable": "Unavailable",
+		"label_apparent": "Feels like",
+		"label_wind": "Wind",
+		"label_precip": "Precipitation",
+		"label_humidity": "Humidity",
+		"day_today": "Today",
+		"day_tomorrow": "Tomorrow",
+		"fetched_at": "Fetched:",
+		"action_refresh": "Refresh"
+	}
+}

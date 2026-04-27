@@ -1,0 +1,19 @@
+{
+	"comparison": {
+		"section_label": "Comparación de modelos",
+		"loading": "Comparando modelos...",
+		"error_unavailable": "Datos de comparación no disponibles",
+		"block_current": "Actual",
+		"block_seven_day": "Comparación a 7 días",
+		"block_alerts": "Alertas meteorológicas DWD",
+		"model_unavailable": "No disponible",
+		"label_apparent": "Sensación",
+		"label_wind": "Viento",
+		"label_precip": "Precipitación",
+		"label_humidity": "Humedad",
+		"day_today": "Hoy",
+		"day_tomorrow": "Mañana",
+		"fetched_at": "Obtenido:",
+		"action_refresh": "Actualizar"
+	}
+}

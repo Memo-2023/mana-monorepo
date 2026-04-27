@@ -53,5 +53,28 @@
 		"weekday_4": "Jeu",
 		"weekday_5": "Ven",
 		"weekday_6": "Sam"
+	},
+	"freeform": {
+		"placeholder": "Que devrait savoir Mana d'autre sur toi ?",
+		"saving": "Enregistrement…",
+		"saved": "Enregistré",
+		"toggle_url_title": "Crawler une page web et l'ajouter",
+		"action_from_url": "Depuis URL",
+		"toggle_mode_title": "Cmd/Ctrl + E",
+		"action_edit": "Modifier",
+		"action_view": "Aperçu",
+		"url_placeholder": "https://example.com/article",
+		"phase_crawling": "Crawl en cours…",
+		"phase_summarizing": "Résumé en cours…",
+		"phase_appending": "Enregistrement…",
+		"action_insert": "Insérer",
+		"action_close_title": "Fermer",
+		"option_single": "Cette page uniquement",
+		"option_deep": "Site entier (max. 20)",
+		"option_summarize": "Résumer avec l'IA",
+		"empty_hint": "Cliquer pour modifier",
+		"error_import_failed": "Échec de l'import",
+		"auth_reason_crawl": "Le crawl d'une page web s'exécute côté serveur et nécessite un compte Mana.",
+		"crawl_source_label": "Source"
 	}
 }

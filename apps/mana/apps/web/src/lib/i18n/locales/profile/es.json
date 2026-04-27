@@ -53,5 +53,28 @@
 		"weekday_4": "Jue",
 		"weekday_5": "Vie",
 		"weekday_6": "Sáb"
+	},
+	"freeform": {
+		"placeholder": "¿Qué más debería saber Mana sobre ti?",
+		"saving": "Guardando…",
+		"saved": "Guardado",
+		"toggle_url_title": "Rastrear una página web y añadirla",
+		"action_from_url": "Desde URL",
+		"toggle_mode_title": "Cmd/Ctrl + E",
+		"action_edit": "Editar",
+		"action_view": "Ver",
+		"url_placeholder": "https://example.com/article",
+		"phase_crawling": "Rastreando…",
+		"phase_summarizing": "Resumiendo…",
+		"phase_appending": "Guardando…",
+		"action_insert": "Insertar",
+		"action_close_title": "Cerrar",
+		"option_single": "Solo esta página",
+		"option_deep": "Sitio web completo (máx. 20)",
+		"option_summarize": "Resumir con IA",
+		"empty_hint": "Haz clic para editar",
+		"error_import_failed": "Importación fallida",
+		"auth_reason_crawl": "El rastreo de una página web se ejecuta en el servidor y requiere una cuenta de Mana.",
+		"crawl_source_label": "Fuente"
 	}
 }

@@ -260,5 +260,33 @@
 		"placeholder_github": "GitHub",
 		"action_cancel": "Abbrechen",
 		"action_save": "Speichern"
+	},
+	"detail": {
+		"page_title_html": "{name} - Mana",
+		"page_title_fallback": "Kontakt",
+		"breadcrumb": "Kontakte",
+		"empty_title": "Kontakt nicht gefunden",
+		"empty_hint": "Dieser Kontakt existiert nicht oder wurde gelöscht.",
+		"empty_back": "Zurück zu Kontakten",
+		"action_share_title": "Kurzlink teilen",
+		"action_unfavorite_title": "Favorit entfernen",
+		"action_favorite_title": "Zu Favoriten",
+		"action_archive_title": "Archivieren",
+		"action_delete_title": "Löschen",
+		"confirm_delete": "\"{name}\" endgültig löschen?",
+		"quick_call": "Anrufen",
+		"quick_email": "E-Mail",
+		"quick_sms": "SMS",
+		"label_mobile": "Mobil",
+		"label_phone": "Telefon",
+		"section_contact": "Kontakt",
+		"section_work": "Arbeit",
+		"section_address": "Adresse",
+		"section_notes": "Notizen",
+		"section_social": "Social Media",
+		"section_tags": "Tags",
+		"empty_contact_info": "Keine Kontaktdaten hinterlegt.",
+		"meta_created": "Erstellt",
+		"meta_updated": "Aktualisiert"
 	}
 }
