@@ -1,4 +1,11 @@
 {
+	"qualities": {
+		"1": "Sehr schlecht",
+		"2": "Schlecht",
+		"3": "Okay",
+		"4": "Gut",
+		"5": "Sehr gut"
+	},
 	"list_view": {
 		"cta_question": "Wie hast du geschlafen?",
 		"cta_action": "Jetzt loggen",

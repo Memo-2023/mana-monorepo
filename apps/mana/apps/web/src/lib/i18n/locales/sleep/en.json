@@ -1,4 +1,11 @@
 {
+	"qualities": {
+		"1": "Very poor",
+		"2": "Poor",
+		"3": "Okay",
+		"4": "Good",
+		"5": "Very good"
+	},
 	"list_view": {
 		"cta_question": "How did you sleep?",
 		"cta_action": "Log now",

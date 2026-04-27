@@ -1,4 +1,11 @@
 {
+	"qualities": {
+		"1": "Pessimo",
+		"2": "Scarso",
+		"3": "Discreto",
+		"4": "Buono",
+		"5": "Ottimo"
+	},
 	"list_view": {
 		"cta_question": "Come hai dormito?",
 		"cta_action": "Registra ora",

@@ -22,9 +22,9 @@
 		formatDuration,
 		formatTime,
 	} from './queries';
-	import { QUALITY_LABELS } from './types';
 	import MorningLog from './components/MorningLog.svelte';
 	import HygieneChecklist from './components/HygieneChecklist.svelte';
+	import { _ } from 'svelte-i18n';
 
 	const entriesQuery = useAllSleepEntries();
 	const hygieneLogsQuery = useAllSleepHygieneLogs();
@@ -85,8 +85,8 @@
 		{#if !logged}
 			<button class="log-cta" onclick={() => (showMorningLog = true)}>
 				<span class="cta-icon">🌙</span>
-				<span class="cta-text">Wie hast du geschlafen?</span>
-				<span class="cta-sub">Jetzt loggen</span>
+				<span class="cta-text">{$_('sleep.list_view.cta_question')}</span>
+				<span class="cta-sub">{$_('sleep.list_view.cta_action')}</span>
 			</button>
 		{/if}
 
@@ -94,9 +94,11 @@
 		{#if lastNight}
 			<div class="last-night">
 				<div class="ln-header">
-					<span class="ln-label">Letzte Nacht</span>
+					<span class="ln-label">{$_('sleep.list_view.label_last_night')}</span>
 					{#if logged}
-						<button class="edit-btn" onclick={() => (showMorningLog = true)}>Bearbeiten</button>
+						<button class="edit-btn" onclick={() => (showMorningLog = true)}
+							>{$_('sleep.list_view.action_edit')}</button
+						>
 					{/if}
 				</div>
 				<div class="ln-bar-container">
@@ -117,7 +119,11 @@
 						{/each}
 					</span>
 					{#if lastNight.interruptions > 0}
-						<span class="ln-interruptions">{lastNight.interruptions}× aufgewacht</span>
+						<span class="ln-interruptions"
+							>{$_('sleep.list_view.interruptions', {
+								values: { n: lastNight.interruptions },
+							})}</span
+						>
 					{/if}
 				</div>
 				<div class="ln-goal">
@@ -129,7 +135,7 @@
 
 		<!-- Week Chart -->
 		<div class="week-section">
-			<span class="section-label">Diese Woche</span>
+			<span class="section-label">{$_('sleep.list_view.section_week')}</span>
 			<div class="week-chart">
 				{#each weekData as day}
 					<div class="week-col">
@@ -157,37 +163,42 @@
 		<div class="stats-grid">
 			<div class="stat">
 				<span class="stat-val">{formatDuration(avgDuration7)}</span>
-				<span class="stat-lbl">Ø Dauer (7T)</span>
+				<span class="stat-lbl">{$_('sleep.list_view.stat_avg_duration')}</span>
 			</div>
 			<div class="stat">
 				<span class="stat-val">{avgQuality7}</span>
-				<span class="stat-lbl">Ø Qualität</span>
+				<span class="stat-lbl">{$_('sleep.list_view.stat_avg_quality')}</span>
 			</div>
 			<div class="stat">
 				<span class="stat-val" class:debt={sleepDebt > 0}
 					>{sleepDebt > 0 ? '-' : '+'}{formatDuration(Math.abs(sleepDebt))}</span
 				>
-				<span class="stat-lbl">Schlafschuld</span>
+				<span class="stat-lbl">{$_('sleep.list_view.stat_sleep_debt')}</span>
 			</div>
 			<div class="stat">
 				<span class="stat-val">{consistency}%</span>
-				<span class="stat-lbl">Konsistenz</span>
+				<span class="stat-lbl">{$_('sleep.list_view.stat_consistency')}</span>
 			</div>
 			<div class="stat">
 				<span class="stat-val">{streak}</span>
-				<span class="stat-lbl">Streak</span>
+				<span class="stat-lbl">{$_('sleep.list_view.stat_streak')}</span>
 			</div>
 		</div>
 
 		<!-- Quality Heatmap -->
 		<div class="heatmap-section">
-			<span class="section-label">Qualität (30 Tage)</span>
+			<span class="section-label">{$_('sleep.list_view.section_quality')}</span>
 			<div class="heatmap-grid">
 				{#each heatmap as day}
 					<div
 						class="heat-cell"
 						style:background={day.quality > 0 ? qualityColor(day.quality) : ''}
-						title="{day.date}: {QUALITY_LABELS[day.quality]?.de ?? '—'}"
+						title={$_('sleep.list_view.heatmap_cell_title', {
+							values: {
+								date: day.date,
+								label: day.quality > 0 ? $_('sleep.qualities.' + day.quality) : '—',
+							},
+						})}
 					></div>
 				{/each}
 			</div>
@@ -196,13 +207,13 @@
 		<!-- Hygiene Correlation -->
 		{#if hygieneCorr}
 			<div class="correlation-card">
-				<span class="section-label">Schlafhygiene-Effekt</span>
+				<span class="section-label">{$_('sleep.list_view.section_hygiene_corr')}</span>
 				<div class="corr-row">
-					<span class="corr-label">Mit Hygiene (≥70%):</span>
+					<span class="corr-label">{$_('sleep.list_view.corr_with')}</span>
 					<span class="corr-val good">{hygieneCorr.withHygiene} ★</span>
 				</div>
 				<div class="corr-row">
-					<span class="corr-label">Ohne:</span>
+					<span class="corr-label">{$_('sleep.list_view.corr_without')}</span>
 					<span class="corr-val">{hygieneCorr.withoutHygiene} ★</span>
 				</div>
 			</div>
@@ -210,9 +221,11 @@
 
 		<!-- Actions -->
 		<div class="actions-row">
-			<button class="action-btn" onclick={() => (showMorningLog = true)}> Schlaf loggen </button>
+			<button class="action-btn" onclick={() => (showMorningLog = true)}>
+				{$_('sleep.list_view.action_log_sleep')}
+			</button>
 			<button class="action-btn secondary" onclick={() => (showHygiene = true)}>
-				Hygiene-Check
+				{$_('sleep.list_view.action_hygiene_check')}
 			</button>
 		</div>
 	</div>

@@ -1,4 +1,11 @@
 {
+	"qualities": {
+		"1": "Très mauvais",
+		"2": "Mauvais",
+		"3": "Correct",
+		"4": "Bon",
+		"5": "Très bon"
+	},
 	"list_view": {
 		"cta_question": "Comment as-tu dormi ?",
 		"cta_action": "Enregistrer maintenant",
