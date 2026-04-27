@@ -1,0 +1,45 @@
+{
+	"difficulties": {
+		"easy": "Facile",
+		"medium": "Medio",
+		"hard": "Difficile"
+	},
+	"list_view": {
+		"search_placeholder": "Cerca ricetta…",
+		"chip_favorites": "Preferiti",
+		"ctx_remove_fav": "Rimuovi dai preferiti",
+		"ctx_make_fav": "Aggiungi ai preferiti",
+		"ctx_duplicate": "Duplica",
+		"ctx_delete": "Elimina",
+		"add_card": "Nuova ricetta",
+		"badge_servings": "{n} porz.",
+		"empty_no_recipes": "Nessuna ricetta salvata.",
+		"action_create_first": "Crea la prima ricetta",
+		"empty_no_match": "Nessuna ricetta trovata."
+	},
+	"detail_panel": {
+		"heading_visibility": "Visibilità",
+		"heading_ingredients": "Ingredienti",
+		"ingredients_servings_suffix": "({n} porzioni)",
+		"heading_steps": "Preparazione"
+	},
+	"create_form": {
+		"heading_new_recipe": "Nuova ricetta",
+		"placeholder_title": "Titolo *",
+		"placeholder_description": "Descrizione (opzionale)",
+		"label_difficulty": "Difficoltà",
+		"label_servings": "Porzioni",
+		"label_prep_time_min": "Prep. (min)",
+		"label_cook_time_min": "Cottura (min)",
+		"label_tags": "Tag",
+		"label_ingredients": "Ingredienti",
+		"placeholder_amount": "Quantità",
+		"placeholder_ingredient": "Ingrediente",
+		"action_add_ingredient": "+ Ingrediente",
+		"label_steps": "Passaggi",
+		"placeholder_step": "Descrivi il passaggio…",
+		"action_add_step": "+ Passaggio",
+		"action_cancel": "Annulla",
+		"action_create": "Crea"
+	}
+}

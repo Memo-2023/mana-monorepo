@@ -1,0 +1,45 @@
+{
+	"difficulties": {
+		"easy": "Fácil",
+		"medium": "Medio",
+		"hard": "Difícil"
+	},
+	"list_view": {
+		"search_placeholder": "Buscar receta…",
+		"chip_favorites": "Favoritas",
+		"ctx_remove_fav": "Quitar de favoritas",
+		"ctx_make_fav": "Marcar como favorita",
+		"ctx_duplicate": "Duplicar",
+		"ctx_delete": "Eliminar",
+		"add_card": "Nueva receta",
+		"badge_servings": "{n} porc.",
+		"empty_no_recipes": "Aún no hay recetas guardadas.",
+		"action_create_first": "Crear la primera receta",
+		"empty_no_match": "No se encontraron recetas."
+	},
+	"detail_panel": {
+		"heading_visibility": "Visibilidad",
+		"heading_ingredients": "Ingredientes",
+		"ingredients_servings_suffix": "({n} porciones)",
+		"heading_steps": "Preparación"
+	},
+	"create_form": {
+		"heading_new_recipe": "Nueva receta",
+		"placeholder_title": "Título *",
+		"placeholder_description": "Descripción (opcional)",
+		"label_difficulty": "Dificultad",
+		"label_servings": "Porciones",
+		"label_prep_time_min": "Prep. (min)",
+		"label_cook_time_min": "Cocción (min)",
+		"label_tags": "Etiquetas",
+		"label_ingredients": "Ingredientes",
+		"placeholder_amount": "Cantidad",
+		"placeholder_ingredient": "Ingrediente",
+		"action_add_ingredient": "+ Ingrediente",
+		"label_steps": "Pasos",
+		"placeholder_step": "Describe el paso…",
+		"action_add_step": "+ Paso",
+		"action_cancel": "Cancelar",
+		"action_create": "Crear"
+	}
+}

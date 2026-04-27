@@ -1,0 +1,45 @@
+{
+	"difficulties": {
+		"easy": "Easy",
+		"medium": "Medium",
+		"hard": "Hard"
+	},
+	"list_view": {
+		"search_placeholder": "Search recipes…",
+		"chip_favorites": "Favorites",
+		"ctx_remove_fav": "Remove favorite",
+		"ctx_make_fav": "Mark as favorite",
+		"ctx_duplicate": "Duplicate",
+		"ctx_delete": "Delete",
+		"add_card": "New recipe",
+		"badge_servings": "{n} srv.",
+		"empty_no_recipes": "No recipes saved yet.",
+		"action_create_first": "Create your first recipe",
+		"empty_no_match": "No recipes found."
+	},
+	"detail_panel": {
+		"heading_visibility": "Visibility",
+		"heading_ingredients": "Ingredients",
+		"ingredients_servings_suffix": "({n} servings)",
+		"heading_steps": "Steps"
+	},
+	"create_form": {
+		"heading_new_recipe": "New recipe",
+		"placeholder_title": "Title *",
+		"placeholder_description": "Description (optional)",
+		"label_difficulty": "Difficulty",
+		"label_servings": "Servings",
+		"label_prep_time_min": "Prep (min)",
+		"label_cook_time_min": "Cook (min)",
+		"label_tags": "Tags",
+		"label_ingredients": "Ingredients",
+		"placeholder_amount": "Amount",
+		"placeholder_ingredient": "Ingredient",
+		"action_add_ingredient": "+ Ingredient",
+		"label_steps": "Steps",
+		"placeholder_step": "Describe step…",
+		"action_add_step": "+ Step",
+		"action_cancel": "Cancel",
+		"action_create": "Create"
+	}
+}
