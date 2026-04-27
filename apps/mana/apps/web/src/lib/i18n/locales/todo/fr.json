@@ -88,6 +88,21 @@
 		"layoutGrid": "Grille",
 		"layoutFocus": "Focus"
 	},
+	"detailView": {
+		"notFound": "Tâche introuvable",
+		"confirmDelete": "Vraiment supprimer la tâche ?",
+		"toastDeleted": "Tâche supprimée",
+		"untitledFallback": "Sans titre",
+		"placeholderTitle": "Titre…",
+		"labelCalendar": "Agenda",
+		"labelSchedule": "Planifier",
+		"unscheduleAria": "Retirer de l'agenda",
+		"durationMin": "{n} min",
+		"sectionSubtasks": "Sous-tâches ({done}/{total})",
+		"placeholderDescription": "Ajouter une description…",
+		"metaCreated": "Créé : {date}",
+		"metaUpdated": "Modifié : {date}"
+	},
 	"settings": {
 		"title": "Paramètres Todo",
 		"pageTitle": "Paramètres Todo - Mana",

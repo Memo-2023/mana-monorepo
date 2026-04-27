@@ -88,6 +88,21 @@
 		"layoutGrid": "Grid",
 		"layoutFocus": "Fokus"
 	},
+	"detailView": {
+		"notFound": "Aufgabe nicht gefunden",
+		"confirmDelete": "Aufgabe wirklich löschen?",
+		"toastDeleted": "Aufgabe gelöscht",
+		"untitledFallback": "Unbenannt",
+		"placeholderTitle": "Titel...",
+		"labelCalendar": "Kalender",
+		"labelSchedule": "Planen",
+		"unscheduleAria": "Vom Kalender entfernen",
+		"durationMin": "{n} Min.",
+		"sectionSubtasks": "Unteraufgaben ({done}/{total})",
+		"placeholderDescription": "Beschreibung hinzufügen...",
+		"metaCreated": "Erstellt: {date}",
+		"metaUpdated": "Bearbeitet: {date}"
+	},
 	"settings": {
 		"title": "Todo Einstellungen",
 		"pageTitle": "Todo Einstellungen - Mana",

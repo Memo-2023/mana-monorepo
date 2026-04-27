@@ -88,6 +88,21 @@
 		"layoutGrid": "Griglia",
 		"layoutFocus": "Focus"
 	},
+	"detailView": {
+		"notFound": "Attività non trovata",
+		"confirmDelete": "Eliminare davvero l'attività?",
+		"toastDeleted": "Attività eliminata",
+		"untitledFallback": "Senza titolo",
+		"placeholderTitle": "Titolo…",
+		"labelCalendar": "Calendario",
+		"labelSchedule": "Pianifica",
+		"unscheduleAria": "Rimuovi dal calendario",
+		"durationMin": "{n} min",
+		"sectionSubtasks": "Sotto-attività ({done}/{total})",
+		"placeholderDescription": "Aggiungi descrizione…",
+		"metaCreated": "Creata: {date}",
+		"metaUpdated": "Modificata: {date}"
+	},
 	"settings": {
 		"title": "Impostazioni Todo",
 		"pageTitle": "Impostazioni Todo - Mana",

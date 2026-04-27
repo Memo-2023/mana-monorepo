@@ -88,6 +88,21 @@
 		"layoutGrid": "Cuadrícula",
 		"layoutFocus": "Enfoque"
 	},
+	"detailView": {
+		"notFound": "Tarea no encontrada",
+		"confirmDelete": "¿Eliminar realmente la tarea?",
+		"toastDeleted": "Tarea eliminada",
+		"untitledFallback": "Sin título",
+		"placeholderTitle": "Título…",
+		"labelCalendar": "Calendario",
+		"labelSchedule": "Planificar",
+		"unscheduleAria": "Quitar del calendario",
+		"durationMin": "{n} min",
+		"sectionSubtasks": "Subtareas ({done}/{total})",
+		"placeholderDescription": "Añadir descripción…",
+		"metaCreated": "Creada: {date}",
+		"metaUpdated": "Editada: {date}"
+	},
 	"settings": {
 		"title": "Ajustes Todo",
 		"pageTitle": "Ajustes Todo - Mana",
