@@ -19,6 +19,7 @@
 	} from './queries';
 	import { EMOTION_META, ACTIVITY_LABELS } from './types';
 	import QuickLog from './components/QuickLog.svelte';
+	import { _ } from 'svelte-i18n';
 
 	const entriesQuery = useAllMoodEntries();
 	const settingsQuery = useMoodSettings();
@@ -63,9 +64,11 @@
 					😊
 				{/if}
 			</span>
-			<span class="cta-text">Wie geht es dir?</span>
+			<span class="cta-text">{$_('mood.list_view.cta_question')}</span>
 			<span class="cta-sub">
-				{todayEntries.length}/{settings.dailyTarget} Check-ins heute
+				{$_('mood.list_view.cta_count', {
+					values: { n: todayEntries.length, target: settings.dailyTarget },
+				})}
 			</span>
 		</button>
 	{/if}
@@ -73,7 +76,7 @@
 	<!-- Today's Entries -->
 	{#if todayEntries.length > 0}
 		<div class="today-section">
-			<span class="section-label">Heute</span>
+			<span class="section-label">{$_('mood.list_view.section_today')}</span>
 			<div class="today-entries">
 				{#each todayEntries as entry (entry.id)}
 					<div class="entry-pill">
@@ -93,22 +96,22 @@
 	<div class="stats-row">
 		<div class="stat">
 			<span class="stat-val" style:color={levelColor(avgLevel7)}>{avgLevel7 || '—'}</span>
-			<span class="stat-lbl">Ø 7 Tage</span>
+			<span class="stat-lbl">{$_('mood.list_view.stat_avg_7')}</span>
 		</div>
 		<div class="stat">
 			<span class="stat-val" style:color={levelColor(avgLevel30)}>{avgLevel30 || '—'}</span>
-			<span class="stat-lbl">Ø 30 Tage</span>
+			<span class="stat-lbl">{$_('mood.list_view.stat_avg_30')}</span>
 		</div>
 		<div class="stat">
 			<span class="stat-val">{streak}</span>
-			<span class="stat-lbl">Streak</span>
+			<span class="stat-lbl">{$_('mood.list_view.stat_streak')}</span>
 		</div>
 	</div>
 
 	<!-- Week Mood Chart -->
 	{#if weekData.some((d) => d.avgLevel > 0)}
 		<div class="week-section">
-			<span class="section-label">Diese Woche</span>
+			<span class="section-label">{$_('mood.list_view.section_week')}</span>
 			<div class="week-chart">
 				{#each weekData as day}
 					<div class="week-col">
@@ -136,15 +139,19 @@
 	<!-- Valence Bar -->
 	{#if entries.length >= 5}
 		<div class="valence-section">
-			<span class="section-label">Stimmungsbilanz</span>
+			<span class="section-label">{$_('mood.list_view.section_valence')}</span>
 			<div class="valence-bar">
 				<div class="v-pos" style:width="{valence.positive}%"></div>
 				<div class="v-neu" style:width="{valence.neutral}%"></div>
 				<div class="v-neg" style:width="{valence.negative}%"></div>
 			</div>
 			<div class="valence-labels">
-				<span class="vl-pos">{valence.positive}% positiv</span>
-				<span class="vl-neg">{valence.negative}% negativ</span>
+				<span class="vl-pos"
+					>{$_('mood.list_view.valence_positive', { values: { n: valence.positive } })}</span
+				>
+				<span class="vl-neg"
+					>{$_('mood.list_view.valence_negative', { values: { n: valence.negative } })}</span
+				>
 			</div>
 		</div>
 	{/if}
@@ -152,7 +159,7 @@
 	<!-- Top Emotions -->
 	{#if distribution.length > 0}
 		<div class="dist-section">
-			<span class="section-label">Häufigste Emotionen</span>
+			<span class="section-label">{$_('mood.list_view.section_distribution')}</span>
 			<div class="dist-list">
 				{#each distribution.slice(0, 5) as item}
 					<div class="dist-row">
@@ -175,7 +182,7 @@
 	<!-- Weekday Pattern -->
 	{#if weekdayPattern.some((d) => d.avgLevel > 0)}
 		<div class="pattern-section">
-			<span class="section-label">Wochentag-Muster</span>
+			<span class="section-label">{$_('mood.list_view.section_weekday_pattern')}</span>
 			<div class="pattern-row">
 				{#each weekdayPattern as day}
 					<div class="pattern-col">
@@ -196,15 +203,17 @@
 	<!-- Activity Insights -->
 	{#if activityInsights.length >= 2}
 		<div class="insights-section">
-			<span class="section-label">Aktivitäten & Stimmung</span>
+			<span class="section-label">{$_('mood.list_view.section_activities')}</span>
 			{#each activityInsights.slice(0, 4) as insight}
 				<div class="insight-row">
 					<span class="ins-emoji">{ACTIVITY_LABELS[insight.activity]?.emoji ?? ''}</span>
 					<span class="ins-name">{ACTIVITY_LABELS[insight.activity]?.de ?? insight.activity}</span>
 					<span class="ins-val" style:color={levelColor(insight.avgLevel)}
-						>Ø {insight.avgLevel}</span
+						>{$_('mood.list_view.insight_avg', { values: { n: insight.avgLevel } })}</span
 					>
-					<span class="ins-count">({insight.count}×)</span>
+					<span class="ins-count"
+						>{$_('mood.list_view.insight_count', { values: { n: insight.count } })}</span
+					>
 				</div>
 			{/each}
 		</div>

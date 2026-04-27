@@ -15,8 +15,9 @@
 		groupByDate,
 	} from './queries';
 	import { financeStore } from './stores/finance.svelte';
-	import type { Transaction, FinanceCategory, TransactionType } from './types';
+	import type { TransactionType } from './types';
 	import type { ViewProps } from '$lib/app-registry';
+	import { _ } from 'svelte-i18n';
 
 	let { navigate, goBack, params }: ViewProps = $props();
 
@@ -75,7 +76,7 @@
 				onclick={() => {
 					addType = 'expense';
 					addCatId = null;
-				}}>Ausgabe</button
+				}}>{$_('finance.page.type_expense')}</button
 			>
 			<button
 				type="button"
@@ -84,7 +85,7 @@
 				onclick={() => {
 					addType = 'income';
 					addCatId = null;
-				}}>Einnahme</button
+				}}>{$_('finance.page.type_income')}</button
 			>
 		</div>
 		<div class="input-row">
@@ -92,7 +93,7 @@
 				class="amount-input"
 				type="text"
 				inputmode="decimal"
-				placeholder="0,00"
+				placeholder={$_('finance.page.placeholder_amount')}
 				bind:value={addAmount}
 				onkeydown={handleKeydown}
 			/>
@@ -100,7 +101,7 @@
 			<input
 				class="desc-input"
 				type="text"
-				placeholder="Beschreibung..."
+				placeholder={$_('finance.page.placeholder_description')}
 				bind:value={addDesc}
 				onkeydown={handleKeydown}
 			/>
@@ -123,17 +124,17 @@
 	<div class="summary">
 		<div class="summary-col">
 			<span class="s-value income">+{formatCurrency(income)}</span>
-			<span class="s-label">Einnahmen</span>
+			<span class="s-label">{$_('finance.page.summary_income')}</span>
 		</div>
 		<div class="summary-col">
 			<span class="s-value expense">-{formatCurrency(expenses)}</span>
-			<span class="s-label">Ausgaben</span>
+			<span class="s-label">{$_('finance.page.summary_expenses')}</span>
 		</div>
 		<div class="summary-col">
 			<span class="s-value" class:income={balance >= 0} class:expense={balance < 0}>
 				{balance >= 0 ? '+' : ''}{formatCurrency(balance)}
 			</span>
-			<span class="s-label">Bilanz</span>
+			<span class="s-label">{$_('finance.page.summary_balance')}</span>
 		</div>
 	</div>
 
@@ -161,7 +162,7 @@
 		{/each}
 
 		{#if recentTxs.length === 0}
-			<p class="empty">Noch keine Transaktionen diesen Monat.</p>
+			<p class="empty">{$_('finance.list_view.empty_no_tx')}</p>
 		{/if}
 	</div>
 </div>
