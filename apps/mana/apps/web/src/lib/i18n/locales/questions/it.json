@@ -30,7 +30,9 @@
 	"priority": {
 		"low": "Bassa",
 		"medium": "Media",
-		"high": "Alta"
+		"high": "Alta",
+		"normal": "Normale",
+		"urgent": "Urgente"
 	},
 	"collection": {
 		"create": "Crea collezione",
@@ -116,5 +118,23 @@
 		"date_today": "Oggi",
 		"date_yesterday": "Ieri",
 		"date_days_ago": "{n} giorni fa"
+	},
+	"detail": {
+		"not_found": "Domanda non trovata",
+		"confirm_delete": "Eliminare davvero questa domanda?",
+		"toast_deleted": "Domanda eliminata",
+		"placeholder_title": "Titolo...",
+		"title_fallback": "Senza titolo",
+		"prop_status": "Stato",
+		"prop_priority": "Priorità",
+		"prop_research_depth": "Profondità di ricerca",
+		"section_description": "Descrizione",
+		"placeholder_description": "Aggiungi una descrizione...",
+		"section_tags": "Tag",
+		"meta_created": "Creato: {date}",
+		"meta_updated": "Modificato: {date}",
+		"depth_quick": "Rapida",
+		"depth_standard": "Standard",
+		"depth_deep": "Approfondita"
 	}
 }

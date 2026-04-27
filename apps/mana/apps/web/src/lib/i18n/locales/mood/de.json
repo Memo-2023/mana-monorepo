@@ -15,5 +15,16 @@
 		"section_activities": "Aktivitäten & Stimmung",
 		"insight_avg": "Ø {n}",
 		"insight_count": "({n}×)"
+	},
+	"quick_log": {
+		"title": "Wie geht es dir?",
+		"level_low": "Schlecht",
+		"level_high": "Super",
+		"section_emotion": "Was fühlst du?",
+		"action_show_details": "+ Details hinzufügen",
+		"section_activity": "Was machst du gerade?",
+		"section_tags": "Tags",
+		"placeholder_notes": "Notizen (optional)...",
+		"action_save": "Speichern"
 	}
 }

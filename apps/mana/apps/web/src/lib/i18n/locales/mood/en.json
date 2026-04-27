@@ -15,5 +15,16 @@
 		"section_activities": "Activities & mood",
 		"insight_avg": "Ø {n}",
 		"insight_count": "({n}×)"
+	},
+	"quick_log": {
+		"title": "How are you doing?",
+		"level_low": "Bad",
+		"level_high": "Great",
+		"section_emotion": "What do you feel?",
+		"action_show_details": "+ Add details",
+		"section_activity": "What are you doing?",
+		"section_tags": "Tags",
+		"placeholder_notes": "Notes (optional)...",
+		"action_save": "Save"
 	}
 }

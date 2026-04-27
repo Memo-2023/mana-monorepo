@@ -30,7 +30,9 @@
 	"priority": {
 		"low": "Baja",
 		"medium": "Media",
-		"high": "Alta"
+		"high": "Alta",
+		"normal": "Normal",
+		"urgent": "Urgente"
 	},
 	"collection": {
 		"create": "Crear colección",
@@ -116,5 +118,23 @@
 		"date_today": "Hoy",
 		"date_yesterday": "Ayer",
 		"date_days_ago": "Hace {n} días"
+	},
+	"detail": {
+		"not_found": "Pregunta no encontrada",
+		"confirm_delete": "¿Eliminar realmente esta pregunta?",
+		"toast_deleted": "Pregunta eliminada",
+		"placeholder_title": "Título...",
+		"title_fallback": "Sin título",
+		"prop_status": "Estado",
+		"prop_priority": "Prioridad",
+		"prop_research_depth": "Profundidad de investigación",
+		"section_description": "Descripción",
+		"placeholder_description": "Añadir una descripción...",
+		"section_tags": "Etiquetas",
+		"meta_created": "Creado: {date}",
+		"meta_updated": "Editado: {date}",
+		"depth_quick": "Rápida",
+		"depth_standard": "Estándar",
+		"depth_deep": "Profunda"
 	}
 }

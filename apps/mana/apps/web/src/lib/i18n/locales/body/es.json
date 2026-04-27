@@ -50,7 +50,13 @@
 		"pick": "Elegir ejercicio",
 		"search": "Buscar…",
 		"empty": "Sin resultados",
-		"create": "Nuevo ejercicio"
+		"create": "Nuevo ejercicio",
+		"dialog_label": "Elegir ejercicio",
+		"close_aria": "Cerrar",
+		"filter_all": "Todos",
+		"placeholder_name": "Nombre",
+		"action_create": "Crear",
+		"action_cancel": "Cancelar"
 	},
 	"muscle": {
 		"chest": "Pecho",

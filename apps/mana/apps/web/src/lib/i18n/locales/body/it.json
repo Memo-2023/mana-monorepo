@@ -50,7 +50,13 @@
 		"pick": "Scegli esercizio",
 		"search": "Cerca…",
 		"empty": "Nessun risultato",
-		"create": "Nuovo esercizio"
+		"create": "Nuovo esercizio",
+		"dialog_label": "Scegli esercizio",
+		"close_aria": "Chiudi",
+		"filter_all": "Tutti",
+		"placeholder_name": "Nome",
+		"action_create": "Crea",
+		"action_cancel": "Annulla"
 	},
 	"muscle": {
 		"chest": "Petto",

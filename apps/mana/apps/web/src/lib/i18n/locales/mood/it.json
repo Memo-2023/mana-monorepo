@@ -15,5 +15,16 @@
 		"section_activities": "Attività e umore",
 		"insight_avg": "Ø {n}",
 		"insight_count": "({n}×)"
+	},
+	"quick_log": {
+		"title": "Come stai?",
+		"level_low": "Male",
+		"level_high": "Ottimo",
+		"section_emotion": "Cosa senti?",
+		"action_show_details": "+ Aggiungi dettagli",
+		"section_activity": "Cosa stai facendo?",
+		"section_tags": "Tag",
+		"placeholder_notes": "Note (opzionale)...",
+		"action_save": "Salva"
 	}
 }

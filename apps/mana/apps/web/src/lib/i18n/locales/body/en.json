@@ -50,7 +50,13 @@
 		"pick": "Pick exercise",
 		"search": "Search…",
 		"empty": "Nothing found",
-		"create": "New exercise"
+		"create": "New exercise",
+		"dialog_label": "Pick exercise",
+		"close_aria": "Close",
+		"filter_all": "All",
+		"placeholder_name": "Name",
+		"action_create": "Create",
+		"action_cancel": "Cancel"
 	},
 	"muscle": {
 		"chest": "Chest",

@@ -15,5 +15,16 @@
 		"section_activities": "Activités & humeur",
 		"insight_avg": "Ø {n}",
 		"insight_count": "({n}×)"
+	},
+	"quick_log": {
+		"title": "Comment vas-tu ?",
+		"level_low": "Mal",
+		"level_high": "Super",
+		"section_emotion": "Que ressens-tu ?",
+		"action_show_details": "+ Ajouter des détails",
+		"section_activity": "Que fais-tu ?",
+		"section_tags": "Tags",
+		"placeholder_notes": "Notes (facultatif)...",
+		"action_save": "Enregistrer"
 	}
 }

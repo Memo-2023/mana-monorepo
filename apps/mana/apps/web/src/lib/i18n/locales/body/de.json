@@ -50,7 +50,13 @@
 		"pick": "Übung wählen",
 		"search": "Suchen…",
 		"empty": "Nichts gefunden",
-		"create": "Neue Übung anlegen"
+		"create": "Neue Übung anlegen",
+		"dialog_label": "Übung auswählen",
+		"close_aria": "Schließen",
+		"filter_all": "Alle",
+		"placeholder_name": "Name",
+		"action_create": "Anlegen",
+		"action_cancel": "Abbrechen"
 	},
 	"muscle": {
 		"chest": "Brust",

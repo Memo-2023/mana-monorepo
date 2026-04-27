@@ -15,5 +15,16 @@
 		"section_activities": "Actividades y ánimo",
 		"insight_avg": "Ø {n}",
 		"insight_count": "({n}×)"
+	},
+	"quick_log": {
+		"title": "¿Cómo estás?",
+		"level_low": "Mal",
+		"level_high": "Genial",
+		"section_emotion": "¿Qué sientes?",
+		"action_show_details": "+ Añadir detalles",
+		"section_activity": "¿Qué estás haciendo?",
+		"section_tags": "Etiquetas",
+		"placeholder_notes": "Notas (opcional)...",
+		"action_save": "Guardar"
 	}
 }
