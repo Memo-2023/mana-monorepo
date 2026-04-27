@@ -64,5 +64,24 @@
 		"deleted": "Gelöscht",
 		"error": "Ein Fehler ist aufgetreten",
 		"created": "Erstellt"
+	},
+	"home": {
+		"page_title_html": "Context - Mana",
+		"title": "Context",
+		"subtitle": "Dein Wissensmanagement Hub",
+		"stat_spaces": "Spaces",
+		"stat_documents": "Dokumente",
+		"stat_words": "Wörter",
+		"stat_split_label": "Text/Kontext/Prompt",
+		"action_spaces": "Spaces",
+		"action_all_documents": "Alle Dokumente",
+		"section_pinned": "Angeheftete Spaces",
+		"section_recent": "Zuletzt bearbeitet",
+		"action_show_all": "Alle anzeigen",
+		"badge_pinned": "Angeheftet",
+		"empty_title": "Noch keine Dokumente",
+		"empty_hint": "Erstelle deinen ersten Space und beginne mit dem Schreiben.",
+		"empty_action": "Ersten Space erstellen",
+		"confirm_delete_doc": "Dokument wirklich löschen?"
 	}
 }

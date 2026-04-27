@@ -64,5 +64,24 @@
 		"deleted": "Eliminato",
 		"error": "Si è verificato un errore",
 		"created": "Creato"
+	},
+	"home": {
+		"page_title_html": "Context - Mana",
+		"title": "Context",
+		"subtitle": "Il tuo hub di gestione della conoscenza",
+		"stat_spaces": "Spaces",
+		"stat_documents": "Documenti",
+		"stat_words": "Parole",
+		"stat_split_label": "Testo/Contesto/Prompt",
+		"action_spaces": "Spaces",
+		"action_all_documents": "Tutti i documenti",
+		"section_pinned": "Spaces fissati",
+		"section_recent": "Modificati di recente",
+		"action_show_all": "Mostra tutti",
+		"badge_pinned": "Fissato",
+		"empty_title": "Nessun documento",
+		"empty_hint": "Crea il tuo primo Space e inizia a scrivere.",
+		"empty_action": "Crea il primo Space",
+		"confirm_delete_doc": "Eliminare davvero il documento?"
 	}
 }
