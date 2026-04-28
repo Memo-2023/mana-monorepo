@@ -168,11 +168,6 @@ db.version(1).stores({
 	timeWorldClocks: 'id, sortOrder, timezone',
 	entryTags: 'id, entryId, tagId, [entryId+tagId]',
 
-	// ─── Context (appId: 'context') ───
-	contextSpaces: 'id, pinned, prefix',
-	documents: 'id, spaceId, type, pinned, title, [spaceId+type], updatedAt',
-	documentTags: 'id, documentId, tagId, [documentId+tagId]',
-
 	// ─── Questions (appId: 'questions') ───
 	qCollections: 'id, sortOrder, isDefault',
 	questions: 'id, collectionId, status, priority, [collectionId+status]',
@@ -673,11 +668,10 @@ db.version(30).stores({
 	_serverIterationExecutions: 'iterationId, missionId, executedAt',
 });
 
-// v31 — Rename the legacy `spaceId` field to `contextSpaceId` on four
+// v31 — Rename the legacy `spaceId` field to `contextSpaceId` on three
 // tables that owned the term before the multi-tenancy Spaces foundation
 // arrived (v28):
 //   - conversations (chat module's reference to a context-space folder)
-//   - documents      (context module's parent context-space)
 //   - spaceMembers   (memoro's members of a context-space)
 //   - memoSpaces     (memoro's memo ↔ context-space join)
 //
@@ -696,12 +690,11 @@ db.version(30).stores({
 db.version(31)
 	.stores({
 		conversations: 'id, isArchived, isPinned, contextSpaceId, templateId, updatedAt',
-		documents: 'id, contextSpaceId, type, pinned, title, [contextSpaceId+type], updatedAt',
 		spaceMembers: 'id, contextSpaceId, userId',
 		memoSpaces: 'id, memoId, contextSpaceId',
 	})
 	.upgrade(async (tx) => {
-		const tables = ['conversations', 'documents', 'spaceMembers', 'memoSpaces'] as const;
+		const tables = ['conversations', 'spaceMembers', 'memoSpaces'] as const;
 		for (const name of tables) {
 			await tx
 				.table(name)
@@ -1402,6 +1395,39 @@ db.version(55).upgrade(async (tx) => {
 			// missing tables silently.
 		}
 	}
+});
+
+// v56 — Articles Bulk-Import (docs/plans/articles-bulk-import.md Phase 1).
+// Three new tables that ride the standard sync pipeline under the
+// articles appId:
+//
+//   articleImportJobs  — one row per bulk-import the user kicked off.
+//     Indexed on `status` for the JobsList tab filter, `[spaceId+status]`
+//     for the per-Space active-job query the worker projection runs,
+//     and `_updatedAtIndex` for chronological sort. Lease columns are
+//     scanned via JS filter — only ~tens of running jobs per user.
+//   articleImportItems — one row per URL inside a job. `[jobId+state]`
+//     is the hot index: the JobDetailView range-scans pending+running
+//     items per job, and the worker pulls "items in state=pending for
+//     these jobIds". `idx` is plain so the in-list display order
+//     scrolls without an extra sort key. `state` standalone is used by
+//     the cross-job retry-failed query.
+//   articleExtractPickup — short-lived inbox between server-worker
+//     write and client-pickup-consumer read. `itemId` indexed so the
+//     consumer can join back to the owning item row. Empty in steady
+//     state; server-side GC caps it at 24 h.
+//
+// All three are plaintext (encryption registry: plaintext-allowlist).
+// `articleImportItems.url` and `articleExtractPickup.payload` ARE
+// user-typed-adjacent content but stay plaintext by necessity — the
+// server-side worker reads them without master-key access. Same
+// rationale as articles.originalUrl. Once the article is persisted,
+// the encrypted copy lives in `articles` and the item carries only an
+// articleId pointer.
+db.version(56).stores({
+	articleImportJobs: 'id, status, [spaceId+status], _updatedAtIndex',
+	articleImportItems: 'id, jobId, [jobId+state], state, idx',
+	articleExtractPickup: 'id, itemId, _updatedAtIndex',
 });
 
 // ─── Sync Routing ──────────────────────────────────────────
