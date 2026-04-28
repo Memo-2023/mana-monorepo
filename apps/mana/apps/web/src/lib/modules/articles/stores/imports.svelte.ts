@@ -15,61 +15,16 @@
 
 import { emitDomainEvent } from '$lib/data/events';
 import { articleImportJobTable, articleImportItemTable } from '../collections';
+import { parseUrls, type ParsedUrls } from '../parse-urls';
 import type {
 	ArticleImportItemState,
 	LocalArticleImportItem,
 	LocalArticleImportJob,
 } from '../types';
 
-/**
- * Pure URL parser — used by both the store (`createJob` accepts a raw
- * textarea blob) and the UI's `$derived` live-validation. Splits on
- * any whitespace + comma, drops empties, validates with `new URL`,
- * deduplicates while preserving first-occurrence order.
- *
- * Exported as a standalone pure function so the unit-test file can
- * import it without booting Dexie.
- */
-export interface ParsedUrls {
-	valid: string[];
-	invalid: string[];
-	duplicates: string[];
-}
-
-export function parseUrls(raw: string): ParsedUrls {
-	const tokens = raw
-		.split(/[\s,]+/)
-		.map((t) => t.trim())
-		.filter(Boolean);
-	const valid: string[] = [];
-	const invalid: string[] = [];
-	const duplicates: string[] = [];
-	const seen = new Set<string>();
-	for (const token of tokens) {
-		// Reject anything without an http(s) scheme — `new URL('foo.com')`
-		// would happily accept it as an opaque URI and the server-side
-		// fetch would then 400 on us.
-		let parsed: URL;
-		try {
-			parsed = new URL(token);
-		} catch {
-			invalid.push(token);
-			continue;
-		}
-		if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-			invalid.push(token);
-			continue;
-		}
-		const canonical = parsed.toString();
-		if (seen.has(canonical)) {
-			duplicates.push(canonical);
-			continue;
-		}
-		seen.add(canonical);
-		valid.push(canonical);
-	}
-	return { valid, invalid, duplicates };
-}
+// Re-export so call sites that already imported from `stores/imports`
+// (BulkImportForm, tools.ts) keep working unchanged.
+export { parseUrls, type ParsedUrls };
 
 export const articleImportsStore = {
 	/**
