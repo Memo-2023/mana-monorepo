@@ -290,6 +290,24 @@ jobs:
             echo "=== Rebuilding: $SERVICES ==="
           fi
 
+          # mana-web's Vite build needs 8 GiB of Node heap and Colima's
+          # VM is sized at 12 GiB. With ~3.5 GiB of other containers
+          # running, peak RSS occasionally OOMs the build (we hit this
+          # on 2026-04-28). Pause the non-critical monitoring stack
+          # for the duration of the build to free ~700 MiB of headroom;
+          # the trap inside the wrapper restores it on exit, even on
+          # build failure. No-op if mana-web isn't in $SERVICES.
+          PAUSE_MONITORING=false
+          if echo " $SERVICES " | grep -q ' mana-web '; then
+            PAUSE_MONITORING=true
+            echo "=== Pausing monitoring stack (mana-web build needs RAM headroom) ==="
+            ./scripts/mac-mini/build-memory-headroom.sh start
+          fi
+          # Resume monitoring no matter how the build phase exits.
+          if [ "$PAUSE_MONITORING" = "true" ]; then
+            trap './scripts/mac-mini/build-memory-headroom.sh stop' EXIT
+          fi
+
           # Build each service individually to capture build times
           BUILD_TIMES=""
           for svc in $SERVICES; do
@@ -300,6 +318,44 @@ jobs:
             build_dur=$(( build_end - build_start ))
             BUILD_TIMES="$BUILD_TIMES $svc:$build_dur"
             echo "  $svc built in ${build_dur}s"
+          done
+
+          # Resume monitoring before the migration / start steps run —
+          # they need cAdvisor + exporters back online to record the
+          # deploy metrics step further down.
+          if [ "$PAUSE_MONITORING" = "true" ]; then
+            ./scripts/mac-mini/build-memory-headroom.sh stop
+            trap - EXIT
+          fi
+
+          # Apply Drizzle schema migrations BEFORE we restart the
+          # service containers — additive-only, see
+          # scripts/mac-mini/safe-db-push.sh for the destructive guard.
+          # If a service has no Drizzle config or no schema diff this is
+          # a fast no-op. We must source POSTGRES_PASSWORD from the env
+          # file because the workflow env doesn't carry it.
+          echo "=== Applying schema migrations ==="
+          set -a
+          # shellcheck source=/dev/null
+          . "$ENV_FILE"
+          set +a
+          PG_PASSWORD="${POSTGRES_PASSWORD:-mana123}"
+          # Most services live in mana_platform; mana-sync (Go, no
+          # Drizzle) and a handful of others use mana_sync. Per-service
+          # routing is read straight from compose's DATABASE_URL env.
+          for svc in $SERVICES; do
+            # Pull the literal DATABASE_URL from the compose definition,
+            # then swap host postgres → localhost (we run on the host,
+            # not inside the docker network).
+            db_url=$(docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" config "$svc" 2>/dev/null \
+              | awk '/DATABASE_URL:/ {print $2; exit}' \
+              | sed 's|@postgres:|@localhost:|')
+            if [ -z "$db_url" ]; then continue; fi
+            DATABASE_URL="$db_url" PROJECT_DIR="${{ env.PROJECT_DIR }}" \
+              ./scripts/mac-mini/safe-db-push.sh "$svc" || {
+                echo "[deploy] safe-db-push failed for $svc — aborting before restart"
+                exit 1
+              }
           done
 
           # Start all services at once (no rebuild, images already built)
