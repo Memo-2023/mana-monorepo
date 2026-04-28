@@ -13,6 +13,7 @@
  * Plan: docs/plans/articles-bulk-import.md.
  */
 
+import { emitDomainEvent } from '$lib/data/events';
 import { articleImportJobTable, articleImportItemTable } from '../collections';
 import type {
 	ArticleImportItemState,
@@ -118,6 +119,11 @@ export const articleImportsStore = {
 		// queued before scanning items, but the bulkAdd is cheap.)
 		await articleImportItemTable.bulkAdd(items);
 		await articleImportJobTable.add(job);
+
+		emitDomainEvent('ArticleImportStarted', 'articles', 'articleImportJobs', jobId, {
+			jobId,
+			totalUrls: urls.length,
+		});
 
 		return jobId;
 	},

@@ -22,9 +22,18 @@
  */
 
 import { liveQuery, type Subscription } from 'dexie';
-import { articleExtractPickupTable, articleImportItemTable } from './collections';
+import { emitDomainEvent } from '$lib/data/events';
+import {
+	articleExtractPickupTable,
+	articleImportItemTable,
+	articleImportJobTable,
+} from './collections';
 import { articlesStore } from './stores/articles.svelte';
-import type { ArticleImportItemState, LocalArticleExtractPickup } from './types';
+import type {
+	ArticleImportItemState,
+	LocalArticleExtractPickup,
+	LocalArticleImportJob,
+} from './types';
 
 const LOCK_NAME = 'mana:articles:pickup';
 
@@ -33,6 +42,11 @@ const LOCK_NAME = 'mana:articles:pickup';
 const inFlight = new Set<string>();
 
 let subscription: Subscription | null = null;
+let jobWatchSubscription: Subscription | null = null;
+
+/** Track which jobs we've already emitted ArticleImportFinished for so a
+ *  liveQuery re-tick doesn't double-fire when other rows change. */
+const finishedEmitted = new Set<string>();
 
 /**
  * Start watching the pickup inbox. Idempotent — second call returns
@@ -61,13 +75,43 @@ export function startArticlePickupConsumer(): () => void {
 			console.error('[articles-import] pickup liveQuery error:', err);
 		},
 	});
+
+	// Independently watch the jobs table for status='done' flips so we
+	// can emit `ArticleImportFinished` once per job. Server-worker
+	// flips the status; this is the only client-side observer for the
+	// terminal transition.
+	const jobsQuery = liveQuery(async () =>
+		articleImportJobTable.filter((j) => j.status === 'done' && !j.deletedAt).toArray()
+	);
+	jobWatchSubscription = jobsQuery.subscribe({
+		next: (jobs: LocalArticleImportJob[]) => {
+			for (const j of jobs) {
+				if (finishedEmitted.has(j.id)) continue;
+				finishedEmitted.add(j.id);
+				emitDomainEvent('ArticleImportFinished', 'articles', 'articleImportJobs', j.id, {
+					jobId: j.id,
+					totalUrls: j.totalUrls,
+					savedCount: j.savedCount ?? 0,
+					duplicateCount: j.duplicateCount ?? 0,
+					errorCount: j.errorCount ?? 0,
+					warningCount: j.warningCount ?? 0,
+				});
+			}
+		},
+		error: (err) => {
+			console.error('[articles-import] job-watch liveQuery error:', err);
+		},
+	});
 	return stopArticlePickupConsumer;
 }
 
 export function stopArticlePickupConsumer(): void {
 	subscription?.unsubscribe();
 	subscription = null;
+	jobWatchSubscription?.unsubscribe();
+	jobWatchSubscription = null;
 	inFlight.clear();
+	finishedEmitted.clear();
 }
 
 /**

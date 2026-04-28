@@ -502,7 +502,19 @@ export interface ArticleSavedPayload {
 	articleId: string;
 	title: string;
 }
-export type NewsEventType = 'ArticleSaved';
+export interface ArticleImportStartedPayload {
+	jobId: string;
+	totalUrls: number;
+}
+export interface ArticleImportFinishedPayload {
+	jobId: string;
+	totalUrls: number;
+	savedCount: number;
+	duplicateCount: number;
+	errorCount: number;
+	warningCount: number;
+}
+export type NewsEventType = 'ArticleSaved' | 'ArticleImportStarted' | 'ArticleImportFinished';
 
 // ── Recipes ─────────────────────────────────────────
 
@@ -773,6 +785,8 @@ export type ManaEvent =
 	| DomainEvent<'PlantDeleted', PlantDeletedPayload>
 	// News
 	| DomainEvent<'ArticleSaved', ArticleSavedPayload>
+	| DomainEvent<'ArticleImportStarted', ArticleImportStartedPayload>
+	| DomainEvent<'ArticleImportFinished', ArticleImportFinishedPayload>
 	// Recipes
 	| DomainEvent<'RecipeCreated', RecipeCreatedPayload>
 	| DomainEvent<'RecipeDeleted', RecipeDeletedPayload>

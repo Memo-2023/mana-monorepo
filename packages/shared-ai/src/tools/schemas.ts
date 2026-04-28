@@ -437,6 +437,21 @@ export const AI_TOOL_CATALOG: readonly ToolSchema[] = [
 		],
 	},
 	{
+		name: 'import_articles_from_urls',
+		module: 'articles',
+		description:
+			'Erstellt einen Bulk-Import-Job für mehrere URLs. Server extrahiert sie nacheinander im Hintergrund (Concurrency 3, Retries pro URL). Auto-Policy: kein Approval pro Artikel, der Job wird als ein einziger Task angelegt. Returns die jobId zum Tracking.',
+		defaultPolicy: 'auto',
+		parameters: [
+			{
+				name: 'urls',
+				type: 'array',
+				description: 'Liste der Artikel-URLs (max 50)',
+				required: true,
+			},
+		],
+	},
+	{
 		name: 'archive_article',
 		module: 'articles',
 		description: 'Verschiebt einen Artikel ins Archiv.',

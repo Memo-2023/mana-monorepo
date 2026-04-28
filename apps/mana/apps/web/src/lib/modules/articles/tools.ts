@@ -23,6 +23,7 @@ import { scopedForModule, scopedGet } from '$lib/data/scope';
 import { tagMutations, useAllTags } from '@mana/shared-stores';
 import type { ModuleTool } from '$lib/data/tools/types';
 import { articlesStore } from './stores/articles.svelte';
+import { articleImportsStore, parseUrls } from './stores/imports.svelte';
 import { highlightsStore } from './stores/highlights.svelte';
 import { articleTagOps } from './stores/tags.svelte';
 import { toArticle } from './queries';
@@ -302,6 +303,53 @@ export const articlesTools: ModuleTool[] = [
 				success: true,
 				message: 'Highlight gesetzt',
 				data: { highlightId: highlight.id, articleId: id },
+			};
+		},
+	},
+
+	// ─── Bulk-Import (docs/plans/articles-bulk-import.md) ───
+	{
+		name: 'import_articles_from_urls',
+		module: 'articles',
+		description:
+			'Erstellt einen Bulk-Import-Job für mehrere URLs. Server extrahiert sie nacheinander im Hintergrund. Auto-policy: kein Approval pro Artikel, der Job ist ein einziger Task.',
+		parameters: [
+			{
+				name: 'urls',
+				type: 'array',
+				description: 'Liste der Artikel-URLs (max 50)',
+				required: true,
+			},
+		],
+		execute: async (params: Record<string, unknown>) => {
+			const rawUrls = params.urls;
+			if (!Array.isArray(rawUrls) || rawUrls.length === 0) {
+				return { success: false, message: 'urls muss ein nicht-leeres Array sein' };
+			}
+			if (rawUrls.length > 50) {
+				return {
+					success: false,
+					message: 'Maximal 50 URLs pro Job. Splitte in mehrere Aufrufe.',
+				};
+			}
+			const blob = rawUrls.filter((u): u is string => typeof u === 'string').join('\n');
+			const parsed = parseUrls(blob);
+			if (parsed.valid.length === 0) {
+				return {
+					success: false,
+					message: `Keine gültigen URLs (alle ${rawUrls.length} verworfen)`,
+				};
+			}
+			const jobId = await articleImportsStore.createJob(parsed.valid);
+			return {
+				success: true,
+				message: `Bulk-Import gestartet (${parsed.valid.length} URLs${parsed.duplicates.length ? `, ${parsed.duplicates.length} Duplikate übersprungen` : ''}${parsed.invalid.length ? `, ${parsed.invalid.length} ungültig` : ''})`,
+				data: {
+					jobId,
+					accepted: parsed.valid.length,
+					duplicates: parsed.duplicates.length,
+					invalid: parsed.invalid.length,
+				},
 			};
 		},
 	},
