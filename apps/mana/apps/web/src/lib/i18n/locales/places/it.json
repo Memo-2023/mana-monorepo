@@ -32,5 +32,11 @@
 		"meta_last_visit": "Ultima visita: {date}",
 		"meta_created": "Creato: {date}",
 		"meta_updated": "Modificato: {date}"
+	},
+	"geocoding_notice": {
+		"sensitive_local_unavailable_title": "Questa ricerca resta locale di proposito",
+		"sensitive_local_unavailable_body": "Termini sensibili (medico, clinica, …) non vengono mai inoltrati a servizi esterni. L'indice locale non è disponibile — riprova più tardi o usa una formulazione più generale.",
+		"fallback_used_badge": "≈ approssimativo",
+		"fallback_used_title": "Ricerca indirizzo tramite OSM pubblico"
 	}
 }

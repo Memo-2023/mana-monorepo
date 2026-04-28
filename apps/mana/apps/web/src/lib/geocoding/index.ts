@@ -66,20 +66,59 @@ export interface GeocodingResult {
 	longitude: number;
 	address: GeocodingAddress;
 	category: PlaceCategory;
-	/** Raw Pelias categories (food, retail, transport, …) */
+	/** Raw Pelias categories (food, retail, transport, …) — only present
+	 *  when the result came from Pelias. */
 	peliasCategories?: string[];
 	confidence: number;
+	/** Which backend served this result. `pelias` is local; `photon` and
+	 *  `nominatim` are public APIs (the wrapper applies sensitive-query
+	 *  blocking + coord quantization before forwarding to those). */
+	provider?: 'pelias' | 'photon' | 'nominatim';
 }
+
+/**
+ * Out-of-band information returned alongside results — the wrapper uses
+ * this to signal *why* a query had unusual behavior:
+ *
+ *  - `'fallback_used'`: Pelias was unreachable, so a public-API provider
+ *    served the request. Results are still valid but may be less precise.
+ *    UI should show a subtle "approximate" badge.
+ *  - `'sensitive_local_unavailable'`: the query matched the wrapper's
+ *    sensitive-keyword list (medical / mental-health / crisis service)
+ *    AND the local Pelias was unreachable. The wrapper deliberately did
+ *    NOT forward the query to public APIs. Results are empty by design.
+ *    UI should explain this to the user.
+ */
+export type GeocodingNotice = 'fallback_used' | 'sensitive_local_unavailable';
 
 interface GeocodingResponse {
 	results: GeocodingResult[];
 	cached?: boolean;
 	error?: string;
+	provider?: 'pelias' | 'photon' | 'nominatim';
+	notice?: GeocodingNotice;
+}
+
+/**
+ * Detailed search outcome — includes provider + notice metadata.
+ *
+ * Most call sites use the simpler `searchAddress` (returns just the
+ * results array). The detailed variant is for places where the UI needs
+ * to surface a notice — typically the address-autocomplete input where
+ * a "search blocked for privacy" message has to be shown.
+ */
+export interface SearchOutcome {
+	results: GeocodingResult[];
+	provider?: 'pelias' | 'photon' | 'nominatim';
+	notice?: GeocodingNotice;
 }
 
 /**
  * Forward geocoding / autocomplete.
  * Returns places matching the search query, biased towards the focus point.
+ *
+ * For UI that needs to display privacy-related notices (e.g. "this
+ * search stays local"), use {@link searchAddressDetailed} instead.
  */
 export async function searchAddress(
 	query: string,
@@ -90,7 +129,29 @@ export async function searchAddress(
 		lang?: string;
 	}
 ): Promise<GeocodingResult[]> {
-	if (!query || query.trim().length < 2) return [];
+	const outcome = await searchAddressDetailed(query, options);
+	return outcome.results;
+}
+
+/**
+ * Detailed forward-search variant that surfaces the wrapper's `provider`
+ * and `notice` fields. Use this in the address-autocomplete UI so we can:
+ *   - Show a subtle "≈ ungefähr" badge when a public-API fallback served
+ *     the result (`notice: 'fallback_used'`).
+ *   - Explain to the user why a sensitive query (Hausarzt, Klinikum,
+ *     etc.) returned 0 results without leaking it to a public API
+ *     (`notice: 'sensitive_local_unavailable'`).
+ */
+export async function searchAddressDetailed(
+	query: string,
+	options?: {
+		limit?: number;
+		focusLat?: number;
+		focusLon?: number;
+		lang?: string;
+	}
+): Promise<SearchOutcome> {
+	if (!query || query.trim().length < 2) return { results: [] };
 
 	const params = new URLSearchParams({ q: query.trim() });
 	if (options?.limit) params.set('limit', String(options.limit));
@@ -100,23 +161,36 @@ export async function searchAddress(
 
 	try {
 		const res = await fetch(geocodeUrl('search', params));
-		if (!res.ok) return [];
+		if (!res.ok) return { results: [] };
 		const data: GeocodingResponse = await res.json();
-		return data.results;
+		return { results: data.results, provider: data.provider, notice: data.notice };
 	} catch {
 		console.warn('Geocoding search failed — service may be offline');
-		return [];
+		return { results: [] };
 	}
 }
 
 /**
  * Reverse geocoding — resolve coordinates to an address and place type.
+ *
+ * For UI that needs to surface the privacy notice (e.g. "approximate match"
+ * badge on a coordinate-derived address), use {@link reverseGeocodeDetailed}.
  */
 export async function reverseGeocode(
 	lat: number,
 	lon: number,
 	lang = 'de'
 ): Promise<GeocodingResult | null> {
+	const outcome = await reverseGeocodeDetailed(lat, lon, lang);
+	return outcome.results[0] ?? null;
+}
+
+/** Detailed reverse-geocode variant — see {@link searchAddressDetailed}. */
+export async function reverseGeocodeDetailed(
+	lat: number,
+	lon: number,
+	lang = 'de'
+): Promise<SearchOutcome> {
 	try {
 		const params = new URLSearchParams({
 			lat: String(lat),
@@ -124,12 +198,12 @@ export async function reverseGeocode(
 			lang,
 		});
 		const res = await fetch(geocodeUrl('reverse', params));
-		if (!res.ok) return null;
+		if (!res.ok) return { results: [] };
 		const data: GeocodingResponse = await res.json();
-		return data.results[0] ?? null;
+		return { results: data.results, provider: data.provider, notice: data.notice };
 	} catch {
 		console.warn('Reverse geocoding failed — service may be offline');
-		return null;
+		return { results: [] };
 	}
 }
 

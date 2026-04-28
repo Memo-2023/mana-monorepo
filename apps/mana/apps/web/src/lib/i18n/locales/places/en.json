@@ -32,5 +32,11 @@
 		"meta_last_visit": "Last visit: {date}",
 		"meta_created": "Created: {date}",
 		"meta_updated": "Edited: {date}"
+	},
+	"geocoding_notice": {
+		"sensitive_local_unavailable_title": "This search stays local on purpose",
+		"sensitive_local_unavailable_body": "Sensitive terms (doctor, clinic, …) are never forwarded to public services. The local index is unavailable right now — try again later or use a more general query.",
+		"fallback_used_badge": "≈ approximate",
+		"fallback_used_title": "Address lookup via public OSM"
 	}
 }

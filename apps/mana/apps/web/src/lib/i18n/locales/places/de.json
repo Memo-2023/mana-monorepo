@@ -32,5 +32,11 @@
 		"meta_last_visit": "Letzter Besuch: {date}",
 		"meta_created": "Erstellt: {date}",
 		"meta_updated": "Bearbeitet: {date}"
+	},
+	"geocoding_notice": {
+		"sensitive_local_unavailable_title": "Diese Suche bleibt bewusst lokal",
+		"sensitive_local_unavailable_body": "Sensible Suchbegriffe (Arzt, Klinik, …) werden nie an externe Dienste geschickt. Der lokale Index ist gerade nicht erreichbar — versuche es später nochmal oder formuliere allgemeiner.",
+		"fallback_used_badge": "≈ ungefähr",
+		"fallback_used_title": "Adress-Suche über öffentliches OSM"
 	}
 }

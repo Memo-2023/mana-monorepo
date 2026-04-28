@@ -8,13 +8,15 @@
 	import { placesStore } from './stores/places.svelte';
 	import { trackingStore } from './stores/tracking.svelte';
 	import {
-		searchAddress,
+		searchAddressDetailed,
 		reverseGeocode,
 		formatAddress,
 		formatLocality,
 		formatFullAddress,
+		type GeocodingNotice,
 		type GeocodingResult,
 	} from '$lib/geocoding';
+	import { _ } from 'svelte-i18n';
 	import { Star, MapPin, Plus, PencilSimple, Trash, MagnifyingGlass } from '@mana/shared-icons';
 	import type { ViewProps } from '$lib/app-registry';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
@@ -77,6 +79,7 @@
 	let editingLocation = $state(false);
 	let locationDraft = $state('');
 	let locationSuggestions = $state<GeocodingResult[]>([]);
+	let locationNotice = $state<GeocodingNotice | undefined>(undefined);
 	let showLocationSuggestions = $state(false);
 	let locationDebounce: ReturnType<typeof setTimeout> | undefined;
 	let locationInputEl = $state<HTMLInputElement | null>(null);
@@ -129,6 +132,7 @@
 		editingLocation = false;
 		showLocationSuggestions = false;
 		locationSuggestions = [];
+		locationNotice = undefined;
 		locationDraft = '';
 	}
 
@@ -137,17 +141,23 @@
 		const q = locationDraft.trim();
 		if (q.length < 2) {
 			locationSuggestions = [];
+			locationNotice = undefined;
 			showLocationSuggestions = false;
 			return;
 		}
 		locationDebounce = setTimeout(async () => {
 			const pos = trackingStore.currentPosition;
-			locationSuggestions = await searchAddress(q, {
+			const outcome = await searchAddressDetailed(q, {
 				limit: 6,
 				focusLat: pos?.coords.latitude,
 				focusLon: pos?.coords.longitude,
 			});
-			showLocationSuggestions = locationSuggestions.length > 0;
+			locationSuggestions = outcome.results;
+			locationNotice = outcome.notice;
+			// Show the dropdown when we have results OR when we have a
+			// notice to display (sensitive-query-blocked queries return
+			// empty results but should still surface the explainer).
+			showLocationSuggestions = outcome.results.length > 0 || !!outcome.notice;
 		}, 250);
 	}
 
@@ -165,6 +175,7 @@
 	// --- Address autocomplete ---
 	let addressQuery = $state('');
 	let suggestions = $state<GeocodingResult[]>([]);
+	let suggestionsNotice = $state<GeocodingNotice | undefined>(undefined);
 	let showSuggestions = $state(false);
 	let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -172,18 +183,24 @@
 		clearTimeout(debounceTimer);
 		if (addressQuery.trim().length < 2) {
 			suggestions = [];
+			suggestionsNotice = undefined;
 			showSuggestions = false;
 			return;
 		}
 		debounceTimer = setTimeout(async () => {
 			const focusLat = trackingStore.currentPosition?.coords.latitude;
 			const focusLon = trackingStore.currentPosition?.coords.longitude;
-			suggestions = await searchAddress(addressQuery, {
+			const outcome = await searchAddressDetailed(addressQuery, {
 				limit: 6,
 				focusLat,
 				focusLon,
 			});
-			showSuggestions = suggestions.length > 0;
+			suggestions = outcome.results;
+			suggestionsNotice = outcome.notice;
+			// Same as the tracking-edit input: show the dropdown when we
+			// have either results OR a notice. A sensitive query with
+			// empty results still needs to surface the explainer.
+			showSuggestions = outcome.results.length > 0 || !!outcome.notice;
 		}, 300);
 	}
 
@@ -313,6 +330,23 @@
 							/>
 							{#if showLocationSuggestions}
 								<div class="tracking-suggestions">
+									{#if locationNotice === 'sensitive_local_unavailable'}
+										<div class="suggestion-notice notice-sensitive">
+											<div class="suggestion-notice-title">
+												{$_('places.geocoding_notice.sensitive_local_unavailable_title')}
+											</div>
+											<div class="suggestion-notice-body">
+												{$_('places.geocoding_notice.sensitive_local_unavailable_body')}
+											</div>
+										</div>
+									{:else if locationNotice === 'fallback_used'}
+										<div
+											class="suggestion-notice notice-fallback"
+											title={$_('places.geocoding_notice.fallback_used_title')}
+										>
+											{$_('places.geocoding_notice.fallback_used_badge')}
+										</div>
+									{/if}
 									{#each locationSuggestions as result}
 										<button
 											type="button"
@@ -387,6 +421,23 @@
 		</div>
 		{#if showSuggestions}
 			<div class="suggestions">
+				{#if suggestionsNotice === 'sensitive_local_unavailable'}
+					<div class="suggestion-notice notice-sensitive">
+						<div class="suggestion-notice-title">
+							{$_('places.geocoding_notice.sensitive_local_unavailable_title')}
+						</div>
+						<div class="suggestion-notice-body">
+							{$_('places.geocoding_notice.sensitive_local_unavailable_body')}
+						</div>
+					</div>
+				{:else if suggestionsNotice === 'fallback_used'}
+					<div
+						class="suggestion-notice notice-fallback"
+						title={$_('places.geocoding_notice.fallback_used_title')}
+					>
+						{$_('places.geocoding_notice.fallback_used_badge')}
+					</div>
+				{/if}
 				{#each suggestions as result}
 					<button class="suggestion-item" onclick={() => selectSuggestion(result)}>
 						<div class="suggestion-icon">
@@ -790,6 +841,44 @@
 
 	.suggestion-item + .suggestion-item {
 		border-top: 1px solid hsl(var(--color-border) / 0.5);
+	}
+
+	/* ── Privacy notices in suggestion dropdown ─────────────────
+	   Two visual styles:
+	   - notice-sensitive: full explainer block (sensitive query was
+	     blocked from public APIs). Soft amber tone.
+	   - notice-fallback: tiny right-aligned badge (results came from
+	     a public-API fallback). Muted footer style. */
+	.suggestion-notice {
+		padding: 0.5rem 0.625rem;
+		font-size: 0.75rem;
+	}
+	.notice-sensitive {
+		background: hsl(40 90% 96%);
+		color: hsl(40 80% 24%);
+		border-bottom: 1px solid hsl(40 60% 85%);
+	}
+	:global(.dark) .notice-sensitive {
+		background: hsl(40 30% 16%);
+		color: hsl(40 80% 78%);
+		border-bottom-color: hsl(40 30% 28%);
+	}
+	.suggestion-notice-title {
+		font-weight: 600;
+		margin-bottom: 0.125rem;
+	}
+	.suggestion-notice-body {
+		font-size: 0.6875rem;
+		line-height: 1.4;
+	}
+	.notice-fallback {
+		text-align: right;
+		font-size: 0.625rem;
+		color: hsl(var(--color-muted-foreground));
+		font-style: italic;
+		padding: 0.25rem 0.625rem;
+		background: hsl(var(--color-muted) / 0.3);
+		border-bottom: 1px solid hsl(var(--color-border) / 0.5);
 	}
 
 	.suggestion-icon {
