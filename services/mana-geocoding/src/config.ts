@@ -93,11 +93,12 @@ export function loadConfig(): Config {
 				'nominatim',
 			]),
 			healthCacheMs: parseInt(process.env.PROVIDER_HEALTH_CACHE_MS || '30000', 10),
-			// 8 s default. Nominatim's cold-start DNS+TLS handshake can push the
-			// first health probe past the older 5 s default, false-marking the
-			// provider unhealthy for the next 30 s. 8 s survives a slow first
-			// probe but still cuts off actually-stuck connections.
-			timeoutMs: parseInt(process.env.PROVIDER_TIMEOUT_MS || '8000', 10),
+			// 20 s default. Cold-start cross-LAN fetches to photon-self
+			// (mana-gpu over WSL2 mirrored networking) consistently take
+			// >10 s on the first probe and ~2 s once warm. Tighter timeouts
+			// false-marked photon-self unhealthy on every cold path, leaking
+			// to public photon for the duration of the 30 s health cache.
+			timeoutMs: parseInt(process.env.PROVIDER_TIMEOUT_MS || '20000', 10),
 		},
 	};
 }

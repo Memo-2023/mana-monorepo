@@ -510,6 +510,14 @@ services:
       # as `photon-self` provider with privacy: 'local' — eligible for
       # sensitive queries. Empty value = slot disabled.
       PHOTON_SELF_API_URL: ${PHOTON_SELF_API_URL:-}
+      # Cold-start cross-LAN fetches to photon-self consistently take
+      # >10s on the first probe; the 8s default false-marked it unhealthy
+      # on every cold path. 20s leaves headroom while still cutting off
+      # actually-stuck connections.
+      PROVIDER_TIMEOUT_MS: ${PROVIDER_TIMEOUT_MS:-20000}
+      # Short public-API cache TTL so a transient photon-self blip can't
+      # pin stale public-fallback answers in the LRU for days.
+      CACHE_PUBLIC_TTL_MS: ${CACHE_PUBLIC_TTL_MS:-3600000}
       CORS_ORIGINS: https://mana.how,http://localhost:5173
       CACHE_MAX_ENTRIES: "5000"
       CACHE_TTL_MS: "86400000"

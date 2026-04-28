@@ -140,7 +140,10 @@ PORT=3018
 # Default order: photon-self,photon,nominatim
 # `photon-self` is silently dropped if PHOTON_SELF_API_URL is unset.
 GEOCODING_PROVIDERS=photon-self,photon,nominatim
-PROVIDER_TIMEOUT_MS=8000              # per-provider request timeout (cold-start safe)
+PROVIDER_TIMEOUT_MS=20000             # per-provider request timeout. Cold-start
+                                      # cross-LAN fetches to photon-self take
+                                      # >10s on the first probe; tighter values
+                                      # false-mark it unhealthy on every cold path.
 PROVIDER_HEALTH_CACHE_MS=30000        # health-cache TTL — skip dead providers
 
 # --- Self-hosted Photon (privacy: 'local', PRIMARY since 2026-04-28) --
