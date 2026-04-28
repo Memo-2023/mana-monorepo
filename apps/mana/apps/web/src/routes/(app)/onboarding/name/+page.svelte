@@ -6,6 +6,7 @@
 -->
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { tick } from 'svelte';
 	import { browser } from '$app/environment';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { onboardingFlow } from '$lib/stores/onboarding-flow.svelte';
@@ -26,8 +27,17 @@
 	let name = $state((onboardingFlow.pendingName ?? authStore.user?.name ?? '').trim());
 	let saving = $state(false);
 	let error = $state<string | null>(null);
+	let inputEl = $state<HTMLInputElement | null>(null);
 
 	let canSubmit = $derived(name.trim().length >= 1 && name.trim().length <= 40 && !saving);
+
+	// Imperative focus after the previous route's focus owner has fully
+	// unmounted. Using `<input autofocus>` would race the router and
+	// trigger Chrome's "Autofocus processing was blocked because a
+	// document already has a focused element" warning.
+	$effect(() => {
+		void tick().then(() => inputEl?.focus());
+	});
 
 	async function saveName(value: string) {
 		const token = await authStore.getValidToken();
@@ -75,15 +85,14 @@
 	</div>
 
 	<div class="field">
-		<!-- svelte-ignore a11y_autofocus -->
 		<input
 			type="text"
+			bind:this={inputEl}
 			bind:value={name}
 			onkeydown={handleKeydown}
 			placeholder="z. B. Till"
 			maxlength={40}
 			autocomplete="given-name"
-			autofocus
 			aria-label="Dein Name"
 		/>
 		{#if error}

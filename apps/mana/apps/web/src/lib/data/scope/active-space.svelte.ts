@@ -186,12 +186,21 @@ export function writeActiveSpaceHint(id: string | null): void {
 
 /**
  * Resolve the user's active space. Order of truth:
- *   1. Server-side active member (get-active-member) — trustworthy when
- *      Better Auth's activeOrganizationId landed in the session.
- *   2. Client-side hint from localStorage — survives cookie drops across
- *      page reloads in dev. If present, we call set-active to re-sync
- *      the server to match.
+ *   1. **Localstorage hint present** — we've already gone through the
+ *      list+set-active flow on this device, so `get-active-member` is
+ *      certain to return 200 (Better Auth's session has an
+ *      activeOrganizationId). Call it as the source of truth (reflects
+ *      cross-tab switches the user may have made elsewhere).
+ *   2. **No hint** — fresh session. `get-active-member` would return
+ *      400 ("active organization not found") because nothing has been
+ *      set yet. Skip the call entirely so the network panel stays clean,
+ *      and go straight to list + activate-Personal-or-localStorage-hint.
  *   3. Personal space fallback — brand-new session, no previous choice.
+ *
+ * The skip-on-fresh-session optimisation eliminates the noisy 400 the
+ * webapp used to log on every fresh inkognito login. Functionally
+ * equivalent — `fetchActiveMember()` returned `null` on 400 anyway and
+ * we fell through to the same auto-activate path.
  *
  * Errors captured in `lastError`; status flips to 'error'. Callers can
  * retry via `loadActiveSpace({ force: true })`.
@@ -203,20 +212,25 @@ export async function loadActiveSpace(opts: { force?: boolean } = {}): Promise<A
 	lastError = null;
 
 	try {
-		const member = await fetchActiveMember();
-		if (member) {
-			writeActiveSpaceHint(member.id);
-			applyActiveSpace(member);
-			return member;
+		// Only call `get-active-member` when we have a localStorage hint —
+		// the hint is set by writeActiveSpaceHint() after every successful
+		// set-active, so its presence is a reliable proxy for "the server's
+		// session has activeOrganizationId set". Without a hint, the server
+		// would 400 and we'd fall through to the activation path anyway.
+		const hintId = readActiveSpaceHint();
+		if (hintId) {
+			const member = await fetchActiveMember();
+			if (member) {
+				writeActiveSpaceHint(member.id);
+				applyActiveSpace(member);
+				return member;
+			}
+			// Hint present but server returned no active org (cookie wipe,
+			// session reset, …) — fall through to list + auto-activate so
+			// the hint is honoured if it still points at a real space.
 		}
 
-		// Server says no active org. Two reasons we might still know one:
-		//   (a) the user switched to a non-personal space earlier and the
-		//       hint survived in localStorage even though the cookie didn't.
-		//   (b) it's truly a fresh session, in which case we activate
-		//       Personal.
 		const orgs = await fetchOrganizations();
-		const hintId = readActiveSpaceHint();
 		const hinted = hintId ? orgs.find((o) => o.id === hintId) : null;
 
 		const chosen = hinted ?? orgs.find((o) => o.type === 'personal') ?? null;

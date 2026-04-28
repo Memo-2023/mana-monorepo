@@ -13,6 +13,7 @@
 -->
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { tick } from 'svelte';
 	import { ArrowLeft, Check, Globe, Lock } from '@mana/shared-icons';
 	import { onboardingFlow } from '$lib/stores/onboarding-flow.svelte';
 	import { onboardingStatus } from '$lib/stores/onboarding-status.svelte';
@@ -24,9 +25,21 @@
 	let isPublic = $state(true);
 	let saving = $state(false);
 	let submittedDisplayName = $state<string | null>(null);
+	let textareaEl = $state<HTMLTextAreaElement | null>(null);
 
 	let trimmed = $derived(wish.trim());
 	let charsLeft = $derived(MAX_LEN - wish.length);
+
+	// Imperative focus after the previous onboarding screen has fully
+	// unmounted. Using the static `autofocus` attribute would race the
+	// outgoing route's focus owner (Chrome warns "Autofocus processing
+	// was blocked because a document already has a focused element"
+	// when a router transition leaves a button focused). `tick()` waits
+	// for the next microtask so the textarea is mounted and has no
+	// competing focus claim.
+	$effect(() => {
+		void tick().then(() => textareaEl?.focus());
+	});
 
 	async function handleFinish() {
 		if (saving) return;
@@ -78,13 +91,12 @@
 	</div>
 
 	<div class="field">
-		<!-- svelte-ignore a11y_autofocus -->
 		<textarea
+			bind:this={textareaEl}
 			bind:value={wish}
 			maxlength={MAX_LEN}
 			placeholder="Ich möchte Mana nutzen, um …"
 			rows="6"
-			autofocus
 			aria-label="Was du dir von Mana wünschst"
 		></textarea>
 		<div class="counter" class:warn={charsLeft < 100}>
