@@ -1,6 +1,6 @@
 # Geocoding Self-Hosting — Decision Report
 
-**Status:** Recommendation — pending migration
+**Status:** ✅ MIGRATED — Photon-on-mana-gpu live since 2026-04-28 19:27 CEST
 **Date:** 2026-04-28
 **Context:** Pelias was retired from the Mac mini on 2026-04-28 (3 GB RAM was crushing the host into 8.6 GB swap). The wrapper now serves all queries through public Photon + Nominatim, with sensitive-query blocking + coord quantization as privacy mitigations. We need a self-hosted geocoder back in the chain so sensitive queries (`Hausarzt`, `Klinikum`, …) don't return zero results when the user actually wants them, and so we don't depend on a third party for routine address lookups.
 
@@ -217,3 +217,91 @@ Tests: extend `chain.test.ts` to verify the order pelias-class → photon-class 
 - [mediagis/nominatim-docker discussion #265](https://github.com/mediagis/nominatim-docker/discussions/265) — Germany-import resource reports (12 GB RAM, ~100 GB disk, 8–12 h)
 - [Photon OpenSearch wiki page](https://wiki.openstreetmap.org/wiki/Photon) — region scoping, memory tuning
 - Internal: [`services/mana-geocoding/CLAUDE.md`](../../services/mana-geocoding/CLAUDE.md) for the current Pelias setup we're replacing
+
+---
+
+## Migration log + lessons learned (2026-04-28)
+
+The migration ran from 17:42 to 19:27 CEST — about 1 h 45 min, almost
+all of which was unattended download/unpack waiting time (29 GB tarball
++ 80 GB unpack). Went smoother than the runbook estimated except for
+five WSL2-specific gotchas:
+
+### What worked first try
+
+- **WSL2 install via SSH:** `winget install Microsoft.WSL` followed by
+  `wsl --install Ubuntu-24.04 --no-launch` — fully unattended, no
+  interactive prompts, including the previously-painful first-run user
+  setup (the `--no-launch` flag combined with `--user root` for
+  follow-up commands skipped the wizard entirely).
+- **Docker Engine in WSL2 (instead of Docker Desktop):** apt install
+  `docker-ce` from the official repo, then run as systemd service.
+  Headless, no GUI session needed — much cleaner for SSH-driven
+  setup than Docker Desktop.
+- **WSL2 Mirrored Networking** (Win11 22H2+): the Linux distro shares
+  the Windows host's LAN IP. Photon listens on
+  `192.168.178.11:2322` directly — no `netsh interface portproxy`
+  forwarding. Just one Windows Defender Firewall rule and the Mac
+  mini reaches it.
+- **Photon Europe pre-built tarball** (29 GB compressed → ~80 GB
+  unpacked) downloaded at ~9 MB/s sustained, unpacked at ~80 MB/s.
+  No PBF import, no Elasticsearch tuning, no patch hacks.
+
+### Five gotchas worth documenting
+
+1. **`bzip2` is not installed by default in Ubuntu 24.04 minimal.**
+   `tar -xjf` fails with `bzip2: Cannot exec`. Fix: `apt install bzip2`
+   before unpacking. Took ~15 minutes to spot because the script's
+   `set -e` exited cleanly after the failure.
+
+2. **No official Photon Docker image.** Komoot publishes a JAR but
+   no `komoot/photon` on Docker Hub. Solution: run the JAR inside
+   `eclipse-temurin:21-jre` with the data dir + JAR mounted in.
+   Cleaner than community images (which lag the upstream version).
+
+3. **`firewall=true` in `.wslconfig` blocks cross-LAN inbound.**
+   The first nginx-on-:2322 cross-LAN test worked. After enabling
+   `firewall=true` (intended to harden Hyper-V firewall), Photon
+   became unreachable from the Mac mini even though the Windows
+   Defender rule allowed it. Removing the line fixed it instantly.
+   The Hyper-V firewall layer in WSL2 is a separate, stricter pass
+   that the Windows-side rule doesn't cover.
+
+4. **`vmIdleTimeout=-1` does NOT prevent WSL2 idle-shutdown** on
+   Win11 26200. The VM still shuts down ~60 s after the last SSH
+   session closes, killing the Photon container. Workaround that
+   actually works: a Windows Task Scheduler task at boot that runs
+   `wsl -d Ubuntu-24.04 --user root -- /bin/sleep infinity`. Holds
+   the VM open permanently. Survives reboots.
+
+5. **PowerShell quoting + bash inside `wsl ... -- bash -c "..."`.**
+   `$(dpkg --print-architecture)` and `$(lsb_release -cs)` got
+   pre-expanded by PowerShell on the Windows side, breaking the
+   Docker apt sources line. Fix: write the install script to a file,
+   transfer via scp, run via `wsl ... bash /mnt/c/temp/script.sh`.
+   No quoting layers to fight.
+
+### Resource snapshot post-migration
+
+- **mana-gpu:** Photon container 391 MB / 31 GB (1.2 %) memory at
+  steady state, 290 % CPU during initial OpenSearch shard recovery,
+  near-zero CPU at idle. Disk: 80 GB unpacked photon_data + 29 GB
+  tarball still on disk (kept for debugging — can be removed).
+- **mana-server:** mana-geocoding container unchanged in resource
+  use; chain just routes to a different upstream. Cross-LAN
+  per-request latency added: ~5–15 ms.
+
+### Cutover verification
+
+- `provider: "photon-self"` confirmed on both `/search` and `/reverse`
+  endpoints from inside mana-geocoding container and externally via
+  `https://mana.how/api/v1/geocode/...`.
+- Sensitive query "Hausarzt Konstanz" now returns real results
+  (`Hausarztpraxis am Tannenhof, Am Tannenhof 2, 78464 Konstanz`)
+  instead of the previous `notice: 'sensitive_local_unavailable'`
+  empty response. Privacy stance maintained: the query never leaves
+  our infra.
+- Public Photon + public Nominatim stay registered as last-resort
+  `privacy: 'public'` fallbacks. Health-snapshot shows them as
+  `healthy: false, ageMs: null` — they're never probed because
+  `photon-self` is healthy.

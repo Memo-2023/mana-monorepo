@@ -159,10 +159,10 @@ GEOCODING_PROVIDERS=photon-self,pelias,photon,nominatim
 PROVIDER_TIMEOUT_MS=8000              # per-provider request timeout (cold-start safe)
 PROVIDER_HEALTH_CACHE_MS=30000        # health-cache TTL — skip dead providers
 
-# --- Self-hosted Photon (privacy: 'local', primary post-migration) ----
-# Set this to point at the GPU-server-hosted Photon. When unset, the
-# `photon-self` slot is not registered and the chain falls back to
-# public providers as before.
+# --- Self-hosted Photon (privacy: 'local', PRIMARY since 2026-04-28) --
+# Live on mana-gpu (Windows 11, WSL2-Ubuntu, Docker, Photon Europe-wide
+# Java JAR + OpenSearch). Cross-LAN reach via WSL2 mirrored networking.
+# Set in .env.macmini; flow into the container via docker-compose env.
 PHOTON_SELF_API_URL=http://192.168.178.11:2322
 
 # --- Pelias (legacy, currently stopped — privacy: 'local') ------------
