@@ -31,7 +31,11 @@
 
 	let pendingEmoji = $state<string | null>(null);
 
-	async function handleClick(emoji: ReactionEmoji) {
+	async function handleClick(e: MouseEvent, emoji: ReactionEmoji) {
+		// Reaction-bars sit inside clickable cards (feedback feed, /me/reacted,
+		// detail page). Without stopPropagation, every reaction-click also
+		// triggers the card's onClick — user reacts and lands in detail-view.
+		e.stopPropagation();
 		if (readOnly || !onToggle) return;
 		pendingEmoji = emoji;
 		try {
@@ -62,7 +66,7 @@
 			title={readOnly ? readOnlyTooltip : `${REACTION_LABELS[emoji]} (${count})`}
 			aria-pressed={mine}
 			aria-label={`${REACTION_LABELS[emoji]}: ${count}`}
-			onclick={() => handleClick(emoji)}
+			onclick={(e) => handleClick(e, emoji)}
 		>
 			<span class="emoji">{emoji}</span>
 			{#if count > 0}<span class="count">{count}</span>{/if}
