@@ -8,6 +8,7 @@
 		Gear,
 		Globe,
 		Heart,
+		Lightbulb,
 		Moon,
 		Palette,
 		Question,
@@ -36,6 +37,7 @@
 		sun: Sun,
 		palette: Palette,
 		robot: Robot,
+		lightbulb: Lightbulb,
 		logout: SignOut,
 	};
 
@@ -43,7 +45,8 @@
 		id: string;
 		label: string;
 		icon: string;
-		href: string;
+		href?: string;
+		onClick?: () => void;
 		active?: boolean;
 	}
 
@@ -182,7 +185,14 @@
 							<button
 								class="chip"
 								class:active={link.active}
-								onclick={() => navigateTo(link.href)}
+								onclick={() => {
+									if (link.onClick) {
+										link.onClick();
+										onClose();
+									} else if (link.href) {
+										navigateTo(link.href);
+									}
+								}}
 								title={link.label}
 							>
 								{#if icons[link.icon]}

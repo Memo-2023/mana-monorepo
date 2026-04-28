@@ -52,6 +52,7 @@
 		Heart,
 		House,
 		Key,
+		Lightbulb,
 		List,
 		MagnifyingGlass,
 		Microphone,
@@ -135,6 +136,7 @@
 		scale: Scales,
 		robot: Robot,
 		key: Key,
+		lightbulb: Lightbulb,
 		shield: Shield,
 		gift: Gift,
 		'music-notes': MusicNotes,
@@ -318,8 +320,13 @@
 		contentSearcher?: ContentSearcher;
 		/** Accessible label for the nav element */
 		ariaLabel?: string;
-		/** Feedback page href (shown in user dropdown). Set to empty string to hide. */
+		/** Feedback page href (shown in user dropdown). Set to empty string to hide.
+		 *  Ignored when `onFeedback` is provided — the action takes precedence. */
 		feedbackHref?: string;
+		/** Called when the user picks "Idee teilen" in the user menu. When set,
+		 *  the Feedback chip opens the host's quick-feedback modal instead of
+		 *  navigating to feedbackHref. */
+		onFeedback?: () => void;
 		/** Themes page href (shown in user dropdown). Set to empty string to hide. */
 		themesHref?: string;
 		/** Spiral page href (shown in user dropdown). Set to empty string to hide. */
@@ -391,6 +398,7 @@
 		contentSearcher,
 		ariaLabel,
 		feedbackHref = '/feedback',
+		onFeedback,
 		themesHref,
 		spiralHref,
 		creditsHref,
@@ -461,7 +469,14 @@
 
 	// Account links for UserMenuPanel
 	const accountLinks = $derived.by(() => {
-		const links: { id: string; label: string; icon: string; href: string; active?: boolean }[] = [];
+		const links: {
+			id: string;
+			label: string;
+			icon: string;
+			href?: string;
+			onClick?: () => void;
+			active?: boolean;
+		}[] = [];
 		if (userEmail && profileHref) {
 			links.push({
 				id: 'profile',
@@ -489,7 +504,14 @@
 				active: currentPath === creditsHref,
 			});
 		}
-		if (userEmail && feedbackHref) {
+		if (userEmail && onFeedback) {
+			links.push({
+				id: 'feedback',
+				label: 'Idee teilen',
+				icon: 'lightbulb',
+				onClick: onFeedback,
+			});
+		} else if (userEmail && feedbackHref) {
 			links.push({
 				id: 'feedback',
 				label: 'Feedback',
@@ -533,6 +555,15 @@
 	// we don't duplicate it inside the opened bar.
 	const userMenuBarItems = $derived.by<PillDropdownItem[]>(() => {
 		const out: PillDropdownItem[] = [];
+		if (userEmail && onFeedback) {
+			out.push({
+				id: 'feedback',
+				label: 'Idee teilen',
+				icon: 'lightbulb',
+				onClick: () => onFeedback(),
+			});
+			out.push({ id: 'feedback-divider', label: '', divider: true });
+		}
 		if (onThemeModeChange) {
 			out.push(
 				{

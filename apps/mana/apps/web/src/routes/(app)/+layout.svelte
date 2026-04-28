@@ -9,7 +9,7 @@
 	import { page } from '$app/stores';
 	import type { Component, Snippet } from 'svelte';
 	import ToastContainer from '$lib/components/ToastContainer.svelte';
-	import GlobalFeedbackPill from '$lib/components/feedback/GlobalFeedbackPill.svelte';
+	import FeedbackQuickModal from '$lib/components/feedback/FeedbackQuickModal.svelte';
 	import { onDestroy, setContext, tick } from 'svelte';
 	import { createReminderScheduler } from '@mana/shared-stores';
 	import { todoReminderSource } from '$lib/modules/todo/reminder-source';
@@ -250,6 +250,17 @@
 	let isQuickInputVisible = $state(false);
 	let isBottomBarVisible = $state(false);
 	let activeBar = $state<PillBarConfig | null>(null);
+
+	// Quick-feedback modal — opened from the user-menu chip ("Idee teilen").
+	// Replaces the older floating "Idee?" pill so feedback lives in the same
+	// affordance as Profile / Credits / Logout.
+	let feedbackModalOpen = $state(false);
+	let feedbackModuleContext = $derived.by(() => {
+		const path = $page.url.pathname;
+		const seg = path.split('/').filter(Boolean)[0];
+		const fromPath = seg && !seg.startsWith('(') ? seg : null;
+		return $page.url.searchParams.get('app') ?? fromPath ?? undefined;
+	});
 
 	function closeAllBars() {
 		isTagStripVisible = false;
@@ -1061,6 +1072,7 @@
 						creditsHref="/?app=credits"
 						themesHref="/?app=themes"
 						helpHref="/?app=help"
+						onFeedback={() => (feedbackModalOpen = true)}
 						{spotlightActions}
 						{contentSearcher}
 						positioning="static"
@@ -1139,9 +1151,12 @@
 		/>
 	{/if}
 
-	<!-- Global "Idee?" feedback pill — self-hides on /onboarding,
-	     /feedback, /community, and for unauthenticated users. -->
-	<GlobalFeedbackPill />
+	<!-- Quick-feedback modal — opened from the user-menu chip. -->
+	<FeedbackQuickModal
+		open={feedbackModalOpen}
+		moduleContext={feedbackModuleContext}
+		onClose={() => (feedbackModalOpen = false)}
+	/>
 </AuthGate>
 
 <ToastContainer />
