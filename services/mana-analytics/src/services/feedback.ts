@@ -129,8 +129,17 @@ export class FeedbackService {
 			try {
 				title = await this.generateTitle(data.feedbackText);
 			} catch {
-				title = data.feedbackText.slice(0, 80);
+				// Don't fall back to a feedbackText prefix — it just duplicates
+				// the body in the UI. Leave title null; the card renders the
+				// text on its own.
+				title = undefined;
 			}
+		}
+
+		// If the auto-titler returned something that's effectively the same
+		// as the body (prefix match modulo whitespace + ellipsis), drop it.
+		if (title && isRedundantTitle(title, data.feedbackText)) {
+			title = undefined;
 		}
 
 		const displayHash = createDisplayHash(userId, this.pseudonymSecret);
@@ -141,7 +150,7 @@ export class FeedbackService {
 			.values({
 				userId,
 				appId: data.appId,
-				title: title || data.feedbackText.slice(0, 80),
+				title: title ?? null,
 				feedbackText: data.feedbackText,
 				category: (data.category as any) || 'other',
 				...(typeof data.isPublic === 'boolean' ? { isPublic: data.isPublic } : {}),
@@ -740,6 +749,24 @@ export class FeedbackService {
 		const data = await res.json();
 		return data.choices?.[0]?.message?.content?.trim() || text.slice(0, 80);
 	}
+}
+
+/**
+ * True if the title is just a truncated/prefixed version of the body
+ * — i.e. would render twice in the card. Compares whitespace-collapsed
+ * lowercase forms, ignoring trailing ellipsis on either side.
+ */
+function isRedundantTitle(title: string, body: string): boolean {
+	const norm = (s: string) =>
+		s
+			.toLowerCase()
+			.replace(/[…\.]+$/u, '')
+			.replace(/\s+/g, ' ')
+			.trim();
+	const t = norm(title);
+	const b = norm(body);
+	if (!t || !b) return false;
+	return b === t || b.startsWith(t) || t.startsWith(b);
 }
 
 /** Strips userId / displayHash / deviceInfo from a row. */

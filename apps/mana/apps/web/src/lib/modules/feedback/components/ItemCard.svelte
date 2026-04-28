@@ -30,6 +30,30 @@
 	let tier = $derived(tierFromKarma(item.karma ?? 0));
 	let tierCfg = $derived(KARMA_TIER_CONFIG[tier]);
 
+	// Hide the bold title when it's just a truncated/prefix copy of the
+	// body — pre-rename items have title === feedbackText for short posts.
+	let normalizedTitle = $derived(
+		(item.title ?? '')
+			.toLowerCase()
+			.replace(/[…\.]+$/u, '')
+			.replace(/\s+/g, ' ')
+			.trim()
+	);
+	let normalizedBody = $derived(
+		item.feedbackText
+			.toLowerCase()
+			.replace(/[…\.]+$/u, '')
+			.replace(/\s+/g, ' ')
+			.trim()
+	);
+	let showTitle = $derived(
+		!!item.title &&
+			normalizedTitle.length > 0 &&
+			normalizedTitle !== normalizedBody &&
+			!normalizedBody.startsWith(normalizedTitle) &&
+			!normalizedTitle.startsWith(normalizedBody)
+	);
+
 	function handleClick() {
 		if (onClick) onClick(item.id);
 	}
@@ -72,7 +96,7 @@
 			</span>
 			<span class="muted">{formatDate(item.createdAt)}</span>
 		</div>
-		{#if item.title}
+		{#if showTitle}
 			<h3 class="title">{item.title}</h3>
 		{/if}
 	</header>
