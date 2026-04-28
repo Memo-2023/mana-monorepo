@@ -122,8 +122,13 @@ services:
     image: redis:7-alpine
     container_name: mana-infra-redis
     restart: always
-    mem_limit: 192m
-    command: redis-server --requirepass ${REDIS_PASSWORD:-redis123}
+    mem_limit: 384m
+    # maxmemory ~80% of mem_limit so Redis evicts before the kernel OOM-kills.
+    # allkeys-lru drops least-recently-used keys when full — safe for our
+    # cache-style usage (rate-limit counters, sync hot-paths, no critical state).
+    command:
+      redis-server --requirepass ${REDIS_PASSWORD:-redis123} --maxmemory 320mb
+      --maxmemory-policy allkeys-lru
     volumes:
       - redis_data:/data
     ports:
@@ -1284,7 +1289,7 @@ services:
     image: ghcr.io/umami-software/umami:postgresql-v2.18.0
     container_name: mana-mon-umami
     restart: always
-    mem_limit: 256m
+    mem_limit: 384m
     depends_on:
       postgres:
         condition: service_healthy
@@ -1310,7 +1315,7 @@ services:
     image: victoriametrics/victoria-metrics:v1.99.0
     container_name: mana-mon-victoria
     restart: always
-    mem_limit: 256m
+    mem_limit: 384m
     # Mount the host config dir read-only and point promscrape directly at it,
     # so edits to docker/prometheus/prometheus.yml are picked up by POST /-/reload
     # without a container restart. The previous setup baked a copy into
@@ -1629,7 +1634,7 @@ services:
     image: glitchtip/glitchtip:latest
     container_name: mana-mon-glitchtip
     restart: always
-    mem_limit: 256m
+    mem_limit: 384m
     environment:
       DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:-mana123}@postgres:5432/glitchtip
       REDIS_URL: redis://:${REDIS_PASSWORD:-redis123}@redis:6379/1
