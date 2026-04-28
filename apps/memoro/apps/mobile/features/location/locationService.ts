@@ -155,71 +155,26 @@ export const reverseGeocodeWithExpo = async (
 };
 
 /**
- * Führt ein Reverse Geocoding mit OpenStreetMap/Nominatim durch
- * @param latitude Breitengrad
- * @param longitude Längengrad
- * @returns Adressinformationen oder null bei Fehler
- */
-export const reverseGeocodeWithOSM = async (
-	latitude: number,
-	longitude: number
-): Promise<AddressInfo | null> => {
-	try {
-		const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`;
-
-		const response = await fetch(url, {
-			headers: {
-				'User-Agent': 'Memoro App', // OSM erfordert einen User-Agent
-			},
-		});
-
-		if (!response.ok) {
-			throw new Error(`OSM API responded with status: ${response.status}`);
-		}
-
-		const data = await response.json();
-
-		if (data && data.address) {
-			return {
-				street: data.address.road || data.address.pedestrian || data.address.street,
-				streetNumber: data.address.house_number,
-				postalCode: data.address.postcode,
-				city: data.address.city || data.address.town || data.address.village,
-				district: data.address.suburb || data.address.neighbourhood,
-				region: data.address.state,
-				country: data.address.country,
-				name: data.name,
-				formattedAddress: data.display_name,
-			};
-		}
-		return null;
-	} catch (error) {
-		console.debug('Fehler beim Reverse Geocoding mit OSM:', error);
-		return null;
-	}
-};
-
-/**
- * Führt ein Reverse Geocoding durch und versucht, die beste verfügbare Adresse zu ermitteln
- * @param latitude Breitengrad
- * @param longitude Längengrad
- * @returns Adressinformationen oder null bei Fehler
+ * Führt ein Reverse Geocoding durch. Nutzt ausschließlich Expo's
+ * On-Device Reverse-Geocoding — keine direkten Calls an
+ * nominatim.openstreetmap.org, weil das die User-IP + Coords ungeschützt
+ * an einen Public-Service leakt. Wenn Expo keine Adresse liefert,
+ * geben wir null zurück.
+ *
+ * Falls Expo's Qualität auf Dauer nicht reicht, ist der richtige Fix
+ * ein Proxy-Endpoint im memoro-server, der intern an mana-geocoding
+ * weiterreicht (Privacy-Hardening + Photon-Self).
  */
 export const getAddressFromCoordinates = async (
 	latitude: number,
 	longitude: number
 ): Promise<AddressInfo | null> => {
 	try {
-		// Zuerst mit Expo versuchen
 		const expoResult = await reverseGeocodeWithExpo(latitude, longitude);
-
-		// Wenn Expo ein gutes Ergebnis liefert, dieses verwenden
 		if (expoResult && expoResult.street && expoResult.city) {
 			return expoResult;
 		}
-
-		// Ansonsten mit OSM versuchen
-		return await reverseGeocodeWithOSM(latitude, longitude);
+		return expoResult;
 	} catch (error) {
 		console.debug('Fehler beim Reverse Geocoding:', error);
 		return null;

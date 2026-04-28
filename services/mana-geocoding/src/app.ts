@@ -9,7 +9,6 @@ import type { Config } from './config';
 import { RateLimiter } from './lib/rate-limiter';
 import { ProviderChain } from './providers/chain';
 import { NominatimProvider } from './providers/nominatim';
-import { PeliasProvider } from './providers/pelias';
 import { PhotonProvider } from './providers/photon';
 import type { GeocodingProvider, ProviderName } from './providers/types';
 import { createGeocodeRoutes } from './routes/geocode';
@@ -47,18 +46,10 @@ export function createApp(config: Config): Hono {
 export function createChain(config: Config): ProviderChain {
 	const built = new Map<ProviderName, GeocodingProvider>();
 
-	built.set(
-		'pelias',
-		new PeliasProvider({
-			apiUrl: config.pelias.apiUrl,
-			timeoutMs: config.providers.timeoutMs,
-		})
-	);
-
 	// Self-hosted Photon (mana-gpu). Only registered when the env-var is set
-	// — pre-migration this stays absent and the chain falls through to
-	// public providers as before. Once the GPU server is running Photon,
-	// flip PHOTON_SELF_API_URL on and this becomes the primary provider.
+	// — without it the chain runs on public providers only. Once the GPU
+	// server is running Photon, flip PHOTON_SELF_API_URL on and this
+	// becomes the primary provider.
 	if (config.photonSelf.apiUrl) {
 		built.set(
 			'photon-self',

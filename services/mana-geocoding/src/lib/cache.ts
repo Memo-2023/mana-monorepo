@@ -1,7 +1,7 @@
 /**
  * Simple in-memory LRU cache with TTL for geocoding results.
- * Geocoding results rarely change, so we cache aggressively to
- * reduce load on the Pelias instance.
+ * Geocoding results rarely change, so we cache to reduce load on
+ * upstream providers.
  */
 
 interface CacheEntry<T> {
@@ -37,11 +37,10 @@ export class LRUCache<T> {
 	/**
 	 * Insert or update a cache entry.
 	 *
-	 * @param ttlOverrideMs Optional per-entry TTL. Useful when results
-	 *   from public-API providers should live longer than results from
-	 *   the (frequently-changing) local Pelias index — e.g. 7 days for
-	 *   Photon/Nominatim answers, 24 hours for Pelias answers. When
-	 *   omitted, the constructor's default TTL applies.
+	 * @param ttlOverrideMs Optional per-entry TTL. The route layer uses
+	 *   this so public-fallback answers expire faster than local-provider
+	 *   answers — see `ttlFor()` in routes/geocode.ts. When omitted, the
+	 *   constructor's default TTL applies.
 	 */
 	set(key: string, value: T, ttlOverrideMs?: number): void {
 		// Delete first so re-insert goes to end

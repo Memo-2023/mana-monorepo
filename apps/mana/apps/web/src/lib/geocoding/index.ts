@@ -1,9 +1,11 @@
 /**
  * Shared geocoding client for all modules in the unified Mana app.
  *
- * Talks to our self-hosted mana-geocoding service (Pelias-backed, port 3018).
- * All queries stay within our infrastructure — no user location data leaves
- * the network.
+ * Talks to mana-geocoding (port 3018), which fronts a provider chain
+ * (photon-self → public photon → public nominatim) with sensitive-query
+ * blocking and coord quantization. Sensitive + happy-path queries stay
+ * on our infrastructure via photon-self; only last-resort fallbacks
+ * leave the network.
  *
  * Used by: places, events, contacts, photos, …
  *
@@ -66,26 +68,24 @@ export interface GeocodingResult {
 	longitude: number;
 	address: GeocodingAddress;
 	category: PlaceCategory;
-	/** Raw Pelias categories (food, retail, transport, …) — only present
-	 *  when the result came from Pelias. */
-	peliasCategories?: string[];
 	confidence: number;
-	/** Which backend served this result. `pelias` is local; `photon` and
-	 *  `nominatim` are public APIs (the wrapper applies sensitive-query
-	 *  blocking + coord quantization before forwarding to those). */
-	provider?: 'pelias' | 'photon' | 'nominatim';
+	/** Which backend served this result. `photon-self` is our self-hosted
+	 *  Photon (privacy: 'local'); `photon` and `nominatim` are public APIs
+	 *  (the wrapper applies sensitive-query blocking + coord quantization
+	 *  before forwarding to those). */
+	provider?: 'photon-self' | 'photon' | 'nominatim';
 }
 
 /**
  * Out-of-band information returned alongside results — the wrapper uses
  * this to signal *why* a query had unusual behavior:
  *
- *  - `'fallback_used'`: Pelias was unreachable, so a public-API provider
- *    served the request. Results are still valid but may be less precise.
- *    UI should show a subtle "approximate" badge.
+ *  - `'fallback_used'`: photon-self was unreachable, so a public-API
+ *    provider served the request. Results are still valid but may be
+ *    less precise. UI should show a subtle "approximate" badge.
  *  - `'sensitive_local_unavailable'`: the query matched the wrapper's
  *    sensitive-keyword list (medical / mental-health / crisis service)
- *    AND the local Pelias was unreachable. The wrapper deliberately did
+ *    AND no local provider was reachable. The wrapper deliberately did
  *    NOT forward the query to public APIs. Results are empty by design.
  *    UI should explain this to the user.
  */
@@ -95,7 +95,7 @@ interface GeocodingResponse {
 	results: GeocodingResult[];
 	cached?: boolean;
 	error?: string;
-	provider?: 'pelias' | 'photon' | 'nominatim';
+	provider?: 'photon-self' | 'photon' | 'nominatim';
 	notice?: GeocodingNotice;
 }
 
@@ -109,7 +109,7 @@ interface GeocodingResponse {
  */
 export interface SearchOutcome {
 	results: GeocodingResult[];
-	provider?: 'pelias' | 'photon' | 'nominatim';
+	provider?: 'photon-self' | 'photon' | 'nominatim';
 	notice?: GeocodingNotice;
 }
 

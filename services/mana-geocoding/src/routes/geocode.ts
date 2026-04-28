@@ -21,10 +21,10 @@ interface CachedAnswer {
 }
 
 /**
- * TTL chooser. Public-API results (Photon/Nominatim) get the longer TTL —
- * caching aggressively is the main privacy lever once the query has
- * already left our network. Local results stay on the shorter TTL because
- * the Pelias index can be re-imported; we don't want stale local data.
+ * TTL chooser. Public-API results (photon/nominatim) get a shorter TTL
+ * (1h) so a transient blip in photon-self doesn't pin stale fallback
+ * answers in the cache for days. Local results (photon-self) get the
+ * longer 24h TTL.
  *
  * Sensitive-query notices are cached on the short TTL too (the user might
  * retry from a different angle quickly), and `undefined` provider (chain

@@ -69,8 +69,8 @@ friendly_name() {
   name="${name#http://}"
   # Interne Services (Docker-Netz): mana-geocoding:3018/health → Mana Geocoding
   case "$name" in
-    mana-geocoding:*/health/pelias)
-      name="Pelias (via Geocoding)"
+    mana-geocoding:*/health/photon-self)
+      name="Photon-Self (via Geocoding)"
       ;;
     mana-geocoding:*)
       name="Mana Geocoding"

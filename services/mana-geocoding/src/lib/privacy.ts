@@ -14,7 +14,7 @@
  *     not telling Photon "user is at THIS HOUSE". Reverse geocoding
  *     against the city block instead of the building is acceptable.
  *
- * Pelias and other LAN-local providers always get the original
+ * Photon-self and other LAN-local providers always get the original
  * full-precision coordinates — quantization only applies on the way
  * out to the public internet.
  */

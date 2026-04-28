@@ -29,12 +29,8 @@ export interface GeocodingResult {
 	};
 	/** Our Places category, derived from the provider's native taxonomy. */
 	category: PlaceCategory;
-	/** Raw Pelias categories (food, retail, transport, …) — only present
-	 *  when the result came from Pelias. Photon/Nominatim don't have an
-	 *  equivalent multi-tag taxonomy. */
-	peliasCategories?: string[];
-	/** Confidence score 0–1. Pelias provides this natively; Photon/Nominatim
-	 *  approximate it from `importance`. */
+	/** Confidence score 0–1. Photon/Nominatim approximate it from
+	 *  `importance`. */
 	confidence: number;
 	/** Which provider answered — useful for telemetry + UI hints
 	 *  ("approximate match" badge for fallback providers). */
@@ -42,8 +38,8 @@ export interface GeocodingResult {
 }
 
 /**
- * Provider identifiers. Two of these wrap the same `PhotonProvider`
- * class with different configs:
+ * Provider identifiers. `photon-self` and `photon` both wrap the same
+ * `PhotonProvider` class with different configs:
  *
  *   - `photon-self`: self-hosted Photon (typically on mana-gpu),
  *     `privacy: 'local'`. Eligible for sensitive queries.
@@ -55,7 +51,7 @@ export interface GeocodingResult {
  * tracks per-provider health. A single `photon` slot can't simultaneously
  * mean two different backends.
  */
-export type ProviderName = 'pelias' | 'photon-self' | 'photon' | 'nominatim';
+export type ProviderName = 'photon-self' | 'photon' | 'nominatim';
 
 export interface SearchRequest {
 	q: string;

@@ -2,8 +2,6 @@
  * Unit tests for the raw-OSM-tag → PlaceCategory mapper.
  *
  * Covers the cases Photon and Nominatim emit for typical DACH queries.
- * The Pelias mapper has its own tests in category-map.test.ts; this file
- * tests *only* the raw-OSM-tag path used by the public-API fallbacks.
  */
 
 import { describe, expect, it } from 'bun:test';
@@ -54,7 +52,7 @@ describe('mapOsmTagToPlaceCategory', () => {
 			expect(mapOsmTagToPlaceCategory('aeroway', 'aerodrome')).toBe('transit');
 		});
 		it('amenity:car_rental → transit', () => {
-			// Matches Pelias mapper's "car_rental → transit" decision
+			// car_rental → transit (transport-flavored)
 			expect(mapOsmTagToPlaceCategory('amenity', 'car_rental')).toBe('transit');
 		});
 	});
@@ -116,7 +114,7 @@ describe('mapOsmTagToPlaceCategory', () => {
 
 	describe('other (health/religion/unknown)', () => {
 		it('amenity:hospital → other', () => {
-			// Health goes to other (matches Pelias mapper)
+			// Health goes to other
 			expect(mapOsmTagToPlaceCategory('amenity', 'hospital')).toBe('other');
 		});
 		it('amenity:pharmacy → other', () => {

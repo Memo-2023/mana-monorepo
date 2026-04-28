@@ -6,10 +6,6 @@ import type { ProviderName } from './providers/types';
 
 export interface Config {
 	port: number;
-	pelias: {
-		/** Pelias API base URL (the API container, not the placeholder service) */
-		apiUrl: string;
-	};
 	photon: {
 		/** Photon base URL — public komoot endpoint by default. Used by
 		 *  the `'photon'` provider slot which always has `privacy: 'public'`. */
@@ -20,7 +16,7 @@ export interface Config {
 		 *  GPU server). When set, the wrapper registers a separate
 		 *  `'photon-self'` provider with `privacy: 'local'` — eligible for
 		 *  sensitive queries. When undefined, the slot is disabled and the
-		 *  chain only has the public providers (current pre-migration state). */
+		 *  chain runs on public providers only. */
 		apiUrl: string | undefined;
 	};
 	nominatim: {
@@ -37,12 +33,13 @@ export interface Config {
 		/** Max entries in the in-memory LRU cache */
 		maxEntries: number;
 		/** Default TTL in milliseconds (24h — used for results from local
-		 *  providers like Pelias, where the index can be re-imported) */
+		 *  providers like photon-self) */
 		ttlMs: number;
-		/** Extended TTL for results that came from public APIs (Photon,
-		 *  Nominatim). 7 days by default — caching aggressively reduces
-		 *  the number of times we forward query content to a third party,
-		 *  which is the main privacy lever we have over public providers. */
+		/** TTL for results that came from public APIs (Photon, Nominatim).
+		 *  Capped at 1h so a brief blip in photon-self can't pin stale
+		 *  public-fallback answers in the cache for days. The privacy
+		 *  benefit of long TTLs (fewer outbound queries) is moot now that
+		 *  photon-self serves the bulk of traffic. */
 		publicTtlMs: number;
 	};
 	providers: {
@@ -60,9 +57,6 @@ export interface Config {
 export function loadConfig(): Config {
 	return {
 		port: parseInt(process.env.PORT || '3018', 10),
-		pelias: {
-			apiUrl: process.env.PELIAS_API_URL || 'http://localhost:4000/v1',
-		},
 		photon: {
 			apiUrl: process.env.PHOTON_API_URL || 'https://photon.komoot.io',
 		},
@@ -86,17 +80,15 @@ export function loadConfig(): Config {
 		cache: {
 			maxEntries: parseInt(process.env.CACHE_MAX_ENTRIES || '5000', 10),
 			ttlMs: parseInt(process.env.CACHE_TTL_MS || String(24 * 60 * 60 * 1000), 10),
-			publicTtlMs: parseInt(process.env.CACHE_PUBLIC_TTL_MS || String(7 * 24 * 60 * 60 * 1000), 10),
+			publicTtlMs: parseInt(process.env.CACHE_PUBLIC_TTL_MS || String(60 * 60 * 1000), 10),
 		},
 		providers: {
 			// Default order (when GEOCODING_PROVIDERS is unset): try the
 			// self-hosted Photon first if it's been configured, then public
 			// providers as fallback. `photon-self` is silently dropped at
-			// chain-build time if `photonSelf.apiUrl` is undefined, so the
-			// list is the same shape regardless of migration status.
+			// chain-build time if `photonSelf.apiUrl` is undefined.
 			enabled: parseProviderList(process.env.GEOCODING_PROVIDERS, [
 				'photon-self',
-				'pelias',
 				'photon',
 				'nominatim',
 			]),
@@ -112,7 +104,7 @@ export function loadConfig(): Config {
 
 function parseProviderList(raw: string | undefined, fallback: ProviderName[]): ProviderName[] {
 	if (!raw) return fallback;
-	const valid: ProviderName[] = ['pelias', 'photon-self', 'photon', 'nominatim'];
+	const valid: ProviderName[] = ['photon-self', 'photon', 'nominatim'];
 	const parsed = raw
 		.split(',')
 		.map((s) => s.trim().toLowerCase())

@@ -2,15 +2,9 @@
  * Maps raw OSM `class:type` tags (Photon's `osm_key:osm_value`,
  * Nominatim's `class:type`) to our 7 PlaceCategories.
  *
- * Pelias has a curated multi-category taxonomy (`food`, `retail`,
- * `transport`, …) that we map via `category-map.ts`. Photon and Nominatim
- * return raw OSM tags instead — `amenity:restaurant`, `shop:supermarket`,
- * `public_transport:station`, etc. — so they need a different lookup.
- *
  * The list below is intentionally narrow: it only covers tags we actually
  * see in real Photon/Nominatim responses for DACH queries. Anything else
- * falls through to `other`, which matches the Pelias mapper's behavior for
- * unknown categories.
+ * falls through to `other`.
  *
  * If a query returns a tag we don't handle, that's the signal to add it
  * here — not to try to enumerate all 1000+ OSM types.
@@ -25,8 +19,8 @@ interface Tag {
 
 /**
  * Priority-ordered: first match wins. More-specific entries (with a
- * `value`) come before generic key-only entries. Matches Pelias's
- * "food beats retail" priority intent.
+ * `value`) come before generic key-only entries. Same "food beats retail"
+ * priority intent as the upstream taxonomies.
  */
 const OSM_RULES: Array<{ match: Tag; category: PlaceCategory }> = [
 	// ── Food (highest priority — restaurants are food, even when also
@@ -82,7 +76,7 @@ const OSM_RULES: Array<{ match: Tag; category: PlaceCategory }> = [
 	{ match: { key: 'amenity', value: 'embassy' }, category: 'work' },
 	{ match: { key: 'office' }, category: 'work' },
 
-	// ── Health / religion → other (matches Pelias mapper) ───────────
+	// ── Health / religion → other ───────────────────────────────────
 	{ match: { key: 'amenity', value: 'hospital' }, category: 'other' },
 	{ match: { key: 'amenity', value: 'clinic' }, category: 'other' },
 	{ match: { key: 'amenity', value: 'doctors' }, category: 'other' },

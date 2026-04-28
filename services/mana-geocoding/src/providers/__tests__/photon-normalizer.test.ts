@@ -44,8 +44,6 @@ describe('normalizePhotonFeature', () => {
 		});
 		expect(result.confidence).toBeCloseTo(0.78, 2);
 		expect(result.provider).toBe('photon');
-		// peliasCategories deliberately absent for non-Pelias providers
-		expect(result.peliasCategories).toBeUndefined();
 	});
 
 	it('builds label from structured fields', () => {
@@ -111,7 +109,7 @@ describe('normalizePhotonFeature', () => {
 	});
 
 	it('coordinates: Photon emits [lon, lat] — normalizer must NOT swap', () => {
-		// Catches the all-too-easy lon/lat flip when porting from Pelias.
+		// Catches the all-too-easy lon/lat flip in Photon's GeoJSON.
 		const result = normalizePhotonFeature({
 			type: 'Feature',
 			geometry: { type: 'Point', coordinates: [9.1758, 47.6634] },

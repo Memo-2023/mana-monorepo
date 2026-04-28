@@ -491,10 +491,9 @@ services:
       - "traefik.http.services.mana-events.loadbalancer.server.port=3065"
 
   # ─── Geocoding ───────────────────────────────────────────
-  # Thin Hono wrapper in front of a self-hosted Pelias stack.
-  # Pelias itself (elasticsearch + api + libpostal) runs from a separate
-  # compose file in services/mana-geocoding/pelias/ — see
-  # services/mana-geocoding/CLAUDE.md for the initial import procedure.
+  # Thin Hono wrapper in front of self-hosted Photon (mana-gpu) with
+  # public photon.komoot.io and Nominatim as last-resort fallbacks.
+  # See services/mana-geocoding/CLAUDE.md for provider-chain details.
   # Internal-only: no traefik labels, not exposed via Cloudflare.
   mana-geocoding:
     build:
@@ -504,14 +503,9 @@ services:
     container_name: mana-geocoding
     restart: always
     mem_limit: 128m
-    # Pelias runs on host network via its own compose, so the wrapper
-    # reaches it via host.docker.internal (Pelias API at :4000).
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     environment:
       TZ: Europe/Berlin
       PORT: 3018
-      PELIAS_API_URL: http://host.docker.internal:4000/v1
       # Self-hosted Photon on mana-gpu (cross-LAN). When set, registers
       # as `photon-self` provider with privacy: 'local' — eligible for
       # sensitive queries. Empty value = slot disabled.

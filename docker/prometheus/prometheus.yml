@@ -314,9 +314,9 @@ scrape_configs:
       - targets:
           # mana-geocoding's own health (Hono wrapper)
           - http://mana-geocoding:3018/health
-          # Upstream Pelias health, proxied through the wrapper so the
+          # Upstream photon-self health, proxied through the wrapper so the
           # blackbox-exporter doesn't need host.docker.internal access.
-          - http://mana-geocoding:3018/health/pelias
+          - http://mana-geocoding:3018/health/photon-self
           # mana-ai (Mission Runner) — internal-only, no CF tunnel.
           - http://mana-ai:3066/health
     relabel_configs:

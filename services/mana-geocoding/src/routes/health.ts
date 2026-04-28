@@ -9,35 +9,43 @@ export function createHealthRoutes(config: Config, chain: ProviderChain) {
 	app.get('/', (c) => c.json({ status: 'ok', service: 'mana-geocoding' }));
 
 	/**
-	 * Upstream Pelias health. Proxies a request to the Pelias API so
-	 * monitoring can reach it without `extra_hosts: host.docker.internal`
-	 * on the blackbox exporter.
+	 * Upstream photon-self health. Proxies a request to the self-hosted
+	 * Photon so monitoring can reach it without `extra_hosts:
+	 * host.docker.internal` on the blackbox exporter.
 	 *
-	 * Backwards-compatible: existing prometheus probes against this
-	 * endpoint keep working. Now reports `degraded` (200) instead of `down`
-	 * (503) when Pelias is unreachable but a fallback provider is healthy
-	 * — the system can still serve queries, just slower / less precise.
+	 * Reports `degraded` (200) instead of `down` (503) when photon-self is
+	 * unreachable but a public fallback (photon / nominatim) is healthy —
+	 * the system can still serve queries, just at the cost of leaking the
+	 * query content to a third party.
 	 */
-	app.get('/pelias', async (c) => {
+	app.get('/photon-self', async (c) => {
+		const upstream = config.photonSelf.apiUrl;
+		if (!upstream) {
+			return c.json({ status: 'unconfigured', error: 'PHOTON_SELF_API_URL is unset' }, 503);
+		}
 		try {
-			const res = await fetch(`${config.pelias.apiUrl}/status`, {
+			const res = await fetch(`${upstream}/api?q=Konstanz&limit=1`, {
 				signal: AbortSignal.timeout(5000),
 			});
-			if (!res.ok && res.status !== 404) {
+			if (!res.ok) {
 				return c.json(
-					{ status: 'degraded', upstream: res.status, fallbackAvailable: chainHasFallback(chain) },
-					chainHasFallback(chain) ? 200 : 503
+					{
+						status: 'degraded',
+						upstream: res.status,
+						fallbackAvailable: chainHasPublicFallback(chain),
+					},
+					chainHasPublicFallback(chain) ? 200 : 503
 				);
 			}
-			return c.json({ status: 'ok', upstream: 'pelias-api' });
+			return c.json({ status: 'ok', upstream: 'photon-self' });
 		} catch (e) {
 			return c.json(
 				{
-					status: chainHasFallback(chain) ? 'degraded' : 'down',
+					status: chainHasPublicFallback(chain) ? 'degraded' : 'down',
 					error: e instanceof Error ? e.message : 'unknown',
-					fallbackAvailable: chainHasFallback(chain),
+					fallbackAvailable: chainHasPublicFallback(chain),
 				},
-				chainHasFallback(chain) ? 200 : 503
+				chainHasPublicFallback(chain) ? 200 : 503
 			);
 		}
 	});
@@ -56,10 +64,10 @@ export function createHealthRoutes(config: Config, chain: ProviderChain) {
 }
 
 /**
- * Check if any non-Pelias provider is currently believed healthy. Used
- * to soften /pelias health to "degraded" instead of "down" when a
- * fallback can still serve traffic.
+ * Check if any public fallback provider is currently believed healthy.
+ * Used to soften /photon-self health to "degraded" instead of "down"
+ * when a public fallback can still serve traffic.
  */
-function chainHasFallback(chain: ProviderChain): boolean {
-	return chain.getHealthSnapshot().some((p) => p.name !== 'pelias' && p.healthy);
+function chainHasPublicFallback(chain: ProviderChain): boolean {
+	return chain.getHealthSnapshot().some((p) => p.name !== 'photon-self' && p.healthy);
 }

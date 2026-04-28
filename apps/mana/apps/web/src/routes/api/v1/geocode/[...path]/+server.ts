@@ -25,8 +25,8 @@
  * If we ever want to rate-limit by user we can add JWT verification here
  * without touching the upstream service.
  *
- * Also proxies /health and /health/pelias so the SvelteKit status page
- * (/status) can check the service from its server side.
+ * Also proxies /health and /health/photon-self so the SvelteKit status
+ * page (/status) can check the service from its server side.
  */
 
 import { error } from '@sveltejs/kit';

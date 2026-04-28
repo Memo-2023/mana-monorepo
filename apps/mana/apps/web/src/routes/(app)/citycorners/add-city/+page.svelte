@@ -6,6 +6,7 @@
 	import { cityTable, useAllCities } from '$lib/modules/citycorners';
 	import type { LocalCity } from '$lib/modules/citycorners/types';
 	import { RoutePage } from '$lib/components/shell';
+	import { searchAddress } from '$lib/geocoding';
 
 	const allCities = useAllCities();
 
@@ -44,14 +45,10 @@
 		geocoding = true;
 		try {
 			const searchQ = country.trim() ? `${q}, ${country.trim()}` : q;
-			const res = await fetch(
-				`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQ)}&limit=1`,
-				{ headers: { 'User-Agent': 'CityCorners/1.0' } }
-			);
-			const results = await res.json();
+			const results = await searchAddress(searchQ, { limit: 1 });
 			if (results.length > 0) {
-				latitude = parseFloat(results[0].lat);
-				longitude = parseFloat(results[0].lon);
+				latitude = results[0].latitude;
+				longitude = results[0].longitude;
 			}
 		} catch {
 			// best-effort

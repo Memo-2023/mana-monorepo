@@ -5,15 +5,10 @@
  * importer). The HTTP shape is GeoJSON FeatureCollection with `properties`
  * holding `osm_key`/`osm_value` raw OSM tags + structured address fields.
  *
- * Compared to Pelias:
- *   + No rate limit advertised, but be a polite neighbor: short timeouts,
- *     no retries, cache aggressively.
- *   + Reverse geocoding takes lon/lat (note the order — different from
- *     Pelias's point.lat/point.lon). Easy to flip if not careful.
- *   - No `confidence` field. We approximate from `importance` (0–1) when
- *     present, else 0.5 as a neutral default.
- *   - No DACH-specific tuning — German venue names sometimes lose umlauts
- *     in display labels. Acceptable for a fallback.
+ * Same class powers both `photon-self` (self-hosted, privacy: 'local')
+ * and `photon` (public komoot.io, privacy: 'public'). Reverse-geocoding
+ * takes lon/lat (note the order). Confidence is approximated from
+ * `importance` (0–1) when present, else 0.5 as a neutral default.
  */
 
 import { mapOsmTagToPlaceCategory } from '../lib/osm-category-map';
@@ -207,9 +202,6 @@ export function normalizePhotonFeature(
 			country: props.country,
 		},
 		category,
-		// peliasCategories deliberately omitted — Photon has osm_key:osm_value
-		// but the consumer side keys off the absence of this field as a
-		// "result came from a fallback" signal.
 		confidence: typeof props.importance === 'number' ? props.importance : 0.5,
 		provider: providerName,
 	};

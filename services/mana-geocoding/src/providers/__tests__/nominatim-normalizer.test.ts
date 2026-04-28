@@ -1,7 +1,7 @@
 /**
  * Tests for normalizing Nominatim's flat-JSON shape into our GeocodingResult.
  *
- * Nominatim differs from Photon/Pelias in three subtle ways we lock in:
+ * Nominatim differs from Photon in three subtle ways we lock in:
  *   1. Lat/lon are STRINGS, not numbers — the normalizer must parseFloat.
  *   2. Display name is a comma-noisy hierarchy ("Konzil, Hafenstraße,
  *      Konstanz, Konstanz, Regierungsbezirk Freiburg, Baden-Württemberg,
@@ -134,17 +134,5 @@ describe('normalizeNominatimResult', () => {
 			type: 'city',
 		});
 		expect(result.provider).toBe('nominatim');
-	});
-
-	it('does not set peliasCategories', () => {
-		// Consumer side keys off the absence of this field as a "fallback
-		// provider" signal.
-		const result = normalizeNominatimResult({
-			lat: '47.0',
-			lon: '9.0',
-			class: 'amenity',
-			type: 'restaurant',
-		});
-		expect(result.peliasCategories).toBeUndefined();
 	});
 });

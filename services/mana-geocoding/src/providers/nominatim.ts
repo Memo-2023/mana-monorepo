@@ -6,9 +6,9 @@
  * search/reverse. A custom `User-Agent` is required (Nominatim returns
  * 403 to default-UA fetches).
  *
- * Compared to Pelias/Photon, Nominatim returns a single flat array
- * rather than GeoJSON. We adapt the shape and synthesize a confidence
- * score from `importance`.
+ * Unlike Photon, Nominatim returns a single flat array rather than
+ * GeoJSON. We adapt the shape and synthesize a confidence score from
+ * `importance`.
  *
  * https://nominatim.org/release-docs/develop/api/Search/
  * https://operations.osmfoundation.org/policies/nominatim/

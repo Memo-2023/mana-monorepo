@@ -14,7 +14,6 @@ import type { Config } from '../config';
 function baseConfig(overrides: Partial<Config> = {}): Config {
 	return {
 		port: 3018,
-		pelias: { apiUrl: 'http://127.0.0.1:1' },
 		photon: { apiUrl: 'https://photon.komoot.io' },
 		photonSelf: { apiUrl: undefined },
 		nominatim: {
@@ -25,7 +24,7 @@ function baseConfig(overrides: Partial<Config> = {}): Config {
 		cors: { origins: [] },
 		cache: { maxEntries: 100, ttlMs: 1000, publicTtlMs: 7000 },
 		providers: {
-			enabled: ['photon-self', 'pelias', 'photon', 'nominatim'],
+			enabled: ['photon-self', 'photon', 'nominatim'],
 			healthCacheMs: 30_000,
 			timeoutMs: 8000,
 		},

@@ -61,7 +61,7 @@ urlenc() {
 
 echo "--- Health ---"
 check "wrapper health" "$BASE/health" '.status' 'ok'
-check "pelias health proxy" "$BASE/health/pelias" '.status' 'ok'
+check "photon-self health proxy" "$BASE/health/photon-self" '.status' 'ok'
 echo
 
 # --- 2. Forward geocoding ---

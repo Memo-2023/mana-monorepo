@@ -47,7 +47,7 @@ export type ChainNotice =
 	/** Sensitive query was blocked from public providers and no local
 	 *  provider was healthy → no results, but the absence is intentional. */
 	| 'sensitive_local_unavailable'
-	/** A non-Pelias provider served the request (Pelias was down). */
+	/** A public provider served the request (the local provider was down). */
 	| 'fallback_used';
 
 export interface ChainOptions {
@@ -161,9 +161,9 @@ export class ProviderChain {
 		}
 
 		// Stale or missing — refresh. We don't await this aggressively in
-		// happy paths (Pelias up + healthy is the cheapest case), but on
-		// cold-start every entry is missing so the first request pays for
-		// one health probe per provider.
+		// happy paths (photon-self up + healthy is the cheapest case),
+		// but on cold-start every entry is missing so the first request
+		// pays for one health probe per provider.
 		const healthy = await provider.health(signal);
 		this.health.set(provider.name, { healthy, checkedAt: now });
 		if (!healthy) {

@@ -68,7 +68,7 @@ const SEARCH: SearchRequest = { q: 'test', limit: 5, lang: 'de' };
 
 describe('ProviderChain — happy path', () => {
 	it('returns the first provider that succeeds', async () => {
-		const a = new FakeProvider('pelias');
+		const a = new FakeProvider('photon-self');
 		const b = new FakeProvider('photon');
 		const chain = new ProviderChain({
 			providers: [a, b],
@@ -76,29 +76,29 @@ describe('ProviderChain — happy path', () => {
 		});
 		const res = await chain.search(SEARCH);
 		expect(res.ok).toBe(true);
-		expect(res.provider).toBe('pelias');
-		expect(res.tried).toEqual(['pelias']);
+		expect(res.provider).toBe('photon-self');
+		expect(res.tried).toEqual(['photon-self']);
 		expect(a.calls.search).toBe(1);
 		expect(b.calls.search).toBe(0);
 	});
 
 	it('honors the providers array order', async () => {
 		const photon = new FakeProvider('photon');
-		const pelias = new FakeProvider('pelias');
+		const local = new FakeProvider('photon-self');
 		// photon first this time
 		const chain = new ProviderChain({
-			providers: [photon, pelias],
+			providers: [photon, local],
 			healthCacheMs: 60_000,
 		});
 		const res = await chain.search(SEARCH);
 		expect(res.provider).toBe('photon');
-		expect(pelias.calls.search).toBe(0);
+		expect(local.calls.search).toBe(0);
 	});
 });
 
 describe('ProviderChain — failover', () => {
 	it('falls through on unreachable, returns next provider', async () => {
-		const a = new FakeProvider('pelias', {
+		const a = new FakeProvider('photon-self', {
 			search: async () => ({ ok: false, kind: 'unreachable', status: 503 }),
 		});
 		const b = new FakeProvider('photon');
@@ -106,7 +106,7 @@ describe('ProviderChain — failover', () => {
 		const res = await chain.search(SEARCH);
 		expect(res.ok).toBe(true);
 		expect(res.provider).toBe('photon');
-		expect(res.tried).toEqual(['pelias', 'photon']);
+		expect(res.tried).toEqual(['photon-self', 'photon']);
 	});
 
 	it('falls through on rate_limited', async () => {
@@ -121,20 +121,20 @@ describe('ProviderChain — failover', () => {
 
 	it('STOPS on empty results — does not consume fallback budget', async () => {
 		// A clean empty answer is definitive: don't burn through public APIs.
-		const a = new FakeProvider('pelias', {
+		const a = new FakeProvider('photon-self', {
 			search: async () => ({ ok: true, results: [] }),
 		});
 		const b = new FakeProvider('photon');
 		const chain = new ProviderChain({ providers: [a, b], healthCacheMs: 60_000 });
 		const res = await chain.search(SEARCH);
 		expect(res.ok).toBe(true);
-		expect(res.provider).toBe('pelias');
+		expect(res.provider).toBe('photon-self');
 		expect(res.results).toEqual([]);
 		expect(b.calls.search).toBe(0);
 	});
 
 	it('returns ok:false when all providers fail', async () => {
-		const a = new FakeProvider('pelias', {
+		const a = new FakeProvider('photon-self', {
 			search: async () => ({ ok: false, kind: 'unreachable' }),
 		});
 		const b = new FakeProvider('photon', {
@@ -144,23 +144,23 @@ describe('ProviderChain — failover', () => {
 		const res = await chain.search(SEARCH);
 		expect(res.ok).toBe(false);
 		expect(res.results).toEqual([]);
-		expect(res.tried).toEqual(['pelias', 'photon']);
+		expect(res.tried).toEqual(['photon-self', 'photon']);
 	});
 });
 
 describe('ProviderChain — health cache', () => {
 	it('skips a provider whose health probe returned false', async () => {
-		const dead = new FakeProvider('pelias', { health: async () => false });
+		const dead = new FakeProvider('photon-self', { health: async () => false });
 		const alive = new FakeProvider('photon');
 		const chain = new ProviderChain({ providers: [dead, alive], healthCacheMs: 60_000 });
 		const res = await chain.search(SEARCH);
-		expect(res.tried).toEqual(['photon']); // pelias was skipped, not tried
+		expect(res.tried).toEqual(['photon']); // local was skipped, not tried
 		expect(dead.calls.search).toBe(0);
 		expect(dead.calls.health).toBe(1);
 	});
 
 	it('caches health for healthCacheMs — only one probe per window', async () => {
-		const a = new FakeProvider('pelias');
+		const a = new FakeProvider('photon-self');
 		const chain = new ProviderChain({ providers: [a], healthCacheMs: 60_000 });
 		await chain.search(SEARCH);
 		await chain.search(SEARCH);
@@ -171,18 +171,19 @@ describe('ProviderChain — health cache', () => {
 
 	it('marks provider unhealthy when search fails, skipping it next time', async () => {
 		let failNext = true;
-		const flaky = new FakeProvider('pelias', {
-			search: async () => (failNext ? { ok: false, kind: 'unreachable' } : okResults('pelias')),
+		const flaky = new FakeProvider('photon-self', {
+			search: async () =>
+				failNext ? { ok: false, kind: 'unreachable' } : okResults('photon-self'),
 		});
 		const alive = new FakeProvider('photon');
 		const chain = new ProviderChain({ providers: [flaky, alive], healthCacheMs: 60_000 });
 
-		// First call: pelias fails → cached unhealthy → photon serves
+		// First call: local fails → cached unhealthy → photon serves
 		const r1 = await chain.search(SEARCH);
 		expect(r1.provider).toBe('photon');
-		expect(r1.tried).toEqual(['pelias', 'photon']);
+		expect(r1.tried).toEqual(['photon-self', 'photon']);
 
-		// Second call: pelias is in unhealthy cache, not tried at all
+		// Second call: local is in unhealthy cache, not tried at all
 		failNext = false; // would now succeed but never gets called
 		const r2 = await chain.search(SEARCH);
 		expect(r2.provider).toBe('photon');
@@ -191,7 +192,7 @@ describe('ProviderChain — health cache', () => {
 	});
 
 	it('refreshes health after cache expires', async () => {
-		const dead = new FakeProvider('pelias', { health: async () => false });
+		const dead = new FakeProvider('photon-self', { health: async () => false });
 		const alive = new FakeProvider('photon');
 		// 1ms cache for fast test
 		const chain = new ProviderChain({ providers: [dead, alive], healthCacheMs: 1 });
@@ -203,7 +204,7 @@ describe('ProviderChain — health cache', () => {
 	});
 
 	it('clearHealthCache forces re-probe', async () => {
-		const a = new FakeProvider('pelias');
+		const a = new FakeProvider('photon-self');
 		const chain = new ProviderChain({ providers: [a], healthCacheMs: 60_000 });
 		await chain.search(SEARCH);
 		expect(a.calls.health).toBe(1);
@@ -215,19 +216,19 @@ describe('ProviderChain — health cache', () => {
 
 describe('ProviderChain — getHealthSnapshot', () => {
 	it('reports per-provider health + age', async () => {
-		const ok = new FakeProvider('pelias');
+		const ok = new FakeProvider('photon-self');
 		const dead = new FakeProvider('photon', { health: async () => false });
 		const chain = new ProviderChain({ providers: [ok, dead], healthCacheMs: 60_000 });
 		await chain.search(SEARCH);
 		const snap = chain.getHealthSnapshot();
 		expect(snap).toHaveLength(2);
-		expect(snap[0]).toMatchObject({ name: 'pelias', healthy: true });
+		expect(snap[0]).toMatchObject({ name: 'photon-self', healthy: true });
 		expect(snap[1]).toMatchObject({ name: 'photon', healthy: false });
 		expect(snap[0].ageMs).toBeLessThan(1000);
 	});
 
 	it('reports Infinity age for never-probed providers', async () => {
-		const a = new FakeProvider('pelias');
+		const a = new FakeProvider('photon-self');
 		const chain = new ProviderChain({ providers: [a], healthCacheMs: 60_000 });
 		const snap = chain.getHealthSnapshot();
 		expect(snap[0].ageMs).toBe(Infinity);
@@ -237,7 +238,7 @@ describe('ProviderChain — getHealthSnapshot', () => {
 
 describe('ProviderChain — reverse', () => {
 	it('uses the same provider order for reverse', async () => {
-		const a = new FakeProvider('pelias', {
+		const a = new FakeProvider('photon-self', {
 			reverse: async () => ({ ok: false, kind: 'unreachable' }),
 		});
 		const b = new FakeProvider('photon', { privacy: 'public' });
@@ -251,26 +252,26 @@ describe('ProviderChain — reverse', () => {
 
 describe('ProviderChain — privacy / localOnly mode', () => {
 	it('skips public providers when localOnly is true', async () => {
-		const localPelias = new FakeProvider('pelias', { privacy: 'local' });
+		const localProvider = new FakeProvider('photon-self', { privacy: 'local' });
 		const publicPhoton = new FakeProvider('photon', { privacy: 'public' });
 		const publicNominatim = new FakeProvider('nominatim', { privacy: 'public' });
 		const chain = new ProviderChain({
-			providers: [localPelias, publicPhoton, publicNominatim],
+			providers: [localProvider, publicPhoton, publicNominatim],
 			healthCacheMs: 60_000,
 		});
 
 		const res = await chain.search(SEARCH, undefined, { localOnly: true });
 
 		expect(res.ok).toBe(true);
-		expect(res.provider).toBe('pelias');
-		expect(localPelias.calls.search).toBe(1);
+		expect(res.provider).toBe('photon-self');
+		expect(localProvider.calls.search).toBe(1);
 		// Public providers must not even have their search() called
 		expect(publicPhoton.calls.search).toBe(0);
 		expect(publicNominatim.calls.search).toBe(0);
 	});
 
 	it('falls back to the second LOCAL provider when the first local fails', async () => {
-		const local1 = new FakeProvider('pelias', {
+		const local1 = new FakeProvider('photon-self', {
 			privacy: 'local',
 			search: async () => ({ ok: false, kind: 'unreachable' }),
 		});
@@ -313,7 +314,7 @@ describe('ProviderChain — privacy / localOnly mode', () => {
 	});
 
 	it('returns notice: fallback_used when a public provider serves a non-sensitive query', async () => {
-		const localDown = new FakeProvider('pelias', {
+		const localDown = new FakeProvider('photon-self', {
 			privacy: 'local',
 			health: async () => false,
 		});
@@ -329,10 +330,10 @@ describe('ProviderChain — privacy / localOnly mode', () => {
 	});
 
 	it('NO notice when the local provider serves a non-sensitive query', async () => {
-		const localUp = new FakeProvider('pelias', { privacy: 'local' });
+		const localUp = new FakeProvider('photon-self', { privacy: 'local' });
 		const chain = new ProviderChain({ providers: [localUp], healthCacheMs: 60_000 });
 		const res = await chain.search(SEARCH);
-		expect(res.provider).toBe('pelias');
+		expect(res.provider).toBe('photon-self');
 		expect(res.notice).toBeUndefined();
 	});
 });

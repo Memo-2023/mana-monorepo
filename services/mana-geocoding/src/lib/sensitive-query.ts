@@ -12,7 +12,7 @@
  *
  * Trade-offs:
  *   - False positives are OK (a user searching for "Praxis Müller" who
- *     wanted the dance studio gets 0 results when Pelias is down — not
+ *     wanted the dance studio gets 0 results when photon-self is down — not
  *     ideal but better than a privacy leak)
  *   - False negatives are NOT OK (we'd rather over-block than under-block)
  *   - The list is intentionally narrow: only words with clear medical or

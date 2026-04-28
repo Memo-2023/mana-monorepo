@@ -8,6 +8,7 @@
 	import { ccLocationTable, CATEGORY_KEYS } from '$lib/modules/citycorners';
 	import type { LocalCity, LocalLocation } from '$lib/modules/citycorners/types';
 	import { RoutePage } from '$lib/components/shell';
+	import { searchAddress } from '$lib/geocoding';
 
 	const cityCtx = getContext<{ value: LocalCity | undefined }>('currentCity');
 	let city = $derived(cityCtx.value);
@@ -58,14 +59,10 @@
 				cityName && !addr.toLowerCase().includes(cityName.toLowerCase())
 					? `${addr}, ${cityName}`
 					: addr;
-			const res = await fetch(
-				`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`,
-				{ headers: { 'User-Agent': 'CityCorners/1.0' } }
-			);
-			const results = await res.json();
+			const results = await searchAddress(q, { limit: 1 });
 			if (results.length > 0) {
-				latitude = parseFloat(results[0].lat);
-				longitude = parseFloat(results[0].lon);
+				latitude = results[0].latitude;
+				longitude = results[0].longitude;
 			}
 		} catch {
 			// Geocoding is best-effort
