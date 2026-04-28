@@ -50,9 +50,9 @@
 		Globe,
 		GridFour,
 		Heart,
+		HeartHalf,
 		House,
 		Key,
-		Lightbulb,
 		List,
 		MagnifyingGlass,
 		Microphone,
@@ -136,7 +136,7 @@
 		scale: Scales,
 		robot: Robot,
 		key: Key,
-		lightbulb: Lightbulb,
+		'heart-half': HeartHalf,
 		shield: Shield,
 		gift: Gift,
 		'music-notes': MusicNotes,
@@ -508,7 +508,7 @@
 			links.push({
 				id: 'feedback',
 				label: 'Idee teilen',
-				icon: 'lightbulb',
+				icon: 'heart-half',
 				onClick: onFeedback,
 			});
 		} else if (userEmail && feedbackHref) {
@@ -559,7 +559,7 @@
 			out.push({
 				id: 'feedback',
 				label: 'Idee teilen',
-				icon: 'lightbulb',
+				icon: 'heart-half',
 				onClick: () => onFeedback(),
 			});
 			out.push({ id: 'feedback-divider', label: '', divider: true });

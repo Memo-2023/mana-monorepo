@@ -67,7 +67,7 @@
 		helpOpen?: boolean;
 		onContextMenu?: (e: MouseEvent) => void;
 
-		// Inline feedback hook — renders a small Lightbulb button in the
+		// Inline feedback hook — renders a small heart-half button in the
 		// window-actions row. Submitted feedback is tagged with `moduleId`
 		// so the public community feed can group/filter by module.
 		/** Module identifier passed to the inline FeedbackHook. */
@@ -75,6 +75,12 @@
 		/** Suppress the auto-injected FeedbackHook (e.g. on the
 		 *  /community-/feedback-pages where it's redundant). */
 		hideFeedback?: boolean;
+		/** When provided, the heart-half button calls this instead of
+		 *  opening its own modal. The host renders feedback inline (used
+		 *  by workbench AppPage to mirror the Hilfe-panel pattern). */
+		onFeedback?: () => void;
+		/** Highlights the heart-half trigger when the inline panel is open. */
+		feedbackOpen?: boolean;
 
 		// Snippets
 		header_left?: Snippet;
@@ -106,6 +112,8 @@
 		onContextMenu,
 		moduleId,
 		hideFeedback = false,
+		onFeedback,
+		feedbackOpen = false,
 		header_left,
 		badge,
 		actions,
@@ -205,7 +213,7 @@
 				{@render actions()}
 			{/if}
 			{#if !hideFeedback}
-				<FeedbackHook {moduleId} />
+				<FeedbackHook {moduleId} onClick={onFeedback} active={feedbackOpen} />
 			{/if}
 			{#if onHelp}
 				<button

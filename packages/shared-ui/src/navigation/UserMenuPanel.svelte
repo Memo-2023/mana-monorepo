@@ -8,7 +8,7 @@
 		Gear,
 		Globe,
 		Heart,
-		Lightbulb,
+		HeartHalf,
 		Moon,
 		Palette,
 		Question,
@@ -37,7 +37,7 @@
 		sun: Sun,
 		palette: Palette,
 		robot: Robot,
-		lightbulb: Lightbulb,
+		'heart-half': HeartHalf,
 		logout: SignOut,
 	};
 

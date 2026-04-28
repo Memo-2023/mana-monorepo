@@ -3,29 +3,46 @@
   pre-filled with the calling module's id. Drops into ModuleShell's
   window-actions row by default; can be placed anywhere by callers.
 
-  ModuleShell auto-injects this in its header (right next to the
-  window-controls). Modules opt out via `hideFeedback={true}`.
+  Two render modes:
+   - Standalone (`onClick` not provided): renders the heart-half button +
+     opens its own FeedbackQuickModal. Used outside the workbench
+     (e.g. /todo direct route, settings pages).
+   - Hosted (`onClick` provided): just the icon button — the host owns
+     the open-state and renders feedback inline (workbench AppPage).
+
+  ModuleShell auto-injects the standalone variant in its header. The
+  workbench's AppPage suppresses that and wires its own onFeedback to
+  flip into the inline feedback panel (like the Hilfe panel).
 -->
 <script lang="ts">
-	import { Lightbulb } from '@mana/shared-icons';
+	import { HeartHalf } from '@mana/shared-icons';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import FeedbackQuickModal from './FeedbackQuickModal.svelte';
 
 	interface Props {
 		moduleId?: string;
 		size?: number;
+		/** When set, the button just calls this — host renders the form. */
+		onClick?: () => void;
+		/** When the host renders inline feedback, pass `true` to highlight
+		 *  the trigger like the help button does. */
+		active?: boolean;
 	}
 
-	let { moduleId, size = 22 }: Props = $props();
+	let { moduleId, size = 22, onClick, active = false }: Props = $props();
 
 	let open = $state(false);
 
 	function handleClick(e: MouseEvent) {
 		e.stopPropagation();
 		// Submit requires login. Guests would just see an auth-error toast,
-		// so silently skip the modal — global pill catches them elsewhere.
+		// so silently skip — global pill catches them elsewhere.
 		if (!authStore.user) return;
-		open = true;
+		if (onClick) {
+			onClick();
+		} else {
+			open = true;
+		}
 	}
 </script>
 
@@ -33,14 +50,17 @@
 	<button
 		type="button"
 		class="feedback-hook-btn"
+		class:active
 		onclick={handleClick}
 		title="Idee oder Feedback?"
 		aria-label="Feedback geben"
 	>
-		<Lightbulb {size} weight="bold" />
+		<HeartHalf {size} weight="bold" />
 	</button>
 
-	<FeedbackQuickModal {open} moduleContext={moduleId} onClose={() => (open = false)} />
+	{#if !onClick}
+		<FeedbackQuickModal {open} moduleContext={moduleId} onClose={() => (open = false)} />
+	{/if}
 {/if}
 
 <style>
@@ -59,6 +79,11 @@
 	}
 
 	.feedback-hook-btn:hover {
+		background: hsl(var(--color-surface-hover, var(--color-muted)));
+		color: hsl(var(--color-primary));
+	}
+
+	.feedback-hook-btn.active {
 		background: hsl(var(--color-surface-hover, var(--color-muted)));
 		color: hsl(var(--color-primary));
 	}

@@ -7,6 +7,7 @@
 	import { X, CaretUp, CaretDown, ArrowLeft, SpinnerGap } from '@mana/shared-icons';
 	import { _ } from 'svelte-i18n';
 	import { ModuleShell } from '$lib/components/shell';
+	import FeedbackForm from '$lib/components/feedback/FeedbackForm.svelte';
 	import { getApp, getAppByDragType, canDrop, executeDrop } from '$lib/app-registry';
 	import type { Component } from 'svelte';
 	import { dropTarget } from '@mana/shared-ui/dnd';
@@ -48,6 +49,19 @@
 	// ── Help ────────────────────────────────────────────────
 	let helpOpen = $state(false);
 	let helpData = $derived(app?.help);
+
+	// ── Inline feedback ────────────────────────────────────
+	let feedbackOpen = $state(false);
+
+	function toggleFeedback() {
+		feedbackOpen = !feedbackOpen;
+		if (feedbackOpen) helpOpen = false;
+	}
+
+	function toggleHelp() {
+		helpOpen = !helpOpen;
+		if (helpOpen) feedbackOpen = false;
+	}
 
 	// ── Cross-module drop target ────────────────────────────
 	let acceptedDropTypes = $derived(app?.acceptsDropFrom ?? []);
@@ -309,10 +323,17 @@
 		{onMoveLeft}
 		{onMoveRight}
 		{onContextMenu}
-		onHelp={helpData ? () => (helpOpen = !helpOpen) : undefined}
+		onHelp={helpData ? toggleHelp : undefined}
 		{helpOpen}
+		moduleId={appId}
+		onFeedback={toggleFeedback}
+		{feedbackOpen}
 	>
-		{#if helpOpen && helpData}
+		{#if feedbackOpen}
+			<div class="feedback-view">
+				<FeedbackForm moduleContext={appId} onCancel={() => (feedbackOpen = false)} />
+			</div>
+		{:else if helpOpen && helpData}
 			<div class="help-view">
 				<p class="help-desc">{helpData.description}</p>
 
@@ -420,6 +441,12 @@
 	}
 
 	.help-view {
+		padding: 1rem 1.125rem 1.5rem;
+		animation: helpFadeIn 0.2s ease-out;
+		overflow-y: auto;
+		height: 100%;
+	}
+	.feedback-view {
 		padding: 1rem 1.125rem 1.5rem;
 		animation: helpFadeIn 0.2s ease-out;
 		overflow-y: auto;
