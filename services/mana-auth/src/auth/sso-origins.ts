@@ -24,7 +24,6 @@ export const PRODUCTION_TRUSTED_ORIGINS = [
 	'https://mana.how',
 	'https://auth.mana.how',
 	// Separate apps (not part of the unified app)
-	'https://arcade.mana.how', // Games
 	'https://whopxl.mana.how', // Games
 ] as const;
 

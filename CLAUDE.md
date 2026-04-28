@@ -25,7 +25,6 @@ apps/
 ├── memoro/apps/     # Only remaining mobile app (Expo SDK 55)
 ├── {product}/       # Per-product landing pages, packages
 │                    # Standalone (own container, not unified): manavoxel
-games/               # arcade, voxelava, whopixels, worldream
 services/            # Backend services (Hono/Bun, Go, Python) — see list below
 packages/            # Shared workspace packages (@mana/*)
 docs/                # Long-form docs (deployment, hardware, postmortems, etc.)
@@ -165,7 +164,7 @@ Enforced by `pnpm run validate:turbo` (`scripts/validate-no-recursive-turbo.mjs`
 | `@mana/shared-theme` | Theme config |
 | `@mana/shared-i18n` | i18n |
 | `@mana/shared-privacy` | Unified visibility/privacy system: `VisibilityLevel` enum + zod schema + `<VisibilityPicker>` + predicates (`canEmbedOnWebsite`, …). Plan: [`docs/plans/visibility-system.md`](docs/plans/visibility-system.md). Rollout per-module, not yet adopted anywhere. |
-| `@mana/local-store` | Local-first store primitives — used by unified Mana, manavoxel, arcade, and shared-uload/-stores/-links |
+| `@mana/local-store` | Local-first store primitives — used by unified Mana, manavoxel, and shared-uload/-stores/-links |
 | `@mana/local-llm` | Browser-local LLM inference (transformers.js + Gemma 4 E2B, WebGPU). Powers `/llm-test` and the playground module. See [`packages/local-llm/CLAUDE.md`](packages/local-llm/CLAUDE.md) for the CSP requirements and the transformers.js v4 gotchas. |
 | `@mana/local-stt` | Browser-local speech-to-text (transformers.js + Whisper, WebGPU). Powers the QuickInputBar mic button. Same architecture as local-llm. See [`packages/local-stt/CLAUDE.md`](packages/local-stt/CLAUDE.md). |
 

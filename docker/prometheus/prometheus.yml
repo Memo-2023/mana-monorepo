@@ -277,7 +277,6 @@ scrape_configs:
           - https://mana.how/playground
           # Standalone games (separate containers)
           - https://whopxl.mana.how
-          - https://arcade.mana.how
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target

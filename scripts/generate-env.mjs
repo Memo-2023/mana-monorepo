@@ -392,36 +392,6 @@ const APP_CONFIGS = [
 		},
 	},
 
-	// Arcade Server (Hono/Bun)
-	{
-		path: 'games/arcade/apps/server/.env',
-		vars: {
-			NODE_ENV: () => 'development',
-			PORT: (env) => env.MANA_GAMES_BACKEND_PORT || '3011',
-			// Google Gemini
-			GOOGLE_GENAI_API_KEY: (env) => env.MANA_GAMES_GOOGLE_GENAI_API_KEY,
-			// Anthropic Claude
-			ANTHROPIC_API_KEY: (env) => env.MANA_GAMES_ANTHROPIC_API_KEY,
-			// Azure OpenAI
-			AZURE_OPENAI_ENDPOINT: (env) => env.MANA_GAMES_AZURE_OPENAI_ENDPOINT,
-			AZURE_OPENAI_API_KEY: (env) => env.MANA_GAMES_AZURE_OPENAI_API_KEY,
-			AZURE_OPENAI_DEPLOYMENT: (env) => env.MANA_GAMES_AZURE_OPENAI_DEPLOYMENT || 'gpt-4o',
-			// GitHub
-			GITHUB_TOKEN: (env) => env.MANA_GAMES_GITHUB_TOKEN,
-			GITHUB_OWNER: (env) => env.MANA_GAMES_GITHUB_OWNER || 'tillschneider',
-			GITHUB_REPO: (env) => env.MANA_GAMES_GITHUB_REPO || 'mana-games',
-			CORS_ORIGINS: (env) => env.CORS_ORIGINS,
-		},
-	},
-
-	// Arcade Web (Astro)
-	{
-		path: 'games/arcade/apps/web/.env',
-		vars: {
-			PUBLIC_BACKEND_URL: (env) => `http://localhost:${env.MANA_GAMES_BACKEND_PORT || '3011'}`,
-		},
-	},
-
 	// Context Server (Hono/Bun)
 	{
 		path: 'apps/context/apps/server/.env',

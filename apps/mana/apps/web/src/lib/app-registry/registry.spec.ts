@@ -61,8 +61,6 @@ const BRANDING_ONLY = new Set([
 	// Meta entry for the unified Mana app itself — it can't be a "module"
 	// of its own workbench.
 	'mana',
-	// Standalone web app on its own subdomain (arcade.mana.how).
-	'arcade',
 	// Marketing placeholders, status: 'planning' / 'development'. No
 	// workbench module exists yet — they only show up in the AppsPage
 	// gallery as "Coming Soon" hints.

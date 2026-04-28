@@ -112,8 +112,6 @@ app.get('/api/v1/data', (c) => {
 });
 ```
 
-> Note: Arcade's server (`@arcade/server`) does not require auth — game generation and community submission are public endpoints.
-
 ## Environment Variables
 
 ```env

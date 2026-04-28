@@ -135,12 +135,11 @@ Alle 76 Module der Mana-App (`apps/mana/apps/web/src/lib/modules/`).
 | `feedback` | Feedback | Bug-Reports und Feedback |
 | `playground` | Playground | Dev/Test-Playground |
 
-## Sonstige (5)
+## Sonstige (4)
 
 | Modul | Name | Beschreibung |
 |---|---|---|
 | `spiral` | Spiral | Spiral-Timeline-Visualisierung |
-| `arcade` | Arcade | AI-generierte Browser-Games |
 | `uload` | uLoad | URL-Shortener mit Click-Tracking |
 | `complexity` | Complexity | System-Komplexitäts-Metriken |
 | `core` | Core | Core-Infrastruktur und shared Exports |

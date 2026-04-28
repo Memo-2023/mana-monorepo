@@ -836,23 +836,6 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'guest',
 	},
 	{
-		id: 'arcade',
-		name: 'Arcade',
-		description: {
-			de: 'KI Browser-Spiele',
-			en: 'AI Browser Games',
-		},
-		longDescription: {
-			de: 'Sammlung von KI-generierten Browser-Spielen zum sofortigen Spielen.',
-			en: 'Collection of AI-generated browser games to play instantly.',
-		},
-		icon: APP_ICONS.arcade,
-		color: '#ef4444',
-		comingSoon: false,
-		status: 'beta',
-		requiredTier: 'guest',
-	},
-	{
 		id: 'drink',
 		name: 'Drink',
 		description: {
@@ -1312,8 +1295,6 @@ export const APP_SLIDER_LABELS = {
 const APP_URL_OVERRIDES: Partial<Record<AppIconId, { dev: string; prod: string }>> = {
 	// The unified app itself lives at the root, not at /mana.
 	mana: { dev: 'http://localhost:5173', prod: 'https://mana.how' },
-	// Standalone apps on their own subdomain / port.
-	arcade: { dev: 'http://localhost:5201', prod: 'https://arcade.mana.how' },
 };
 
 export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = Object.fromEntries(
