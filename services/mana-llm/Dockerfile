@@ -23,8 +23,12 @@ RUN useradd -m -u 1000 appuser
 # Copy installed packages from builder
 COPY --from=builder /root/.local /home/appuser/.local
 
-# Copy application code
+# Copy application code + alias config. `aliases.yaml` is loaded by
+# main.py's lifespan handler from `Path(__file__).parent.parent /
+# 'aliases.yaml'` = /app/aliases.yaml. Without it the FastAPI app
+# raises AliasConfigError on startup and the container crashloops.
 COPY --chown=appuser:appuser src/ ./src/
+COPY --chown=appuser:appuser aliases.yaml ./aliases.yaml
 
 # Set environment
 ENV PATH=/home/appuser/.local/bin:$PATH
