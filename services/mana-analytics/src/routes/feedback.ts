@@ -22,7 +22,10 @@ export function createFeedbackRoutes(feedbackService: FeedbackService) {
 	r.post('/', async (c) => {
 		const user = c.get('user');
 		const body = await c.req.json();
-		const item = await feedbackService.createFeedback(user.userId, body);
+		// Body never carries appId — the client sends it as X-App-Id.
+		// Fall back to 'mana' so legacy callers don't 500 on a NOT NULL.
+		const appId = body.appId || c.req.header('x-app-id') || 'mana';
+		const item = await feedbackService.createFeedback(user.userId, { ...body, appId });
 		return c.json(item, 201);
 	});
 
