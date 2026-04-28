@@ -7,6 +7,7 @@
 
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { trimTrailingSlash } from 'hono/trailing-slash';
 import { loadConfig } from './config';
 import { getDb } from './db/connection';
 import { createBetterAuth } from './auth/better-auth.config';
@@ -78,6 +79,14 @@ const app = new Hono();
 
 app.onError(errorHandler);
 app.use('*', requestLogger());
+// Defense-in-depth for clients that accidentally request the trailing-slash
+// form of a route (e.g. `/api/v1/me/onboarding/`). Hono's nested-router root
+// match-up doesn't include the prefix-with-slash variant, so without this
+// middleware those clients get a 404 even though the same path-without-slash
+// would work. Trims the slash and 301-redirects on GET/HEAD, only when a
+// non-trimmed lookup already produced a 404 — so the legitimate root path
+// `/` is never touched.
+app.use('*', trimTrailingSlash());
 app.use(
 	'*',
 	cors({

@@ -87,16 +87,20 @@ export class VaultLockedError extends Error {
  * Dev-only registry-vs-record shape check.
  *
  * Called from encryptRecord when `import.meta.env.DEV` is truthy (Vite
- * strips the call in production builds). Catches the most common silent
- * failure mode: a registry entry names a field the record doesn't have,
- * because of a case typo. Without this warning, the field stays plaintext
- * forever and no error is ever thrown.
+ * strips the call in production builds). Catches the genuine silent
+ * failure mode: a registry entry names a field the record has only
+ * under a case-mismatched key. Without this warning, the typo'd field
+ * stays plaintext forever and no error is ever thrown.
  *
- * False-positive strategy:
- *   - We only warn on close matches (case-insensitive). An optional field
- *     that happens to be omitted from a given write won't light up.
- *   - A record that has NONE of the registered fields is also flagged,
- *     which catches wrong-table-name call sites.
+ * What the check explicitly does NOT flag:
+ *   - Records that have NONE of the registered fields. Many call sites
+ *     legitimately encrypt records before any optional encrypted field
+ *     has been set (e.g. `ensureDefaultAgent` writes a fresh agent row
+ *     without a `systemPrompt` or `memory` yet — those are filled in
+ *     later when the user customises the agent). Encrypting such a
+ *     record is a no-op anyway, so warning is pure noise.
+ *   - Optional fields that just happen to be undefined for this write.
+ *     Same reason — no leak possible without a value to leak.
  *
  * Throttled per (tableName, field) pair so liveQuery loops don't spam.
  */
@@ -111,12 +115,8 @@ function devCheckRegistryShape(
 	const lcMap = new Map<string, string>();
 	for (const k of recordKeys) lcMap.set(k.toLowerCase(), k);
 
-	let exactHits = 0;
 	for (const field of fields) {
-		if (recordKeySet.has(field)) {
-			exactHits++;
-			continue;
-		}
+		if (recordKeySet.has(field)) continue;
 		// Case-insensitive near-miss → almost certainly a typo in the registry.
 		const near = lcMap.get(field.toLowerCase());
 		if (near && near !== field) {
@@ -129,21 +129,6 @@ function devCheckRegistryShape(
 						`This field is SILENTLY staying plaintext in production.`
 				);
 			}
-		}
-	}
-
-	// Record has no registered field at all — probably wrong tableName or
-	// a record shape that diverged from the type the registry was written for.
-	if (exactHits === 0 && recordKeys.length > 0) {
-		const key = `${tableName}:no-fields`;
-		if (!_registryWarnings.has(key)) {
-			_registryWarnings.add(key);
-			console.warn(
-				`[mana-crypto] DEV: encryptRecord('${tableName}', ...) called but the record ` +
-					`has none of the registered fields [${fields.join(', ')}]. ` +
-					`Keys on record: [${recordKeys.slice(0, 10).join(', ')}${recordKeys.length > 10 ? ', …' : ''}]. ` +
-					`Wrong table name?`
-			);
 		}
 	}
 }

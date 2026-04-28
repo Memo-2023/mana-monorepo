@@ -170,22 +170,48 @@ export function stopStreakTracker(): void {
 
 // ── Seed defaults ───────────────────────────────────
 
+/**
+ * Cache the in-flight (or completed) seed so concurrent first-callers
+ * await the same operation instead of each starting their own race.
+ * `useStreaks()` is called from multiple components and the live-query
+ * machinery re-runs `buildAllStreaks` on every `_streakState` change
+ * event — without this guard, two boot-time callers would each pass
+ * the `count > 0` check before either had written anything, and the
+ * second's `.add()` would throw a ConstraintError.
+ */
+let seedPromise: Promise<void> | null = null;
+
 async function ensureSeeded(): Promise<void> {
-	const count = await db.table(TABLE).count();
-	if (count > 0) return;
-	// Seed empty states so useStreaks() returns all definitions. Same
-	// attribution reasoning as markActive — this is a subsystem write.
+	return (seedPromise ??= seedImpl());
+}
+
+async function seedImpl(): Promise<void> {
+	// Subsystem write — attribute to the projection actor, not to
+	// whoever triggered the upstream read.
 	await runAsAsync(PROJECTION_ACTOR, async () => {
-		for (const def of STREAK_DEFS) {
-			await db.table(TABLE).add({
-				id: def.id,
-				label: def.label,
-				moduleId: def.moduleId,
-				currentStreak: 0,
-				longestStreak: 0,
-				lastActiveDate: '',
-			});
-		}
+		// Single Dexie RW transaction: the existence check and the
+		// inserts share the same atomic scope, so even if two browser
+		// tabs / two component mounts hit this in the same microtask,
+		// only one transaction sees an empty table and writes the
+		// defaults. The other sees them and skips.
+		await db.transaction('rw', TABLE, async () => {
+			const existingIds = new Set((await db.table<StreakState>(TABLE).toArray()).map((r) => r.id));
+			const missing = STREAK_DEFS.filter((d) => !existingIds.has(d.id));
+			if (missing.length === 0) return;
+			// bulkAdd is faster than a per-row loop and atomic-on-failure
+			// inside the open transaction. Only the missing definitions
+			// land — existing rows keep their currentStreak / longestStreak.
+			await db.table(TABLE).bulkAdd(
+				missing.map((def) => ({
+					id: def.id,
+					label: def.label,
+					moduleId: def.moduleId,
+					currentStreak: 0,
+					longestStreak: 0,
+					lastActiveDate: '',
+				}))
+			);
+		});
 	});
 }
 

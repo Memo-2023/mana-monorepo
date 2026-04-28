@@ -68,7 +68,11 @@ function createOnboardingStatusStore() {
 			if (!browser || loading) return;
 			loading = true;
 			try {
-				const res = await authedFetch('/');
+				// Empty path — `${baseUrl}/api/v1/me/onboarding` without a
+				// trailing slash. Hono's nested router (`app.route(prefix,
+				// sub)` + inner `app.get('/')`) matches the prefix exactly,
+				// not the prefix-with-slash form, so a `/` here would 404.
+				const res = await authedFetch('');
 				if (!res.ok) throw new Error(`GET /onboarding → ${res.status}`);
 				const data = (await res.json()) as { completedAt: string | null };
 				({ completedAt } = parseStatus(data));

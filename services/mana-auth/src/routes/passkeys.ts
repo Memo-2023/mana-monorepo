@@ -159,14 +159,17 @@ export function createPasskeyRoutes(
 
 		// Clone the body before the upstream read so we can extract
 		// credentialID for rate-limit bookkeeping without double-
-		// consuming the stream. The client sends
-		// `{ challengeId, credential: { id: '<base64url>' } }`.
+		// consuming the stream. The client sends Better-Auth's shape
+		// `{ response: { id: '<base64url>', ... } }` — see
+		// `verifyPasskeyAuthenticationBodySchema` in the upstream
+		// @better-auth/passkey plugin. Falls back to a flat `{ id }`
+		// body for any direct-to-mana-auth caller (legacy harness).
 		let credentialId: string | null = null;
 		let bodyText: string | null = null;
 		try {
 			bodyText = await c.req.text();
 			const parsed = JSON.parse(bodyText);
-			credentialId = parsed?.credential?.id ?? parsed?.id ?? null;
+			credentialId = parsed?.response?.id ?? parsed?.id ?? null;
 		} catch {
 			// Body malformed — let the upstream handler return a real
 			// validation error. No rate-limit bump because we don't

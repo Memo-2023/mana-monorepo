@@ -429,7 +429,16 @@ export function createAuthService(config: AuthServiceConfig): AuthServiceInterfa
 		},
 
 		/**
-		 * Register a new passkey for the current user
+		 * Register a new passkey for the current user.
+		 *
+		 * The shape of the server's options response and the verify
+		 * request body match Better-Auth's `@better-auth/passkey` plugin
+		 * exactly: the options endpoint returns the raw
+		 * PublicKeyCredentialCreationOptionsJSON (no envelope), and the
+		 * verify endpoint accepts `{ response, name? }`. The challenge
+		 * is carried in a server-set signed cookie — that's why every
+		 * fetch in the flow MUST send `credentials: 'include'` so the
+		 * cookie survives the round-trip.
 		 */
 		async registerPasskey(friendlyName?: string): Promise<AuthResult> {
 			try {
@@ -440,6 +449,7 @@ export function createAuthService(config: AuthServiceConfig): AuthServiceInterfa
 				// Step 1: Get registration options from server
 				const optionsRes = await fetch(`${baseUrl}${endpoints.passkeyRegisterOptions}`, {
 					method: 'POST',
+					credentials: 'include',
 					headers: {
 						'Content-Type': 'application/json',
 						Authorization: `Bearer ${appToken}`,
@@ -451,19 +461,22 @@ export function createAuthService(config: AuthServiceConfig): AuthServiceInterfa
 					return { success: false, error: err.message || 'Failed to get registration options' };
 				}
 
-				const { options, challengeId } = await optionsRes.json();
+				const webauthnOptions = await optionsRes.json();
 
 				// Step 2: Create credential via browser WebAuthn API
-				const credential = await startRegistration({ optionsJSON: options });
+				const credential = await startRegistration({ optionsJSON: webauthnOptions });
 
-				// Step 3: Send credential to server for verification
+				// Step 3: Send credential to server for verification.
+				// `name` is the Better-Auth parameter name for the
+				// passkey label; `response` is the credential payload.
 				const verifyRes = await fetch(`${baseUrl}${endpoints.passkeyRegisterVerify}`, {
 					method: 'POST',
+					credentials: 'include',
 					headers: {
 						'Content-Type': 'application/json',
 						Authorization: `Bearer ${appToken}`,
 					},
-					body: JSON.stringify({ challengeId, credential, friendlyName }),
+					body: JSON.stringify({ response: credential, name: friendlyName }),
 				});
 
 				if (!verifyRes.ok) {
@@ -493,6 +506,13 @@ export function createAuthService(config: AuthServiceConfig): AuthServiceInterfa
 		 * where the browser surfaces passkeys directly inside the email autofill
 		 * dropdown instead of opening a modal. The host MUST verify
 		 * `PublicKeyCredential.isConditionalMediationAvailable()` first.
+		 *
+		 * Server / client shape matches Better-Auth's `@better-auth/passkey`
+		 * plugin exactly: options endpoint returns the raw
+		 * PublicKeyCredentialRequestOptionsJSON (no envelope), verify endpoint
+		 * accepts `{ response: credential }`. The challenge lives in a signed
+		 * cookie set by the server, so every fetch MUST send `credentials:
+		 * 'include'` for the cookie to round-trip.
 		 */
 		async signInWithPasskey(options: { conditional?: boolean } = {}): Promise<AuthResult> {
 			try {
@@ -502,6 +522,7 @@ export function createAuthService(config: AuthServiceConfig): AuthServiceInterfa
 				// Step 1: Get authentication options from server
 				const optionsRes = await fetch(`${baseUrl}${endpoints.passkeyAuthOptions}`, {
 					method: 'POST',
+					credentials: 'include',
 					headers: { 'Content-Type': 'application/json' },
 				});
 
@@ -518,7 +539,7 @@ export function createAuthService(config: AuthServiceConfig): AuthServiceInterfa
 					};
 				}
 
-				const { options: webauthnOptions, challengeId } = await optionsRes.json();
+				const webauthnOptions = await optionsRes.json();
 
 				// Step 2: Authenticate via browser WebAuthn API
 				const credential = await startAuthentication({
@@ -526,11 +547,14 @@ export function createAuthService(config: AuthServiceConfig): AuthServiceInterfa
 					useBrowserAutofill: options.conditional === true,
 				});
 
-				// Step 3: Send credential to server for verification
+				// Step 3: Send credential to server for verification.
+				// Better-Auth expects `{ response: credential }` — the
+				// challenge is read from the signed cookie, not the body.
 				const verifyRes = await fetch(`${baseUrl}${endpoints.passkeyAuthVerify}`, {
 					method: 'POST',
+					credentials: 'include',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ challengeId, credential }),
+					body: JSON.stringify({ response: credential }),
 				});
 
 				if (!verifyRes.ok) {
