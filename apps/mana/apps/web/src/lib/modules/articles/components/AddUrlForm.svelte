@@ -257,6 +257,10 @@
 		</button>
 	</div>
 
+	<p class="bulk-link">
+		Mehrere URLs auf einmal? <a href="/articles/import">Bulk-Import →</a>
+	</p>
+
 	{#if (loading || saving) && !error && !preview && !duplicate}
 		<div class="loading-block" role="status">
 			<span class="spinner" aria-hidden="true"></span>
@@ -354,7 +358,19 @@
 	.input-row {
 		display: flex;
 		gap: 0.55rem;
-		margin-bottom: 0.9rem;
+		margin-bottom: 0.45rem;
+	}
+	.bulk-link {
+		margin: 0 0 0.9rem 0;
+		font-size: 0.85rem;
+		color: var(--color-text-muted, #64748b);
+	}
+	.bulk-link a {
+		color: #ea580c;
+		text-decoration: none;
+	}
+	.bulk-link a:hover {
+		text-decoration: underline;
 	}
 	.url-input {
 		flex: 1;

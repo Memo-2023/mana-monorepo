@@ -1,0 +1,376 @@
+<!--
+  JobDetailView — live progress of a bulk-import job. Drives the
+  /articles/import/[jobId] route.
+
+  Header: status, total, counters, action bar (pause/resume/cancel/retry).
+  Body:   per-item rows with state pill + URL + action link.
+
+  Plan: docs/plans/articles-bulk-import.md.
+-->
+<script lang="ts">
+	import { goto } from '$app/navigation';
+	import { articleImportsStore } from '../stores/imports.svelte';
+	import { useImportItems, useImportJob } from '../queries';
+	import type { ArticleImportItem, ArticleImportItemState } from '../types';
+
+	interface Props {
+		jobId: string;
+	}
+	let { jobId }: Props = $props();
+
+	const job$ = $derived(useImportJob(jobId));
+	const items$ = $derived(useImportItems(jobId));
+	const job = $derived(job$.value);
+	const items = $derived(items$.value);
+
+	let busyAction = $state<string | null>(null);
+
+	const totalDone = $derived(job ? job.savedCount + job.duplicateCount + job.errorCount : 0);
+	const progressPct = $derived(
+		job && job.totalUrls > 0 ? Math.round((totalDone / job.totalUrls) * 100) : 0
+	);
+
+	async function withBusy(name: string, fn: () => Promise<unknown>) {
+		busyAction = name;
+		try {
+			await fn();
+		} finally {
+			busyAction = null;
+		}
+	}
+
+	function statePill(state: ArticleImportItemState): { label: string; klass: string } {
+		switch (state) {
+			case 'pending':
+				return { label: 'Wartet', klass: 'pill-pending' };
+			case 'extracting':
+				return { label: 'Extrahiert…', klass: 'pill-extracting' };
+			case 'extracted':
+				return { label: 'Server fertig', klass: 'pill-extracted' };
+			case 'saved':
+				return { label: '✓ Gespeichert', klass: 'pill-saved' };
+			case 'duplicate':
+				return { label: '· Duplikat', klass: 'pill-dup' };
+			case 'consent-wall':
+				return { label: '⚠ Cookie-Wand', klass: 'pill-warn' };
+			case 'error':
+				return { label: '✗ Fehler', klass: 'pill-error' };
+			case 'cancelled':
+				return { label: 'Abgebrochen', klass: 'pill-cancelled' };
+		}
+	}
+
+	function shortUrl(item: ArticleImportItem): string {
+		try {
+			const u = new URL(item.url);
+			return u.host + u.pathname.replace(/\/$/, '');
+		} catch {
+			return item.url;
+		}
+	}
+</script>
+
+<div class="job-shell">
+	{#if !job}
+		<p class="empty">Job nicht gefunden.</p>
+	{:else}
+		{@const j = job}
+		<header class="header">
+			<div class="title-row">
+				<h1>Import-Job</h1>
+				<span class="status status-{j.status}">{j.status}</span>
+			</div>
+			<div class="progress-bar" aria-label="Fortschritt">
+				<div class="progress-fill" style="width: {progressPct}%"></div>
+			</div>
+			<div class="counters">
+				<span class="counter">
+					<strong>{totalDone}</strong> / {j.totalUrls} verarbeitet
+				</span>
+				{#if j.savedCount > 0}<span class="counter ok">{j.savedCount} gespeichert</span>{/if}
+				{#if j.duplicateCount > 0}
+					<span class="counter dup">{j.duplicateCount} Duplikate</span>
+				{/if}
+				{#if j.warningCount > 0}
+					<span class="counter warn">{j.warningCount} mit Cookie-Wand</span>
+				{/if}
+				{#if j.errorCount > 0}<span class="counter err">{j.errorCount} Fehler</span>{/if}
+			</div>
+
+			<div class="actions">
+				{#if j.status === 'running' || j.status === 'queued'}
+					<button
+						type="button"
+						class="secondary"
+						disabled={busyAction !== null}
+						onclick={() => withBusy('pause', () => articleImportsStore.pauseJob(jobId))}
+					>
+						Pause
+					</button>
+				{/if}
+				{#if j.status === 'paused'}
+					<button
+						type="button"
+						class="primary"
+						disabled={busyAction !== null}
+						onclick={() => withBusy('resume', () => articleImportsStore.resumeJob(jobId))}
+					>
+						Fortsetzen
+					</button>
+				{/if}
+				{#if j.status === 'running' || j.status === 'queued' || j.status === 'paused'}
+					<button
+						type="button"
+						class="danger"
+						disabled={busyAction !== null}
+						onclick={() => {
+							if (confirm('Job wirklich abbrechen? Bisherige Artikel bleiben gespeichert.'))
+								void withBusy('cancel', () => articleImportsStore.cancelJob(jobId));
+						}}
+					>
+						Abbrechen
+					</button>
+				{/if}
+				{#if j.errorCount > 0}
+					<button
+						type="button"
+						class="secondary"
+						disabled={busyAction !== null}
+						onclick={() => withBusy('retry', () => articleImportsStore.retryFailed(jobId))}
+					>
+						Fehler wiederholen
+					</button>
+				{/if}
+				{#if j.status === 'done' || j.status === 'cancelled'}
+					<button
+						type="button"
+						class="ghost"
+						disabled={busyAction !== null}
+						onclick={() => {
+							if (confirm('Job-Historie löschen? Artikel bleiben.')) {
+								void withBusy('delete', async () => {
+									await articleImportsStore.deleteJob(jobId);
+									goto('/articles/import');
+								});
+							}
+						}}
+					>
+						Löschen
+					</button>
+				{/if}
+			</div>
+		</header>
+
+		<ul class="items">
+			{#each items as item (item.id)}
+				{@const pill = statePill(item.state)}
+				<li class="item">
+					<span class="pill {pill.klass}">{pill.label}</span>
+					<span class="url" title={item.url}>{shortUrl(item)}</span>
+					{#if item.articleId && (item.state === 'saved' || item.state === 'consent-wall' || item.state === 'duplicate')}
+						<a class="action" href="/articles/{item.articleId}">Öffnen</a>
+					{:else if item.state === 'error' && item.error}
+						<span class="error-msg" title={item.error}>{item.error}</span>
+					{/if}
+				</li>
+			{/each}
+		</ul>
+	{/if}
+</div>
+
+<style>
+	.job-shell {
+		max-width: 920px;
+		margin: 0 auto;
+		padding: 1.5rem;
+	}
+	.empty {
+		color: var(--color-text-muted, #64748b);
+	}
+	.header {
+		display: flex;
+		flex-direction: column;
+		gap: 0.65rem;
+		margin-bottom: 1.25rem;
+	}
+	.title-row {
+		display: flex;
+		gap: 0.6rem;
+		align-items: baseline;
+	}
+	.title-row h1 {
+		margin: 0;
+		font-size: 1.45rem;
+	}
+	.status {
+		font-size: 0.75rem;
+		padding: 0.12rem 0.55rem;
+		border-radius: 999px;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		font-weight: 600;
+	}
+	.status-queued,
+	.status-paused {
+		background: color-mix(in srgb, #64748b 14%, transparent);
+		color: #475569;
+	}
+	.status-running {
+		background: color-mix(in srgb, #f97316 16%, transparent);
+		color: #ea580c;
+	}
+	.status-done {
+		background: color-mix(in srgb, #16a34a 14%, transparent);
+		color: #16a34a;
+	}
+	.status-cancelled {
+		background: rgba(239, 68, 68, 0.14);
+		color: #ef4444;
+	}
+	.progress-bar {
+		height: 6px;
+		border-radius: 999px;
+		background: color-mix(in srgb, currentColor 8%, transparent);
+		overflow: hidden;
+	}
+	.progress-fill {
+		height: 100%;
+		background: #f97316;
+		transition: width 220ms ease;
+	}
+	.counters {
+		display: flex;
+		gap: 0.35rem;
+		flex-wrap: wrap;
+		font-size: 0.85rem;
+	}
+	.counter {
+		padding: 0.12rem 0.55rem;
+		border-radius: 999px;
+		background: color-mix(in srgb, currentColor 6%, transparent);
+	}
+	.counter.ok {
+		color: #16a34a;
+	}
+	.counter.dup {
+		color: var(--color-text-muted, #64748b);
+	}
+	.counter.warn {
+		color: #b45309;
+	}
+	.counter.err {
+		color: #ef4444;
+	}
+	.actions {
+		display: flex;
+		gap: 0.4rem;
+		flex-wrap: wrap;
+	}
+	.actions button {
+		padding: 0.4rem 0.85rem;
+		border-radius: 0.45rem;
+		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.15));
+		background: transparent;
+		color: inherit;
+		font: inherit;
+		font-size: 0.85rem;
+		cursor: pointer;
+	}
+	.actions .primary {
+		background: #f97316;
+		border-color: #f97316;
+		color: white;
+	}
+	.actions .primary:hover:not(:disabled) {
+		background: #ea580c;
+	}
+	.actions .danger:hover:not(:disabled) {
+		border-color: #ef4444;
+		color: #ef4444;
+	}
+	.actions .ghost {
+		opacity: 0.7;
+	}
+	.actions button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+	.items {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.3rem;
+	}
+	.item {
+		display: grid;
+		grid-template-columns: 9rem 1fr auto;
+		gap: 0.65rem;
+		align-items: center;
+		padding: 0.4rem 0.7rem;
+		border: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
+		border-radius: 0.45rem;
+		font-size: 0.88rem;
+	}
+	.pill {
+		font-size: 0.76rem;
+		padding: 0.1rem 0.5rem;
+		border-radius: 999px;
+		text-align: center;
+		white-space: nowrap;
+	}
+	.pill-pending {
+		background: color-mix(in srgb, #64748b 10%, transparent);
+		color: #64748b;
+	}
+	.pill-extracting,
+	.pill-extracted {
+		background: color-mix(in srgb, #f97316 12%, transparent);
+		color: #ea580c;
+	}
+	.pill-saved {
+		background: color-mix(in srgb, #16a34a 14%, transparent);
+		color: #16a34a;
+	}
+	.pill-dup {
+		background: color-mix(in srgb, #64748b 12%, transparent);
+		color: #475569;
+	}
+	.pill-warn {
+		background: color-mix(in srgb, #f59e0b 14%, transparent);
+		color: #b45309;
+	}
+	.pill-error {
+		background: rgba(239, 68, 68, 0.14);
+		color: #ef4444;
+	}
+	.pill-cancelled {
+		background: color-mix(in srgb, #64748b 8%, transparent);
+		color: #64748b;
+		opacity: 0.7;
+	}
+	.url {
+		font-family: 'SF Mono', Menlo, Consolas, monospace;
+		font-size: 0.82rem;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.action {
+		font-size: 0.82rem;
+		color: #ea580c;
+		text-decoration: none;
+	}
+	.action:hover {
+		text-decoration: underline;
+	}
+	.error-msg {
+		font-size: 0.78rem;
+		color: #ef4444;
+		max-width: 18rem;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+</style>
