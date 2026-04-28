@@ -78,7 +78,7 @@ export type PublicFeedbackItem = {
 	/** Author's community karma (public, drives tier-badge). */
 	karma: number;
 	/** Real name, only present when:
-	 *  - the post-author opted in via communityShowRealName=true, AND
+	 *  - the post-author opted in via feedbackShowRealName=true, AND
 	 *  - the response is going to an authenticated caller (the
 	 *    anonymous /public endpoint always strips this).
 	 */
@@ -88,8 +88,8 @@ export type PublicFeedbackItem = {
 type FeedbackRow = typeof userFeedback.$inferSelect;
 type AuthUserRow = {
 	name: string;
-	communityShowRealName: boolean;
-	communityKarma: number;
+	feedbackShowRealName: boolean;
+	feedbackKarma: number;
 } | null;
 
 export class FeedbackService {
@@ -301,7 +301,7 @@ export class FeedbackService {
 
 		const items = rows.map((r) => redact(r.feedback, r.author, { includeRealName: false }));
 		const displayName = items[0]?.displayName ?? null;
-		const karma = rows[0]?.author?.communityKarma ?? 0;
+		const karma = rows[0]?.author?.feedbackKarma ?? 0;
 
 		return { displayHash, displayName, karma, items };
 	}
@@ -327,8 +327,8 @@ export class FeedbackService {
 	private authorSelection() {
 		return {
 			name: authUsers.name,
-			communityShowRealName: authUsers.communityShowRealName,
-			communityKarma: authUsers.communityKarma,
+			feedbackShowRealName: authUsers.feedbackShowRealName,
+			feedbackKarma: authUsers.feedbackKarma,
 		};
 	}
 
@@ -442,7 +442,7 @@ export class FeedbackService {
 			await this.db
 				.update(authUsers)
 				.set({
-					communityKarma: sql`GREATEST(${authUsers.communityKarma} + ${delta}, 0)`,
+					feedbackKarma: sql`GREATEST(${authUsers.feedbackKarma} + ${delta}, 0)`,
 				})
 				.where(eq(authUsers.id, item.authorId));
 		}
@@ -767,9 +767,9 @@ function redact(
 		adminResponse: row.adminResponse,
 		createdAt: row.createdAt,
 		updatedAt: row.updatedAt,
-		karma: author?.communityKarma ?? 0,
+		karma: author?.feedbackKarma ?? 0,
 	};
-	if (includeReal && author?.communityShowRealName && author.name) {
+	if (includeReal && author?.feedbackShowRealName && author.name) {
 		item.realName = author.name;
 	}
 	return item;

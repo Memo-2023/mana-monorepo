@@ -8,14 +8,14 @@
  * `getSearchIndex()` so components stay reactive to locale changes.
  */
 import type { Component } from 'svelte';
-import { Gear, Robot, ShieldCheck, Cloud, Tag, Megaphone } from '@mana/shared-icons';
+import { Gear, Robot, ShieldCheck, Cloud, Tag, HeartHalf } from '@mana/shared-icons';
 
 export type CategoryId =
 	| 'general'
 	| 'ai'
 	| 'security'
 	| 'privacy'
-	| 'community'
+	| 'feedback'
 	| 'data'
 	| 'tag-presets';
 
@@ -46,7 +46,7 @@ const CATEGORY_DEFS: Record<CategoryId, CategoryDef> = {
 		i18nKey: 'security',
 	},
 	privacy: { icon: ShieldCheck, anchors: ['privacy'], i18nKey: 'privacy' },
-	community: { icon: Megaphone, anchors: ['community-identity'], i18nKey: 'community' },
+	feedback: { icon: HeartHalf, anchors: ['feedback-identity'], i18nKey: 'feedback' },
 	data: {
 		icon: Cloud,
 		anchors: [
@@ -118,9 +118,9 @@ const SEARCH_ENTRY_DEFS: SearchEntryDef[] = [
 	// Privacy
 	{ i18nKey: 'privacy_overview', category: 'privacy', anchor: 'privacy' },
 	{ i18nKey: 'reset_all_private', category: 'privacy', anchor: 'privacy' },
-	// Community
-	{ i18nKey: 'community_show_real_name', category: 'community', anchor: 'community-identity' },
-	{ i18nKey: 'community_karma', category: 'community', anchor: 'community-identity' },
+	// Feedback
+	{ i18nKey: 'feedback_show_real_name', category: 'feedback', anchor: 'feedback-identity' },
+	{ i18nKey: 'feedback_karma', category: 'feedback', anchor: 'feedback-identity' },
 	// Data
 	{ i18nKey: 'cloud_sync', category: 'data', anchor: 'cloud-sync' },
 	{ i18nKey: 'data_export', category: 'data', anchor: 'my-data' },

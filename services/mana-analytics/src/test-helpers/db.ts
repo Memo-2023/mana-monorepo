@@ -47,7 +47,7 @@ let seededIds = new Set<string>();
  */
 export async function seedUser(
 	db: TestDb,
-	overrides: Partial<{ name: string; communityShowRealName: boolean; communityKarma: number }> = {}
+	overrides: Partial<{ name: string; feedbackShowRealName: boolean; feedbackKarma: number }> = {}
 ): Promise<SeededUser> {
 	const id = `test-${randomUUID()}`;
 	const email = `${id}@test.local`;
@@ -57,13 +57,13 @@ export async function seedUser(
 	// model only declares the columns mana-analytics READS — auth.users
 	// has additional NOT NULL columns (email, etc.) we'd otherwise miss.
 	await db.execute(sql`
-		INSERT INTO auth.users (id, email, name, community_show_real_name, community_karma)
+		INSERT INTO auth.users (id, email, name, feedback_show_real_name, feedback_karma)
 		VALUES (
 			${id},
 			${email},
 			${name},
-			${overrides.communityShowRealName ?? false},
-			${overrides.communityKarma ?? 0}
+			${overrides.feedbackShowRealName ?? false},
+			${overrides.feedbackKarma ?? 0}
 		)
 		ON CONFLICT (id) DO NOTHING
 	`);
@@ -71,10 +71,10 @@ export async function seedUser(
 	return { id, email, name };
 }
 
-/** Read auth.users.community_karma for a test user. */
+/** Read auth.users.feedback_karma for a test user. */
 export async function getKarma(db: TestDb, userId: string): Promise<number> {
 	const [row] = await db
-		.select({ karma: authUsers.communityKarma })
+		.select({ karma: authUsers.feedbackKarma })
 		.from(authUsers)
 		.where(eq(authUsers.id, userId))
 		.limit(1);

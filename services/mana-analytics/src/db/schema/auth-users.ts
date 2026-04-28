@@ -1,5 +1,5 @@
 /**
- * Read-only cross-schema view of auth.users for the public-community
+ * Read-only cross-schema view of auth.users for the public-feedback
  * hub. mana-auth owns the table; we JOIN it from mana-analytics to
  * enrich feed responses with the post-author's real-name opt-in and
  * karma score. We never INSERT/UPDATE/DELETE here — that's
@@ -17,6 +17,6 @@ const authSchema = pgSchema('auth');
 export const authUsers = authSchema.table('users', {
 	id: text('id').primaryKey(),
 	name: text('name').notNull(),
-	communityShowRealName: boolean('community_show_real_name').default(false).notNull(),
-	communityKarma: integer('community_karma').default(0).notNull(),
+	feedbackShowRealName: boolean('feedback_show_real_name').default(false).notNull(),
+	feedbackKarma: integer('feedback_karma').default(0).notNull(),
 });

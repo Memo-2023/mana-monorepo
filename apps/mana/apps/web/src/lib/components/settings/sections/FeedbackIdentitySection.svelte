@@ -1,9 +1,9 @@
 <!--
-  CommunitySection — Identity opt-ins für den Public-Community-Hub.
+  FeedbackIdentitySection — Identity opt-ins für den Public-Feedback-Hub.
   Aktuell:
     - Avatar-Preview + Pseudonym-Anzeige
     - Karma + Tier-Badge
-    - Klarname-Toggle (community_show_real_name)
+    - Klarname-Toggle (feedback_show_real_name)
   Zukünftig könnten hier Pseudonym-Reset, Notification-Präferenzen, etc.
   landen.
 -->
@@ -13,7 +13,7 @@
 	import SettingsSectionHeader from '../SettingsSectionHeader.svelte';
 	import { authStore } from '$lib/stores/auth.svelte';
 	import { browser } from '$app/environment';
-	import { Megaphone } from '@mana/shared-icons';
+	import { HeartHalf } from '@mana/shared-icons';
 
 	function getAuthUrl(): string {
 		if (browser && typeof window !== 'undefined') {
@@ -27,8 +27,8 @@
 	type ProfileBlob = {
 		displayHash?: string;
 		displayName?: string;
-		communityShowRealName?: boolean;
-		communityKarma?: number;
+		feedbackShowRealName?: boolean;
+		feedbackKarma?: number;
 	};
 
 	let profile = $state<ProfileBlob>({});
@@ -42,7 +42,7 @@
 		try {
 			const token = await authStore.getValidToken();
 			if (!token) throw new Error('not authenticated');
-			// We don't have a "get my community profile" endpoint yet — but the
+			// We don't have a "get my feedback profile" endpoint yet — but the
 			// my-feedback endpoint is enough to derive everything we need:
 			// most-recent post carries the displayHash + displayName, the
 			// auth.users karma comes back via /me/data.
@@ -57,22 +57,22 @@
 			if (!profileRes.ok) throw new Error(`profile load ${profileRes.status}`);
 			const data = (await profileRes.json()) as {
 				auth?: {
-					communityShowRealName?: boolean;
-					communityKarma?: number;
+					feedbackShowRealName?: boolean;
+					feedbackKarma?: number;
 				};
 			};
 			profile = {
 				...profile,
-				communityShowRealName: data.auth?.communityShowRealName ?? false,
-				communityKarma: data.auth?.communityKarma ?? 0,
+				feedbackShowRealName: data.auth?.feedbackShowRealName ?? false,
+				feedbackKarma: data.auth?.feedbackKarma ?? 0,
 			};
 			if (dataRes && dataRes.ok) {
 				const fields = (await dataRes.json()) as ProfileBlob;
 				profile = { ...profile, ...fields };
 			}
 		} catch (err) {
-			console.warn('[community-section] load failed:', err);
-			error = err instanceof Error ? err.message : 'Konnte die Community-Daten nicht laden';
+			console.warn('[feedback-identity-section] load failed:', err);
+			error = err instanceof Error ? err.message : 'Konnte die Feedback-Identität nicht laden';
 		} finally {
 			loading = false;
 		}
@@ -85,8 +85,8 @@
 	async function toggleRealName(next: boolean) {
 		if (saving) return;
 		saving = true;
-		const previous = profile.communityShowRealName;
-		profile = { ...profile, communityShowRealName: next }; // optimistic
+		const previous = profile.feedbackShowRealName;
+		profile = { ...profile, feedbackShowRealName: next }; // optimistic
 		try {
 			const token = await authStore.getValidToken();
 			const res = await fetch(`${getAuthUrl()}/api/v1/me/profile`, {
@@ -95,28 +95,28 @@
 					'Content-Type': 'application/json',
 					Authorization: `Bearer ${token}`,
 				},
-				body: JSON.stringify({ communityShowRealName: next }),
+				body: JSON.stringify({ feedbackShowRealName: next }),
 			});
 			if (!res.ok) throw new Error(`update ${res.status}`);
 		} catch (err) {
-			console.warn('[community-section] toggle failed:', err);
+			console.warn('[feedback-identity-section] toggle failed:', err);
 			error = 'Speichern fehlgeschlagen — versuch es nochmal.';
-			profile = { ...profile, communityShowRealName: previous }; // rollback
+			profile = { ...profile, feedbackShowRealName: previous }; // rollback
 		} finally {
 			saving = false;
 		}
 	}
 
-	let karma = $derived(profile.communityKarma ?? 0);
+	let karma = $derived(profile.feedbackKarma ?? 0);
 	let tier = $derived(tierFromKarma(karma));
 	let tierCfg = $derived(KARMA_TIER_CONFIG[tier]);
 </script>
 
-<SettingsPanel id="community-identity">
+<SettingsPanel id="feedback-identity">
 	<SettingsSectionHeader
-		icon={Megaphone}
-		title="Community-Identität"
-		description="Wie du in der Mana-Community auftauchst — Pseudonym, Karma, Klarname-Toggle."
+		icon={HeartHalf}
+		title="Feedback-Identität"
+		description="Wie du im Feedback-Feed auftauchst — Pseudonym, Karma, Klarname-Toggle."
 	/>
 
 	{#if loading}
@@ -132,7 +132,7 @@
 				<div class="display-name">
 					<span class="tier-dot" style:background-color={tierCfg.color}></span>
 					<strong>{profile.displayName ?? 'Wachsame Eule (noch unbenutzt)'}</strong>
-					{#if authStore.user?.name && profile.communityShowRealName}
+					{#if authStore.user?.name && profile.feedbackShowRealName}
 						<span class="real-name">· {authStore.user.name}</span>
 					{/if}
 				</div>
@@ -165,12 +165,12 @@
 			<button
 				type="button"
 				class="switch"
-				class:on={profile.communityShowRealName}
+				class:on={profile.feedbackShowRealName}
 				disabled={saving}
 				role="switch"
 				aria-label="Klarnamen neben Pseudonym zeigen"
-				aria-checked={profile.communityShowRealName}
-				onclick={() => toggleRealName(!profile.communityShowRealName)}
+				aria-checked={profile.feedbackShowRealName}
+				onclick={() => toggleRealName(!profile.feedbackShowRealName)}
 			>
 				<span class="switch-thumb"></span>
 			</button>

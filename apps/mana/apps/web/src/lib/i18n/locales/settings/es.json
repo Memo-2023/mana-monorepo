@@ -1,15 +1,20 @@
 {
 	"categories": {
-		"general": { "label": "General", "description": "Tema, idioma, notificaciones" },
-		"ai": { "label": "IA", "description": "Backend de cómputo y modelos" },
-		"security": { "label": "Seguridad", "description": "Passkeys, 2FA, cifrado y sesiones" },
+		"general": {
+			"label": "General",
+			"description": "Tema, idioma, notificaciones"
+		},
+		"ai": {
+			"label": "IA",
+			"description": "Backend de cómputo y modelos"
+		},
+		"security": {
+			"label": "Seguridad",
+			"description": "Passkeys, 2FA, cifrado y sesiones"
+		},
 		"privacy": {
 			"label": "Privacidad",
 			"description": "Qué es público o compartido por enlace ahora mismo — con interruptor de emergencia."
-		},
-		"community": {
-			"label": "Comunidad",
-			"description": "Cómo apareces en la comunidad — pseudónimo de búho, nombre real, karma."
 		},
 		"data": {
 			"label": "Datos y sincronización",
@@ -18,6 +23,10 @@
 		"tag_presets": {
 			"label": "Plantillas de etiquetas",
 			"description": "Conjuntos de etiquetas para nuevos espacios"
+		},
+		"feedback": {
+			"label": "Feedback",
+			"description": "Cómo apareces en el feed de feedback — pseudónimo de búho, nombre real, karma."
 		}
 	},
 	"sidebar": {
@@ -28,21 +37,54 @@
 		"no_results": "Sin resultados para «{query}»"
 	},
 	"search": {
-		"theme": { "label": "Tema", "keywords": "oscuro, claro, color, diseño" },
-		"language": { "label": "Idioma", "keywords": "language, i18n, alemán, inglés" },
-		"notifications": { "label": "Notificaciones", "keywords": "notification, sonido" },
-		"ai_options": { "label": "Opciones de IA", "keywords": "llm, ia, ai, compute" },
+		"theme": {
+			"label": "Tema",
+			"keywords": "oscuro, claro, color, diseño"
+		},
+		"language": {
+			"label": "Idioma",
+			"keywords": "language, i18n, alemán, inglés"
+		},
+		"notifications": {
+			"label": "Notificaciones",
+			"keywords": "notification, sonido"
+		},
+		"ai_options": {
+			"label": "Opciones de IA",
+			"keywords": "llm, ia, ai, compute"
+		},
 		"browser_model": {
 			"label": "Modelo del navegador (Gemma)",
 			"keywords": "gemma, webgpu, local, offline"
 		},
-		"mana_server": { "label": "Servidor Mana (IA)", "keywords": "servidor, self-hosted" },
-		"cloud_ai": { "label": "IA en la nube (Gemini)", "keywords": "google, cloud, gemini" },
-		"passkeys": { "label": "Passkeys", "keywords": "webauthn, fido, biometría" },
-		"sessions": { "label": "Sesiones activas", "keywords": "logout, dispositivo" },
-		"two_factor": { "label": "Doble factor (2FA)", "keywords": "totp, 2fa, mfa" },
-		"vault": { "label": "Cifrado", "keywords": "vault, cifrado, aes, clave, zero-knowledge" },
-		"security_log": { "label": "Registro de seguridad", "keywords": "audit, historial" },
+		"mana_server": {
+			"label": "Servidor Mana (IA)",
+			"keywords": "servidor, self-hosted"
+		},
+		"cloud_ai": {
+			"label": "IA en la nube (Gemini)",
+			"keywords": "google, cloud, gemini"
+		},
+		"passkeys": {
+			"label": "Passkeys",
+			"keywords": "webauthn, fido, biometría"
+		},
+		"sessions": {
+			"label": "Sesiones activas",
+			"keywords": "logout, dispositivo"
+		},
+		"two_factor": {
+			"label": "Doble factor (2FA)",
+			"keywords": "totp, 2fa, mfa"
+		},
+		"vault": {
+			"label": "Cifrado",
+			"keywords": "vault, cifrado, aes, clave, zero-knowledge"
+		},
+		"security_log": {
+			"label": "Registro de seguridad",
+			"keywords": "audit, historial"
+		},
 		"privacy_overview": {
 			"label": "Resumen de privacidad",
 			"keywords": "público, unlisted, compartir, enlace"
@@ -51,20 +93,38 @@
 			"label": "Restablecer todo a privado",
 			"keywords": "kill-switch, reset, privado, revocar"
 		},
-		"community_show_real_name": {
-			"label": "Nombre real en la comunidad",
+		"feedback_show_real_name": {
+			"label": "Nombre real en el feed de feedback",
 			"keywords": "nombre, búho, pseudónimo, anónimo, identidad"
 		},
-		"community_karma": {
+		"feedback_karma": {
 			"label": "Karma y nivel",
 			"keywords": "karma, nivel, bronce, plata, oro, platino, búho"
 		},
-		"cloud_sync": { "label": "Cloud Sync", "keywords": "sync, dispositivos" },
-		"data_export": { "label": "Exportar datos", "keywords": "export, rgpd, gdpr, json" },
-		"auth_data": { "label": "Autenticación", "keywords": "sesiones, 2fa, login" },
-		"credits_data": { "label": "Créditos y transacciones", "keywords": "saldo, transacciones" },
-		"project_data": { "label": "Datos de proyectos", "keywords": "proyectos, apps, estadística" },
-		"retention": { "label": "Plazos de conservación", "keywords": "retention, rgpd, plazos" },
+		"cloud_sync": {
+			"label": "Cloud Sync",
+			"keywords": "sync, dispositivos"
+		},
+		"data_export": {
+			"label": "Exportar datos",
+			"keywords": "export, rgpd, gdpr, json"
+		},
+		"auth_data": {
+			"label": "Autenticación",
+			"keywords": "sesiones, 2fa, login"
+		},
+		"credits_data": {
+			"label": "Créditos y transacciones",
+			"keywords": "saldo, transacciones"
+		},
+		"project_data": {
+			"label": "Datos de proyectos",
+			"keywords": "proyectos, apps, estadística"
+		},
+		"retention": {
+			"label": "Plazos de conservación",
+			"keywords": "retention, rgpd, plazos"
+		},
 		"backup": {
 			"label": "Copia y restauración",
 			"keywords": "backup, restore, import, archivo, .mana"

@@ -53,14 +53,14 @@ export const users = authSchema.table('users', {
 	// → Look → Templates). The flow is skippable, but even a skip sets
 	// this timestamp so we don't re-prompt. See docs/plans/onboarding-flow.md.
 	onboardingCompletedAt: timestamp('onboarding_completed_at', { withTimezone: true }),
-	// Community-Hub identity opt-ins (Phase 3.C of feedback-rewards-and-identity).
+	// Public-feedback identity opt-ins (Phase 3.C of feedback-rewards-and-identity).
 	// Off by default — users stay anonymous as their tier-pseudonym ("Wachsame
 	// Eule #4528"). Opt-in shows the real `name` next to the pseudonym in the
-	// auth-required community feed only; the public-mirror NEVER exposes it.
-	communityShowRealName: boolean('community_show_real_name').default(false).notNull(),
+	// auth-required feedback feed only; the public-mirror NEVER exposes it.
+	feedbackShowRealName: boolean('feedback_show_real_name').default(false).notNull(),
 	// Karma += 1 per reaction received from another user, decremented on unreact.
 	// Drives the public Bronze/Silver/Gold/Platinum-Eulen tier badge.
-	communityKarma: integer('community_karma').default(0).notNull(),
+	feedbackKarma: integer('feedback_karma').default(0).notNull(),
 });
 
 // Sessions table (Better Auth schema)

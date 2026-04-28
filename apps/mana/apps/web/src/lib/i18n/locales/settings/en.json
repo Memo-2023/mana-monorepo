@@ -1,18 +1,33 @@
 {
 	"categories": {
-		"general": { "label": "General", "description": "Theme, language, notifications" },
-		"ai": { "label": "AI", "description": "Compute backend & models" },
-		"security": { "label": "Security", "description": "Passkeys, 2FA, encryption & sessions" },
+		"general": {
+			"label": "General",
+			"description": "Theme, language, notifications"
+		},
+		"ai": {
+			"label": "AI",
+			"description": "Compute backend & models"
+		},
+		"security": {
+			"label": "Security",
+			"description": "Passkeys, 2FA, encryption & sessions"
+		},
 		"privacy": {
 			"label": "Privacy",
 			"description": "What is currently public or shared via link — with kill switch."
 		},
-		"community": {
-			"label": "Community",
-			"description": "How you appear in the community — owl pseudonym, real name, karma."
+		"data": {
+			"label": "Data & Sync",
+			"description": "Cloud sync, export, backup & GDPR"
 		},
-		"data": { "label": "Data & Sync", "description": "Cloud sync, export, backup & GDPR" },
-		"tag_presets": { "label": "Tag presets", "description": "Tag sets for new spaces" }
+		"tag_presets": {
+			"label": "Tag presets",
+			"description": "Tag sets for new spaces"
+		},
+		"feedback": {
+			"label": "Feedback",
+			"description": "How you appear in the feedback feed — owl pseudonym, real name, karma."
+		}
 	},
 	"sidebar": {
 		"aria_categories": "Settings categories",
@@ -22,21 +37,54 @@
 		"no_results": "No matches for \"{query}\""
 	},
 	"search": {
-		"theme": { "label": "Theme", "keywords": "dark, light, color, design" },
-		"language": { "label": "Language", "keywords": "language, i18n, german, english" },
-		"notifications": { "label": "Notifications", "keywords": "notification, sound" },
-		"ai_options": { "label": "AI options", "keywords": "llm, ai, compute" },
+		"theme": {
+			"label": "Theme",
+			"keywords": "dark, light, color, design"
+		},
+		"language": {
+			"label": "Language",
+			"keywords": "language, i18n, german, english"
+		},
+		"notifications": {
+			"label": "Notifications",
+			"keywords": "notification, sound"
+		},
+		"ai_options": {
+			"label": "AI options",
+			"keywords": "llm, ai, compute"
+		},
 		"browser_model": {
 			"label": "Browser model (Gemma)",
 			"keywords": "gemma, webgpu, local, offline"
 		},
-		"mana_server": { "label": "Mana server (AI)", "keywords": "server, self-hosted" },
-		"cloud_ai": { "label": "Cloud AI (Gemini)", "keywords": "google, cloud, gemini" },
-		"passkeys": { "label": "Passkeys", "keywords": "webauthn, fido, biometric" },
-		"sessions": { "label": "Active sessions", "keywords": "logout, device" },
-		"two_factor": { "label": "Two-factor (2FA)", "keywords": "totp, 2fa, mfa" },
-		"vault": { "label": "Encryption", "keywords": "vault, encryption, aes, key, zero-knowledge" },
-		"security_log": { "label": "Security log", "keywords": "audit, history" },
+		"mana_server": {
+			"label": "Mana server (AI)",
+			"keywords": "server, self-hosted"
+		},
+		"cloud_ai": {
+			"label": "Cloud AI (Gemini)",
+			"keywords": "google, cloud, gemini"
+		},
+		"passkeys": {
+			"label": "Passkeys",
+			"keywords": "webauthn, fido, biometric"
+		},
+		"sessions": {
+			"label": "Active sessions",
+			"keywords": "logout, device"
+		},
+		"two_factor": {
+			"label": "Two-factor (2FA)",
+			"keywords": "totp, 2fa, mfa"
+		},
+		"vault": {
+			"label": "Encryption",
+			"keywords": "vault, encryption, aes, key, zero-knowledge"
+		},
+		"security_log": {
+			"label": "Security log",
+			"keywords": "audit, history"
+		},
 		"privacy_overview": {
 			"label": "Privacy overview",
 			"keywords": "public, unlisted, share, sharing, link"
@@ -45,25 +93,46 @@
 			"label": "Reset all to private",
 			"keywords": "kill-switch, kill switch, reset, private, revoke"
 		},
-		"community_show_real_name": {
-			"label": "Real name in community",
+		"feedback_show_real_name": {
+			"label": "Real name in feedback feed",
 			"keywords": "name, owl, pseudonym, anonymous, identity"
 		},
-		"community_karma": {
+		"feedback_karma": {
 			"label": "Karma & Tier",
 			"keywords": "karma, tier, bronze, silver, gold, platinum, owl"
 		},
-		"cloud_sync": { "label": "Cloud Sync", "keywords": "sync, devices" },
-		"data_export": { "label": "Export data", "keywords": "export, dsgvo, gdpr, json" },
-		"auth_data": { "label": "Authentication", "keywords": "sessions, 2fa, login" },
-		"credits_data": { "label": "Credits & transactions", "keywords": "balance, transactions" },
-		"project_data": { "label": "Project data", "keywords": "projects, apps, statistics" },
-		"retention": { "label": "Retention periods", "keywords": "retention, gdpr, periods" },
+		"cloud_sync": {
+			"label": "Cloud Sync",
+			"keywords": "sync, devices"
+		},
+		"data_export": {
+			"label": "Export data",
+			"keywords": "export, dsgvo, gdpr, json"
+		},
+		"auth_data": {
+			"label": "Authentication",
+			"keywords": "sessions, 2fa, login"
+		},
+		"credits_data": {
+			"label": "Credits & transactions",
+			"keywords": "balance, transactions"
+		},
+		"project_data": {
+			"label": "Project data",
+			"keywords": "projects, apps, statistics"
+		},
+		"retention": {
+			"label": "Retention periods",
+			"keywords": "retention, gdpr, periods"
+		},
 		"backup": {
 			"label": "Backup & restore",
 			"keywords": "backup, restore, import, archive, .mana"
 		},
-		"delete_account": { "label": "Delete account", "keywords": "delete, gdpr, danger zone" }
+		"delete_account": {
+			"label": "Delete account",
+			"keywords": "delete, gdpr, danger zone"
+		}
 	},
 	"general": {
 		"title": "General",

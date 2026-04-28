@@ -2,7 +2,7 @@
  * Privacy-boundary tests für die `redact()`-Funktion.
  *
  * Kritisch: anonymous public endpoint darf NIE einen Klarnamen
- * ausliefern, auch wenn der User-Account `communityShowRealName=true`
+ * ausliefern, auch wenn der User-Account `feedbackShowRealName=true`
  * gesetzt hat. Diese Tests sind das Sicherheitsnetz für die ›Public
  * bleibt anonym‹-Garantie der Community-Surface.
  */
@@ -35,14 +35,14 @@ const baseFeedback = {
 
 const optedInAuthor = {
 	name: 'Till Schäfer',
-	communityShowRealName: true,
-	communityKarma: 47,
+	feedbackShowRealName: true,
+	feedbackKarma: 47,
 };
 
 const optedOutAuthor = {
 	name: 'Till Schäfer',
-	communityShowRealName: false,
-	communityKarma: 47,
+	feedbackShowRealName: false,
+	feedbackKarma: 47,
 };
 
 describe('redact (privacy-boundary)', () => {

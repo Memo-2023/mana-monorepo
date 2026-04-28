@@ -1,7 +1,13 @@
 {
 	"categories": {
-		"general": { "label": "Allgemein", "description": "Theme, Sprache, Benachrichtigungen" },
-		"ai": { "label": "KI", "description": "Compute-Backend & Modelle" },
+		"general": {
+			"label": "Allgemein",
+			"description": "Theme, Sprache, Benachrichtigungen"
+		},
+		"ai": {
+			"label": "KI",
+			"description": "Compute-Backend & Modelle"
+		},
 		"security": {
 			"label": "Sicherheit",
 			"description": "Passkeys, 2FA, Verschlüsselung & Sitzungen"
@@ -10,12 +16,18 @@
 			"label": "Privatsphäre",
 			"description": "Was ist gerade öffentlich oder per Link geteilt — mit Kill-Switch."
 		},
-		"community": {
-			"label": "Community",
-			"description": "Wie du in der Community auftauchst — Eulen-Pseudonym, Klarname, Karma."
+		"data": {
+			"label": "Daten & Sync",
+			"description": "Cloud-Sync, Export, Backup & DSGVO"
 		},
-		"data": { "label": "Daten & Sync", "description": "Cloud-Sync, Export, Backup & DSGVO" },
-		"tag_presets": { "label": "Tag-Presets", "description": "Tag-Sets für neue Spaces" }
+		"tag_presets": {
+			"label": "Tag-Presets",
+			"description": "Tag-Sets für neue Spaces"
+		},
+		"feedback": {
+			"label": "Feedback",
+			"description": "Wie du im Feedback-Feed auftauchst — Eulen-Pseudonym, Klarname, Karma."
+		}
 	},
 	"sidebar": {
 		"aria_categories": "Einstellungs-Kategorien",
@@ -25,24 +37,54 @@
 		"no_results": "Keine Treffer für „{query}\""
 	},
 	"search": {
-		"theme": { "label": "Theme", "keywords": "dark, light, farbe, design" },
-		"language": { "label": "Sprache", "keywords": "language, i18n, deutsch, english" },
-		"notifications": { "label": "Benachrichtigungen", "keywords": "notification, sound" },
-		"ai_options": { "label": "KI-Optionen", "keywords": "llm, ai, compute" },
+		"theme": {
+			"label": "Theme",
+			"keywords": "dark, light, farbe, design"
+		},
+		"language": {
+			"label": "Sprache",
+			"keywords": "language, i18n, deutsch, english"
+		},
+		"notifications": {
+			"label": "Benachrichtigungen",
+			"keywords": "notification, sound"
+		},
+		"ai_options": {
+			"label": "KI-Optionen",
+			"keywords": "llm, ai, compute"
+		},
 		"browser_model": {
 			"label": "Browser-Modell (Gemma)",
 			"keywords": "gemma, webgpu, lokal, offline"
 		},
-		"mana_server": { "label": "Mana-Server (KI)", "keywords": "server, self-hosted" },
-		"cloud_ai": { "label": "Cloud-KI (Gemini)", "keywords": "google, cloud, gemini" },
-		"passkeys": { "label": "Passkeys", "keywords": "webauthn, fido, biometrie" },
-		"sessions": { "label": "Aktive Sessions", "keywords": "logout, gerät, device" },
-		"two_factor": { "label": "Zwei-Faktor (2FA)", "keywords": "totp, 2fa, mfa" },
+		"mana_server": {
+			"label": "Mana-Server (KI)",
+			"keywords": "server, self-hosted"
+		},
+		"cloud_ai": {
+			"label": "Cloud-KI (Gemini)",
+			"keywords": "google, cloud, gemini"
+		},
+		"passkeys": {
+			"label": "Passkeys",
+			"keywords": "webauthn, fido, biometrie"
+		},
+		"sessions": {
+			"label": "Aktive Sessions",
+			"keywords": "logout, gerät, device"
+		},
+		"two_factor": {
+			"label": "Zwei-Faktor (2FA)",
+			"keywords": "totp, 2fa, mfa"
+		},
 		"vault": {
 			"label": "Verschlüsselung",
 			"keywords": "vault, encryption, aes, schlüssel, zero-knowledge"
 		},
-		"security_log": { "label": "Sicherheits-Log", "keywords": "audit, history, verlauf" },
+		"security_log": {
+			"label": "Sicherheits-Log",
+			"keywords": "audit, history, verlauf"
+		},
 		"privacy_overview": {
 			"label": "Privatsphäre-Übersicht",
 			"keywords": "public, öffentlich, unlisted, teilen, sharing, link"
@@ -51,25 +93,46 @@
 			"label": "Alle auf privat zurücksetzen",
 			"keywords": "kill-switch, kill switch, reset, privat, widerrufen"
 		},
-		"community_show_real_name": {
-			"label": "Klarname in der Community",
+		"feedback_show_real_name": {
+			"label": "Klarname im Feedback-Feed",
 			"keywords": "name, eule, pseudonym, klarname, anonym"
 		},
-		"community_karma": {
+		"feedback_karma": {
 			"label": "Karma & Tier",
 			"keywords": "karma, tier, bronze, silver, gold, platin, eule"
 		},
-		"cloud_sync": { "label": "Cloud Sync", "keywords": "sync, geräte" },
-		"data_export": { "label": "Daten exportieren", "keywords": "export, dsgvo, gdpr, json" },
-		"auth_data": { "label": "Authentifizierung", "keywords": "sessions, 2fa, login" },
-		"credits_data": { "label": "Credits & Transaktionen", "keywords": "guthaben, transaktionen" },
-		"project_data": { "label": "Projektdaten", "keywords": "projekte, apps, statistik" },
-		"retention": { "label": "Aufbewahrungsfristen", "keywords": "retention, dsgvo, fristen" },
+		"cloud_sync": {
+			"label": "Cloud Sync",
+			"keywords": "sync, geräte"
+		},
+		"data_export": {
+			"label": "Daten exportieren",
+			"keywords": "export, dsgvo, gdpr, json"
+		},
+		"auth_data": {
+			"label": "Authentifizierung",
+			"keywords": "sessions, 2fa, login"
+		},
+		"credits_data": {
+			"label": "Credits & Transaktionen",
+			"keywords": "guthaben, transaktionen"
+		},
+		"project_data": {
+			"label": "Projektdaten",
+			"keywords": "projekte, apps, statistik"
+		},
+		"retention": {
+			"label": "Aufbewahrungsfristen",
+			"keywords": "retention, dsgvo, fristen"
+		},
 		"backup": {
 			"label": "Backup & Wiederherstellung",
 			"keywords": "backup, restore, import, archiv, .mana"
 		},
-		"delete_account": { "label": "Konto löschen", "keywords": "delete, gdpr, dsgvo, gefahrenzone" }
+		"delete_account": {
+			"label": "Konto löschen",
+			"keywords": "delete, gdpr, dsgvo, gefahrenzone"
+		}
 	},
 	"general": {
 		"title": "Allgemein",

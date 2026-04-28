@@ -1,7 +1,7 @@
 /**
  * Integration tests for the cross-schema karma flow.
  *
- * Karma lives on auth.users.community_karma; mana-analytics increments
+ * Karma lives on auth.users.feedback_karma; mana-analytics increments
  * it inside toggleReaction. Tests verify the SQL path, the self-react
  * skip, and the floor-at-zero clamp.
  */
