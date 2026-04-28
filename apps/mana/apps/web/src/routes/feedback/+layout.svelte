@@ -1,11 +1,11 @@
 <!--
-  Public community route — outside (app)/ on purpose so AuthGate doesn't
+  Public feedback route — outside (app)/ on purpose so AuthGate doesn't
   bounce non-logged-in visitors. Renders a thin shell with brand header
   and Login CTA so the surface stands on its own as a marketing-asset.
 -->
 <script lang="ts">
 	import { authStore } from '$lib/stores/auth.svelte';
-	import { Megaphone } from '@mana/shared-icons';
+	import { HeartHalf } from '@mana/shared-icons';
 
 	let { children } = $props();
 </script>
@@ -13,17 +13,17 @@
 <div class="public-shell">
 	<header class="public-header">
 		<a class="brand" href="/">
-			<Megaphone size={20} weight="bold" />
+			<HeartHalf size={20} weight="bold" />
 			<span class="brand-text">
-				<strong>Mana Community</strong>
+				<strong>Mana Feedback</strong>
 				<small>Stimmen aus der Mana-Welt</small>
 			</span>
 		</a>
 		<nav class="nav-links">
-			<a href="/community">Feed</a>
-			<a href="/community/roadmap">Roadmap</a>
+			<a href="/feedback">Feed</a>
+			<a href="/feedback/roadmap">Roadmap</a>
 			{#if authStore.user}
-				<a class="cta" href="/?app=community">In Mana öffnen</a>
+				<a class="cta" href="/?app=feedback">In Mana öffnen</a>
 			{:else}
 				<a class="cta" href="/login">Login</a>
 			{/if}

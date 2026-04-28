@@ -73,7 +73,7 @@
 		/** Module identifier passed to the inline FeedbackHook. */
 		moduleId?: string;
 		/** Suppress the auto-injected FeedbackHook (e.g. on the
-		 *  /community-/feedback-pages where it's redundant). */
+		 *  /feedback-page where it's redundant). */
 		hideFeedback?: boolean;
 		/** When provided, the heart-half button calls this instead of
 		 *  opening its own modal. The host renders feedback inline (used

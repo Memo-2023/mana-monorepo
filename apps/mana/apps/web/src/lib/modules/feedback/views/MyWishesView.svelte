@@ -103,7 +103,7 @@
 	}
 
 	function goToItem(id: string) {
-		void goto(`/community/${id}`);
+		void goto(`/feedback/${id}`);
 	}
 </script>
 
@@ -160,9 +160,9 @@
 	{:else if active === 'mine'}
 		{#if myItems.length === 0}
 			<div class="state">
-				Noch keine eigenen Wünsche. Schreib einen über das Idee-Lämpchen oder die Pille unten rechts
-				— oder über
-				<a class="link" href="/community">/community</a>.
+				Noch keine eigenen Wünsche. Schreib einen über das Herz-Halb-Icon im Modul-Header oder den
+				Eintrag „Idee teilen" im Usermenü — oder direkt unter
+				<a class="link" href="/feedback">/feedback</a>.
 			</div>
 		{:else}
 			<div class="grid">
@@ -204,7 +204,7 @@
 		{#if reactedItems.length === 0}
 			<div class="state">
 				Du hast noch nichts unterstützt. Reagier mit 👍 / ❤️ / 🚀 auf einen Wunsch im
-				<a class="link" href="/community">Community-Feed</a>.
+				<a class="link" href="/feedback">Community-Feed</a>.
 			</div>
 		{:else}
 			<div class="grid">

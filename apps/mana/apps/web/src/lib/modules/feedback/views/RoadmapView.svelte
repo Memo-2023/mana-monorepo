@@ -26,7 +26,7 @@
 	}));
 
 	function handleClick(id: string) {
-		void goto(`/community/${id}`);
+		void goto(`/feedback/${id}`);
 	}
 
 	async function handleReact(feedRef: { items: PublicFeedbackItem[] }, id: string, emoji: string) {

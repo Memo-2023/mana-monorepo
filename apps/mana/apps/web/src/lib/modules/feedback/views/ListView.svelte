@@ -53,7 +53,7 @@
 
 	function handleClickItem(id: string) {
 		openItemId = id;
-		void goto(`/community/${id}`);
+		void goto(`/feedback/${id}`);
 	}
 </script>
 

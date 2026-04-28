@@ -157,8 +157,8 @@
 			<div>
 				<div class="toggle-label">Klarnamen neben dem Pseudonym zeigen</div>
 				<div class="toggle-hint">
-					Wenn aktiv, sehen eingeloggte Mana-User in der Community deinen Namen ({authStore.user
-						?.name ?? 'kein Name'}) neben deiner Eule. Auf der öffentlichen community.mana.how-Seite
+					Wenn aktiv, sehen eingeloggte Mana-User im Feedback-Feed deinen Namen ({authStore.user
+						?.name ?? 'kein Name'}) neben deiner Eule. Auf der öffentlichen feedback.mana.how-Seite
 					(ohne Login) wird der Klarname <strong>nie</strong> gezeigt.
 				</div>
 			</div>

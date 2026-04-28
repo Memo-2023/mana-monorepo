@@ -603,7 +603,7 @@ services:
       # Comma-separated userIds that bypass community credit-grants
       # (otherwise founders self-reward when posting/shipping).
       FEEDBACK_FOUNDER_USER_IDS: ${FEEDBACK_FOUNDER_USER_IDS:-}
-      CORS_ORIGINS: https://mana.how,https://community.mana.how
+      CORS_ORIGINS: https://mana.how,https://feedback.mana.how
     ports:
       - "3064:3064"
     healthcheck:
@@ -962,11 +962,11 @@ services:
       # and research fetches fall back to the current origin (404).
       PUBLIC_MANA_RESEARCH_URL: http://mana-research:3068
       PUBLIC_MANA_RESEARCH_URL_CLIENT: https://research.mana.how
-      # mana-analytics — public-community feedback hub. Browser hits the
+      # mana-analytics — public-feedback hub. Browser hits the
       # /api/v1/(public/)feedback/* endpoints directly; SSR uses the
       # internal docker-network URL.
       PUBLIC_MANA_ANALYTICS_URL: http://mana-analytics:3064
-      PUBLIC_MANA_ANALYTICS_URL_CLIENT: https://community.mana.how
+      PUBLIC_MANA_ANALYTICS_URL_CLIENT: https://feedback.mana.how
       # mana-ai background Mission Runner. Browser calls the audit
       # endpoint (/api/v1/me/ai-audit) to render the Workbench
       # "Datenzugriff" tab. SSR doesn't hit this service directly.

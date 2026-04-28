@@ -3,7 +3,7 @@
   Free-text "what do you want from Mana?" capture. Posts to the central
   @mana/feedback hub as category='onboarding-wish'.
 
-  Public by default — appears in the /community feed under a Tier-
+  Public by default — appears in the /feedback feed under a Tier-
   pseudonym ("Wachsame Eule #4528"). Users can opt out via the visibility
   toggle, in which case the wish stays private (admin-only).
 

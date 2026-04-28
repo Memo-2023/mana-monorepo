@@ -89,7 +89,7 @@
 	<footer class="item-footer">
 		<a
 			class="author-link"
-			href={`/community/eule/${item.displayHash}`}
+			href={`/feedback/eule/${item.displayHash}`}
 			onclick={(e) => e.stopPropagation()}
 			title={`Profil von ${item.displayName} öffnen · ${tierCfg.label}-Eule (${item.karma ?? 0} Karma)`}
 		>

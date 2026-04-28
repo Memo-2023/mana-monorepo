@@ -2,10 +2,10 @@
 
 Public-Community-Feedback-Hub. Backend für `@mana/feedback`. Hostet
 sowohl die auth-required Submission/React/Admin-Surface als auch die
-anonymous Public-Mirror-Endpoints für `community.mana.how` und
-`mana.how/community`.
+anonymous Public-Mirror-Endpoints für `feedback.mana.how` und
+`mana.how/feedback`.
 
-## Port: 3064 (prod port via cloudflared tunnel: `community.mana.how`)
+## Port: 3064 (prod port via cloudflared tunnel: `feedback.mana.how`)
 
 ## API Endpoints
 
@@ -65,7 +65,7 @@ MANA_CREDITS_URL=http://mana-credits:3002 # internal grant calls (prod port; dev
 MANA_SERVICE_KEY=...                    # X-Service-Key for /internal/credits/grant
 FEEDBACK_PSEUDONYM_SECRET=...           # SHA256(userId+secret) → display_hash
 FEEDBACK_FOUNDER_USER_IDS=…,…           # Comma-separated; bypass +5/+500 grants
-CORS_ORIGINS=https://mana.how,https://community.mana.how
+CORS_ORIGINS=https://mana.how,https://feedback.mana.how
 ```
 
 ## Tests

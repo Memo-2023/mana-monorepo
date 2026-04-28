@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import DetailView from '$lib/modules/community/views/DetailView.svelte';
+	import DetailView from '$lib/modules/feedback/views/DetailView.svelte';
 
 	let { data } = $props();
 	let id = $derived($page.params.id ?? data.item.id);
@@ -12,7 +12,7 @@
 </svelte:head>
 
 <div class="detail-public">
-	<a href="/community" class="back-link">← Zurück zum Feed</a>
+	<a href="/feedback" class="back-link">← Zurück zum Feed</a>
 
 	<DetailView {id} />
 

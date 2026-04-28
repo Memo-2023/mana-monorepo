@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ModuleShell } from '$lib/components/shell';
-	import MyWishesView from '$lib/modules/community/views/MyWishesView.svelte';
+	import MyWishesView from '$lib/modules/feedback/views/MyWishesView.svelte';
 	import { Megaphone } from '@mana/shared-icons';
 </script>
 
@@ -13,7 +13,7 @@
 	title="Meine Wünsche"
 	color="#F59E0B"
 	icon={Megaphone}
-	backHref="/community"
+	backHref="/feedback"
 	moduleId="community"
 	hideFeedback
 >

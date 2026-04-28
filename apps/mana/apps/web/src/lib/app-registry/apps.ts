@@ -83,7 +83,7 @@ import {
 	NotePencil,
 	FilmStrip,
 	Hourglass,
-	Megaphone,
+	HeartHalf,
 } from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
@@ -1324,12 +1324,12 @@ registerApp({
 });
 
 registerApp({
-	id: 'community',
-	name: 'Community',
+	id: 'feedback',
+	name: 'Feedback',
 	color: '#F59E0B',
-	icon: Megaphone,
+	icon: HeartHalf,
 	views: {
-		list: { load: () => import('$lib/modules/community/ListView.svelte') },
+		list: { load: () => import('$lib/modules/feedback/ListView.svelte') },
 	},
 });
 

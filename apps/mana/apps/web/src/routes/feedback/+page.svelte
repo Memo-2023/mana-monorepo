@@ -1,11 +1,11 @@
 <!--
-  /community — Public community feed.
+  /feedback — Public feedback feed.
   SSR pre-renders the items from the anonymous endpoint; once mounted,
   the client-side ListView (auth-enriched if logged in) takes over with
   filters + reactions.
 -->
 <script lang="ts">
-	import ListView from '$lib/modules/community/views/ListView.svelte';
+	import ListView from '$lib/modules/feedback/views/ListView.svelte';
 
 	// data is from +page.server.ts — used as initial paint for SEO/non-JS,
 	// but the ListView re-fetches on mount (client-side, possibly authenticated).

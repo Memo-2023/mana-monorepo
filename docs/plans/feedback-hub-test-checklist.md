@@ -98,7 +98,7 @@ Alle 4 sollten `(healthy)` sein. Wenn nicht: `bash scripts/mac-mini/build-app.sh
 - [ ] Reaction-Bar (👍❤️🚀🤔🎉) klickbar
 - [ ] Filter: Category-Dropdown + Modul-Input
 
-**Anonymous (Inkognito) auf `mana.how/community` UND `community.mana.how`:**
+**Anonymous (Inkognito) auf `mana.how/community` UND `feedback.mana.how`:**
 
 - [ ] Feed lädt ohne Login
 - [ ] Pseudonym + Avatar sichtbar — **NIE Klarname** (auch wenn Test-A opted-in wäre)
@@ -206,7 +206,7 @@ Alle 4 sollten `(healthy)` sein. Wenn nicht: `bash scripts/mac-mini/build-app.sh
 - [ ] "← Zurück zum Feed"-Link funktioniert
 
 **Inkognito (kein Login):**
-- [ ] `community.mana.how/community/eule/<hash>` (oder mana.how/community/eule/<hash>) lädt SSR-rendered
+- [ ] `feedback.mana.how/community/eule/<hash>` (oder mana.how/community/eule/<hash>) lädt SSR-rendered
 - [ ] **Expect**: Anzeige identisch — Avatar, Tier-Badge, Karma, Posts; KEIN Klarname
 - [ ] HTML-Source: enthält `<meta name="description"...>` mit Pseudonym + Karma + Post-Count
 

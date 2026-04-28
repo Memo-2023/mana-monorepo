@@ -1,7 +1,7 @@
 <!--
-  /community/admin — Founder/Admin triage hub.
+  /feedback/admin — Founder/Admin triage hub.
 
-  Lives in the public /community route tree, but client-side gates on
+  Lives in the public /feedback route tree, but client-side gates on
   authStore.user.role === 'admin'. Lets the founder filter all feedback
   (public + private), update status, write admin responses, and toggle
   visibility.
@@ -22,7 +22,7 @@
 
 	$effect(() => {
 		if (authStore.initialized && !authStore.loading && !isAdmin) {
-			goto('/community');
+			goto('/feedback');
 		}
 	});
 

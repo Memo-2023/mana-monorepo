@@ -1,5 +1,5 @@
 <script lang="ts">
-	import RoadmapView from '$lib/modules/community/views/RoadmapView.svelte';
+	import RoadmapView from '$lib/modules/feedback/views/RoadmapView.svelte';
 </script>
 
 <svelte:head>

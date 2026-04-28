@@ -30,7 +30,7 @@
 	}
 
 	function goToItem(id: string) {
-		void goto(`/community/${id}`);
+		void goto(`/feedback/${id}`);
 	}
 </script>
 
@@ -43,7 +43,7 @@
 </svelte:head>
 
 <div class="profile">
-	<a href="/community" class="back-link">← Zurück zum Feed</a>
+	<a href="/feedback" class="back-link">← Zurück zum Feed</a>
 
 	<header class="hero">
 		<EulenAvatar displayHash={data.displayHash} size={96} title={data.displayName ?? ''} />
