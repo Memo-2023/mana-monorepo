@@ -340,6 +340,35 @@ jobs:
           . "$ENV_FILE"
           set +a
           PG_PASSWORD="${POSTGRES_PASSWORD:-mana123}"
+
+          # `drizzle-kit` reads `drizzle.config.ts`, which itself
+          # `import {defineConfig} from 'drizzle-kit'`. Node's resolver
+          # only finds that import when the package lives in the local
+          # node_modules — `pnpm dlx` puts it in the global cache,
+          # invisible to a from-cwd resolve. So before running any
+          # migration we install workspace deps for every Drizzle
+          # service in this deploy. pnpm's lockfile cache makes the
+          # second-and-later runs near-instant.
+          DRIZZLE_SVCS=""
+          for svc in $SERVICES; do
+            if [ -f "services/$svc/drizzle.config.ts" ] || [ -f "services/$svc/drizzle.config.js" ]; then
+              DRIZZLE_SVCS="$DRIZZLE_SVCS $svc"
+            fi
+          done
+          if [ -n "$DRIZZLE_SVCS" ]; then
+            echo "Installing workspace deps for Drizzle services:$DRIZZLE_SVCS"
+            # Use pnpm's path-based filter (`--filter ./services/<svc>...`)
+            # because our service package names don't follow a uniform
+            # convention (`@mana/auth` vs `@mana/credits-service` etc.).
+            # The trailing `...` includes transitive workspace deps.
+            FILTER_FLAGS=""
+            for svc in $DRIZZLE_SVCS; do
+              FILTER_FLAGS="$FILTER_FLAGS --filter ./services/$svc..."
+            done
+            # shellcheck disable=SC2086
+            pnpm install $FILTER_FLAGS --frozen-lockfile --ignore-scripts 2>&1 | tail -5 || true
+          fi
+
           # Most services live in mana_platform; mana-sync (Go, no
           # Drizzle) and a handful of others use mana_sync. Per-service
           # routing is read straight from compose's DATABASE_URL env.

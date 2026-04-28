@@ -57,16 +57,17 @@ fi
 
 cd "$SVC_DIR"
 
-# Pick how we'll invoke drizzle-kit. The Mac Mini runner doesn't run
-# `pnpm install` for the workspace (everything builds inside Docker),
-# so the per-service node_modules/.bin/drizzle-kit binary is missing.
-# `pnpm dlx` fetches drizzle-kit on demand, caches it in the global
-# pnpm store, and is then fast on every subsequent call. drizzle-kit
-# reads its config from cwd so it still finds drizzle.config.ts here.
-if pnpm exec --silent drizzle-kit --version >/dev/null 2>&1; then
-	DRIZZLE="pnpm exec drizzle-kit"
-else
-	DRIZZLE="pnpm dlx drizzle-kit"
+# Drizzle-kit must be available as a workspace-local module — its
+# binary AND the import that drizzle.config.ts performs both go
+# through Node's local-dir resolver. The CD pipeline runs `pnpm
+# install --filter ./services/<svc>...` before invoking this script
+# so every Drizzle service has node_modules/.bin/drizzle-kit + the
+# importable package linked. `pnpm dlx` doesn't work here because
+# its global cache isn't on Node's resolution path for the config
+# file's `import { defineConfig } from 'drizzle-kit'`.
+if ! pnpm exec drizzle-kit --version >/dev/null 2>&1; then
+	echo "[safe-db-push] $SVC: drizzle-kit not installed in workspace — run \`pnpm install --filter ./services/$SVC...\` first"
+	exit 0
 fi
 
 # Snapshot the existing migration set before we generate. Anything new
@@ -75,7 +76,7 @@ PRE_GEN_FILES=$(find drizzle -maxdepth 2 -name '*.sql' 2>/dev/null | sort || tru
 
 # Generate-only — does not touch the database.
 echo "[safe-db-push] $SVC: generating diff…"
-GEN_OUT=$($DRIZZLE generate --name "__ci_safety_check_$$" 2>&1 || true)
+GEN_OUT=$(pnpm exec drizzle-kit generate --name "__ci_safety_check_$$" 2>&1 || true)
 echo "$GEN_OUT" | tail -20
 
 POST_GEN_FILES=$(find drizzle -maxdepth 2 -name '*.sql' 2>/dev/null | sort || true)
@@ -132,5 +133,5 @@ fi
 
 # Additive only — safe to apply.
 echo "[safe-db-push] $SVC: ✓ additive only, applying…"
-$DRIZZLE push --force
+pnpm exec drizzle-kit push --force
 echo "[safe-db-push] $SVC: ✓ schema is now in sync"
