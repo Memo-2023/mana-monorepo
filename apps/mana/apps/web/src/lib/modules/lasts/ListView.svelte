@@ -9,7 +9,25 @@
 	import { goto } from '$app/navigation';
 	import { _ } from 'svelte-i18n';
 	import { ContextMenu, type ContextMenuItem } from '@mana/shared-ui';
-	import { PushPin, Trash, Archive } from '@mana/shared-icons';
+	import {
+		PushPin,
+		Trash,
+		Archive,
+		Tray,
+		Path,
+		Gear,
+		ListBullets,
+		Question,
+		CheckCircle,
+		ArrowUUpLeft,
+	} from '@mana/shared-icons';
+
+	const TAB_ICONS = {
+		all: ListBullets,
+		suspected: Question,
+		confirmed: CheckCircle,
+		reclaimed: ArrowUUpLeft,
+	} as const;
 	import { useItemContextMenu } from '$lib/data/item-context-menu.svelte';
 	import { onMount } from 'svelte';
 	import { useAllLasts, useInboxLasts, searchLasts } from './queries';
@@ -127,62 +145,63 @@
 	<!-- In-app reminders banner (anniversary / recognition / inbox-notify) -->
 	<DueBanner {lasts} {inboxCount} />
 
-	<!-- Tab bar -->
+	<!-- Tab bar: status filters + cross-module utility links, horizontally scrollable -->
 	<div class="tab-bar">
 		{#each ['all', 'suspected', 'confirmed', 'reclaimed'] as const as tab}
+			{@const Icon = TAB_ICONS[tab]}
 			<button class="tab" class:active={activeTab === tab} onclick={() => (activeTab = tab)}>
-				{$_(`lasts.tabs.${tab}`)}
+				<Icon size={13} weight="regular" />
+				<span>{$_(`lasts.tabs.${tab}`)}</span>
 				{#if counts[tab] > 0}
-					<span class="tab-count">{counts[tab]}</span>
+					<span class="tab-count">({counts[tab]})</span>
 				{/if}
 			</button>
 		{/each}
-		<a class="inbox-link" href="/lasts/inbox">
-			{$_('lasts.tabs.inbox')}
-			{#if inboxCount > 0}
-				<span class="inbox-count">{inboxCount}</span>
-			{/if}
-		</a>
-		<a class="inbox-link" href="/milestones" title={$_('milestones.timeline.title')}>
-			{$_('milestones.timeline.title')}
-		</a>
-		<a class="inbox-link settings-link" href="/lasts/settings" title={$_('lasts.settings.title')}
-			>⚙</a
-		>
+		<div class="utility-cluster">
+			<a class="tab util-tab" href="/lasts/inbox" title={$_('lasts.tabs.inbox')}>
+				<Tray size={13} weight="regular" />
+				<span>{$_('lasts.tabs.inbox')}</span>
+				{#if inboxCount > 0}
+					<span class="tab-count util-count">({inboxCount})</span>
+				{/if}
+			</a>
+			<a class="tab util-tab" href="/milestones" title={$_('milestones.timeline.title')}>
+				<Path size={13} weight="regular" />
+				<span>{$_('milestones.timeline.title')}</span>
+			</a>
+			<a class="tab util-tab" href="/lasts/settings" title={$_('lasts.settings.title')}>
+				<Gear size={13} weight="regular" />
+				<span>{$_('lasts.settings.title')}</span>
+			</a>
+		</div>
 	</div>
 
-	<!-- Quick create -->
+	<!-- Quick create — single row: category, title, mode -->
 	<form onsubmit={(e) => e.preventDefault()} class="quick-add">
-		<div class="quick-top">
-			<select class="cat-select" bind:value={newCategory}>
-				{#each MILESTONE_CATEGORIES as cat}
-					<option value={cat}>{CATEGORY_LABELS[cat].de}</option>
-				{/each}
-			</select>
-			<input
-				class="add-input"
-				type="text"
-				placeholder={$_('lasts.quickAdd.placeholder')}
-				bind:value={newTitle}
-				onkeydown={handleQuickCreate}
-			/>
-		</div>
-		<div class="quick-toggle">
-			<button
-				class="toggle-btn"
-				class:active={!newAsConfirmed}
-				onclick={() => (newAsConfirmed = false)}
-			>
-				{$_('lasts.quickAdd.modeSuspected')}
-			</button>
-			<button
-				class="toggle-btn"
-				class:active={newAsConfirmed}
-				onclick={() => (newAsConfirmed = true)}
-			>
-				{$_('lasts.quickAdd.modeConfirmed')}
-			</button>
-		</div>
+		<select
+			class="cat-select"
+			bind:value={newCategory}
+			aria-label={$_('lasts.detail.categoryLabel')}
+		>
+			{#each MILESTONE_CATEGORIES as cat}
+				<option value={cat}>{CATEGORY_LABELS[cat].de}</option>
+			{/each}
+		</select>
+		<input
+			class="add-input"
+			type="text"
+			placeholder={$_('lasts.quickAdd.placeholder')}
+			bind:value={newTitle}
+			onkeydown={handleQuickCreate}
+		/>
+		<select
+			class="mode-select"
+			bind:value={newAsConfirmed}
+			aria-label={$_('lasts.status.suspected') + ' / ' + $_('lasts.status.confirmed')}
+		>
+			<option value={false}>↩ {$_('lasts.quickAdd.modeSuspected')}</option>
+			<option value={true}>↩ {$_('lasts.quickAdd.modeConfirmed')}</option>
+		</select>
 	</form>
 
 	<!-- Search -->
@@ -262,12 +281,23 @@
 	/* ── Tab Bar ─────────────────────────────── */
 	.tab-bar {
 		display: flex;
-		gap: 0.25rem;
+		flex-wrap: nowrap;
+		gap: 0.125rem;
 		border-bottom: 1px solid hsl(var(--color-border));
 		padding-bottom: 0.25rem;
+		overflow-x: auto;
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+	}
+	.tab-bar::-webkit-scrollbar {
+		display: none;
 	}
 	.tab {
-		padding: 0.375rem 0.75rem;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3125rem;
+		flex-shrink: 0;
+		padding: 0.375rem 0.625rem;
 		border: none;
 		background: transparent;
 		font-size: 0.75rem;
@@ -275,7 +305,12 @@
 		color: hsl(var(--color-muted-foreground));
 		cursor: pointer;
 		border-bottom: 2px solid transparent;
-		transition: all 0.15s;
+		text-decoration: none;
+		white-space: nowrap;
+		transition:
+			color 0.15s,
+			border-color 0.15s,
+			background 0.15s;
 	}
 	.tab:hover {
 		color: hsl(var(--color-foreground));
@@ -285,59 +320,39 @@
 		border-bottom-color: hsl(var(--color-primary));
 	}
 	.tab-count {
-		font-size: 0.625rem;
-		background: hsl(var(--color-primary) / 0.12);
+		font-size: 0.6875rem;
+		font-weight: 400;
+		color: hsl(var(--color-muted-foreground));
+	}
+	.tab.active .tab-count {
+		color: hsl(var(--color-primary) / 0.7);
+	}
+	.util-count {
 		color: hsl(var(--color-primary));
-		padding: 0.0625rem 0.375rem;
-		border-radius: 9999px;
-		margin-left: 0.25rem;
+		font-weight: 600;
 	}
 
-	.inbox-link {
-		margin-left: auto;
-		padding: 0.375rem 0.625rem;
-		border-radius: 0.25rem;
-		font-size: 0.6875rem;
-		font-weight: 600;
-		color: hsl(var(--color-muted-foreground));
-		text-decoration: none;
-		transition: all 0.15s;
+	.utility-cluster {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.25rem;
-	}
-	.inbox-link:hover {
-		color: hsl(var(--color-primary));
-		background: hsl(var(--color-surface-hover));
-	}
-	.inbox-link.settings-link {
-		margin-left: 0;
-		font-size: 0.875rem;
-	}
-	.inbox-count {
-		font-size: 0.5625rem;
-		background: hsl(var(--color-primary));
-		color: hsl(var(--color-primary-foreground));
-		padding: 0.0625rem 0.375rem;
-		border-radius: 9999px;
-		font-weight: 700;
+		gap: 0.125rem;
+		flex-shrink: 0;
+		margin-left: 0.25rem;
+		padding-left: 0.375rem;
+		border-left: 1px solid hsl(var(--color-border));
 	}
 
 	/* ── Quick Add ───────────────────────────── */
 	.quick-add {
 		display: flex;
-		flex-direction: column;
-		gap: 0.375rem;
+		align-items: center;
+		gap: 0.5rem;
 		padding: 0.375rem 0.5rem;
 		border-radius: 0.375rem;
 		border: 1px solid hsl(var(--color-border));
 	}
-	.quick-top {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-	.cat-select {
+	.cat-select,
+	.mode-select {
 		background: transparent;
 		border: 1px solid hsl(var(--color-border));
 		border-radius: 0.25rem;
@@ -345,9 +360,14 @@
 		color: hsl(var(--color-foreground));
 		padding: 0.125rem 0.25rem;
 		outline: none;
+		cursor: pointer;
+	}
+	.mode-select {
+		color: hsl(var(--color-muted-foreground));
 	}
 	.add-input {
 		flex: 1;
+		min-width: 0;
 		border: none;
 		background: transparent;
 		outline: none;
@@ -356,25 +376,6 @@
 	}
 	.add-input::placeholder {
 		color: hsl(var(--color-muted-foreground));
-	}
-	.quick-toggle {
-		display: flex;
-		gap: 0.25rem;
-	}
-	.toggle-btn {
-		padding: 0.125rem 0.5rem;
-		border-radius: 9999px;
-		border: 1px solid hsl(var(--color-border));
-		background: transparent;
-		font-size: 0.625rem;
-		color: hsl(var(--color-muted-foreground));
-		cursor: pointer;
-		transition: all 0.15s;
-	}
-	.toggle-btn.active {
-		background: hsl(var(--color-primary));
-		color: hsl(var(--color-primary-foreground));
-		border-color: hsl(var(--color-primary));
 	}
 
 	/* ── Search ──────────────────────────────── */
