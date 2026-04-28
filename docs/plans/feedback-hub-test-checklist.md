@@ -27,7 +27,24 @@ parent: docs/plans/feedback-rewards-and-identity.md
 
 Schnell-Login zwischen Accounts: Inkognito-Tab oder zweiter Browser. JWT lebt im Cookie + im SessionStorage; Inkognito-Sessions sind unabhängig.
 
-**Vor dem Test prüfen:**
+**Vor dem Test prüfen — Lokale Entwicklung (`mana.how` lokal auf :5173):**
+
+Die Web-App schickt Feedback-Calls an `localhost:3064` (mana-analytics).
+Wenn der Service nicht läuft, siehst du im Browser-Console
+`ERR_CONNECTION_REFUSED` auf `/api/v1/feedback/...`.
+
+```bash
+# In separatem Terminal vor dem Web-Dev-Server:
+pnpm dev:analytics    # → http://localhost:3064 (auto-watch)
+```
+
+Plus Auth + Credits, falls noch nicht laufend:
+```bash
+pnpm dev:auth         # 3001
+pnpm dev:credits      # 3002
+```
+
+**Vor dem Test prüfen — Production (`mana.how`):**
 
 ```bash
 ssh mana-server 'export DOCKER_HOST=unix:///Users/mana/.colima/default/docker.sock && /usr/local/bin/docker ps --filter "name=mana-analytics" --filter "name=mana-credits" --filter "name=mana-app-web" --filter "name=mana-auth" --format "{{.Names}}: {{.Status}}"'

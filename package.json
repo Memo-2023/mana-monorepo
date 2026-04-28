@@ -77,6 +77,7 @@
 		"dev:chat:app": "concurrently -n api,web -c yellow,cyan \"pnpm dev:api\" \"pnpm dev:chat:web\"",
 		"dev:auth": "cd services/mana-auth && bun run --watch src/index.ts",
 		"dev:events": "cd services/mana-events && bun run --watch src/index.ts",
+		"dev:analytics": "cd services/mana-analytics && bun run --watch src/index.ts",
 		"dev:sync": "cd services/mana-sync && JWKS_URL=http://localhost:3001/api/auth/jwks DATABASE_URL=postgresql://mana:devpassword@localhost:5432/mana_sync ./server",
 		"dev:sync:build": "cd services/mana-sync && go build -o server ./cmd/server",
 		"dev:chat:full": "concurrently -n auth,sync,api -c blue,magenta,yellow \"pnpm dev:auth\" \"pnpm dev:sync\" \"pnpm dev:api\"",
