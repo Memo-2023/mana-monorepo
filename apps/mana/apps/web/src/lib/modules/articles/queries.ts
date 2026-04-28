@@ -11,7 +11,17 @@ import { deriveUpdatedAt } from '$lib/data/sync';
 import { decryptRecords } from '$lib/data/crypto';
 import { scopedForModule, scopedGet } from '$lib/data/scope';
 import { articleTagOps } from './stores/tags.svelte';
-import type { LocalArticle, LocalHighlight, Article, Highlight, ArticleStatus } from './types';
+import type {
+	Article,
+	ArticleImportItem,
+	ArticleImportJob,
+	ArticleStatus,
+	Highlight,
+	LocalArticle,
+	LocalArticleImportItem,
+	LocalArticleImportJob,
+	LocalHighlight,
+} from './types';
 
 // ─── Type Converters ─────────────────────────────────────
 
@@ -265,6 +275,85 @@ export function useArticleHighlights(articleId: string) {
 		const decrypted = await decryptRecords('articleHighlights', forArticle);
 		return decrypted.map(toHighlight).sort((a, b) => a.startOffset - b.startOffset);
 	}, [] as Highlight[]);
+}
+
+// ─── Bulk-Import (docs/plans/articles-bulk-import.md) ────
+
+export function toImportJob(local: LocalArticleImportJob): ArticleImportJob {
+	const now = new Date().toISOString();
+	return {
+		id: local.id,
+		totalUrls: local.totalUrls,
+		status: local.status,
+		leasedBy: local.leasedBy ?? null,
+		leasedUntil: local.leasedUntil ?? null,
+		startedAt: local.startedAt ?? null,
+		finishedAt: local.finishedAt ?? null,
+		savedCount: local.savedCount ?? 0,
+		duplicateCount: local.duplicateCount ?? 0,
+		errorCount: local.errorCount ?? 0,
+		warningCount: local.warningCount ?? 0,
+		createdAt: local.createdAt ?? now,
+		updatedAt: deriveUpdatedAt(local) ?? local.createdAt ?? now,
+	};
+}
+
+export function toImportItem(local: LocalArticleImportItem): ArticleImportItem {
+	const now = new Date().toISOString();
+	return {
+		id: local.id,
+		jobId: local.jobId,
+		idx: local.idx,
+		url: local.url,
+		state: local.state,
+		articleId: local.articleId ?? null,
+		warning: local.warning ?? null,
+		error: local.error ?? null,
+		attempts: local.attempts ?? 0,
+		lastAttemptAt: local.lastAttemptAt ?? null,
+		createdAt: local.createdAt ?? now,
+		updatedAt: deriveUpdatedAt(local) ?? local.createdAt ?? now,
+	};
+}
+
+/** All bulk-import jobs in the active space, newest first. Drives the
+ *  `/articles/import` index. */
+export function useImportJobs() {
+	return useScopedLiveQuery(async () => {
+		const locals = await scopedForModule<LocalArticleImportJob, string>(
+			'articles',
+			'articleImportJobs'
+		).toArray();
+		const visible = locals.filter((j) => !j.deletedAt);
+		visible.sort((a, b) => (deriveUpdatedAt(b) ?? '').localeCompare(deriveUpdatedAt(a) ?? ''));
+		return visible.map(toImportJob);
+	}, [] as ArticleImportJob[]);
+}
+
+/** Single job — drives the `/articles/import/[jobId]` detail header. */
+export function useImportJob(jobId: string) {
+	return useScopedLiveQuery(
+		async () => {
+			const local = await scopedGet<LocalArticleImportJob>('articleImportJobs', jobId);
+			if (!local || local.deletedAt) return null;
+			return toImportJob(local);
+		},
+		null as ArticleImportJob | null
+	);
+}
+
+/** Items for one job, in the original input order. Drives the per-row
+ *  list on the detail view. */
+export function useImportItems(jobId: string) {
+	return useScopedLiveQuery(async () => {
+		const locals = await scopedForModule<LocalArticleImportItem, string>(
+			'articles',
+			'articleImportItems'
+		).toArray();
+		const forJob = locals.filter((i) => i.jobId === jobId && !i.deletedAt);
+		forJob.sort((a, b) => a.idx - b.idx);
+		return forJob.map(toImportItem);
+	}, [] as ArticleImportItem[]);
 }
 
 // ─── Pure Helpers ─────────────────────────────────────────
