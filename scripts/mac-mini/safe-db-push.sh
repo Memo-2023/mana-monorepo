@@ -57,13 +57,25 @@ fi
 
 cd "$SVC_DIR"
 
+# Pick how we'll invoke drizzle-kit. The Mac Mini runner doesn't run
+# `pnpm install` for the workspace (everything builds inside Docker),
+# so the per-service node_modules/.bin/drizzle-kit binary is missing.
+# `pnpm dlx` fetches drizzle-kit on demand, caches it in the global
+# pnpm store, and is then fast on every subsequent call. drizzle-kit
+# reads its config from cwd so it still finds drizzle.config.ts here.
+if pnpm exec --silent drizzle-kit --version >/dev/null 2>&1; then
+	DRIZZLE="pnpm exec drizzle-kit"
+else
+	DRIZZLE="pnpm dlx drizzle-kit"
+fi
+
 # Snapshot the existing migration set before we generate. Anything new
 # afterwards is the diff this push would apply.
 PRE_GEN_FILES=$(find drizzle -maxdepth 2 -name '*.sql' 2>/dev/null | sort || true)
 
 # Generate-only — does not touch the database.
 echo "[safe-db-push] $SVC: generating diff…"
-GEN_OUT=$(pnpm exec drizzle-kit generate --name "__ci_safety_check_$$" 2>&1 || true)
+GEN_OUT=$($DRIZZLE generate --name "__ci_safety_check_$$" 2>&1 || true)
 echo "$GEN_OUT" | tail -20
 
 POST_GEN_FILES=$(find drizzle -maxdepth 2 -name '*.sql' 2>/dev/null | sort || true)
@@ -120,5 +132,5 @@ fi
 
 # Additive only — safe to apply.
 echo "[safe-db-push] $SVC: ✓ additive only, applying…"
-pnpm exec drizzle-kit push --force
+$DRIZZLE push --force
 echo "[safe-db-push] $SVC: ✓ schema is now in sync"
