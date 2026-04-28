@@ -17,6 +17,7 @@
  */
 
 import { mapOsmTagToPlaceCategory } from '../lib/osm-category-map';
+import { PUBLIC_FOCUS_DECIMALS, PUBLIC_REVERSE_DECIMALS, quantizeCoord } from '../lib/privacy';
 import type {
 	GeocodingProvider,
 	GeocodingResult,
@@ -32,6 +33,7 @@ export interface PhotonConfig {
 
 export class PhotonProvider implements GeocodingProvider {
 	readonly name = 'photon' as const;
+	readonly privacy = 'public' as const;
 
 	constructor(private readonly config: PhotonConfig) {}
 
@@ -41,9 +43,16 @@ export class PhotonProvider implements GeocodingProvider {
 			limit: String(req.limit),
 			lang: req.lang,
 		});
-		if (req.focusLat && req.focusLon) {
-			params.set('lat', req.focusLat);
-			params.set('lon', req.focusLon);
+		// Quantize the user's focus point before forwarding. Photon biases
+		// results toward "near this lat/lon"; we don't need to send the
+		// user's exact GPS — 2 decimals (~1.1 km) is enough for the bias
+		// to work and keeps the user's home/workplace coords out of
+		// Photon's logs.
+		const qLat = quantizeCoord(req.focusLat, PUBLIC_FOCUS_DECIMALS);
+		const qLon = quantizeCoord(req.focusLon, PUBLIC_FOCUS_DECIMALS);
+		if (qLat && qLon) {
+			params.set('lat', qLat);
+			params.set('lon', qLon);
 		}
 
 		try {
@@ -63,9 +72,15 @@ export class PhotonProvider implements GeocodingProvider {
 
 	async reverse(req: ReverseRequest, signal?: AbortSignal): Promise<ProviderResponse> {
 		// Photon expects lon + lat, not point.lat/point.lon. Easy footgun.
+		// Quantize to ~110 m so we don't reverse-geocode the user's exact
+		// front door — city-block resolution is enough for the Places UI's
+		// "What's near me?" use case, and we never want to log a precise
+		// home location to a third party.
+		const qLat = quantizeCoord(req.lat, PUBLIC_REVERSE_DECIMALS);
+		const qLon = quantizeCoord(req.lon, PUBLIC_REVERSE_DECIMALS);
 		const params = new URLSearchParams({
-			lat: req.lat,
-			lon: req.lon,
+			lat: qLat ?? req.lat,
+			lon: qLon ?? req.lon,
 			lang: req.lang,
 		});
 

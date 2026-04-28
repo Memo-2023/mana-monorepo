@@ -22,6 +22,7 @@ export interface PeliasConfig {
 
 export class PeliasProvider implements GeocodingProvider {
 	readonly name = 'pelias' as const;
+	readonly privacy = 'local' as const;
 
 	constructor(private readonly config: PeliasConfig) {}
 

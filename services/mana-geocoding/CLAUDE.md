@@ -171,7 +171,8 @@ NOMINATIM_INTERVAL_MS=1100            # >= 1000 to honor 1 req/sec policy
 # --- Misc -------------------------------------------------------------
 CORS_ORIGINS=http://localhost:5173,https://mana.how
 CACHE_MAX_ENTRIES=5000
-CACHE_TTL_MS=86400000
+CACHE_TTL_MS=86400000                 # 24h — used for local-provider answers
+CACHE_PUBLIC_TTL_MS=604800000         # 7d — extended TTL for public-API answers (privacy)
 ```
 
 To **disable a provider**, drop it from `GEOCODING_PROVIDERS`. To run with
@@ -202,9 +203,78 @@ Client (Places module)
       3. Nominatim     ← last resort: 200–800 ms + 1 req/sec queue
 ```
 
-The response body includes `provider: 'pelias' | 'photon' | 'nominatim'`
-and `tried: ProviderName[]` so the caller can render a "approximate match"
-hint when a fallback served the request.
+The response body includes `provider: 'pelias' | 'photon' | 'nominatim'`,
+`tried: ProviderName[]`, and an optional `notice` (`'fallback_used'` or
+`'sensitive_local_unavailable'`) so the caller can render an
+"approximate match" hint or explain why a sensitive query returned 0
+results.
+
+## Privacy hardening
+
+When a request goes to Pelias, the user's query content + focus point
+stay on our infrastructure. When it falls through to Photon or
+Nominatim, the query is forwarded to a third party. Three independent
+defenses limit what those third parties can learn:
+
+### 1. Sensitive-query block (`src/lib/sensitive-query.ts`)
+
+Queries matching the medical / mental-health / crisis-service keyword
+list (`Hausarzt`, `Psychiater`, `Klinikum`, `Suchtberatung`, `HIV`,
+`Frauenhaus`, …) are **never forwarded to public APIs**, even if Pelias
+is unreachable. The chain detects sensitivity at the route layer and
+calls `chain.search(req, signal, { localOnly: true })` — providers with
+`privacy: 'public'` are filtered out *before* the iteration begins, so
+there is no race window.
+
+When no local provider is available (e.g. Pelias is stopped), a
+sensitive query returns `ok: true, results: [], notice:
+'sensitive_local_unavailable'`. The UI should show "Diese Suche bleibt
+bewusst lokal — kein Treffer im DACH-Index. Versuche eine allgemeinere
+Formulierung." rather than "no results".
+
+The keyword list is documented and maintained inline. False negatives
+(a sensitive query slipping through) are the primary risk; false
+positives just produce a 0-result UX hit, which is the safer
+trade-off.
+
+### 2. Coordinate quantization (`src/lib/privacy.ts`)
+
+Coordinates are rounded before forwarding to public providers:
+
+- **Forward-search focus** (`focus.lat/lon`): rounded to 2 decimals
+  (~1.1 km). Enough for the "results near me" bias without sending
+  exact GPS.
+- **Reverse-geocoding lat/lon**: rounded to 3 decimals (~110 m).
+  City-block resolution — sufficient for "what's near me?", avoids
+  logging exact home/workplace coordinates to a third party.
+
+Pelias always gets full-precision coordinates — quantization only
+applies on the way out to public APIs.
+
+### 3. Aggressive caching of public-API answers
+
+`config.cache.publicTtlMs` (default 7 days) overrides the default 24h
+cache TTL when the response came from a public provider. Same query
+from 1000 different users → 1 outbound request to Photon/Nominatim.
+This is the strongest privacy lever we have over public providers,
+since we can't change their logging behavior — only the rate at which
+we feed them queries.
+
+### What this protects + what it doesn't
+
+| Threat | Protected? |
+|---|---|
+| Public API sees user's IP | ✓ (wrapper is the proxy, only mac-mini IP goes out) |
+| Public API sees user identity / JWT | ✓ (wrapper sends no auth headers) |
+| Public API sees query content | partial — sensitive queries blocked entirely, others go through |
+| Public API sees user's exact GPS | ✓ (quantized to ~1km / ~110m) |
+| Aggregate location-intent profiling | partial — cache reduces volume ~10–100× |
+| TLS-level traffic analysis (timing) | ✗ (not in scope) |
+| Compelled disclosure of public-API logs | ✗ (no legal mitigation) |
+
+Residual risk for non-sensitive queries: "third party learns what
+queries our backend made, with timestamps, but not who made them."
+Acceptable for restaurant/landmark lookups, blocked for medical lookups.
 
 ## Pelias Infrastructure
 
@@ -319,7 +389,7 @@ bun test
   `nominatim-normalizer.test.ts` — locking the wire-format mapping for the
   two public fallback providers.
 
-As of the 2026-04-28 fallback rollout: **115 tests, all green**.
+As of the 2026-04-28 privacy-hardening rollout: **141 tests, all green**.
 
 ### Smoke test (`bun run test:smoke`)
 
@@ -354,10 +424,12 @@ src/
 │   ├── photon.ts                # Fallback 1: photon.komoot.io
 │   └── nominatim.ts             # Fallback 2: nominatim.openstreetmap.org
 └── lib/
-    ├── cache.ts                 # LRU cache with TTL (provider-agnostic)
+    ├── cache.ts                 # LRU cache with TTL + per-entry override
     ├── category-map.ts          # Pelias-taxonomy → PlaceCategory
     ├── osm-category-map.ts      # Raw OSM `class:type` → PlaceCategory
-    └── rate-limiter.ts          # Single-token limiter (used by Nominatim)
+    ├── privacy.ts               # Coordinate quantization for public APIs
+    ├── rate-limiter.ts          # Single-token limiter (used by Nominatim)
+    └── sensitive-query.ts       # Health/crisis keyword detector
 pelias/
 ├── docker-compose.yml           # Pelias stack
 ├── pelias.json                  # Pelias config (DACH region)

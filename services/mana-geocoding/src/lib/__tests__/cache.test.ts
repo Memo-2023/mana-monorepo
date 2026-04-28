@@ -79,6 +79,34 @@ describe('LRUCache', () => {
 		expect(cache.size).toBe(0);
 	});
 
+	it('honors per-entry ttlOverride longer than the default', async () => {
+		// Default TTL = 20ms; one entry overridden to 200ms.
+		const cache = new LRUCache<string>(10, 20);
+		cache.set('short', 'short-lived');
+		cache.set('long', 'long-lived', 200);
+
+		// Both alive at t=0
+		expect(cache.get('short')).toBe('short-lived');
+		expect(cache.get('long')).toBe('long-lived');
+
+		// Past default TTL: short expires, long survives
+		await new Promise((r) => setTimeout(r, 40));
+		expect(cache.get('short')).toBeUndefined();
+		expect(cache.get('long')).toBe('long-lived');
+	});
+
+	it('honors per-entry ttlOverride shorter than the default', async () => {
+		// Inverse case: shorter override on one entry. Validates we use
+		// the override value, not the larger of (default, override).
+		const cache = new LRUCache<string>(10, 200);
+		cache.set('default', 'A');
+		cache.set('shortened', 'B', 20);
+
+		await new Promise((r) => setTimeout(r, 40));
+		expect(cache.get('default')).toBe('A');
+		expect(cache.get('shortened')).toBeUndefined();
+	});
+
 	it('handles arbitrary value types', () => {
 		interface Feature {
 			name: string;

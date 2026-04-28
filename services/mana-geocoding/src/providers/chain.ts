@@ -38,6 +38,25 @@ interface HealthEntry {
 	checkedAt: number;
 }
 
+/**
+ * Notice codes — surfaced to the route layer so the API response can carry
+ * a hint to the UI (e.g. badge a result as "approximate" or explain why
+ * a sensitive query returned 0 hits).
+ */
+export type ChainNotice =
+	/** Sensitive query was blocked from public providers and no local
+	 *  provider was healthy → no results, but the absence is intentional. */
+	| 'sensitive_local_unavailable'
+	/** A non-Pelias provider served the request (Pelias was down). */
+	| 'fallback_used';
+
+export interface ChainOptions {
+	/** When true, only providers with `privacy: 'local'` are tried.
+	 *  Set this for queries that match the sensitive-keyword list so we
+	 *  don't leak medical / crisis-service queries to public endpoints. */
+	localOnly?: boolean;
+}
+
 export interface ChainResponse {
 	ok: boolean;
 	provider?: ProviderName;
@@ -45,6 +64,8 @@ export interface ChainResponse {
 	/** Names of providers that were tried but failed before we got a hit.
 	 *  Useful for telemetry (`x-geocoding-tried` response header). */
 	tried: ProviderName[];
+	/** Optional UX hint — see `ChainNotice` for the meanings. */
+	notice?: ChainNotice;
 }
 
 export class ProviderChain {
@@ -52,17 +73,26 @@ export class ProviderChain {
 
 	constructor(private readonly config: ChainConfig) {}
 
-	async search(req: SearchRequest, signal?: AbortSignal): Promise<ChainResponse> {
-		return this.run(req, signal, (p, r, s) => p.search(r as SearchRequest, s));
+	async search(
+		req: SearchRequest,
+		signal?: AbortSignal,
+		options: ChainOptions = {}
+	): Promise<ChainResponse> {
+		return this.run(req, signal, options, (p, r, s) => p.search(r as SearchRequest, s));
 	}
 
-	async reverse(req: ReverseRequest, signal?: AbortSignal): Promise<ChainResponse> {
-		return this.run(req, signal, (p, r, s) => p.reverse(r as ReverseRequest, s));
+	async reverse(
+		req: ReverseRequest,
+		signal?: AbortSignal,
+		options: ChainOptions = {}
+	): Promise<ChainResponse> {
+		return this.run(req, signal, options, (p, r, s) => p.reverse(r as ReverseRequest, s));
 	}
 
 	private async run(
 		req: SearchRequest | ReverseRequest,
 		signal: AbortSignal | undefined,
+		options: ChainOptions,
 		call: (
 			provider: GeocodingProvider,
 			req: SearchRequest | ReverseRequest,
@@ -71,7 +101,16 @@ export class ProviderChain {
 	): Promise<ChainResponse> {
 		const tried: ProviderName[] = [];
 
-		for (const provider of this.config.providers) {
+		// Filter providers up front: in local-only mode (sensitive query),
+		// drop everything with `privacy: 'public'` BEFORE we even probe
+		// health. This guarantees a sensitive query can never reach a
+		// public endpoint, even on a tight race window between health
+		// caching and provider iteration.
+		const candidates = options.localOnly
+			? this.config.providers.filter((p) => p.privacy === 'local')
+			: this.config.providers;
+
+		for (const provider of candidates) {
 			if (!(await this.isHealthy(provider, signal))) {
 				continue;
 			}
@@ -81,7 +120,8 @@ export class ProviderChain {
 
 			if (result.ok) {
 				// Success — even if results=[], that's a definitive answer.
-				return { ok: true, provider: provider.name, results: result.results, tried };
+				const notice = provider.privacy === 'public' ? ('fallback_used' as const) : undefined;
+				return { ok: true, provider: provider.name, results: result.results, tried, notice };
 			}
 
 			// Failure — mark unhealthy and fall through.
@@ -93,6 +133,18 @@ export class ProviderChain {
 			});
 		}
 
+		// All candidates failed (or the sensitive-query filter left us with
+		// none). Distinguish the two so the UI can show different copy:
+		//   - "no results found" (generic chain failure)
+		//   - "this search stays local — currently unavailable" (sensitive)
+		if (options.localOnly) {
+			return {
+				ok: true,
+				results: [],
+				tried,
+				notice: 'sensitive_local_unavailable',
+			};
+		}
 		return { ok: false, results: [], tried };
 	}
 

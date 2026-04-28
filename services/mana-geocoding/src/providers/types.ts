@@ -75,6 +75,15 @@ export type ProviderResponse =
 
 export interface GeocodingProvider {
 	readonly name: ProviderName;
+	/**
+	 * Privacy stance:
+	 *   - `'local'`: backend runs on our infrastructure, query content
+	 *     never leaves our network. Eligible for sensitive queries.
+	 *   - `'public'`: backend is a public third-party API. The query
+	 *     content + our outbound IP are visible to that third party.
+	 *     Skipped when the chain is in local-only mode (sensitive query).
+	 */
+	readonly privacy: 'local' | 'public';
 	search(req: SearchRequest, signal?: AbortSignal): Promise<ProviderResponse>;
 	reverse(req: ReverseRequest, signal?: AbortSignal): Promise<ProviderResponse>;
 	/** Cheap probe — `true` means the backend is reachable right now.

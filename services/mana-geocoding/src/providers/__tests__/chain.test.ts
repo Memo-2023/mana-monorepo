@@ -17,6 +17,7 @@ import type {
 class FakeProvider implements GeocodingProvider {
 	calls = { search: 0, reverse: 0, health: 0 };
 	healthCalls: number[] = [];
+	readonly privacy: 'local' | 'public';
 
 	constructor(
 		readonly name: ProviderName,
@@ -24,8 +25,13 @@ class FakeProvider implements GeocodingProvider {
 			search?: () => Promise<ProviderResponse>;
 			reverse?: () => Promise<ProviderResponse>;
 			health?: () => Promise<boolean>;
+			privacy?: 'local' | 'public';
 		} = {}
-	) {}
+	) {
+		// Default to 'local' so existing chain tests keep working. The
+		// localOnly-mode tests below set this explicitly.
+		this.privacy = behavior.privacy ?? 'local';
+	}
 
 	async search(_req: SearchRequest): Promise<ProviderResponse> {
 		this.calls.search++;
@@ -234,11 +240,99 @@ describe('ProviderChain — reverse', () => {
 		const a = new FakeProvider('pelias', {
 			reverse: async () => ({ ok: false, kind: 'unreachable' }),
 		});
-		const b = new FakeProvider('photon');
+		const b = new FakeProvider('photon', { privacy: 'public' });
 		const chain = new ProviderChain({ providers: [a, b], healthCacheMs: 60_000 });
 		const res = await chain.reverse({ lat: '47.66', lon: '9.17', lang: 'de' });
 		expect(res.provider).toBe('photon');
 		expect(b.calls.reverse).toBe(1);
 		expect(b.calls.search).toBe(0);
+	});
+});
+
+describe('ProviderChain — privacy / localOnly mode', () => {
+	it('skips public providers when localOnly is true', async () => {
+		const localPelias = new FakeProvider('pelias', { privacy: 'local' });
+		const publicPhoton = new FakeProvider('photon', { privacy: 'public' });
+		const publicNominatim = new FakeProvider('nominatim', { privacy: 'public' });
+		const chain = new ProviderChain({
+			providers: [localPelias, publicPhoton, publicNominatim],
+			healthCacheMs: 60_000,
+		});
+
+		const res = await chain.search(SEARCH, undefined, { localOnly: true });
+
+		expect(res.ok).toBe(true);
+		expect(res.provider).toBe('pelias');
+		expect(localPelias.calls.search).toBe(1);
+		// Public providers must not even have their search() called
+		expect(publicPhoton.calls.search).toBe(0);
+		expect(publicNominatim.calls.search).toBe(0);
+	});
+
+	it('falls back to the second LOCAL provider when the first local fails', async () => {
+		const local1 = new FakeProvider('pelias', {
+			privacy: 'local',
+			search: async () => ({ ok: false, kind: 'unreachable' }),
+		});
+		// Pretend we have a hypothetical second local provider
+		const local2 = new FakeProvider('photon', { privacy: 'local' });
+		const chain = new ProviderChain({
+			providers: [local1, local2],
+			healthCacheMs: 60_000,
+		});
+
+		const res = await chain.search(SEARCH, undefined, { localOnly: true });
+		expect(res.ok).toBe(true);
+		expect(res.provider).toBe('photon');
+	});
+
+	it('returns ok:true with empty results + sensitive_local_unavailable when no local provider works', async () => {
+		// All public, all healthy — but we asked for localOnly. The chain
+		// must NOT silently fall through to public providers.
+		const public1 = new FakeProvider('photon', { privacy: 'public' });
+		const public2 = new FakeProvider('nominatim', { privacy: 'public' });
+		const chain = new ProviderChain({
+			providers: [public1, public2],
+			healthCacheMs: 60_000,
+		});
+
+		const res = await chain.search(SEARCH, undefined, { localOnly: true });
+
+		// The privacy contract is the load-bearing assertion: a sensitive
+		// query must NEVER reach a public provider, even if every local
+		// provider was filtered out.
+		expect(public1.calls.search).toBe(0);
+		expect(public2.calls.search).toBe(0);
+		expect(public1.calls.health).toBe(0); // not even probed
+		expect(public2.calls.health).toBe(0);
+
+		expect(res.ok).toBe(true);
+		expect(res.results).toEqual([]);
+		expect(res.notice).toBe('sensitive_local_unavailable');
+		expect(res.tried).toEqual([]);
+	});
+
+	it('returns notice: fallback_used when a public provider serves a non-sensitive query', async () => {
+		const localDown = new FakeProvider('pelias', {
+			privacy: 'local',
+			health: async () => false,
+		});
+		const publicUp = new FakeProvider('photon', { privacy: 'public' });
+		const chain = new ProviderChain({
+			providers: [localDown, publicUp],
+			healthCacheMs: 60_000,
+		});
+
+		const res = await chain.search(SEARCH);
+		expect(res.provider).toBe('photon');
+		expect(res.notice).toBe('fallback_used');
+	});
+
+	it('NO notice when the local provider serves a non-sensitive query', async () => {
+		const localUp = new FakeProvider('pelias', { privacy: 'local' });
+		const chain = new ProviderChain({ providers: [localUp], healthCacheMs: 60_000 });
+		const res = await chain.search(SEARCH);
+		expect(res.provider).toBe('pelias');
+		expect(res.notice).toBeUndefined();
 	});
 });

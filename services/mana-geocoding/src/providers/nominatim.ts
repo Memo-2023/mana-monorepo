@@ -15,6 +15,7 @@
  */
 
 import { mapOsmTagToPlaceCategory } from '../lib/osm-category-map';
+import { PUBLIC_REVERSE_DECIMALS, quantizeCoord } from '../lib/privacy';
 import type { RateLimiter } from '../lib/rate-limiter';
 import type {
 	GeocodingProvider,
@@ -32,6 +33,7 @@ export interface NominatimConfig {
 
 export class NominatimProvider implements GeocodingProvider {
 	readonly name = 'nominatim' as const;
+	readonly privacy = 'public' as const;
 
 	constructor(
 		private readonly config: NominatimConfig,
@@ -46,6 +48,9 @@ export class NominatimProvider implements GeocodingProvider {
 			limit: String(req.limit),
 			'accept-language': req.lang,
 		});
+		// Nominatim doesn't have a focus param, but it accepts a viewbox.
+		// We don't currently use it — the user's location stays out of the
+		// query entirely, which is the safer default.
 
 		try {
 			const json = await this.limiter.run(
@@ -66,9 +71,16 @@ export class NominatimProvider implements GeocodingProvider {
 	}
 
 	async reverse(req: ReverseRequest, signal?: AbortSignal): Promise<ProviderResponse> {
+		// Quantize to ~110 m so we never log the user's exact GPS to a
+		// public endpoint. City-block resolution is enough for "what's
+		// near me?" — and reverse geocoding is the most identifying
+		// query type (a precise lat/lon often equals a precise home
+		// address).
+		const qLat = quantizeCoord(req.lat, PUBLIC_REVERSE_DECIMALS);
+		const qLon = quantizeCoord(req.lon, PUBLIC_REVERSE_DECIMALS);
 		const params = new URLSearchParams({
-			lat: req.lat,
-			lon: req.lon,
+			lat: qLat ?? req.lat,
+			lon: qLon ?? req.lon,
 			format: 'json',
 			addressdetails: '1',
 			'accept-language': req.lang,

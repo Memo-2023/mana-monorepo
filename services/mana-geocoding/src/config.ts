@@ -27,8 +27,14 @@ export interface Config {
 	cache: {
 		/** Max entries in the in-memory LRU cache */
 		maxEntries: number;
-		/** TTL in milliseconds (default: 24h — geocoding results rarely change) */
+		/** Default TTL in milliseconds (24h — used for results from local
+		 *  providers like Pelias, where the index can be re-imported) */
 		ttlMs: number;
+		/** Extended TTL for results that came from public APIs (Photon,
+		 *  Nominatim). 7 days by default — caching aggressively reduces
+		 *  the number of times we forward query content to a third party,
+		 *  which is the main privacy lever we have over public providers. */
+		publicTtlMs: number;
 	};
 	providers: {
 		/** Order matters — the chain tries them top-down. Anything not in
@@ -64,6 +70,7 @@ export function loadConfig(): Config {
 		cache: {
 			maxEntries: parseInt(process.env.CACHE_MAX_ENTRIES || '5000', 10),
 			ttlMs: parseInt(process.env.CACHE_TTL_MS || String(24 * 60 * 60 * 1000), 10),
+			publicTtlMs: parseInt(process.env.CACHE_PUBLIC_TTL_MS || String(7 * 24 * 60 * 60 * 1000), 10),
 		},
 		providers: {
 			enabled: parseProviderList(process.env.GEOCODING_PROVIDERS, [

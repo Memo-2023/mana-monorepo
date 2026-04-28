@@ -10,12 +10,29 @@
 import { Hono } from 'hono';
 import type { Config } from '../config';
 import { LRUCache } from '../lib/cache';
-import type { ProviderChain } from '../providers/chain';
+import { isSensitiveQuery } from '../lib/sensitive-query';
+import type { ChainNotice, ProviderChain } from '../providers/chain';
 import type { GeocodingResult, ProviderName } from '../providers/types';
 
 interface CachedAnswer {
 	results: GeocodingResult[];
 	provider: ProviderName | undefined;
+	notice?: ChainNotice;
+}
+
+/**
+ * TTL chooser. Public-API results (Photon/Nominatim) get the longer TTL —
+ * caching aggressively is the main privacy lever once the query has
+ * already left our network. Local results stay on the shorter TTL because
+ * the Pelias index can be re-imported; we don't want stale local data.
+ *
+ * Sensitive-query notices are cached on the short TTL too (the user might
+ * retry from a different angle quickly), and `undefined` provider (chain
+ * served-empty case) defaults to local TTL.
+ */
+function ttlFor(provider: ProviderName | undefined, config: Config): number {
+	if (provider === 'photon' || provider === 'nominatim') return config.cache.publicTtlMs;
+	return config.cache.ttlMs;
 }
 
 export function createGeocodeRoutes(config: Config, chain: ProviderChain) {
@@ -38,6 +55,13 @@ export function createGeocodeRoutes(config: Config, chain: ProviderChain) {
 		const focusLat = c.req.query('focus.lat');
 		const focusLon = c.req.query('focus.lon');
 
+		// Sensitive-query check happens BEFORE the cache lookup. The cache
+		// key includes focus coords; we want the privacy decision baked into
+		// the cached value, not retroactively flipped if the keyword list
+		// changes. Cached entries from prior sensitive queries are fine —
+		// they were stored from a localOnly run.
+		const sensitivity = isSensitiveQuery(q);
+
 		const cacheKey = `${q}|${limit}|${lang}|${focusLat}|${focusLon}`;
 		const cached = searchCache.get(cacheKey);
 		if (cached) {
@@ -45,19 +69,31 @@ export function createGeocodeRoutes(config: Config, chain: ProviderChain) {
 				results: cached.results,
 				cached: true,
 				provider: cached.provider,
+				...(cached.notice ? { notice: cached.notice } : {}),
 			});
 		}
 
-		const response = await chain.search({ q, limit, lang, focusLat, focusLon });
+		const response = await chain.search({ q, limit, lang, focusLat, focusLon }, undefined, {
+			localOnly: sensitivity.sensitive,
+		});
 		if (!response.ok) {
 			return c.json({ results: [], error: 'geocoding_unavailable', tried: response.tried }, 502);
 		}
 
-		searchCache.set(cacheKey, { results: response.results, provider: response.provider });
+		searchCache.set(
+			cacheKey,
+			{
+				results: response.results,
+				provider: response.provider,
+				notice: response.notice,
+			},
+			ttlFor(response.provider, config)
+		);
 		return c.json({
 			results: response.results,
 			provider: response.provider,
 			tried: response.tried,
+			...(response.notice ? { notice: response.notice } : {}),
 		});
 	});
 
@@ -85,19 +121,33 @@ export function createGeocodeRoutes(config: Config, chain: ProviderChain) {
 				results: cached.results,
 				cached: true,
 				provider: cached.provider,
+				...(cached.notice ? { notice: cached.notice } : {}),
 			});
 		}
 
+		// Reverse geocoding has no query string to classify, so no
+		// sensitive-keyword check applies — the privacy lever here is the
+		// quantization that happens inside the public providers (Photon
+		// and Nominatim round to ~110 m before forwarding).
 		const response = await chain.reverse({ lat: roundedLat, lon: roundedLon, lang });
 		if (!response.ok) {
 			return c.json({ results: [], error: 'geocoding_unavailable', tried: response.tried }, 502);
 		}
 
-		reverseCache.set(cacheKey, { results: response.results, provider: response.provider });
+		reverseCache.set(
+			cacheKey,
+			{
+				results: response.results,
+				provider: response.provider,
+				notice: response.notice,
+			},
+			ttlFor(response.provider, config)
+		);
 		return c.json({
 			results: response.results,
 			provider: response.provider,
 			tried: response.tried,
+			...(response.notice ? { notice: response.notice } : {}),
 		});
 	});
 

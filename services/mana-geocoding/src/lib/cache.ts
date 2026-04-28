@@ -34,7 +34,16 @@ export class LRUCache<T> {
 		return entry.value;
 	}
 
-	set(key: string, value: T): void {
+	/**
+	 * Insert or update a cache entry.
+	 *
+	 * @param ttlOverrideMs Optional per-entry TTL. Useful when results
+	 *   from public-API providers should live longer than results from
+	 *   the (frequently-changing) local Pelias index — e.g. 7 days for
+	 *   Photon/Nominatim answers, 24 hours for Pelias answers. When
+	 *   omitted, the constructor's default TTL applies.
+	 */
+	set(key: string, value: T, ttlOverrideMs?: number): void {
 		// Delete first so re-insert goes to end
 		this.map.delete(key);
 
@@ -44,9 +53,10 @@ export class LRUCache<T> {
 			if (oldest !== undefined) this.map.delete(oldest);
 		}
 
+		const ttl = ttlOverrideMs ?? this.ttlMs;
 		this.map.set(key, {
 			value,
-			expiresAt: Date.now() + this.ttlMs,
+			expiresAt: Date.now() + ttl,
 		});
 	}
 
