@@ -70,19 +70,51 @@ if ! pnpm exec drizzle-kit --version >/dev/null 2>&1; then
 	exit 0
 fi
 
-# Snapshot the existing migration set before we generate. Anything new
-# afterwards is the diff this push would apply.
-PRE_GEN_FILES=$(find drizzle -maxdepth 2 -name '*.sql' 2>/dev/null | sort || true)
+# Snapshot the existing drizzle/ artifacts before we generate. Anything
+# new (or newly modified) afterwards is the probe trail this run left
+# behind, which the cleanup trap will tear down — even on failure — so
+# the runner doesn't accumulate pseudo-migration files between deploys.
+DRIZZLE_DIR_EXISTED=false
+[ -d drizzle ] && DRIZZLE_DIR_EXISTED=true
+PRE_GEN_FILES=$(find drizzle -maxdepth 3 -type f 2>/dev/null | sort || true)
 
 # Generate-only — does not touch the database.
 echo "[safe-db-push] $SVC: generating diff…"
 GEN_OUT=$(pnpm exec drizzle-kit generate --name "__ci_safety_check_$$" 2>&1 || true)
 echo "$GEN_OUT" | tail -20
 
-POST_GEN_FILES=$(find drizzle -maxdepth 2 -name '*.sql' 2>/dev/null | sort || true)
+POST_GEN_FILES=$(find drizzle -maxdepth 3 -type f 2>/dev/null | sort || true)
+NEW_GEN_FILES=$(comm -13 <(echo "$PRE_GEN_FILES") <(echo "$POST_GEN_FILES") | grep -v '^$' || true)
+
+# Trap so we always tear down the probe trail (SQL + snapshot + journal
+# + the whole drizzle/ tree if we created it), even on failure or
+# early-exit. Without this the runner accumulates one pseudo-migration
+# pair per deploy and `git status` slowly turns into noise.
+cleanup() {
+	# Remove every file we wrote. Sorted in reverse so deeper paths go
+	# before their parents (relevant for the rmdir cleanup below).
+	for f in $(echo "$NEW_GEN_FILES" | tr ' ' '\n' | sort -r); do
+		[ -n "$f" ] && rm -f "$f"
+	done
+	# Strip our probe entry from the journal so legitimate generates
+	# don't see a phantom "__ci_safety_check" tag.
+	if [ -f drizzle/meta/_journal.json ] && command -v jq >/dev/null 2>&1; then
+		tmp=$(mktemp)
+		jq '.entries |= map(select(.tag | test("__ci_safety_check") | not))' \
+			drizzle/meta/_journal.json > "$tmp" && mv "$tmp" drizzle/meta/_journal.json || true
+	fi
+	# Drop empty dirs we may have created (drizzle/, drizzle/meta/).
+	if [ "$DRIZZLE_DIR_EXISTED" = "false" ]; then
+		rm -rf drizzle 2>/dev/null || true
+	else
+		# Existing dir — only sweep empty subdirs we touched.
+		rmdir drizzle/meta 2>/dev/null || true
+	fi
+}
+trap cleanup EXIT
 
 # New SQL files = the diff
-NEW_SQL=$(comm -13 <(echo "$PRE_GEN_FILES") <(echo "$POST_GEN_FILES") | grep -v '^$' || true)
+NEW_SQL=$(echo "$NEW_GEN_FILES" | grep '\.sql$' || true)
 
 if [ -z "$NEW_SQL" ]; then
 	echo "[safe-db-push] $SVC: no schema changes — clean."
@@ -91,25 +123,6 @@ fi
 
 echo "[safe-db-push] $SVC: schema diff detected:"
 echo "$NEW_SQL"
-
-# Trap so we always remove the generated probe files, even on failure.
-cleanup() {
-	for f in $NEW_SQL; do
-		rm -f "$f"
-	done
-	# drizzle-kit also writes a meta entry; remove the most recent one.
-	if [ -f drizzle/meta/_journal.json ]; then
-		# Best-effort cleanup — strip the entry that references our probe tag.
-		# If jq isn't available, leave it; the next legitimate `db:push` will
-		# overwrite anyway.
-		if command -v jq >/dev/null 2>&1; then
-			tmp=$(mktemp)
-			jq '.entries |= map(select(.tag | test("__ci_safety_check") | not))' \
-				drizzle/meta/_journal.json > "$tmp" && mv "$tmp" drizzle/meta/_journal.json || true
-		fi
-	fi
-}
-trap cleanup EXIT
 
 # Refuse to auto-apply destructive changes. The operator must review
 # and either fix the schema (if the diff was unintentional) or run
