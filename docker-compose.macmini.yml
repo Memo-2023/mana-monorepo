@@ -403,7 +403,8 @@ services:
     image: mana-research:local
     container_name: mana-research
     restart: always
-    mem_limit: 256m
+    # Tier-3 right-size 2026-04-28: live RSS ~57 MiB, 4× headroom is enough.
+    mem_limit: 128m
     depends_on:
       postgres:
         condition: service_healthy
@@ -768,7 +769,11 @@ services:
     image: stalwartlabs/stalwart:latest
     container_name: mana-mail
     restart: always
-    mem_limit: 256m
+    # Tier-3 right-size 2026-04-28: bootstrap-mode RSS ~11 MiB. Bumped
+    # to 128m (not 64m) because once Stalwart finishes its initial setup
+    # and starts handling real SMTP queues + IMAP sessions, RSS will
+    # rise. 128m gives 10× current headroom without being wasteful.
+    mem_limit: 128m
     ports:
       - "25:25"
       - "587:587"
@@ -823,7 +828,9 @@ services:
     image: mana-media:local
     container_name: mana-core-media
     restart: always
-    mem_limit: 128m
+    # Tier-3 right-size 2026-04-28: live RSS ~80 MiB (63%) — within
+    # OOM range when image-thumb spikes hit. Bumped to 160m.
+    mem_limit: 160m
     depends_on:
       postgres:
         condition: service_healthy
@@ -1072,7 +1079,9 @@ services:
     image: uload-server:local
     container_name: mana-app-uload-server
     restart: always
-    mem_limit: 256m
+    # Tier-3 right-size 2026-04-28: live RSS ~51 MiB (20%). 128m is
+    # 2.5× headroom — enough for spike during multi-file uploads.
+    mem_limit: 128m
     depends_on:
       postgres:
         condition: service_healthy
@@ -1171,7 +1180,11 @@ services:
       dockerfile: Dockerfile
     container_name: mana-service-llm
     restart: unless-stopped
-    mem_limit: 256m
+    # Tier-3 right-size 2026-04-28: live RSS ~46 MiB (18%). The service
+    # is a thin OpenAI-compatible router around the GPU-box Ollama —
+    # all heavy LLM work happens upstream, this container just proxies.
+    # 128m is 2.5× headroom for streaming response buffers.
+    mem_limit: 128m
     depends_on:
       redis:
         condition: service_healthy
@@ -1219,7 +1232,9 @@ services:
       dockerfile: apps/playground/apps/web/Dockerfile
     container_name: mana-app-llm-playground
     restart: unless-stopped
-    mem_limit: 128m
+    # Tier-3 right-size 2026-04-28: live RSS ~22 MiB (17%) — 64m is
+    # plenty for a SvelteKit static-export demo page.
+    mem_limit: 64m
     depends_on:
       mana-auth:
         condition: service_healthy
@@ -1408,7 +1423,9 @@ services:
     image: gcr.io/cadvisor/cadvisor:v0.49.1
     container_name: mana-mon-cadvisor
     restart: always
-    mem_limit: 128m
+    # Tier-3 right-size 2026-04-28: live RSS ~98 MiB (76%) — too close
+    # to OOM during cgroup-stat bursts on a busy host. Bumped to 160m.
+    mem_limit: 160m
     privileged: true
     volumes:
       - /:/rootfs:ro
@@ -1589,7 +1606,10 @@ services:
     image: alert-notifier:local
     container_name: mana-mon-alert-notifier
     restart: always
-    mem_limit: 32m
+    # Tier-3 right-size 2026-04-28: live RSS ~25 MiB (79%) — at OOM
+    # risk during alert-burst when many alerts queue at once. Bumped
+    # to 48m.
+    mem_limit: 48m
     environment:
       PORT: 8080
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
