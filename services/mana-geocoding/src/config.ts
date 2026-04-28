@@ -72,7 +72,11 @@ export function loadConfig(): Config {
 				'nominatim',
 			]),
 			healthCacheMs: parseInt(process.env.PROVIDER_HEALTH_CACHE_MS || '30000', 10),
-			timeoutMs: parseInt(process.env.PROVIDER_TIMEOUT_MS || '5000', 10),
+			// 8 s default. Nominatim's cold-start DNS+TLS handshake can push the
+			// first health probe past the older 5 s default, false-marking the
+			// provider unhealthy for the next 30 s. 8 s survives a slow first
+			// probe but still cuts off actually-stuck connections.
+			timeoutMs: parseInt(process.env.PROVIDER_TIMEOUT_MS || '8000', 10),
 		},
 	};
 }

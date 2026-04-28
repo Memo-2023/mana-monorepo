@@ -154,7 +154,7 @@ PORT=3018
 
 # --- Provider chain (tried in order) ----------------------------------
 GEOCODING_PROVIDERS=pelias,photon,nominatim
-PROVIDER_TIMEOUT_MS=5000              # per-provider request timeout
+PROVIDER_TIMEOUT_MS=8000              # per-provider request timeout (cold-start safe)
 PROVIDER_HEALTH_CACHE_MS=30000        # health-cache TTL — skip dead providers
 
 # --- Pelias (primary) -------------------------------------------------
