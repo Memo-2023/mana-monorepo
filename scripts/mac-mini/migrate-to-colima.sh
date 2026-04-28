@@ -239,6 +239,27 @@ else
         error "Rollback: ./scripts/mac-mini/migrate-to-colima.sh --rollback"
         exit 1
     fi
+
+    # 2 GiB Swap als OOM-Versicherung. Colima startet die VM ohne
+    # Swap; ohne ihn killt der OOM-Killer Container statt zu paginen,
+    # sobald RSS-Spitzen (z.B. mana-web Vite-Build mit 8 GiB Heap)
+    # auf laufende Container treffen. Idempotent — wenn /swap schon
+    # existiert ist es ein no-op.
+    log "Konfiguriere 2 GiB Swap in der Colima-VM"
+    colima ssh -- bash -c '
+        if [ -f /swap ] && grep -q "^/swap " /proc/swaps; then
+            echo "  Swap bereits aktiv — skip"
+            exit 0
+        fi
+        sudo fallocate -l 2G /swap
+        sudo chmod 600 /swap
+        sudo mkswap /swap >/dev/null
+        sudo swapon /swap
+        if ! grep -q "^/swap " /etc/fstab; then
+            echo "/swap none swap sw 0 0" | sudo tee -a /etc/fstab >/dev/null
+        fi
+        echo "  Swap aktiv: $(grep ^/swap /proc/swaps | awk "{print \$3}") KiB"
+    '
 fi
 
 # ============================================
