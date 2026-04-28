@@ -29,13 +29,23 @@ import type {
 export interface PhotonConfig {
 	apiUrl: string;
 	timeoutMs: number;
+	/** Override the default provider name. Used when registering a second
+	 *  Photon instance pointing at a self-hosted backend (`'photon-self'`)
+	 *  alongside the public komoot endpoint (`'photon'`). */
+	name?: 'photon' | 'photon-self';
+	/** Override the default privacy stance. Self-hosted Photon on our
+	 *  infrastructure is `'local'`; public komoot is `'public'`. */
+	privacy?: 'local' | 'public';
 }
 
 export class PhotonProvider implements GeocodingProvider {
-	readonly name = 'photon' as const;
-	readonly privacy = 'public' as const;
+	readonly name: 'photon' | 'photon-self';
+	readonly privacy: 'local' | 'public';
 
-	constructor(private readonly config: PhotonConfig) {}
+	constructor(private readonly config: PhotonConfig) {
+		this.name = config.name ?? 'photon';
+		this.privacy = config.privacy ?? 'public';
+	}
 
 	async search(req: SearchRequest, signal?: AbortSignal): Promise<ProviderResponse> {
 		const params = new URLSearchParams({
@@ -64,7 +74,10 @@ export class PhotonProvider implements GeocodingProvider {
 					status: res.status,
 				};
 			}
-			return { ok: true, results: res.features.map(normalizePhotonFeature) };
+			return {
+				ok: true,
+				results: res.features.map((f) => normalizePhotonFeature(f, this.name)),
+			};
 		} catch (e) {
 			return { ok: false, kind: 'unreachable', error: errorMessage(e) };
 		}
@@ -93,7 +106,10 @@ export class PhotonProvider implements GeocodingProvider {
 					status: res.status,
 				};
 			}
-			return { ok: true, results: res.features.map(normalizePhotonFeature) };
+			return {
+				ok: true,
+				results: res.features.map((f) => normalizePhotonFeature(f, this.name)),
+			};
 		} catch (e) {
 			return { ok: false, kind: 'unreachable', error: errorMessage(e) };
 		}
@@ -161,7 +177,16 @@ interface PhotonFeature {
 	};
 }
 
-export function normalizePhotonFeature(f: PhotonFeature): GeocodingResult {
+/**
+ * @param providerName Which provider tag to stamp on the result. Defaults
+ *   to `'photon'` (public komoot) for backward compat. Pass `'photon-self'`
+ *   to mark results as coming from our self-hosted instance — useful for
+ *   the UI to know "this came from local infra, no privacy compromise".
+ */
+export function normalizePhotonFeature(
+	f: PhotonFeature,
+	providerName: 'photon' | 'photon-self' = 'photon'
+): GeocodingResult {
 	const props = f.properties;
 	const [lon, lat] = f.geometry.coordinates;
 
@@ -186,7 +211,7 @@ export function normalizePhotonFeature(f: PhotonFeature): GeocodingResult {
 		// but the consumer side keys off the absence of this field as a
 		// "result came from a fallback" signal.
 		confidence: typeof props.importance === 'number' ? props.importance : 0.5,
-		provider: 'photon',
+		provider: providerName,
 	};
 }
 

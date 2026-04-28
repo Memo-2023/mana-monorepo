@@ -11,8 +11,17 @@ export interface Config {
 		apiUrl: string;
 	};
 	photon: {
-		/** Photon base URL (defaults to public komoot endpoint) */
+		/** Photon base URL — public komoot endpoint by default. Used by
+		 *  the `'photon'` provider slot which always has `privacy: 'public'`. */
 		apiUrl: string;
+	};
+	photonSelf: {
+		/** Self-hosted Photon URL (e.g. `http://192.168.178.11:2322` for the
+		 *  GPU server). When set, the wrapper registers a separate
+		 *  `'photon-self'` provider with `privacy: 'local'` — eligible for
+		 *  sensitive queries. When undefined, the slot is disabled and the
+		 *  chain only has the public providers (current pre-migration state). */
+		apiUrl: string | undefined;
 	};
 	nominatim: {
 		apiUrl: string;
@@ -57,6 +66,13 @@ export function loadConfig(): Config {
 		photon: {
 			apiUrl: process.env.PHOTON_API_URL || 'https://photon.komoot.io',
 		},
+		photonSelf: {
+			// Opt-in: only registered when this env-var is explicitly set
+			// (e.g. http://192.168.178.11:2322 once the GPU server is up).
+			// Empty string → treated as unset so a stray "" in .env doesn't
+			// register a useless provider.
+			apiUrl: process.env.PHOTON_SELF_API_URL?.trim() || undefined,
+		},
 		nominatim: {
 			apiUrl: process.env.NOMINATIM_API_URL || 'https://nominatim.openstreetmap.org',
 			userAgent:
@@ -73,7 +89,13 @@ export function loadConfig(): Config {
 			publicTtlMs: parseInt(process.env.CACHE_PUBLIC_TTL_MS || String(7 * 24 * 60 * 60 * 1000), 10),
 		},
 		providers: {
+			// Default order (when GEOCODING_PROVIDERS is unset): try the
+			// self-hosted Photon first if it's been configured, then public
+			// providers as fallback. `photon-self` is silently dropped at
+			// chain-build time if `photonSelf.apiUrl` is undefined, so the
+			// list is the same shape regardless of migration status.
 			enabled: parseProviderList(process.env.GEOCODING_PROVIDERS, [
+				'photon-self',
 				'pelias',
 				'photon',
 				'nominatim',
@@ -90,7 +112,7 @@ export function loadConfig(): Config {
 
 function parseProviderList(raw: string | undefined, fallback: ProviderName[]): ProviderName[] {
 	if (!raw) return fallback;
-	const valid: ProviderName[] = ['pelias', 'photon', 'nominatim'];
+	const valid: ProviderName[] = ['pelias', 'photon-self', 'photon', 'nominatim'];
 	const parsed = raw
 		.split(',')
 		.map((s) => s.trim().toLowerCase())

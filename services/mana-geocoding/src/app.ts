@@ -55,11 +55,29 @@ export function createChain(config: Config): ProviderChain {
 		})
 	);
 
+	// Self-hosted Photon (mana-gpu). Only registered when the env-var is set
+	// — pre-migration this stays absent and the chain falls through to
+	// public providers as before. Once the GPU server is running Photon,
+	// flip PHOTON_SELF_API_URL on and this becomes the primary provider.
+	if (config.photonSelf.apiUrl) {
+		built.set(
+			'photon-self',
+			new PhotonProvider({
+				apiUrl: config.photonSelf.apiUrl,
+				timeoutMs: config.providers.timeoutMs,
+				name: 'photon-self',
+				privacy: 'local',
+			})
+		);
+	}
+
 	built.set(
 		'photon',
 		new PhotonProvider({
 			apiUrl: config.photon.apiUrl,
 			timeoutMs: config.providers.timeoutMs,
+			// name + privacy default to 'photon' / 'public' — public komoot
+			// is the always-on safety net behind self-hosted.
 		})
 	);
 

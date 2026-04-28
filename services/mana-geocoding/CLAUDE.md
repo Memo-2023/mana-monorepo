@@ -153,14 +153,22 @@ docker compose up -d --force-recreate api
 PORT=3018
 
 # --- Provider chain (tried in order) ----------------------------------
-GEOCODING_PROVIDERS=pelias,photon,nominatim
+# Default order: photon-self,pelias,photon,nominatim
+# `photon-self` is silently dropped if PHOTON_SELF_API_URL is unset.
+GEOCODING_PROVIDERS=photon-self,pelias,photon,nominatim
 PROVIDER_TIMEOUT_MS=8000              # per-provider request timeout (cold-start safe)
 PROVIDER_HEALTH_CACHE_MS=30000        # health-cache TTL — skip dead providers
 
-# --- Pelias (primary) -------------------------------------------------
+# --- Self-hosted Photon (privacy: 'local', primary post-migration) ----
+# Set this to point at the GPU-server-hosted Photon. When unset, the
+# `photon-self` slot is not registered and the chain falls back to
+# public providers as before.
+PHOTON_SELF_API_URL=http://192.168.178.11:2322
+
+# --- Pelias (legacy, currently stopped — privacy: 'local') ------------
 PELIAS_API_URL=http://pelias-api:4000/v1
 
-# --- Photon (fallback 1) ----------------------------------------------
+# --- Public Photon (privacy: 'public', last-resort fallback) ----------
 PHOTON_API_URL=https://photon.komoot.io
 
 # --- Nominatim (fallback 2) -------------------------------------------
@@ -176,9 +184,20 @@ CACHE_PUBLIC_TTL_MS=604800000         # 7d — extended TTL for public-API answe
 ```
 
 To **disable a provider**, drop it from `GEOCODING_PROVIDERS`. To run with
-no Pelias at all (e.g. while it's being migrated), set
-`GEOCODING_PROVIDERS=photon,nominatim`. The chain ordering is honored
-exactly — the first listed provider is tried first.
+no local backend at all, set `GEOCODING_PROVIDERS=photon,nominatim` —
+the wrapper will block sensitive queries (see Privacy hardening below)
+since no `privacy: 'local'` provider is reachable.
+
+The dual-Photon split:
+- `photon-self` — self-hosted Photon (mana-gpu), `privacy: 'local'`, eligible
+  for sensitive queries. Registered iff `PHOTON_SELF_API_URL` is set.
+- `photon` — public komoot.io endpoint, `privacy: 'public'`, last-resort
+  fallback for non-sensitive queries when self-hosted is down.
+
+Both share the same `PhotonProvider` class — only the URL, name, and
+privacy stance differ. See the [migration runbook](../../docs/runbooks/photon-on-mana-gpu.md)
+and [decision report](../../docs/reports/geocoding-self-hosting-2026-04-28.md)
+for the operational story.
 
 ## Provider-chain semantics
 

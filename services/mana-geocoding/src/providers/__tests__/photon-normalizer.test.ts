@@ -124,4 +124,30 @@ describe('normalizePhotonFeature', () => {
 		expect(result.latitude).toBeGreaterThan(47);
 		expect(result.latitude).toBeLessThan(48);
 	});
+
+	it('stamps provider:"photon" by default (back-compat)', () => {
+		const result = normalizePhotonFeature({
+			type: 'Feature',
+			geometry: { type: 'Point', coordinates: [9.17, 47.66] },
+			properties: { osm_key: 'place', osm_value: 'city', name: 'X' },
+		});
+		expect(result.provider).toBe('photon');
+	});
+
+	it('stamps provider:"photon-self" when called with that name (self-hosted path)', () => {
+		// The dual-Photon migration relies on this: a result from the
+		// self-hosted instance must NOT look like it came from public
+		// komoot. UI uses the provider field to decide whether to show
+		// the "approximate match" badge — fallback_used notice fires only
+		// for `privacy: 'public'` providers.
+		const result = normalizePhotonFeature(
+			{
+				type: 'Feature',
+				geometry: { type: 'Point', coordinates: [9.17, 47.66] },
+				properties: { osm_key: 'place', osm_value: 'city', name: 'X' },
+			},
+			'photon-self'
+		);
+		expect(result.provider).toBe('photon-self');
+	});
 });

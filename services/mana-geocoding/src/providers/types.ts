@@ -41,7 +41,21 @@ export interface GeocodingResult {
 	provider: ProviderName;
 }
 
-export type ProviderName = 'pelias' | 'photon' | 'nominatim';
+/**
+ * Provider identifiers. Two of these wrap the same `PhotonProvider`
+ * class with different configs:
+ *
+ *   - `photon-self`: self-hosted Photon (typically on mana-gpu),
+ *     `privacy: 'local'`. Eligible for sensitive queries.
+ *   - `photon`: public photon.komoot.io, `privacy: 'public'`. Last-resort
+ *     fallback for non-sensitive queries when the self-hosted instance
+ *     is down.
+ *
+ * The split exists because the chain identifies providers by name and
+ * tracks per-provider health. A single `photon` slot can't simultaneously
+ * mean two different backends.
+ */
+export type ProviderName = 'pelias' | 'photon-self' | 'photon' | 'nominatim';
 
 export interface SearchRequest {
 	q: string;
