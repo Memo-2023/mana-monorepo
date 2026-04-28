@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { useAllCampaigns } from '$lib/modules/broadcast/queries';
-	import ComposeView from '$lib/modules/broadcast/views/ComposeView.svelte';
+	import { useAllCampaigns } from '$lib/modules/broadcasts/queries';
+	import ComposeView from '$lib/modules/broadcasts/views/ComposeView.svelte';
 	import { RoutePage } from '$lib/components/shell';
 
 	const campaigns$ = useAllCampaigns();

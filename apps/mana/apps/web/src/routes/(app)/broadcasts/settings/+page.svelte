@@ -3,7 +3,7 @@
   Reached via the ⚙ button in the broadcast module; not a workbench card.
 -->
 <script lang="ts">
-	import SettingsForm from '$lib/modules/broadcast/components/SettingsForm.svelte';
+	import SettingsForm from '$lib/modules/broadcasts/components/SettingsForm.svelte';
 	import { RoutePage } from '$lib/components/shell';
 </script>
 

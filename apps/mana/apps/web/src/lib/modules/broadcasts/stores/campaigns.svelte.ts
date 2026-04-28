@@ -70,7 +70,7 @@ export const broadcastCampaignsStore = {
 
 		await encryptRecord('broadcastCampaigns', newLocal);
 		await campaignTable.add(newLocal);
-		emitDomainEvent('BroadcastCampaignCreated', 'broadcast', 'broadcastCampaigns', newLocal.id, {
+		emitDomainEvent('BroadcastCampaignCreated', 'broadcasts', 'broadcastCampaigns', newLocal.id, {
 			campaignId: newLocal.id,
 			name: newLocal.name,
 		});
@@ -142,7 +142,7 @@ export const broadcastCampaignsStore = {
 			status: 'scheduled' as CampaignStatus,
 			scheduledAt,
 		});
-		emitDomainEvent('BroadcastCampaignScheduled', 'broadcast', 'broadcastCampaigns', id, {
+		emitDomainEvent('BroadcastCampaignScheduled', 'broadcasts', 'broadcastCampaigns', id, {
 			campaignId: id,
 			scheduledAt,
 		});
@@ -159,7 +159,7 @@ export const broadcastCampaignsStore = {
 			status: 'cancelled' as CampaignStatus,
 			scheduledAt: null,
 		});
-		emitDomainEvent('BroadcastCampaignCancelled', 'broadcast', 'broadcastCampaigns', id, {
+		emitDomainEvent('BroadcastCampaignCancelled', 'broadcasts', 'broadcastCampaigns', id, {
 			campaignId: id,
 		});
 	},
@@ -198,7 +198,7 @@ export const broadcastCampaignsStore = {
 		await campaignTable.update(id, {
 			deletedAt: new Date().toISOString(),
 		});
-		emitDomainEvent('BroadcastCampaignDeleted', 'broadcast', 'broadcastCampaigns', id, {
+		emitDomainEvent('BroadcastCampaignDeleted', 'broadcasts', 'broadcastCampaigns', id, {
 			campaignId: id,
 		});
 	},

@@ -6,7 +6,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { broadcastCampaignsStore } from '$lib/modules/broadcast/stores/campaigns.svelte';
+	import { broadcastCampaignsStore } from '$lib/modules/broadcasts/stores/campaigns.svelte';
 	import { RoutePage } from '$lib/components/shell';
 
 	let error = $state<string | null>(null);

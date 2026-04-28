@@ -53,7 +53,7 @@ export const broadcastSettingsStore = {
 		});
 		emitDomainEvent(
 			'BroadcastSettingsUpdated',
-			'broadcast',
+			'broadcasts',
 			'broadcastSettings',
 			BROADCAST_SETTINGS_ID,
 			{ fields: Object.keys(patch) }

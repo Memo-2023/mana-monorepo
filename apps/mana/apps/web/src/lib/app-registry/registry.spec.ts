@@ -14,7 +14,36 @@ import { getAllApps } from './registry';
  * the kind of mismatch that produced the silent inventar↔inventory bug
  * before commit 45790ffbb.
  */
-const WORKBENCH_ONLY = new Set(['automations', 'playground']);
+const WORKBENCH_ONLY = new Set([
+	// Dev / internal tools — never meant for MANA_APPS.
+	'automations',
+	'playground',
+	'admin',
+	'complexity',
+	'feedback',
+	// Settings family — surfaced as workbench cards but conceptually
+	// part of /settings, not standalone MANA_APPS entries.
+	'settings',
+	'themes',
+	'profile',
+	'credits',
+	'api-keys',
+	'help',
+	'spiral',
+	// User-facing modules that don't yet have MANA_APPS branding.
+	// Add them to MANA_APPS when they ship a marketing surface.
+	'kontext',
+	'rituals',
+	'wishes',
+	// AI Studio surfaces. Open question whether to expose each one in
+	// MANA_APPS or consolidate into a single "AI Studio" branding entry.
+	// Keeping them workbench-only until that decision lands.
+	'ai-missions',
+	'ai-workbench',
+	'ai-policy',
+	'ai-insights',
+	'ai-health',
+]);
 
 /**
  * Apps that intentionally exist in MANA_APPS but are NOT in the workbench
@@ -39,11 +68,6 @@ const BRANDING_ONLY = new Set([
 	// gallery as "Coming Soon" hints.
 	'wisekeep',
 	'mail',
-	'events',
-	// Status 'beta' but the workbench integration is still pending. Move
-	// out of this list once the apps.ts entry exists.
-	'guides',
-	'who',
 ]);
 
 describe('app registry ↔ MANA_APPS consistency', () => {

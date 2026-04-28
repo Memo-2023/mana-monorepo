@@ -35,7 +35,7 @@ import NewsUnreadWidget from '$lib/modules/news/widgets/NewsUnreadWidget.svelte'
 import ArticlesUnreadWidget from '$lib/modules/articles/widgets/ArticlesUnreadWidget.svelte';
 import BodyStatsWidget from '$lib/modules/body/widgets/BodyStatsWidget.svelte';
 import InvoicesOpenWidget from '$lib/modules/invoices/widgets/InvoicesOpenWidget.svelte';
-import BroadcastsWidget from '$lib/modules/broadcast/widgets/BroadcastsWidget.svelte';
+import BroadcastsWidget from '$lib/modules/broadcasts/widgets/BroadcastsWidget.svelte';
 import DayTimelineWidget from './widgets/DayTimelineWidget.svelte';
 import ActivityFeedWidget from './widgets/ActivityFeedWidget.svelte';
 

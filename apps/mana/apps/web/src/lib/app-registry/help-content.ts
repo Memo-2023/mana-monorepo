@@ -690,7 +690,7 @@ export const MODULE_HELP: Record<string, ModuleHelp> = {
 			'Der Debug-Log hilft zu verstehen warum die AI bestimmte Entscheidungen trifft',
 		],
 	},
-	'ai-agents': {
+	agents: {
 		description:
 			'Benannte AI-Personas mit eigenem System-Prompt, Policy und Gedächtnis. Jeder Agent kann eigene Missionen ausführen.',
 		features: [

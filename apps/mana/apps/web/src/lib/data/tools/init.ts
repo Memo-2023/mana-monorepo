@@ -45,7 +45,7 @@ import { wetterTools } from '$lib/modules/wetter/tools';
 import { quizTools } from '$lib/modules/quiz/tools';
 import { invoicesTools } from '$lib/modules/invoices/tools';
 import { libraryTools } from '$lib/modules/library/tools';
-import { broadcastTools } from '$lib/modules/broadcast/tools';
+import { broadcastTools } from '$lib/modules/broadcasts/tools';
 import { websiteTools } from '$lib/modules/website/tools';
 import { writingTools } from '$lib/modules/writing/tools';
 import { comicTools } from '$lib/modules/comic/tools';

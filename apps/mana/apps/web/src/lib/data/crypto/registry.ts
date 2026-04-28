@@ -87,7 +87,7 @@ import type {
 	LocalCampaign,
 	LocalBroadcastTemplate,
 	LocalBroadcastSettings,
-} from '../../modules/broadcast/types';
+} from '../../modules/broadcasts/types';
 import type { LocalArticle, LocalHighlight } from '../../modules/articles/types';
 import type { LocalMeImage } from '../../modules/profile/types';
 import type { LocalWardrobeGarment, LocalWardrobeOutfit } from '../../modules/wardrobe/types';

@@ -102,7 +102,7 @@ import { profileModuleConfig } from '$lib/modules/profile/module.config';
 import { libraryModuleConfig } from '$lib/modules/library/module.config';
 import { articlesModuleConfig } from '$lib/modules/articles/module.config';
 import { invoicesModuleConfig } from '$lib/modules/invoices/module.config';
-import { broadcastModuleConfig } from '$lib/modules/broadcast/module.config';
+import { broadcastModuleConfig } from '$lib/modules/broadcasts/module.config';
 import { wetterModuleConfig } from '$lib/modules/wetter/module.config';
 import { websiteModuleConfig } from '$lib/modules/website/module.config';
 import { wardrobeModuleConfig } from '$lib/modules/wardrobe/module.config';

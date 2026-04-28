@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { useAllCampaigns } from '$lib/modules/broadcast/queries';
-	import DetailView from '$lib/modules/broadcast/views/DetailView.svelte';
+	import { useAllCampaigns } from '$lib/modules/broadcasts/queries';
+	import DetailView from '$lib/modules/broadcasts/views/DetailView.svelte';
 	import { RoutePage } from '$lib/components/shell';
 
 	const campaigns$ = useAllCampaigns();

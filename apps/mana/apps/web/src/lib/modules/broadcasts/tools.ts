@@ -60,7 +60,7 @@ async function listDecryptedCampaigns(): Promise<ReturnType<typeof toCampaign>[]
 export const broadcastTools: ModuleTool[] = [
 	{
 		name: 'create_campaign_draft',
-		module: 'broadcast',
+		module: 'broadcasts',
 		description:
 			'Erstellt einen Newsletter-/Kampagnen-Entwurf mit Name, Betreff, optionalem Preheader und fertigem HTML-Body.',
 		parameters: [
@@ -97,7 +97,7 @@ export const broadcastTools: ModuleTool[] = [
 
 	{
 		name: 'list_campaigns',
-		module: 'broadcast',
+		module: 'broadcasts',
 		description: 'Listet Kampagnen (id, name, subject, status, Empfängerzahl, sentAt).',
 		parameters: [
 			{
@@ -132,7 +132,7 @@ export const broadcastTools: ModuleTool[] = [
 
 	{
 		name: 'get_campaign_stats',
-		module: 'broadcast',
+		module: 'broadcasts',
 		description: 'Gibt Raten zu einer Kampagne zurück: Öffnungs-, Klick-, Bounce- und Abmelderate.',
 		parameters: [{ name: 'campaignId', type: 'string', description: 'ID', required: true }],
 		async execute(params) {

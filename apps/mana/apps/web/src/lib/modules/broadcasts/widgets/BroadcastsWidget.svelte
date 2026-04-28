@@ -8,10 +8,10 @@
 	 */
 
 	import { liveQuery } from 'dexie';
-	import { campaignTable } from '$lib/modules/broadcast/collections';
+	import { campaignTable } from '$lib/modules/broadcasts/collections';
 	import { decryptRecords } from '$lib/data/crypto';
-	import { toCampaign, computeStats, formatRate } from '$lib/modules/broadcast/queries';
-	import type { Campaign, LocalCampaign } from '$lib/modules/broadcast/types';
+	import { toCampaign, computeStats, formatRate } from '$lib/modules/broadcasts/queries';
+	import type { Campaign, LocalCampaign } from '$lib/modules/broadcasts/types';
 
 	let campaigns = $state<Campaign[]>([]);
 	let loading = $state(true);

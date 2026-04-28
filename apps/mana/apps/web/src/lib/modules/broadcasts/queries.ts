@@ -80,7 +80,7 @@ export function toSettings(local: LocalBroadcastSettings): BroadcastSettings {
 export function useAllCampaigns() {
 	return useScopedLiveQuery(async () => {
 		const rows = await scopedForModule<LocalCampaign, string>(
-			'broadcast',
+			'broadcasts',
 			'broadcastCampaigns'
 		).toArray();
 		const visible = rows.filter((r) => !r.deletedAt);
@@ -92,7 +92,7 @@ export function useAllCampaigns() {
 export function useAllTemplates() {
 	return useScopedLiveQuery(async () => {
 		const rows = await scopedForModule<LocalBroadcastTemplate, string>(
-			'broadcast',
+			'broadcasts',
 			'broadcastTemplates'
 		).toArray();
 		const visible = rows.filter((r) => !r.deletedAt);

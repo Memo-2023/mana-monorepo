@@ -1,12 +1,12 @@
 <script lang="ts">
-	import ListView from '$lib/modules/timeline/ListView.svelte';
+	import ListView from '$lib/modules/rituals/ListView.svelte';
 	import { RoutePage } from '$lib/components/shell';
 </script>
 
 <svelte:head>
-	<title>Timeline - Mana</title>
+	<title>Rituale - Mana</title>
 </svelte:head>
 
-<RoutePage appId="timeline">
+<RoutePage appId="rituals">
 	<ListView />
 </RoutePage>

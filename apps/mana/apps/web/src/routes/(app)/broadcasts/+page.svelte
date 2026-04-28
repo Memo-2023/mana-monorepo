@@ -1,5 +1,5 @@
 <script lang="ts">
-	import ListView from '$lib/modules/broadcast/ListView.svelte';
+	import ListView from '$lib/modules/broadcasts/ListView.svelte';
 	import { RoutePage } from '$lib/components/shell';
 </script>
 

@@ -84,6 +84,10 @@ import {
 	FilmStrip,
 	Hourglass,
 	HeartHalf,
+	Eye,
+	Megaphone,
+	Receipt,
+	ClockCounterClockwise,
 } from '@mana/shared-icons';
 
 // ── Apps with entity capabilities ───────────────────────────
@@ -1113,7 +1117,9 @@ registerApp({
 });
 
 registerApp({
-	id: 'ai-agents',
+	// Public id matches MANA_APPS + the route URL `/agents`. The module
+	// folder is named `ai-agents` for grouping with other ai-* modules.
+	id: 'agents',
 	name: 'AI Agents',
 	color: '#8B5CF6',
 	icon: Flag,
@@ -1490,5 +1496,73 @@ registerApp({
 			title: (data.title as string) || 'Neues Quiz',
 		});
 		return quiz.id;
+	},
+});
+
+registerApp({
+	id: 'augur',
+	name: 'Augur',
+	color: '#7c3aed',
+	icon: Eye,
+	views: {
+		// Witness/Oracle modes live inside the ListView; detail (/augur/entry/[id])
+		// and recap (/augur/recap) navigate via goto().
+		list: { load: () => import('$lib/modules/augur/ListView.svelte') },
+	},
+});
+
+registerApp({
+	id: 'broadcasts',
+	name: 'Broadcasts',
+	color: '#6366f1',
+	icon: Megaphone,
+	views: {
+		// Detail (/broadcasts/[id]), new (/broadcasts/new) and settings live
+		// as SvelteKit routes; the workbench card hosts the ListView root.
+		list: { load: () => import('$lib/modules/broadcasts/ListView.svelte') },
+	},
+	contextMenuActions: [
+		{
+			id: 'new-campaign',
+			label: 'Neue Kampagne',
+			icon: Plus,
+			action: () => {
+				window.location.href = '/broadcasts/new';
+			},
+		},
+	],
+});
+
+registerApp({
+	id: 'invoices',
+	name: 'Rechnungen',
+	color: '#059669',
+	icon: Receipt,
+	views: {
+		// Detail (/invoices/[id]), new (/invoices/new) and settings live as
+		// SvelteKit routes; the workbench card hosts the ListView root.
+		list: { load: () => import('$lib/modules/invoices/ListView.svelte') },
+	},
+	contextMenuActions: [
+		{
+			id: 'new-invoice',
+			label: 'Neue Rechnung',
+			icon: Plus,
+			action: () => {
+				window.location.href = '/invoices/new';
+			},
+		},
+	],
+});
+
+registerApp({
+	id: 'timeline',
+	name: 'Timeline',
+	color: '#f59e0b',
+	icon: ClockCounterClockwise,
+	views: {
+		// Cross-module read-only view — reads timeBlocks owned by core.
+		// /timeline/analytics navigates via goto() from the route page.
+		list: { load: () => import('$lib/modules/timeline/ListView.svelte') },
 	},
 });

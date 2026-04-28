@@ -255,7 +255,6 @@ export const MANA_APPS: ManaApp[] = [
 		comingSoon: false,
 		status: 'development',
 		requiredTier: 'guest',
-		archived: true,
 	},
 	{
 		id: 'contacts',
@@ -1106,7 +1105,7 @@ export const MANA_APPS: ManaApp[] = [
 		requiredTier: 'guest', // LOCAL TIER PATCH — revert to 'beta' before release
 	},
 	{
-		id: 'broadcast',
+		id: 'broadcasts',
 		name: 'Broadcasts',
 		description: {
 			de: 'Newsletter & Kampagnen',
@@ -1116,7 +1115,7 @@ export const MANA_APPS: ManaApp[] = [
 			de: 'Newsletter und Ankündigungen an Kontaktgruppen versenden — mit Rich-Text-Editor, Open/Click-Tracking, DSGVO-konformem Unsubscribe und Kampagnen-Statistik.',
 			en: 'Send newsletters and announcements to contact segments — with a rich-text editor, open/click tracking, GDPR-compliant unsubscribe, and per-campaign stats.',
 		},
-		icon: APP_ICONS.broadcast,
+		icon: APP_ICONS.broadcasts,
 		color: '#6366f1',
 		comingSoon: false,
 		status: 'development',
@@ -1315,9 +1314,6 @@ const APP_URL_OVERRIDES: Partial<Record<AppIconId, { dev: string; prod: string }
 	mana: { dev: 'http://localhost:5173', prod: 'https://mana.how' },
 	// Standalone apps on their own subdomain / port.
 	arcade: { dev: 'http://localhost:5201', prod: 'https://arcade.mana.how' },
-	// The broadcast module's route is `/broadcasts` (plural) but the icon
-	// + id stay singular to match the `lib/modules/broadcast/` folder.
-	broadcast: { dev: 'http://localhost:5173/broadcasts', prod: 'https://mana.how/broadcasts' },
 };
 
 export const APP_URLS: Record<AppIconId, { dev: string; prod: string }> = Object.fromEntries(

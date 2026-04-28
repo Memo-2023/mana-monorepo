@@ -1,7 +1,7 @@
 import type { ModuleConfig } from '$lib/data/module-registry';
 
 export const broadcastModuleConfig: ModuleConfig = {
-	appId: 'broadcast',
+	appId: 'broadcasts',
 	tables: [
 		{ name: 'broadcastCampaigns' },
 		{ name: 'broadcastTemplates' },
