@@ -512,6 +512,10 @@ services:
       TZ: Europe/Berlin
       PORT: 3018
       PELIAS_API_URL: http://host.docker.internal:4000/v1
+      # Self-hosted Photon on mana-gpu (cross-LAN). When set, registers
+      # as `photon-self` provider with privacy: 'local' — eligible for
+      # sensitive queries. Empty value = slot disabled.
+      PHOTON_SELF_API_URL: ${PHOTON_SELF_API_URL:-}
       CORS_ORIGINS: https://mana.how,http://localhost:5173
       CACHE_MAX_ENTRIES: "5000"
       CACHE_TTL_MS: "86400000"
@@ -945,6 +949,11 @@ services:
       # mana-api.* subdomain is the unambiguous new home.
       PUBLIC_MANA_API_URL: http://mana-api:3060
       PUBLIC_MANA_API_URL_CLIENT: https://mana-api.mana.how
+      # Server-side same-origin proxy upstream for routes/api/v1/who/[...path].
+      # Inside docker the SvelteKit handler reaches mana-api over the internal
+      # network; the dev fallback in code is localhost:3060, so this env var
+      # is what makes prod hit the right hostname.
+      MANA_API_INTERNAL_URL: http://mana-api:3060
       PUBLIC_MANA_CREDITS_URL: http://mana-credits:3002
       PUBLIC_MANA_CREDITS_URL_CLIENT: https://credits.mana.how
       # Per-app HTTP backend URLs (todo-api, calendar-api, contacts-api,
