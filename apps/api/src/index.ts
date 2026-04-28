@@ -41,6 +41,7 @@ import { moodlitRoutes } from './modules/moodlit/routes';
 import { newsRoutes } from './modules/news/routes';
 import { newsResearchRoutes } from './modules/news-research/routes';
 import { articlesRoutes } from './modules/articles/routes';
+import { startArticleImportWorker } from './modules/articles/import-worker';
 import { tracesRoutes } from './modules/traces/routes';
 import { writingRoutes } from './modules/writing/routes';
 import { comicRoutes } from './modules/comic/routes';
@@ -141,6 +142,12 @@ app.route('/api/v1/unlisted', unlistedRoutes);
 app.route('/api/v1/who', whoRoutes);
 app.route('/api/v1/writing', writingRoutes);
 app.route('/api/v1/comic', comicRoutes);
+
+// ─── Background Workers ─────────────────────────────────────
+// Articles bulk-import: ticks every 2s, advisory-lock-gated so multiple
+// apps/api replicas never double-process. See
+// docs/plans/articles-bulk-import.md.
+startArticleImportWorker();
 
 // ─── Server Info ────────────────────────────────────────────
 console.log(`mana-api starting on port ${PORT}...`);
