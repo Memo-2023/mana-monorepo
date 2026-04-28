@@ -6,10 +6,18 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import type { Config } from './config';
-import { createHealthRoutes } from './routes/health';
+import { RateLimiter } from './lib/rate-limiter';
+import { ProviderChain } from './providers/chain';
+import { NominatimProvider } from './providers/nominatim';
+import { PeliasProvider } from './providers/pelias';
+import { PhotonProvider } from './providers/photon';
+import type { GeocodingProvider, ProviderName } from './providers/types';
 import { createGeocodeRoutes } from './routes/geocode';
+import { createHealthRoutes } from './routes/health';
 
 export function createApp(config: Config): Hono {
+	const chain = createChain(config);
+
 	const app = new Hono();
 
 	app.onError((err, c) => {
@@ -25,8 +33,62 @@ export function createApp(config: Config): Hono {
 		})
 	);
 
-	app.route('/health', createHealthRoutes(config));
-	app.route('/api/v1/geocode', createGeocodeRoutes(config));
+	app.route('/health', createHealthRoutes(config, chain));
+	app.route('/api/v1/geocode', createGeocodeRoutes(config, chain));
 
 	return app;
+}
+
+/**
+ * Build the provider chain from config. The order of `config.providers.enabled`
+ * is honored — providers earlier in the list are tried first. A disabled
+ * provider is simply not registered, not skipped at runtime.
+ */
+export function createChain(config: Config): ProviderChain {
+	const built = new Map<ProviderName, GeocodingProvider>();
+
+	built.set(
+		'pelias',
+		new PeliasProvider({
+			apiUrl: config.pelias.apiUrl,
+			timeoutMs: config.providers.timeoutMs,
+		})
+	);
+
+	built.set(
+		'photon',
+		new PhotonProvider({
+			apiUrl: config.photon.apiUrl,
+			timeoutMs: config.providers.timeoutMs,
+		})
+	);
+
+	const nominatimLimiter = new RateLimiter(config.nominatim.intervalMs);
+	built.set(
+		'nominatim',
+		new NominatimProvider(
+			{
+				apiUrl: config.nominatim.apiUrl,
+				userAgent: config.nominatim.userAgent,
+				timeoutMs: config.providers.timeoutMs,
+			},
+			nominatimLimiter
+		)
+	);
+
+	const ordered = config.providers.enabled
+		.map((name) => built.get(name))
+		.filter((p): p is GeocodingProvider => p !== undefined);
+
+	return new ProviderChain({
+		providers: ordered,
+		healthCacheMs: config.providers.healthCacheMs,
+		log: (level, msg, meta) => {
+			if (level === 'warn') {
+				console.warn('[geocoding-chain]', msg, meta ?? '');
+			} else {
+				console.log('[geocoding-chain]', msg, meta ?? '');
+			}
+		},
+	});
 }

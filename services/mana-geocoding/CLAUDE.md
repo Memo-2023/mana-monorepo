@@ -1,6 +1,6 @@
 # mana-geocoding
 
-Self-hosted geocoding service. Wraps a local Pelias instance (DACH region) with caching and automatic OSM → PlaceCategory mapping. All geocoding queries stay within our infrastructure — no user location data leaves the network.
+Geocoding service for the Places module. **Provider-chain architecture** — tries a self-hosted Pelias first, falls back to public Photon (komoot) and then public Nominatim (OSM) when Pelias is unhealthy or unreachable. All Pelias-served queries stay on our infrastructure; fallback queries leak the search string to a public OSM endpoint.
 
 ## Tech Stack
 
@@ -8,9 +8,11 @@ Self-hosted geocoding service. Wraps a local Pelias instance (DACH region) with 
 |-------|------------|
 | **Runtime** | Bun |
 | **Framework** | Hono |
-| **Geocoding** | Pelias (self-hosted, Elasticsearch-backed) |
-| **Data** | OpenStreetMap DACH extract (DE/AT/CH) |
-| **Caching** | In-memory LRU (5000 entries, 24h TTL) |
+| **Primary geocoder** | Pelias (self-hosted, Elasticsearch-backed) |
+| **Fallback 1** | [Photon](https://photon.komoot.io) (public, no rate limit advertised) |
+| **Fallback 2** | [Nominatim](https://nominatim.openstreetmap.org) (public, 1 req/sec strict) |
+| **Data** | OpenStreetMap DACH extract (DE/AT/CH) for Pelias; global OSM for the public fallbacks |
+| **Caching** | In-memory LRU (5000 entries, 24h TTL) — applies to all provider answers |
 
 ## Port: 3018
 
@@ -145,25 +147,64 @@ docker run --rm pelias/api:latest cat /code/pelias/api/helper/geojsonify_place_d
 docker compose up -d --force-recreate api
 ```
 
-## Architecture
-
-```
-Client (Places module)
-  → mana-geocoding (Hono, port 3018)
-    → LRU cache check
-    → Pelias API (port 4000) [patched — see above]
-      → Elasticsearch (port 9200)
-```
-
 ## Configuration
 
 ```env
 PORT=3018
-PELIAS_API_URL=http://localhost:4000/v1
+
+# --- Provider chain (tried in order) ----------------------------------
+GEOCODING_PROVIDERS=pelias,photon,nominatim
+PROVIDER_TIMEOUT_MS=5000              # per-provider request timeout
+PROVIDER_HEALTH_CACHE_MS=30000        # health-cache TTL — skip dead providers
+
+# --- Pelias (primary) -------------------------------------------------
+PELIAS_API_URL=http://pelias-api:4000/v1
+
+# --- Photon (fallback 1) ----------------------------------------------
+PHOTON_API_URL=https://photon.komoot.io
+
+# --- Nominatim (fallback 2) -------------------------------------------
+NOMINATIM_API_URL=https://nominatim.openstreetmap.org
+NOMINATIM_USER_AGENT=mana-geocoding/1.0 (+https://mana.how; kontakt@memoro.ai)
+NOMINATIM_INTERVAL_MS=1100            # >= 1000 to honor 1 req/sec policy
+
+# --- Misc -------------------------------------------------------------
 CORS_ORIGINS=http://localhost:5173,https://mana.how
 CACHE_MAX_ENTRIES=5000
 CACHE_TTL_MS=86400000
 ```
+
+To **disable a provider**, drop it from `GEOCODING_PROVIDERS`. To run with
+no Pelias at all (e.g. while it's being migrated), set
+`GEOCODING_PROVIDERS=photon,nominatim`. The chain ordering is honored
+exactly — the first listed provider is tried first.
+
+## Provider-chain semantics
+
+The `ProviderChain` (`src/providers/chain.ts`) iterates providers in
+priority order and stops on the first success. A provider that returns
+**zero results successfully** stops the chain — we don't waste public-API
+budget on a query that legitimately doesn't match. Only network errors
+(unreachable, 5xx, 429) cause fallthrough.
+
+Per-provider health is cached for `PROVIDER_HEALTH_CACHE_MS` (default 30s).
+A failed health probe or a failed search marks the provider unhealthy and
+skips it for the rest of the cache window. The next request after the cache
+expires re-probes lazily — there is no background health pinger.
+
+```
+Client (Places module)
+  → mana-geocoding (Hono, port 3018)
+    → LRU cache (24h TTL)             ← hit: ~0 ms
+    → Provider chain
+      1. Pelias        ← reachable: 50–200 ms (DACH index, fully featured)
+      2. Photon        ← fallback: 200–500 ms public, partial features
+      3. Nominatim     ← last resort: 200–800 ms + 1 req/sec queue
+```
+
+The response body includes `provider: 'pelias' | 'photon' | 'nominatim'`
+and `tried: ProviderName[]` so the caller can render a "approximate match"
+hint when a fallback served the request.
 
 ## Pelias Infrastructure
 
@@ -263,15 +304,22 @@ bun test
 ```
 
 - `src/lib/__tests__/category-map.test.ts` — Pelias→PlaceCategory
-  priority resolution. Covers the multi-category ambiguity (food beats
-  retail for a restaurant, transport beats professional for a car rental,
-  …), single-category mappings, layer-hint fallback, and real-world
-  venue categories observed from the DACH index during the 2026-04-11
-  deploy verification.
+  priority resolution.
+- `src/lib/__tests__/osm-category-map.test.ts` — raw OSM-tag→PlaceCategory
+  mapping used by Photon + Nominatim (since they emit `class:type` rather
+  than Pelias's curated taxonomy).
 - `src/lib/__tests__/cache.test.ts` — LRU eviction order, TTL expiry,
   move-to-end on `get`, size tracking.
+- `src/lib/__tests__/rate-limiter.test.ts` — single-token rate limiter
+  (used to enforce Nominatim's 1 req/sec policy). FIFO order, abort
+  cleanup, busy-flag release on aborted interval-wait.
+- `src/providers/__tests__/chain.test.ts` — provider chain failover, health
+  cache, "stop on empty results" semantics.
+- `src/providers/__tests__/photon-normalizer.test.ts` and
+  `nominatim-normalizer.test.ts` — locking the wire-format mapping for the
+  two public fallback providers.
 
-As of the 2026-04-11 deploy: **42 tests, all green**.
+As of the 2026-04-28 fallback rollout: **115 tests, all green**.
 
 ### Smoke test (`bun run test:smoke`)
 
@@ -293,17 +341,25 @@ geocoding for Konstanz and München, cache hit on repeat. 9 checks.
 
 ```
 src/
-├── index.ts              # Bootstrap
-├── app.ts                # Hono app factory
-├── config.ts             # Environment config
+├── index.ts                     # Bootstrap
+├── app.ts                       # Hono app factory + chain wiring
+├── config.ts                    # Environment config (incl. provider list)
 ├── routes/
-│   ├── geocode.ts        # Forward + reverse endpoints with caching
-│   └── health.ts
+│   ├── geocode.ts               # Forward + reverse, delegates to chain
+│   └── health.ts                # /health, /health/pelias, /health/providers
+├── providers/
+│   ├── types.ts                 # GeocodingProvider interface, shared shape
+│   ├── chain.ts                 # Failover orchestrator + health cache
+│   ├── pelias.ts                # Primary: self-hosted DACH Pelias
+│   ├── photon.ts                # Fallback 1: photon.komoot.io
+│   └── nominatim.ts             # Fallback 2: nominatim.openstreetmap.org
 └── lib/
-    ├── cache.ts          # LRU cache with TTL
-    └── category-map.ts   # OSM → PlaceCategory mapping
+    ├── cache.ts                 # LRU cache with TTL (provider-agnostic)
+    ├── category-map.ts          # Pelias-taxonomy → PlaceCategory
+    ├── osm-category-map.ts      # Raw OSM `class:type` → PlaceCategory
+    └── rate-limiter.ts          # Single-token limiter (used by Nominatim)
 pelias/
-├── docker-compose.yml    # Pelias stack
-├── pelias.json           # Pelias config (DACH region)
-└── setup.sh              # Initial data import script
+├── docker-compose.yml           # Pelias stack
+├── pelias.json                  # Pelias config (DACH region)
+└── setup.sh                     # Initial data import script
 ```
