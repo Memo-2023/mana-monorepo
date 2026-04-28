@@ -5,12 +5,22 @@ RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
 WORKDIR /app
 
-# Copy workspace structure
+# Copy workspace structure. Every workspace dep referenced (transitively
+# included) by services/mana-ai/package.json must be present here, or
+# pnpm leaves the symlink broken and the container crashloops with
+# "ENOENT reading /app/services/mana-ai/node_modules/@mana/<pkg>".
+#
+# Direct deps:        @mana/shared-{ai,hono,research}, @mana/tool-registry
+# Transitive deps:    @mana/shared-logger (via shared-hono),
+#                     @mana/shared-crypto (via tool-registry)
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY services/mana-ai/package.json ./services/mana-ai/
 COPY packages/shared-hono ./packages/shared-hono
 COPY packages/shared-ai ./packages/shared-ai
 COPY packages/shared-logger ./packages/shared-logger
+COPY packages/shared-research ./packages/shared-research
+COPY packages/mana-tool-registry ./packages/mana-tool-registry
+COPY packages/shared-crypto ./packages/shared-crypto
 
 # Install only mana-ai and its workspace deps
 RUN pnpm install --filter @mana/ai-service... --no-frozen-lockfile --ignore-scripts
